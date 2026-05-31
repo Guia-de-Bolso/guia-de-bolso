@@ -7,6 +7,7 @@ import LandingAmbient from "@/components/landing/LandingAmbient";
 import LandingButton from "@/components/landing/LandingButton";
 import LandingHeroFloatingCards from "@/components/landing/LandingHeroFloatingCards";
 import LandingPhoneMockup from "@/components/landing/LandingPhoneMockup";
+import LandingWaitlistForm from "@/components/landing/LandingWaitlistForm";
 import { LANDING } from "@/components/landing/landingTheme";
 import {
   fadeUpHero,
@@ -104,6 +105,7 @@ function LandingHeroBody({
   const SubtitleTag = richMotion ? motion.p : "p";
   const CtaWrap = richMotion ? motion.div : "div";
   const StatsWrap = richMotion ? motion.dl : "dl";
+  const WaitlistWrap = richMotion ? motion.div : "div";
   const motionChild = richMotion ? { variants: fadeUpHero } : {};
   const textWrapMotion = richMotion
     ? { initial: "hidden", animate: "visible", variants: staggerHero }
@@ -234,6 +236,14 @@ function LandingHeroBody({
                 {LANDING_HERO.ctaBusiness}
               </LandingButton>
             </CtaWrap>
+
+            <WaitlistWrap {...motionChild}>
+              <LandingWaitlistForm
+                variant="hero"
+                origem="landing-hero"
+                id={LANDING_SECTION_IDS.listaEspera}
+              />
+            </WaitlistWrap>
 
             <StatsWrap
               {...motionChild}

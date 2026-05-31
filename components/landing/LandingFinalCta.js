@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import LandingAmbient from "@/components/landing/LandingAmbient";
 import LandingButton from "@/components/landing/LandingButton";
+import LandingWaitlistForm from "@/components/landing/LandingWaitlistForm";
 import { useLandingRevealMotion } from "@/components/landing/useLandingRichMotion";
 import {
   LANDING_HERO,
@@ -64,6 +65,12 @@ export default function LandingFinalCta() {
               {LANDING_HERO.ctaBusiness}
             </LandingButton>
           </div>
+
+          <LandingWaitlistForm
+            variant="dark"
+            origem="landing-final"
+            id={`${LANDING_SECTION_IDS.listaEspera}-final`}
+          />
         </div>
       </motion.div>
     </section>
