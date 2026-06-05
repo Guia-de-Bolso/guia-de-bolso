@@ -18,8 +18,7 @@ import {
   getCategoriasEmDestaque,
   sortCategoriasPorContagem,
 } from "@/lib/categorias";
-import { getCapaFromLugar } from "@/lib/fotos";
-import { fetchLugaresFromApi } from "@/lib/fetchLugaresApi";
+import { fetchExplorarFromApi } from "@/lib/fetchExplorarApi";
 
 /**
  * Tela Explorar — descoberta por categorias, intenções e busca IA.
@@ -42,24 +41,10 @@ export default function CategoriasExplorarClient({ initialData = null }) {
       return undefined;
     }
 
-    fetchLugaresFromApi({ limit: 100 })
+    fetchExplorarFromApi()
       .then((data) => {
-        const totals = {};
-        const imagens = {};
-
-        for (const lugar of data ?? []) {
-          const cat = lugar.categoria;
-          if (!cat) continue;
-          totals[cat] = (totals[cat] || 0) + 1;
-
-          if (!imagens[cat]) {
-            const capa = getCapaFromLugar(lugar);
-            if (capa) imagens[cat] = capa;
-          }
-        }
-
-        setCounts(totals);
-        setCapas(imagens);
+        setCounts(data?.counts ?? {});
+        setCapas(data?.capas ?? {});
         setLoading(false);
       })
       .catch((err) => {
@@ -73,7 +58,8 @@ export default function CategoriasExplorarClient({ initialData = null }) {
   }, []);
 
   const totalLugares = useMemo(
-    () => Object.values(counts).reduce((acc, value) => acc + value, 0),
+    () =>
+      CATEGORIAS_EXPLORE.reduce((acc, item) => acc + (counts[item.nome] || 0), 0),
     [counts]
   );
 
