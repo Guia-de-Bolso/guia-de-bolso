@@ -175,8 +175,12 @@ export default function PlaceCard({
       {onFavoritar && (
         <button
           type="button"
-          onClick={() => onFavoritar(lugar)}
-          className="absolute bottom-5 right-5 flex h-11 w-11 items-center justify-center rounded-2xl border border-white/20 bg-white/15 text-white backdrop-blur-md transition-transform active:scale-90"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onFavoritar(lugar);
+          }}
+          className="absolute bottom-5 right-5 z-10 flex h-11 w-11 items-center justify-center rounded-2xl border border-white/20 bg-white/15 text-white backdrop-blur-md transition-transform active:scale-90"
           aria-label={isFavorito ? "Remover dos favoritos" : "Adicionar aos favoritos"}
         >
           <FavoriteIcon active={isFavorito} />

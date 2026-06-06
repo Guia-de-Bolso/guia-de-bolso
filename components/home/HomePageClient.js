@@ -20,7 +20,11 @@ import SearchStatusFilter from "@/components/home/SearchStatusFilter";
 import SmartSearch from "@/components/home/SmartSearch";
 import { useStickyShellRef } from "@/hooks/useHomeHeaderScroll";
 import { useUserPosition } from "@/hooks/useUserPosition";
-import { fetchFavoritoIds, toggleFavoritoLugar } from "@/lib/favoritos";
+import {
+  createFavoritosSyncGuard,
+  fetchFavoritoIds,
+  toggleFavoritoLugar,
+} from "@/lib/favoritos";
 import { FILTRO_STATUS_BUSCA } from "@/lib/busca";
 import { buildReportContext } from "@/lib/reportContext";
 import { getNetworkErrorMessage, mapApiErrorResponse } from "@/lib/userMessages";
@@ -146,6 +150,7 @@ function Home({ initialHomeData = null }) {
   const searchContainerRef = useRef(null);
 
   const [favoritos, setFavoritos] = useState([]);
+  const favoritosSyncGuardRef = useRef(createFavoritosSyncGuard());
   const { userPosition } = useUserPosition();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -424,11 +429,24 @@ function Home({ initialHomeData = null }) {
   }, [searchMode]);
 
   useEffect(() => {
-    if (!user || !isSupabasePublicConfigured()) return;
+    if (!user?.id || !isSupabasePublicConfigured()) {
+      if (!user?.id) setFavoritos([]);
+      return undefined;
+    }
+
     const supabase = createClient();
-    if (!supabase) return;
-    fetchFavoritoIds(supabase, user.id).then(setFavoritos);
-  }, [user]);
+    if (!supabase) return undefined;
+
+    const fetchGen = favoritosSyncGuardRef.current.bump();
+    const userId = user.id;
+
+    fetchFavoritoIds(supabase, userId).then((ids) => {
+      if (!favoritosSyncGuardRef.current.isCurrent(fetchGen)) return;
+      setFavoritos(ids);
+    });
+
+    return undefined;
+  }, [user?.id]);
 
   /**
    * Toggles favorite state for a place; opens login modal if guest.
@@ -444,7 +462,9 @@ function Home({ initialHomeData = null }) {
 
     const supabase = createClient();
     if (!supabase) return;
-    await toggleFavoritoLugar(supabase, user, lugar, favoritos, setFavoritos);
+
+    favoritosSyncGuardRef.current.bump();
+    await toggleFavoritoLugar(supabase, user, lugar, setFavoritos);
   }
 
   /** Resets search UI state and blurs the input. */

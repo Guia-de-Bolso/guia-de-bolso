@@ -38,7 +38,7 @@ import {
   getTextoSobre,
   getVisibilidadePerfil,
 } from "@/lib/lugarVisibilidade";
-import { toggleFavoritoLugarBoolean } from "@/lib/favoritos";
+import { createFavoritosSyncGuard, toggleFavoritoLugarBoolean } from "@/lib/favoritos";
 import { saveLugarVisitado } from "@/lib/lugaresVisitados";
 import { getDistanciaLugar } from "@/lib/localizacao";
 import { registrarLog } from "@/lib/logs";
@@ -61,6 +61,8 @@ export function useLugarDetalhe(lugarIdFromServer) {
   const [lugar, setLugar] = useState(null);
   const [fotos, setFotos] = useState([]);
   const viewLoggedRef = useRef(false);
+  const favoritoSyncGuardRef = useRef(createFavoritosSyncGuard());
+  const avaliacaoSyncGuardRef = useRef(createFavoritosSyncGuard());
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
@@ -186,16 +188,31 @@ export function useLugarDetalhe(lugarIdFromServer) {
   }, [lugar, supabase]);
 
   useEffect(() => {
-    if (!user || !lugar) return;
+    if (!user?.id || !lugar?.id) {
+      if (!user?.id) {
+        setIsFavorito(false);
+        setJaAvaliou(false);
+      }
+      return undefined;
+    }
 
-    fetchFavoritoLugar(supabase, user.id, lugar.id).then(({ data }) =>
-      setIsFavorito(Boolean(data))
-    );
+    const userId = user.id;
+    const lugarId = lugar.id;
+    const favoritoFetchGen = favoritoSyncGuardRef.current.bump();
+    const avaliacaoFetchGen = avaliacaoSyncGuardRef.current.bump();
 
-    fetchJaAvaliouLugar(supabase, user.id, lugar.id).then(({ data }) =>
-      setJaAvaliou(Boolean(data))
-    );
-  }, [user, lugar, supabase]);
+    fetchFavoritoLugar(supabase, userId, lugarId).then(({ data }) => {
+      if (!favoritoSyncGuardRef.current.isCurrent(favoritoFetchGen)) return;
+      setIsFavorito(Boolean(data));
+    });
+
+    fetchJaAvaliouLugar(supabase, userId, lugarId).then(({ data }) => {
+      if (!avaliacaoSyncGuardRef.current.isCurrent(avaliacaoFetchGen)) return;
+      setJaAvaliou(Boolean(data));
+    });
+
+    return undefined;
+  }, [user?.id, lugar?.id, supabase]);
 
   useEffect(() => {
     const stored = localStorage.getItem(MAP_PREFERENCE_STORAGE_KEY);
@@ -229,7 +246,8 @@ export function useLugarDetalhe(lugarIdFromServer) {
       return;
     }
 
-    await toggleFavoritoLugarBoolean(supabase, user, lugar, isFavorito, setIsFavorito);
+    favoritoSyncGuardRef.current.bump();
+    await toggleFavoritoLugarBoolean(supabase, user, lugar, setIsFavorito);
   }
 
   async function handleOpenAvaliacao() {
