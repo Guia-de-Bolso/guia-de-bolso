@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import LoginModal from "@/components/LoginModal";
 import DailyLimitCountdown from "@/components/DailyLimitCountdown";
 import PremiumPaywallSheet from "@/components/PremiumPaywallSheet";
@@ -156,11 +157,12 @@ function RoteiroViewModal({ roteiro, onClose, onExcluir, lugaresCatalog = [] }) 
 /**
  * Seção da home de rotas: CTA de roteiro com IA, lista de roteiros salvos e modais de login/paywall.
  * @param {object} props
- * @param {boolean} props.isLoggedIn - Indica sessão ativa na página pai.
  * @param {Array<{ id?: string, titulo: string, created_at?: string, conteudo?: string }>} [props.roteirosIniciais=[]] - Roteiros pré-carregados do servidor.
  * @returns {import("react").JSX.Element}
  */
-export default function RoteiroSection({ isLoggedIn, roteirosIniciais = [] }) {
+export default function RoteiroSection({ roteirosIniciais = [] }) {
+  const router = useRouter();
+  const [pendingCriar, setPendingCriar] = useState(false);
   const [user, setUser] = useState(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
@@ -177,6 +179,12 @@ export default function RoteiroSection({ isLoggedIn, roteirosIniciais = [] }) {
     setUsage: setPremiumUsage,
   } = usePremiumUsage(user);
 
+  const loggedIn = Boolean(user);
+
+  useEffect(() => {
+    setRoteiros(roteirosIniciais);
+  }, [roteirosIniciais]);
+
   useEffect(() => {
     const supabase = createClient();
 
@@ -186,12 +194,17 @@ export default function RoteiroSection({ isLoggedIn, roteirosIniciais = [] }) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
+
+      if (event === "SIGNED_IN" && session?.user) {
+        setLoginOpen(false);
+        router.refresh();
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     let cancelled = false;
@@ -235,7 +248,7 @@ export default function RoteiroSection({ isLoggedIn, roteirosIniciais = [] }) {
    * @returns {Promise<boolean>}
    */
   async function handleExcluirRoteiro(roteiroId) {
-    if (!isLoggedIn || !roteiroId) return false;
+    if (!user || !roteiroId) return false;
 
     try {
       const res = await fetch(`/api/roteiro/${encodeURIComponent(String(roteiroId))}`, {
@@ -264,14 +277,9 @@ export default function RoteiroSection({ isLoggedIn, roteirosIniciais = [] }) {
   }
 
   /**
-   * Abre o sheet de criação ou exibe login/paywall conforme sessão e limites premium.
+   * Abre o sheet após login confirmado (sem re-checar autenticação).
    */
-  async function handleAbrirCriar() {
-    if (!isLoggedIn || !user) {
-      setLoginOpen(true);
-      return;
-    }
-
+  const abrirSheetSePermitido = useCallback(async () => {
     let usageForGate = usage;
     let usageSyncedForGate = usageSynced;
 
@@ -280,7 +288,7 @@ export default function RoteiroSection({ isLoggedIn, roteirosIniciais = [] }) {
       usageSyncedForGate = true;
     }
 
-    const access = canUseRoteiro(usageForGate, Boolean(user), {
+    const access = canUseRoteiro(usageForGate, true, {
       synced: usageSyncedForGate,
     });
 
@@ -288,15 +296,37 @@ export default function RoteiroSection({ isLoggedIn, roteirosIniciais = [] }) {
       if (access.code === "LIMIT_REACHED") {
         setPaywallOpen(true);
       } else if (access.code === "LOGIN_REQUIRED") {
+        setPendingCriar(true);
         setLoginOpen(true);
       }
       return;
     }
 
     setSheetOpen(true);
+  }, [usage, usageSynced, usageLoading, refreshUsage]);
+
+  /**
+   * Abre o sheet de criação ou exibe login/paywall conforme sessão e limites premium.
+   */
+  async function handleAbrirCriar() {
+    if (!user) {
+      setPendingCriar(true);
+      setLoginOpen(true);
+      return;
+    }
+
+    await abrirSheetSePermitido();
   }
 
-  const loggedIn = Boolean(user) && isLoggedIn;
+  useEffect(() => {
+    if (!pendingCriar || !user) return undefined;
+
+    setPendingCriar(false);
+    void abrirSheetSePermitido();
+
+    return undefined;
+  }, [pendingCriar, user, abrirSheetSePermitido]);
+
   const roteiroLimiteDiarioAtingido = loggedIn && isDailyRoteiroLimitReached(usage);
 
   return (
@@ -390,7 +420,10 @@ export default function RoteiroSection({ isLoggedIn, roteirosIniciais = [] }) {
         isOpen={sheetOpen}
         onClose={() => setSheetOpen(false)}
         isLoggedIn={loggedIn}
-        onLoginRequired={() => setLoginOpen(true)}
+        onLoginRequired={() => {
+          setPendingCriar(true);
+          setLoginOpen(true);
+        }}
         onLimitReached={() => setPaywallOpen(true)}
         onRoteiroSalvo={handleRoteiroSalvo}
         onUsageRefresh={(nextUsage) => {
@@ -402,7 +435,15 @@ export default function RoteiroSection({ isLoggedIn, roteirosIniciais = [] }) {
       <LoginModal
         isOpen={loginOpen}
         motivo="rotas"
-        onClose={() => setLoginOpen(false)}
+        redirectAfterLogin="/rotas"
+        onClose={() => {
+          setPendingCriar(false);
+          setLoginOpen(false);
+        }}
+        onLoginSuccess={() => {
+          setPendingCriar(true);
+          setLoginOpen(false);
+        }}
       />
 
       <PremiumPaywallSheet

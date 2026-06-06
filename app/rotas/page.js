@@ -52,7 +52,7 @@ export default async function RotasPage() {
       </header>
 
       <main className="mx-auto max-w-md px-4 pb-28 pt-5">
-        <RoteiroSection isLoggedIn={Boolean(user)} roteirosIniciais={roteiros} />
+        <RoteiroSection roteirosIniciais={roteiros} />
 
         {rotas.length === 0 ? (
           <section className="rounded-2xl bg-white p-6 text-center shadow-sm">

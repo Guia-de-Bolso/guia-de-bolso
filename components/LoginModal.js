@@ -45,9 +45,19 @@ function IconLock({ className = "h-9 w-9" }) {
  * @param {boolean} props.isOpen - Whether the modal is visible.
  * @param {() => void} props.onClose - Called when the user dismisses the modal.
  * @param {string} [props.motivo] - Context key for subtitle copy (e.g. favoritar, rotas).
+ * @param {string} [props.redirectAfterLogin] - Path pós-OAuth/SMS (padrão: `/rotas` se motivo=rotas).
+ * @param {() => void} [props.onLoginSuccess] - Chamado após login SMS no modal (sem navegar).
  * @returns {import('react').ReactElement|null}
  */
-export default function LoginModal({ isOpen, onClose, motivo = "favoritar" }) {
+export default function LoginModal({
+  isOpen,
+  onClose,
+  motivo = "favoritar",
+  redirectAfterLogin,
+  onLoginSuccess,
+}) {
+  const postLoginPath =
+    redirectAfterLogin ?? (motivo === "rotas" ? "/rotas" : "/");
   const MainIcon = motivo === "favoritar" ? IconHeart : IconLock;
   const subtitle =
     subtitles[motivo] ??
@@ -104,7 +114,11 @@ export default function LoginModal({ isOpen, onClose, motivo = "favoritar" }) {
         </div>
 
         <div id="login-modal-title" className="mt-5 max-h-[min(70vh,520px)] overflow-y-auto overscroll-contain">
-          <AuthFlow compact />
+          <AuthFlow
+            compact
+            redirectAfterLogin={postLoginPath}
+            onLoginSuccess={onLoginSuccess}
+          />
         </div>
 
         <button

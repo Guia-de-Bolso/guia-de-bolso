@@ -107,6 +107,7 @@ export default function AuthFlow({
   compact = false,
   variant = "default",
   redirectAfterLogin = "/",
+  onLoginSuccess,
 }) {
   const immersive = variant === "immersive" && !compact;
   const router = useRouter();
@@ -228,6 +229,12 @@ export default function AuthFlow({
     }
 
     setScreen("success");
+
+    if (compact && onLoginSuccess) {
+      onLoginSuccess();
+      return;
+    }
+
     setTimeout(() => router.push(postLoginPath), 1500);
   }
 
