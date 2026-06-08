@@ -4,6 +4,10 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AdminShell, { useAdminAuth } from "@/components/admin/AdminShell";
 import {
+  isUsuarioDeleteConfirmationValid,
+  validateAdminCanDeleteUsuario,
+} from "@/lib/adminDeleteUsuario";
+import {
   ROLES,
   canAccessAdmin,
   getRoleChipClass,
@@ -235,6 +239,10 @@ export default function UsuariosGridPage() {
   const [pendingRole, setPendingRole] = useState(null);
   const [confirmRoleOpen, setConfirmRoleOpen] = useState(false);
   const [updatingRole, setUpdatingRole] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [deleteConfirmInput, setDeleteConfirmInput] = useState("");
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
   const [message, setMessage] = useState("");
 
   const loadUsuarios = useCallback(async () => {
@@ -334,6 +342,9 @@ export default function UsuariosGridPage() {
     setDetalhe(null);
     setPendingRole(null);
     setConfirmRoleOpen(false);
+    setConfirmDeleteOpen(false);
+    setDeleteConfirmInput("");
+    setDeleteError("");
   }
 
   /**
@@ -377,6 +388,40 @@ export default function UsuariosGridPage() {
     setUpdatingRole(false);
   }
 
+  /**
+   * @param {object} usuario
+   */
+  async function handleDeleteUsuario(usuario) {
+    setDeletingAccount(true);
+    setDeleteError("");
+
+    const confirmation = usuario.email
+      ? { confirmEmail: deleteConfirmInput }
+      : { confirmNome: deleteConfirmInput };
+
+    try {
+      const response = await fetch(`/api/admin/usuarios/${usuario.id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(confirmation),
+      });
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        setDeleteError(data.error || "Não foi possível excluir a conta.");
+        return;
+      }
+
+      setUsuarios((items) => items.filter((item) => item.id !== usuario.id));
+      setMessage(`Conta de ${getDisplayName(usuario)} excluída permanentemente.`);
+      closeDetalhe();
+    } catch {
+      setDeleteError("Não foi possível excluir a conta. Tente novamente.");
+    } finally {
+      setDeletingAccount(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f0f4f3] text-[#5a6b66]">
@@ -387,6 +432,18 @@ export default function UsuariosGridPage() {
 
   const selectedUsage = selected ? normalizeUsageFromPerfil(selected) : null;
   const selectedPremium = selected ? isPremiumActive(selected) : false;
+  const deleteGuard = selected
+    ? validateAdminCanDeleteUsuario({
+        adminId: adminUser?.id,
+        targetPerfil: selected,
+      })
+    : null;
+  const deleteConfirmationValid = selected
+    ? isUsuarioDeleteConfirmationValid(selected, {
+        confirmEmail: deleteConfirmInput,
+        confirmNome: deleteConfirmInput,
+      })
+    : false;
 
   return (
     <AdminShell
@@ -689,10 +746,103 @@ export default function UsuariosGridPage() {
                   Revisar e confirmar
                 </button>
               </section>
+
+              <section className="mt-6 border-t border-red-100 pt-5">
+                <h3 className="text-sm font-bold text-[#b42318]">Excluir conta</h3>
+                <p className="mt-1 text-xs leading-relaxed text-[#5a6b66]">
+                  Remove favoritos, avaliações, roteiros, perfil e autenticação. Ação
+                  irreversível — use para suporte ou contas de teste.
+                </p>
+
+                {!deleteGuard?.ok ? (
+                  <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-xs font-medium text-amber-900">
+                    {deleteGuard?.message}
+                  </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDeleteConfirmInput("");
+                      setDeleteError("");
+                      setConfirmDeleteOpen(true);
+                    }}
+                    className="mt-3 w-full rounded-xl border border-red-200 bg-red-50 py-3 text-sm font-semibold text-[#b42318] transition hover:bg-red-100"
+                  >
+                    Excluir conta permanentemente
+                  </button>
+                )}
+              </section>
             </div>
           </div>
         </>
       )}
+
+      <AdminModal
+        isOpen={confirmDeleteOpen}
+        title="Excluir conta permanentemente"
+        onClose={() => {
+          if (!deletingAccount) {
+            setConfirmDeleteOpen(false);
+            setDeleteConfirmInput("");
+            setDeleteError("");
+          }
+        }}
+      >
+        {selected && (
+          <>
+            <p className="text-sm leading-relaxed text-[#5a6b66]">
+              Você está prestes a excluir <strong>{getDisplayName(selected)}</strong>.
+              Todos os dados da conta serão removidos e não há como desfazer.
+            </p>
+            <ul className="mt-3 list-disc space-y-1 pl-5 text-xs text-[#5a6b66]">
+              <li>Favoritos, avaliações e roteiros salvos</li>
+              <li>Perfil, avatar e sessões de login</li>
+              <li>Conta de autenticação (Google ou SMS)</li>
+            </ul>
+            <p className="mt-3 text-xs font-semibold text-[#1a2e28]">
+              {selected.email
+                ? "Digite o e-mail do usuário para confirmar:"
+                : "Digite o nome do usuário exatamente como no perfil:"}
+            </p>
+            <input
+              value={deleteConfirmInput}
+              onChange={(event) => setDeleteConfirmInput(event.target.value)}
+              disabled={deletingAccount}
+              placeholder={selected.email || getDisplayName(selected)}
+              className="mt-2 w-full rounded-xl bg-[#f0f4f3] px-3 py-2.5 text-sm outline-none ring-[#b42318]/20 focus:ring-2 disabled:opacity-60"
+              autoComplete="off"
+              spellCheck={false}
+            />
+            {deleteError && (
+              <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-xs font-medium text-[#b42318]">
+                {deleteError}
+              </p>
+            )}
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                disabled={deletingAccount}
+                onClick={() => {
+                  setConfirmDeleteOpen(false);
+                  setDeleteConfirmInput("");
+                  setDeleteError("");
+                }}
+                className="flex-1 rounded-xl bg-[#f0f4f3] py-2.5 text-sm font-semibold text-[#1a2e28] disabled:opacity-60"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={deletingAccount || !deleteConfirmationValid}
+                onClick={() => handleDeleteUsuario(selected)}
+                className="flex-1 rounded-xl bg-[#d9534f] py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+              >
+                {deletingAccount ? "Excluindo…" : "Excluir permanentemente"}
+              </button>
+            </div>
+          </>
+        )}
+      </AdminModal>
 
       <AdminModal
         isOpen={confirmRoleOpen}
