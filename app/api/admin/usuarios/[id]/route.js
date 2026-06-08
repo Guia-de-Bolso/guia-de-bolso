@@ -46,12 +46,10 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    console.error(
-      "DELETE /api/admin/usuarios/[id]:",
-      err instanceof Error ? err.message : err
-    );
+    const message = err instanceof Error ? err.message : USER_MESSAGES.SERVER;
+    console.error("DELETE /api/admin/usuarios/[id]:", message);
     return NextResponse.json(
-      { error: USER_MESSAGES.SERVER, code: "SERVER" },
+      { error: message, code: "SERVER" },
       { status: 500 }
     );
   }
