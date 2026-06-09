@@ -6,6 +6,7 @@ import {
   isMarketingHost,
 } from "@/lib/marketingHost";
 import { SITE_DOMAIN } from "@/lib/siteContact";
+import { SUPABASE_AUTH_COOKIE_OPTIONS } from "@/lib/supabase/cookieOptions";
 
 /**
  * @param {import('next/server').NextResponse} response
@@ -16,6 +17,41 @@ function applyPreviewRobots(response) {
     response.headers.set("X-Robots-Tag", "noindex, nofollow");
   }
   return response;
+}
+
+/**
+ * Atualiza cookies de sessão Supabase para evitar logout após expiração do access token.
+ * @param {import("next/server").NextRequest} request
+ * @returns {Promise<import("next/server").NextResponse>}
+ */
+async function updateSupabaseSession(request) {
+  let supabaseResponse = NextResponse.next({ request });
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    {
+      cookieOptions: SUPABASE_AUTH_COOKIE_OPTIONS,
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => {
+            request.cookies.set(name, value);
+          });
+          supabaseResponse = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) => {
+            supabaseResponse.cookies.set(name, value, options);
+          });
+        },
+      },
+    }
+  );
+
+  await supabase.auth.getUser();
+
+  return applyPreviewRobots(supabaseResponse);
 }
 
 /**
@@ -44,39 +80,10 @@ export async function middleware(request) {
     if (action === "redirect-home") {
       return applyPreviewRobots(NextResponse.redirect(new URL("/", request.url), 307));
     }
-    return applyPreviewRobots(NextResponse.next());
+    return updateSupabaseSession(request);
   }
 
-  let supabaseResponse = NextResponse.next({ request });
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => {
-            request.cookies.set(name, value);
-          });
-          supabaseResponse = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) => {
-            supabaseResponse.cookies.set(name, value, options);
-          });
-        },
-      },
-    }
-  );
-
-  await supabase.auth.getUser();
-
-  if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production") {
-    supabaseResponse.headers.set("X-Robots-Tag", "noindex, nofollow");
-  }
-
-  return supabaseResponse;
+  return updateSupabaseSession(request);
 }
 
 export const config = {

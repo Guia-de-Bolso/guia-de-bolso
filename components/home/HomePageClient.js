@@ -45,7 +45,7 @@ import { usePremiumUsage } from "@/lib/usePremiumUsage";
 import { createClient } from "@/lib/supabase";
 import { registrarLog } from "@/lib/logs";
 
-/** Timeout de segurança se `getSession`/`getUser` não responder (ex.: OAuth no tablet). */
+/** Timeout de segurança se `getUser` não responder (ex.: OAuth no tablet). */
 const AUTH_RESOLVE_TIMEOUT_MS = 8000;
 
 /**
@@ -212,10 +212,23 @@ function Home({ initialHomeData = null }) {
       setAuthLoading(false);
     }
 
-    supabase.auth
-      .getSession()
-      .then(({ data: { session } }) => {
-        const currentUser = session?.user ?? null;
+    async function resolveCurrentUser() {
+      const {
+        data: { user: currentUser },
+        error,
+      } = await supabase.auth.getUser();
+
+      if (!error) return currentUser ?? null;
+
+      console.warn("[home] getUser:", error.message);
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      return session?.user ?? null;
+    }
+
+    resolveCurrentUser()
+      .then((currentUser) => {
         applySession(currentUser);
         if (currentUser && !accessLogged) {
           accessLogged = true;
@@ -224,7 +237,7 @@ function Home({ initialHomeData = null }) {
         }
       })
       .catch((err) => {
-        console.error("[home] getSession:", err);
+        console.error("[home] auth:", err);
         applySession(null);
       });
 
@@ -243,9 +256,14 @@ function Home({ initialHomeData = null }) {
     });
 
     const safetyTimer = window.setTimeout(() => {
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        applySession(session?.user ?? null);
-      });
+      resolveCurrentUser()
+        .then((currentUser) => {
+          applySession(currentUser);
+        })
+        .catch((err) => {
+          console.error("[home] auth timeout:", err);
+          applySession(null);
+        });
     }, AUTH_RESOLVE_TIMEOUT_MS);
 
     return () => {

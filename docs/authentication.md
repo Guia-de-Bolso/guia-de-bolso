@@ -14,9 +14,9 @@ Visão de sistema: [`architecture.md`](./architecture.md#authentication-flow).
 | Cliente browser | `lib/supabase/client.js` → `createBrowserClient` |
 | Server (Route Handlers, layouts) | `lib/supabase/server.js` → `createServerClient` |
 | Refresh | `middleware.js` chama `auth.getUser()` em cada request elegível |
-| Expiração | Política padrão Supabase (refresh automático via middleware) |
+| Expiração | Cookie persistente compartilhado em `lib/supabase/cookieOptions.js` + refresh automático via middleware |
 
-**Não há** Context global React de auth — cada página/hook chama `getUser()` ou `onAuthStateChange` conforme necessário.
+**Não há** Context global React de auth — cada página/hook chama `getUser()` ou `onAuthStateChange` conforme necessário. A home valida o usuário com `getUser()` no primeiro carregamento para renovar tokens vencidos antes de decidir que o visitante está deslogado.
 
 ---
 
