@@ -6,6 +6,7 @@ import EnderecoAutocomplete from "@/components/EnderecoAutocomplete";
 import HorarioEditor from "@/components/admin/HorarioEditor";
 import LugarQrSection from "@/components/admin/LugarQrSection";
 import PhotoUploader from "@/components/admin/PhotoUploader";
+import VideoUploader from "@/components/admin/VideoUploader";
 import { getInitialPhotoItems } from "@/lib/fotos";
 import {
   buildFotosUrlsFromPhotoItems,
@@ -16,10 +17,12 @@ import {
   revokePhotoItemPreview,
 } from "@/lib/photoItems";
 import { createClient } from "@/lib/supabase";
+import { isLugarElegivelVideo } from "@/lib/lugarVideo";
 import {
   LUGARES_FOTOS_BUCKET,
   getStorageErrorMessage,
   uploadEntityPhotos,
+  uploadEntityVideo,
 } from "@/lib/storageUpload";
 import {
   filterTagIdsBySubcategoria,
@@ -64,6 +67,8 @@ export const emptyLocalForm = {
   horarios: emptyHorario,
   mostrar_endereco: true,
   mostrar_horarios: true,
+  tem_video: false,
+  video_url: null,
 };
 
 const categorias = [
@@ -140,6 +145,10 @@ export default function LocalForm({
   const [tagLimitMessage, setTagLimitMessage] = useState("");
   const [photoItems, setPhotoItems] = useState(() => getInitialPhotoItems(initialData));
   const [photoError, setPhotoError] = useState("");
+  const [videoUrl, setVideoUrl] = useState(initialData?.video_url || null);
+  const [pendingVideo, setPendingVideo] = useState(null);
+  const [videoRemoved, setVideoRemoved] = useState(false);
+  const [videoError, setVideoError] = useState("");
   const [slugColumnReady, setSlugColumnReady] = useState(true);
   const { destaque: _destaqueLegado, ...initialSemDestaque } = initialData ?? {};
 
@@ -150,9 +159,14 @@ export default function LocalForm({
     telefone: formatTelefone(initialData?.telefone),
     mostrar_endereco: initialData?.mostrar_endereco ?? true,
     mostrar_horarios: initialData?.mostrar_horarios ?? true,
+    tem_video: Boolean(initialData?.tem_video),
     slug: initialData?.slug || "",
     slug_auto: isSlugAutoFromNome(initialData?.slug, initialData?.nome),
   });
+
+  const elegivelVideo = isLugarElegivelVideo(form);
+  const showVideoAdmin =
+    elegivelVideo || Boolean(pendingVideo) || (Boolean(videoUrl) && !videoRemoved);
 
   useEffect(() => {
     const supabase = createClient();
@@ -271,10 +285,12 @@ export default function LocalForm({
     event.preventDefault();
     setSaving(true);
     setPhotoError("");
+    setVideoError("");
     const supabase = createClient();
     const {
       imagem_url: _imagemUrl,
       fotos: _fotos,
+      video_url: _videoUrlField,
       endereco: _endereco,
       destaque: _destaqueCampo,
       slug: _slugField,
@@ -380,6 +396,44 @@ export default function LocalForm({
       );
       setSaving(false);
       return;
+    }
+
+    if (lugarId && (pendingVideo || videoRemoved)) {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (pendingVideo && !user) {
+          throw new Error("Faça login para enviar vídeo.");
+        }
+
+        let nextVideoUrl = videoRemoved ? null : videoUrl;
+
+        if (pendingVideo) {
+          nextVideoUrl = await uploadEntityVideo(
+            supabase,
+            LUGARES_FOTOS_BUCKET,
+            lugarId,
+            pendingVideo.file
+          );
+        }
+
+        const { error: videoSaveError } = await supabase
+          .from("lugares")
+          .update({ video_url: nextVideoUrl })
+          .eq("id", lugarId);
+
+        if (videoSaveError) throw videoSaveError;
+      } catch (error) {
+        console.error(error);
+        setVideoError(
+          getStorageErrorMessage(error) ||
+            error?.message ||
+            "Não foi possível salvar o vídeo. Tente novamente."
+        );
+        setSaving(false);
+        return;
+      }
     }
 
     if (lugarId && localizacao?.endereco_completo) {
@@ -569,6 +623,51 @@ export default function LocalForm({
         disabled={saving}
         error={photoError}
       />
+
+      {!isLugarElegivelVideo(form) && (
+        <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-xl bg-[#f7faf9] px-3 py-3 text-sm text-[#1a2e28]">
+          <input
+            type="checkbox"
+            checked={Boolean(form.tem_video)}
+            onChange={(e) =>
+              setForm((current) => ({ ...current, tem_video: e.target.checked }))
+            }
+            className="mt-1 h-4 w-4 rounded border-[#c5d5cf] text-[#1a4a3a]"
+          />
+          <span>
+            <strong>Habilitar vídeo neste local</strong>
+            <span className="mt-0.5 block text-xs font-normal text-[#5a6b66]">
+              Por padrão, vídeo é só para Natureza e Aventura. Marque para outras categorias.
+            </span>
+          </span>
+        </label>
+      )}
+
+      {showVideoAdmin && (
+        <VideoUploader
+          currentUrl={videoRemoved ? null : videoUrl}
+          pending={pendingVideo}
+          disabled={saving}
+          error={videoError}
+          onPendingChange={(next) => {
+            setVideoError("");
+            setVideoRemoved(false);
+            if (pendingVideo?.preview) {
+              URL.revokeObjectURL(pendingVideo.preview);
+            }
+            setPendingVideo(next);
+          }}
+          onRemove={() => {
+            setVideoError("");
+            if (pendingVideo?.preview) {
+              URL.revokeObjectURL(pendingVideo.preview);
+            }
+            setPendingVideo(null);
+            setVideoUrl(null);
+            setVideoRemoved(true);
+          }}
+        />
+      )}
 
       <div className="mt-4">
         <div className="mb-2 flex items-center justify-between gap-2">

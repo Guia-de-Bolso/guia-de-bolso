@@ -123,6 +123,19 @@ Core content: beaches, restaurants, trails, services, etc.
 | `media_avaliacoes` | `numeric` | *(optional alias)* — same client read path as `rating_medio` |
 | `created_at` | `timestamptz` | |
 | `slug` | `text` | Unique short URL segment for `/q/{slug}` (eligible establishments only; null for Natureza/Aventura) *(migration: `lugares_qr_slug.sql`)* |
+| `video_url` | `text` | Public URL of one optional place video in Storage `lugares-fotos/{id}/videos/` *(migration: `lugares_video.sql`)* |
+| `tem_video` | `boolean` NOT NULL DEFAULT false | Enables video upload in admin outside Natureza/Aventura *(migration)* |
+
+**Place video limits** (enforced in `lib/videoUpload.js` on admin upload; no server transcode):
+
+| Rule | Value |
+|------|--------|
+| Max duration | 60 seconds |
+| Max file size | 25 MB |
+| Formats | MP4 (H.264), WebM |
+| Count | 1 video per place |
+
+Admin compresses before upload (client validates only). Detail page: native `<video controls playsInline>` in section **“Veja o lugar”**, below photo gallery, hidden when `video_url` is null.
 
 **`horarios` runtime:** parsed in `lib/horarios.js` (`parseHorarioDia`, `getStatusFuncionamento`, overnight carry-over, `America/Sao_Paulo`). Tests: `node lib/horarios.test.js`.
 

@@ -11,6 +11,7 @@ import LugarLocalizacaoCard from "@/components/lugar/LugarLocalizacaoCard";
 import LugarQuickActions from "@/components/lugar/LugarQuickActions";
 import LugarCtaBarAirbnb from "@/components/lugar/airbnb/LugarCtaBarAirbnb";
 import LugarGalleryAirbnb from "@/components/lugar/airbnb/LugarGalleryAirbnb";
+import LugarVideoSection from "@/components/lugar/LugarVideoSection";
 import LugarSectionAirbnb, {
   LugarCardAirbnb,
   LugarDividerAirbnb,
@@ -22,6 +23,7 @@ import {
 } from "@/components/lugar/airbnb/lugarAirbnbTokens";
 import { getBadgeCuradoriaLabel, getBadgeParceiroLabel } from "@/lib/lugarBadges";
 import { lugarExibeClima } from "@/lib/clima";
+import { lugarExibeVideo } from "@/lib/lugarVideo";
 import { formatHorario, getDiasHorario } from "@/lib/horarios";
 
 /**
@@ -195,6 +197,19 @@ export default function LugarDetalheAirbnb(props) {
                 Fechar
               </button>
             </div>
+          )}
+
+          {lugarExibeVideo(lugar) && (
+            <>
+              <div className="-mx-1 mt-5">
+                <LugarVideoSection
+                  videoUrl={lugar.video_url}
+                  posterUrl={imagens[0] || lugar.imagem_url}
+                  nome={lugar.nome}
+                />
+              </div>
+              <LugarDividerAirbnb />
+            </>
           )}
 
           <p className="mt-5 text-[15px] leading-[1.65] text-[#3d4f4a]">

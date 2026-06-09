@@ -113,6 +113,8 @@ Run in order for a **new environment** that already has base tables from the Sup
 | 14b | `subcategoria_piscinas_naturais.sql` | **Superseded** by #14 — reference only |
 | 15 | `lugares_qr_slug.sql` | `lugares.slug` unique + backfill |
 | 15b | `lugares_parceiro_curadoria.sql` | `eh_parceiro`, `conteudo_curadoria`; migra vigentes de `destaques` |
+| 15d | `lugares_historia_facebook.sql` | `historia_cultura`, `facebook_url` |
+| 15e | `lugares_video.sql` | `video_url`, `tem_video` (1 vídeo por lugar; Storage em `lugares-fotos/…/videos/`) |
 
 ### D — Routes (curated)
 
