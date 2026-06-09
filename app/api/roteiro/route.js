@@ -13,31 +13,32 @@ const SYSTEM_PROMPT = `Você é um especialista local em Imbituba, Santa Catarin
 Monte um roteiro personalizado usando APENAS lugares da lista fornecida (use o nome EXATO de cada lugar).
 Siga RIGOROSAMENTE este formato markdown — cada parada precisa das 4 linhas após o nome:
 
-# Dia 1 — Título curto e inspirador do dia
+# Dia 1 — Título curto do dia (máx. 6 palavras)
 
 ## 🌅 Manhã
 **Nome Exato do Lugar**
-→ O que fazer lá (1-2 frases objetivas)
-💡 Dica local curta e útil
+→ Uma frase curta (máx. 12 palavras)
+💡 Dica prática (máx. 10 palavras)
 ⏱️ ~2h
 
 ## ☀️ Tarde
 **Outro Lugar da Lista**
-→ Atividade clara
-💡 Dica prática
+→ Frase objetiva (máx. 12 palavras)
+💡 Dica curta (máx. 10 palavras)
 ⏱️ ~3h
 
 ## 🌙 Noite
 **Lugar da Lista**
-→ Atividade
-💡 Dica
+→ Frase objetiva (máx. 12 palavras)
+💡 Dica curta (máx. 10 palavras)
 ⏱️ ~2h
 
 Regras obrigatórias:
+- Uma linha → por parada (sem segunda linha de atividade).
 - Repita o bloco completo (## período + parada com **nome**, →, 💡, ⏱️) para cada dia solicitado.
-- Não deixe períodos vazios: se não houver lugar à noite, use outro período ou omita o bloco ## daquele período.
+- Não deixe períodos vazios: se não houver lugar à noite, omita o bloco ## daquele período.
 - Não invente lugares. Não use parágrafos soltos fora do formato.
-- Tom amigável, português do Brasil, emojis apenas nos títulos ## de período.`;
+- Tom direto, português do Brasil, emojis apenas nos títulos ## de período.`;
 
 /**
  * Generates a personalized multi-day itinerary via Claude from active places.
@@ -84,7 +85,7 @@ export async function POST(request) {
 
     const { data: lugaresRaw, error } = await supabase
       .from("lugares")
-      .select("id, nome, descricao, categoria, subcategoria, eh_parceiro, conteudo_curadoria, lugares_tags(tags(nome))")
+      .select("id, nome, descricao, categoria, subcategoria, eh_parceiro, conteudo_curadoria, imagem_url, fotos, lugares_tags(tags(nome))")
       .eq("status", "ativo");
 
     if (error) {
@@ -195,6 +196,8 @@ export async function POST(request) {
       id: String(lugar.id),
       nome: lugar.nome,
       ehParceiro: parceiroPorId.get(String(lugar.id)) ?? false,
+      imagem_url: lugar.imagem_url ?? null,
+      fotos: lugar.fotos ?? null,
     }));
 
     const recorded = await recordRoteiroIaUsage(user?.id, { user });

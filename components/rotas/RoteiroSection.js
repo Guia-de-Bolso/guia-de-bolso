@@ -216,6 +216,9 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
           (data ?? []).map((lugar) => ({
             id: String(lugar.id),
             nome: lugar.nome,
+            imagem_url: lugar.imagem_url ?? null,
+            fotos: lugar.fotos ?? null,
+            ehParceiro: Boolean(lugar.eh_parceiro),
           }))
         );
       })

@@ -1,13 +1,19 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { getCapaFromLugar } from "@/lib/fotos";
 import { getBadgeParceiroLabel } from "@/lib/lugarBadges";
 import {
   countRoteiroParadas,
   getRoteiroResumo,
   parseRoteiroMarkdown,
 } from "@/lib/roteiroParse";
+
+const MAX_ATIVIDADES = 2;
+const MAX_ATIVIDADE_CHARS = 88;
+const MAX_DICA_CHARS = 120;
 
 /**
  * @param {string} text
@@ -18,99 +24,166 @@ function stripMarkdownBold(text) {
 }
 
 /**
- * Parada individual na timeline do roteiro.
+ * @param {string} text
+ * @param {number} [max]
+ * @returns {string}
+ */
+function truncateText(text, max = MAX_ATIVIDADE_CHARS) {
+  const clean = stripMarkdownBold(text);
+  if (clean.length <= max) return clean;
+  const slice = clean.slice(0, max - 1);
+  const lastSpace = slice.lastIndexOf(" ");
+  const cut = lastSpace > max * 0.6 ? slice.slice(0, lastSpace) : slice;
+  return `${cut.trim()}…`;
+}
+
+/**
+ * @param {string[]} atividades
+ * @returns {string[]}
+ */
+function summarizeAtividades(atividades) {
+  return (atividades ?? [])
+    .filter(Boolean)
+    .slice(0, MAX_ATIVIDADES)
+    .map((item) => truncateText(item));
+}
+
+/**
+ * Card de parada com foto, duração destacada e texto resumido.
  * @param {object} props
  * @param {import("@/lib/roteiroParse").RoteiroParada} props.parada
- * @param {boolean} props.isLast
  * @param {boolean} [props.ehParceiro]
+ * @param {string} [props.capaUrl]
  * @returns {import("react").JSX.Element}
  */
-function RoteiroParadaItem({ parada, isLast, ehParceiro = false }) {
-  const atividades = (parada.atividades ?? []).filter(Boolean);
+function RoteiroParadaCard({ parada, ehParceiro = false, capaUrl = "" }) {
+  const atividades = summarizeAtividades(parada.atividades);
+  const dica = parada.dica ? truncateText(parada.dica, MAX_DICA_CHARS) : "";
+  const duracao = parada.duracao ? stripMarkdownBold(parada.duracao) : "";
+  const nome = stripMarkdownBold(parada.nome);
+  const temFoto = Boolean(capaUrl && parada.lugarId);
 
-  return (
-    <li className="relative flex gap-3 pb-4 last:pb-0">
-      {!isLast && (
-        <span
-          className="absolute left-[15px] top-8 bottom-0 w-px bg-[#d4ede8]"
-          aria-hidden
-        />
-      )}
-      <div
-        className="relative z-[1] flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#1a4a3a] text-xs font-bold text-white"
-        aria-hidden
-      >
-        {parada.ordem}
-      </div>
-      <div className="min-w-0 flex-1 pt-0.5">
-        <div className="flex flex-wrap items-start justify-between gap-2">
-          <div className="min-w-0 flex-1">
-            <h4 className="text-base font-bold leading-snug text-[#1a2e28]">
-              {stripMarkdownBold(parada.nome)}
-            </h4>
-            {ehParceiro ? (
-              <span className="mt-1 inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-900">
-                {getBadgeParceiroLabel()}
+  const cardInner = (
+    <>
+      {temFoto ? (
+        <div className="relative h-[5.5rem] w-full shrink-0 overflow-hidden bg-[#e8eeee] sm:h-24">
+          <Image
+            src={capaUrl}
+            alt={nome}
+            fill
+            sizes="(max-width: 390px) 100vw, 390px"
+            className="object-cover"
+          />
+          <div
+            className="absolute inset-0 bg-gradient-to-t from-[#1a2e28]/75 via-[#1a2e28]/20 to-transparent"
+            aria-hidden
+          />
+          <div className="absolute bottom-2 left-2 right-2 flex items-end justify-between gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-xs font-bold text-[#1a4a3a] shadow-sm">
+              {parada.ordem}
+            </span>
+            {duracao ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#1a4a3a]/90 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm backdrop-blur-sm">
+                <span aria-hidden>⏱</span>
+                {duracao}
               </span>
             ) : null}
           </div>
-          {parada.duracao ? (
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#f0f4f3] px-2 py-0.5 text-[11px] font-semibold text-[#5a6b66] ring-1 ring-[#e3e9e6]">
+        </div>
+      ) : (
+        <div className="flex items-center justify-between gap-2 border-b border-[#eef2f0] px-3 py-2.5">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#1a4a3a] text-xs font-bold text-white">
+            {parada.ordem}
+          </span>
+          {duracao ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#d4ede8] px-2.5 py-1 text-[11px] font-bold text-[#1a4a3a]">
               <span aria-hidden>⏱</span>
-              {stripMarkdownBold(parada.duracao)}
+              {duracao}
+            </span>
+          ) : null}
+        </div>
+      )}
+
+      <div className="min-w-0 flex-1 p-3">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <h4 className="text-[15px] font-bold leading-snug text-[#1a2e28]">{nome}</h4>
+          {ehParceiro ? (
+            <span className="inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-900">
+              {getBadgeParceiroLabel()}
             </span>
           ) : null}
         </div>
 
         {atividades.length > 0 ? (
-          <ul className="mt-2 space-y-1.5">
+          <ul className="mt-2 space-y-1">
             {atividades.map((item) => (
               <li
                 key={`${parada.ordem}-${item.slice(0, 40)}`}
-                className="flex gap-2 text-sm leading-relaxed text-[#3d4f4a]"
+                className="flex gap-2 text-[13px] leading-snug text-[#3d4f4a]"
               >
-                <span className="shrink-0 font-bold text-[#1a4a3a]" aria-hidden>
-                  →
-                </span>
-                <span>{stripMarkdownBold(item)}</span>
+                <span
+                  className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#1a4a3a]"
+                  aria-hidden
+                />
+                <span>{item}</span>
               </li>
             ))}
           </ul>
         ) : null}
 
-        {parada.dica ? (
-          <p className="mt-2 text-sm leading-relaxed text-[#5a6b66]">
-            <span className="font-semibold text-[#1a4a3a]">Dica:</span>{" "}
-            {stripMarkdownBold(parada.dica)}
-          </p>
+        {dica ? (
+          <div className="mt-2.5 flex gap-2 rounded-lg bg-[#f0f4f3] px-2.5 py-2 ring-1 ring-[#d4ede8]">
+            <span className="shrink-0 text-sm leading-none" aria-hidden>
+              💡
+            </span>
+            <p className="text-[12px] leading-snug text-[#3d4f4a]">{dica}</p>
+          </div>
         ) : null}
 
-        {parada.lugarId ? (
+        {parada.lugarId && !temFoto ? (
           <Link
             href={`/lugares/${parada.lugarId}`}
-            className="mt-2 inline-flex text-sm font-semibold text-[#1a4a3a] underline-offset-2 hover:underline"
+            className="mt-2.5 inline-flex text-[13px] font-semibold text-[#1a4a3a] underline-offset-2 hover:underline"
           >
             Ver no guia →
           </Link>
         ) : null}
       </div>
-    </li>
+    </>
+  );
+
+  if (parada.lugarId && temFoto) {
+    return (
+      <Link
+        href={`/lugares/${parada.lugarId}`}
+        className="group block overflow-hidden rounded-xl border border-[#e3e9e6] bg-white shadow-sm transition-shadow hover:shadow-md"
+      >
+        {cardInner}
+      </Link>
+    );
+  }
+
+  return (
+    <article className="overflow-hidden rounded-xl border border-[#e3e9e6] bg-white shadow-sm">
+      {cardInner}
+    </article>
   );
 }
 
 /**
- * Bloco de período (manhã/tarde/noite) com paradas.
+ * Bloco de período (manhã/tarde/noite) com paradas em cards.
  * @param {object} props
  * @param {import("@/lib/roteiroParse").RoteiroPeriodo} props.periodo
  * @param {Map<string, boolean>} [props.parceiroPorLugarId]
+ * @param {Map<string, string>} [props.capaPorLugarId]
  * @returns {import("react").JSX.Element|null}
  */
-function RoteiroPeriodoBlock({ periodo, parceiroPorLugarId }) {
+function RoteiroPeriodoBlock({ periodo, parceiroPorLugarId, capaPorLugarId }) {
   if (!periodo.paradas?.length) return null;
 
   return (
-    <div className="mt-3 first:mt-0">
-      <div className="flex items-center gap-2 rounded-lg bg-[#f0f4f3] px-3 py-2">
+    <div className="mt-4 first:mt-2">
+      <div className="flex items-center gap-2 border-l-[3px] border-[#1a4a3a] pl-2.5">
         <span className="text-base leading-none" aria-hidden>
           {periodo.emoji}
         </span>
@@ -118,18 +191,22 @@ function RoteiroPeriodoBlock({ periodo, parceiroPorLugarId }) {
           {periodo.label}
         </h3>
       </div>
-      <ol className="mt-2 list-none p-0">
-        {periodo.paradas.map((parada, index) => (
-          <RoteiroParadaItem
+      <div className="mt-2.5 space-y-2.5">
+        {periodo.paradas.map((parada) => (
+          <RoteiroParadaCard
             key={`${periodo.id}-${parada.ordem}-${parada.nome}`}
             parada={parada}
-            isLast={index === periodo.paradas.length - 1}
             ehParceiro={Boolean(
               parada.lugarId && parceiroPorLugarId?.get(String(parada.lugarId))
             )}
+            capaUrl={
+              parada.lugarId
+                ? capaPorLugarId?.get(String(parada.lugarId)) ?? ""
+                : ""
+            }
           />
         ))}
-      </ol>
+      </div>
     </div>
   );
 }
@@ -140,9 +217,15 @@ function RoteiroPeriodoBlock({ periodo, parceiroPorLugarId }) {
  * @param {import("@/lib/roteiroParse").RoteiroDia} props.dia
  * @param {boolean} props.defaultOpen
  * @param {Map<string, boolean>} [props.parceiroPorLugarId]
+ * @param {Map<string, string>} [props.capaPorLugarId]
  * @returns {import("react").JSX.Element}
  */
-function RoteiroDiaAccordion({ dia, defaultOpen, parceiroPorLugarId }) {
+function RoteiroDiaAccordion({
+  dia,
+  defaultOpen,
+  parceiroPorLugarId,
+  capaPorLugarId,
+}) {
   const [open, setOpen] = useState(defaultOpen);
 
   const paradasNoDia =
@@ -180,27 +263,32 @@ function RoteiroDiaAccordion({ dia, defaultOpen, parceiroPorLugarId }) {
       </button>
 
       {open && (
-        <div className="border-t border-[#e8eeee] px-4 pb-4 pt-1">
+        <div className="border-t border-[#e8eeee] px-3 pb-4 pt-1 sm:px-4">
           {dia.periodos.map((periodo) => (
             <RoteiroPeriodoBlock
               key={periodo.id ?? periodo.label}
               periodo={periodo}
               parceiroPorLugarId={parceiroPorLugarId}
+              capaPorLugarId={capaPorLugarId}
             />
           ))}
           {dia.paradasSemPeriodo.length > 0 ? (
-            <ol className="mt-3 list-none p-0">
-              {dia.paradasSemPeriodo.map((parada, index) => (
-                <RoteiroParadaItem
+            <div className="mt-3 space-y-2.5">
+              {dia.paradasSemPeriodo.map((parada) => (
+                <RoteiroParadaCard
                   key={`sem-periodo-${parada.ordem}-${parada.nome}`}
                   parada={parada}
-                  isLast={index === dia.paradasSemPeriodo.length - 1}
                   ehParceiro={Boolean(
                     parada.lugarId && parceiroPorLugarId?.get(String(parada.lugarId))
                   )}
+                  capaUrl={
+                    parada.lugarId
+                      ? capaPorLugarId?.get(String(parada.lugarId)) ?? ""
+                      : ""
+                  }
                 />
               ))}
-            </ol>
+            </div>
           ) : null}
         </div>
       )}
@@ -216,7 +304,7 @@ function RoteiroDiaAccordion({ dia, defaultOpen, parceiroPorLugarId }) {
  * @param {string} [props.diasLabel]
  * @param {string} [props.perfil]
  * @param {string[]} [props.interesses]
- * @param {Array<{ id: string, nome: string }>} [props.lugaresCatalog]
+ * @param {Array<{ id: string, nome: string, imagem_url?: string, fotos?: unknown }>} [props.lugaresCatalog]
  * @param {boolean} [props.compactHeader=false] - Omitir header interno (pai já exibe título).
  * @returns {import("react").JSX.Element}
  */
@@ -240,6 +328,17 @@ export default function RoteiroItineraryView({
     for (const item of lugaresCatalog ?? []) {
       if (item?.id) {
         map.set(String(item.id), Boolean(item.ehParceiro));
+      }
+    }
+    return map;
+  }, [lugaresCatalog]);
+
+  const capaPorLugarId = useMemo(() => {
+    const map = new Map();
+    for (const item of lugaresCatalog ?? []) {
+      if (item?.id) {
+        const capa = getCapaFromLugar(item);
+        if (capa) map.set(String(item.id), capa);
       }
     }
     return map;
@@ -328,8 +427,8 @@ export default function RoteiroItineraryView({
       ) : null}
 
       {parsed.intro.length > 0 ? (
-        <div className="rounded-xl bg-[#f0f4f3] px-3 py-2.5 text-sm leading-relaxed text-[#3d4f4a]">
-          {parsed.intro.map((line) => (
+        <div className="rounded-xl border border-[#d4ede8] bg-[#f0f4f3] px-3 py-2.5 text-[13px] leading-snug text-[#3d4f4a]">
+          {parsed.intro.slice(0, 2).map((line) => (
             <p key={line.slice(0, 48)}>{stripMarkdownBold(line)}</p>
           ))}
         </div>
@@ -342,6 +441,7 @@ export default function RoteiroItineraryView({
             dia={dia}
             defaultOpen={index === 0 || parsed.dias.length === 1}
             parceiroPorLugarId={parceiroPorLugarId}
+            capaPorLugarId={capaPorLugarId}
           />
         ))}
       </div>
