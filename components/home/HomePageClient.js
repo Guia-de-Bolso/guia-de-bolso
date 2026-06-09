@@ -618,13 +618,92 @@ function Home({ initialHomeData = null }) {
   }
 
   /**
-   * Applies a quick-plan chip filter and triggers search.
-   * @param {{ query: string, filtro: string }} plano - Quick plan preset.
+   * Runs curated plan search (deterministic, no IA quota).
+   * @param {{ id: string, titulo: string, filtro: string }} plano - Quick plan preset.
+   * @returns {Promise<void>}
+   */
+  async function executarPlanoRapido(plano) {
+    if (!user) {
+      setMotivoModal("busca");
+      setIsModalOpen(true);
+      return;
+    }
+
+    setFiltroBuscaStatus(plano.filtro);
+    setTermoBusca(plano.titulo);
+    setTermoResultado(plano.titulo);
+    setSearchMode("results");
+    setLoadingBusca(true);
+    setResultadosBusca([]);
+    setErroBusca("");
+    setErroBuscaReportavel(false);
+    setErroBuscaContext(null);
+    searchInputRef.current?.focus();
+
+    try {
+      const response = await fetch("/api/planos-rapidos", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          planoId: plano.id,
+          filtroStatus: plano.filtro,
+          latitude: userPosition?.latitude,
+          longitude: userPosition?.longitude,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (data.code === "LOGIN_REQUIRED") {
+          setMotivoModal("busca");
+          setIsModalOpen(true);
+          setSearchMode("browse");
+          return;
+        }
+        const mapped = mapApiErrorResponse(data, response.status);
+        setErroBusca(mapped.message);
+        setErroBuscaReportavel(true);
+        setErroBuscaContext(
+          buildReportContext({
+            code: mapped.code ?? data.code,
+            route: "/",
+            message: mapped.message,
+            extra: { planoId: plano.id },
+          })
+        );
+        setResultadosBusca([]);
+        return;
+      }
+
+      setResultadosBusca(data.lugares ?? []);
+      if (data.message && !(data.lugares ?? []).length) {
+        setErroBusca(data.message);
+        setErroBuscaReportavel(false);
+      }
+    } catch {
+      setErroBusca(getNetworkErrorMessage());
+      setErroBuscaReportavel(true);
+      setErroBuscaContext(
+        buildReportContext({
+          code: "NETWORK",
+          route: "/",
+          extra: { planoId: plano.id },
+        })
+      );
+      setResultadosBusca([]);
+    } finally {
+      setLoadingBusca(false);
+    }
+  }
+
+  /**
+   * Applies a quick-plan preset and opens curated results.
+   * @param {{ id: string, titulo: string, filtro: string }} plano - Quick plan preset.
    */
   function handlePlanoClick(plano) {
-    setFiltroBuscaStatus(plano.filtro);
-    searchInputRef.current?.focus();
-    executarBusca(plano.query, plano.filtro);
+    executarPlanoRapido(plano);
   }
 
   /**
