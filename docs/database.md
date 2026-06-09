@@ -480,6 +480,60 @@ Inserção via `lib/logIA.js` (`calcularCusto` + `logIA`) nas rotas `POST /api/b
 
 ---
 
+### `despesas_config`
+
+Configuração global do módulo de despesas operacionais (admin).
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | `smallint` PK | Sempre `1` (single row) |
+| `taxa_cambio_usd_brl` | `numeric(8,4)` | Taxa USD→BRL padrão (default `5.90`) |
+| `updated_at` | `timestamptz` | Última alteração |
+
+---
+
+### `despesas_operacionais`
+
+Catálogo manual de despesas fixas/recorrentes da stack (Vercel, Supabase, domínio, etc.). CRUD em `/admin/despesas`.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | `uuid` PK | |
+| `nome_plataforma` | `text` | Nome do serviço |
+| `categoria` | `text` | `infra`, `ia`, `auth`, `maps`, `lojas`, `ferramentas`, `dominio`, `marketing`, `outros` |
+| `periodicidade` | `text` | `mensal`, `trimestral`, `semestral`, `anual`, `unico` |
+| `valor` | `numeric(12,4)` | Valor na moeda informada |
+| `moeda` | `text` | `USD` ou `BRL` |
+| `ativo` | `boolean` | Despesa vigente |
+| `data_inicio` | `date` | Início da cobrança |
+| `data_fim` | `date` | Cancelamento (nullable) |
+| `dia_vencimento` | `smallint` | Dia do mês (1–28, nullable) |
+| `notas` | `text` | Observações |
+| `url_referencia` | `text` | Link do painel/fatura |
+| `taxa_cambio` | `numeric(8,4)` | Override USD→BRL por item (nullable) |
+| `created_at`, `updated_at` | `timestamptz` | Auditoria |
+
+Migration: [`despesas_operacionais.sql`](../supabase/despesas_operacionais.sql). Lógica: `lib/adminDespesas.js`.
+
+---
+
+### `despesas_lancamentos`
+
+Histórico de pagamentos reais vinculados a `despesas_operacionais`.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | `uuid` PK | |
+| `despesa_id` | `uuid` FK | → `despesas_operacionais.id` ON DELETE CASCADE |
+| `valor` | `numeric(12,4)` | Valor pago |
+| `moeda` | `text` | `USD` ou `BRL` |
+| `data_pagamento` | `date` | Data efetiva |
+| `competencia` | `text` | Mês de referência (`YYYY-MM`, nullable) |
+| `notas` | `text` | |
+| `created_at` | `timestamptz` | |
+
+---
+
 ## Relationships summary
 
 | From | To | Cardinality | Join / notes |
@@ -498,6 +552,7 @@ Inserção via `lib/logIA.js` (`calcularCusto` + `logIA`) nas rotas `POST /api/b
 | `roteiros` | user | N:1 | Private to owner |
 | `logs` | `perfis` | N:1 | Optional `user_id` |
 | `logs_ia` | `perfis` | N:1 | Optional `user_id`, custo/latência IA |
+| `despesas_lancamentos` | `despesas_operacionais` | N:1 | Pagamentos reais por despesa |
 | `subcategorias` | `lugares` | Logical | Text match on `categoria` + `nome`, not FK |
 
 ### Common Supabase select patterns

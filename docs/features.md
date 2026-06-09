@@ -675,6 +675,7 @@ Not for tourists. Requires `perfis.role` ∈ `admin`, `dev`.
 | Usuários | Roles, Premium IA status, engagement sheet; link to user logs | Access control |
 | Logs (`/admin/logs`) | Filter by action, period, user (`?user_id=`); deep links to place edit | Investigate behavior |
 | IA & Custos (`/admin/ia`) | Filtros por período/feature/moeda, cards de custo/tokens/latência, gráfico diário, projeções e tabela paginada de `logs_ia` com alertas automáticos | Controlar custo, qualidade e escala do uso de IA |
+| Despesas (`/admin/despesas`) | CRUD de despesas operacionais (plataforma, periodicidade, USD/BRL), lançamentos de pagamento, visões mês/trimestre/semestre/ano, taxa de câmbio configurável, resumo por categoria + card de IA variável | Controlar custos fixos da stack e visão de custo total |
 | Relatórios (`/admin/relatorios`) | Per-establishment report: period presets (30d, this month, previous month, 3 months); KPIs with % vs previous period (views = `visualizou_lugar` + `acesso_app` with `lugar_id`, **QR scans = `escaneou_qr`**, `ir_agora`, favorite logs, approved reviews); review list; copy WhatsApp; PDF (`jspdf`) | Share performance with partners |
 | Taxonomia (`/admin/taxonomia`) | CRUD `subcategorias` (per fixed category) and `tags` (`categorias` jsonb, `aplica_em_rotas`); block delete when in use; migrate places on rename | Maintain catalog vocabulary without SQL |
 

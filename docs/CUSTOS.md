@@ -3,8 +3,10 @@
 Documento financeiro para planejamento de lançamento. **Não substitui contabilidade** — use como modelo editável junto com [`custos-planilha.csv`](./custos-planilha.csv).
 
 **Data de referência dos preços:** maio/2026  
-**Câmbio premissa:** US$ 1 = **R$ 5,90** (editável na planilha)  
+**Câmbio premissa:** US$ 1 = **R$ 5,90** (editável na planilha e em `/admin/despesas`)  
 **Responsável:** Bruno Disliler — operação solo em transição
+
+> **Operação:** custos fixos da stack podem ser cadastrados e acompanhados no painel admin em **`/admin/despesas`**. Custos variáveis de IA continuam em **`/admin/ia`** (`logs_ia`).
 
 ---
 
