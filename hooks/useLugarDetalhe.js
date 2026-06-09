@@ -28,6 +28,7 @@ import {
 import {
   appleMapsUrl,
   CATEGORIA_STYLES,
+  facebookUrl,
   googleMapsUrl,
   instagramUrl,
   wazeUrl,
@@ -35,6 +36,7 @@ import {
 import { isConteudoCuradoria, isParceiro } from "@/lib/lugarBadges";
 import {
   getFotosParaExibicao,
+  getTextoHistoriaCultura,
   getTextoSobre,
   getVisibilidadePerfil,
 } from "@/lib/lugarVisibilidade";
@@ -72,6 +74,7 @@ export function useLugarDetalhe(lugarIdFromServer) {
   const [showRotas, setShowRotas] = useState(false);
   const [mapPreference, setMapPreference] = useState("google");
   const [sobreExpandido, setSobreExpandido] = useState(false);
+  const [historiaExpandido, setHistoriaExpandido] = useState(false);
   const [avaliacoes, setAvaliacoes] = useState([]);
   const [jaAvaliou, setJaAvaliou] = useState(false);
   const [showAvaliacaoForm, setShowAvaliacaoForm] = useState(false);
@@ -365,6 +368,7 @@ export function useLugarDetalhe(lugarIdFromServer) {
     lugar && visibilidade
       ? getTextoSobre(lugar, visibilidade.showDescricaoLonga)
       : null;
+  const historiaCultura = lugar ? getTextoHistoriaCultura(lugar) : null;
   const totalAvaliacoes = avaliacoes.length;
   const mediaAvaliacoes =
     totalAvaliacoes > 0
@@ -395,6 +399,9 @@ export function useLugarDetalhe(lugarIdFromServer) {
               telefone: lugar.telefone?.trim() || undefined,
               instagramHref: lugar.instagram?.trim()
                 ? instagramUrl(lugar.instagram)
+                : null,
+              facebookHref: lugar.facebook_url?.trim()
+                ? facebookUrl(lugar.facebook_url)
                 : null,
               cardapioUrl: lugar.cardapio_url?.trim() || undefined,
               siteUrl: lugar.site_url?.trim() || undefined,
@@ -428,6 +435,8 @@ export function useLugarDetalhe(lugarIdFromServer) {
     mapPreference,
     sobreExpandido,
     setSobreExpandido,
+    historiaExpandido,
+    setHistoriaExpandido,
     avaliacoes,
     jaAvaliou,
     showAvaliacaoForm,
@@ -445,6 +454,7 @@ export function useLugarDetalhe(lugarIdFromServer) {
     diaAtual,
     enderecoExibicao,
     descricaoLonga,
+    historiaCultura,
     totalAvaliacoes,
     mediaAvaliacoes,
     distancia,

@@ -34,6 +34,20 @@ function IconInstagram({ className = "h-5 w-5" }) {
 }
 
 /**
+ * Ícone do Facebook.
+ * @param {object} props
+ * @param {string} [props.className] - Classes Tailwind do SVG.
+ * @returns {import("react").JSX.Element}
+ */
+function IconFacebook({ className = "h-5 w-5" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M13.5 22v-8.2h2.8l.4-3.3h-3.2V8.5c0-1 .3-1.7 1.8-1.7H17V3.6c-.3 0-1.4-.1-2.7-.1-2.7 0-4.5 1.6-4.5 4.7v2.6H7.2v3.3h2.6V22h3.7z" />
+    </svg>
+  );
+}
+
+/**
  * Ícone de cardápio / gastronomia.
  * @param {object} props
  * @param {string} [props.className] - Classes Tailwind do SVG.
@@ -64,6 +78,7 @@ function IconGlobe({ className = "h-5 w-5" }) {
 const ICONS_ESTABELECIMENTO = {
   whatsapp: IconWhatsApp,
   instagram: IconInstagram,
+  facebook: IconFacebook,
   cardapio: IconUtensils,
   site: IconGlobe,
 };

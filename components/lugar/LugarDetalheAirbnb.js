@@ -60,6 +60,9 @@ export default function LugarDetalheAirbnb(props) {
     diaAtual,
     enderecoExibicao,
     descricaoLonga,
+    historiaCultura,
+    historiaExpandido,
+    setHistoriaExpandido,
     totalAvaliacoes,
     mediaAvaliacoes,
     distancia,
@@ -292,6 +295,32 @@ export default function LugarDetalheAirbnb(props) {
                     <button
                       type="button"
                       onClick={() => setSobreExpandido(true)}
+                      className="mt-3 text-sm font-semibold text-[#1a4a3a] underline"
+                    >
+                      Mostrar mais
+                    </button>
+                  )}
+                </LugarCardAirbnb>
+              </LugarSectionAirbnb>
+            </>
+          )}
+
+          {historiaCultura && (
+            <>
+              <LugarDividerAirbnb />
+              <LugarSectionAirbnb title="História e cultura">
+                <LugarCardAirbnb>
+                  <p
+                    className={`text-[15px] leading-relaxed text-[#5a6b66] ${
+                      historiaExpandido ? "" : "line-clamp-6"
+                    }`}
+                  >
+                    {historiaCultura}
+                  </p>
+                  {!historiaExpandido && historiaCultura.length > 220 && (
+                    <button
+                      type="button"
+                      onClick={() => setHistoriaExpandido(true)}
                       className="mt-3 text-sm font-semibold text-[#1a4a3a] underline"
                     >
                       Mostrar mais

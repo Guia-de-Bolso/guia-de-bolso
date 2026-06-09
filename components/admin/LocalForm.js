@@ -53,9 +53,11 @@ export const emptyLocalForm = {
   subcategoria: "",
   telefone: "",
   instagram: "",
+  facebook_url: "",
   cardapio_url: "",
   site_url: "",
   descricao_longa: "",
+  historia_cultura: "",
   status: "ativo",
   eh_parceiro: false,
   conteudo_curadoria: false,
@@ -483,6 +485,7 @@ export default function LocalForm({
           onChange={(e) => setForm({ ...form, telefone: formatTelefone(e.target.value) })}
         />
         <Input label="Instagram" value={form.instagram || ""} onChange={(e) => setForm({ ...form, instagram: e.target.value })} />
+        <Input label="Facebook" value={form.facebook_url || ""} onChange={(e) => setForm({ ...form, facebook_url: e.target.value })} placeholder="URL ou @pagina" />
         <Input label="Cardápio URL" value={form.cardapio_url || ""} onChange={(e) => setForm({ ...form, cardapio_url: e.target.value })} />
         <Input label="Site URL" value={form.site_url || ""} onChange={(e) => setForm({ ...form, site_url: e.target.value })} />
       </div>
@@ -622,6 +625,14 @@ export default function LocalForm({
       <label className="mt-4 block text-sm font-semibold text-[#1a2e28]">
         Descrição longa
         <textarea value={form.descricao_longa || ""} onChange={(e) => setForm({ ...form, descricao_longa: e.target.value })} className="mt-1 min-h-24 w-full rounded-xl bg-[#f0f4f3] p-3 text-sm font-normal outline-none" />
+      </label>
+
+      <label className="mt-4 block text-sm font-semibold text-[#1a2e28]">
+        História e cultura
+        <span className="mt-0.5 block text-xs font-normal text-[#5a6b66]">
+          Origem do nome, contexto histórico ou cultural — exibido em seção separada no app.
+        </span>
+        <textarea value={form.historia_cultura || ""} onChange={(e) => setForm({ ...form, historia_cultura: e.target.value })} className="mt-1 min-h-24 w-full rounded-xl bg-[#f0f4f3] p-3 text-sm font-normal outline-none" />
       </label>
 
       <label className="mt-4 flex items-center gap-2 text-sm font-semibold text-[#1a2e28]">

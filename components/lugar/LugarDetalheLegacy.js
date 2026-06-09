@@ -58,6 +58,9 @@ export default function LugarDetalheLegacy(props) {
     diaAtual,
     enderecoExibicao,
     descricaoLonga,
+    historiaCultura,
+    historiaExpandido,
+    setHistoriaExpandido,
     totalAvaliacoes,
     mediaAvaliacoes,
     distancia,
@@ -188,6 +191,30 @@ export default function LugarDetalheLegacy(props) {
                   <button
                     type="button"
                     onClick={() => setSobreExpandido(true)}
+                    className="mt-2 text-sm font-semibold text-[#1a4a3a] underline"
+                  >
+                    Mostrar mais
+                  </button>
+                )}
+              </div>
+            </section>
+          )}
+
+          {historiaCultura && (
+            <section className="mt-6">
+              <h2 className="mb-3 text-sm font-bold text-[#1a2e28]">História e cultura</h2>
+              <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-[#e8eeee]">
+                <p
+                  className={`text-sm leading-relaxed text-[#5a6b66] ${
+                    historiaExpandido ? "" : "line-clamp-4"
+                  }`}
+                >
+                  {historiaCultura}
+                </p>
+                {!historiaExpandido && historiaCultura.length > 180 && (
+                  <button
+                    type="button"
+                    onClick={() => setHistoriaExpandido(true)}
                     className="mt-2 text-sm font-semibold text-[#1a4a3a] underline"
                   >
                     Mostrar mais
