@@ -19,11 +19,11 @@ function applyPreviewRobots(response) {
 }
 
 /**
- * Middleware: domínio de marketing (guiadebolso.app) só landing + legal; demais hosts = app completo.
+ * Proxy: dominio de marketing (guiadebolso.app) so landing + legal; demais hosts = app completo.
  * @param {import("next/server").NextRequest} request - Incoming request.
  * @returns {Promise<import("next/server").NextResponse>} Response with updated session cookies.
  */
-export async function middleware(request) {
+export async function proxy(request) {
   const host = getRequestHostname(request);
 
   if (host === `www.${SITE_DOMAIN}`) {
