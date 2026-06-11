@@ -1,4 +1,10 @@
 {
+  "rewrites": [
+    {
+      "source": "/excluir-conta",
+      "destination": "/excluir-conta.html"
+    }
+  ],
   "crons": [
     {
       "path": "/api/cron/lugares-purge",
