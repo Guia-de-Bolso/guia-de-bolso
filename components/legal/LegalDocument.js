@@ -9,7 +9,7 @@ import { LEGAL_LAST_UPDATED, LEGAL_RESPONSAVEL } from "@/lib/legalContent";
 /**
  * Página legal estática (privacidade ou termos).
  * @param {object} props
- * @param {"privacidade" | "termos"} props.kind
+ * @param {"privacidade" | "termos" | "excluir-conta"} props.kind
  * @param {string} props.title
  * @param {import("@/lib/legalContent").LegalSection[]} props.sections
  * @returns {import("react").ReactElement}
@@ -97,25 +97,32 @@ export default function LegalDocument({ kind, title, sections }) {
               {LEGAL_RESPONSAVEL.email}
             </a>
           </p>
-          {kind === "privacidade" ? (
-            <p className="mt-2">
-              <Link
-                href={fromPerfil ? "/termos?from=perfil" : "/termos"}
-                className="font-semibold text-[#1a4a3a] underline"
-              >
-                Termos de Uso
-              </Link>
-            </p>
-          ) : (
-            <p className="mt-2">
+          <p className="mt-2 flex flex-wrap justify-center gap-x-3 gap-y-1">
+            {kind !== "privacidade" && (
               <Link
                 href={fromPerfil ? "/privacidade?from=perfil" : "/privacidade"}
                 className="font-semibold text-[#1a4a3a] underline"
               >
                 Política de Privacidade
               </Link>
-            </p>
-          )}
+            )}
+            {kind !== "termos" && (
+              <Link
+                href={fromPerfil ? "/termos?from=perfil" : "/termos"}
+                className="font-semibold text-[#1a4a3a] underline"
+              >
+                Termos de Uso
+              </Link>
+            )}
+            {kind !== "excluir-conta" && (
+              <Link
+                href={fromPerfil ? "/excluir-conta?from=perfil" : "/excluir-conta"}
+                className="font-semibold text-[#1a4a3a] underline"
+              >
+                Excluir conta
+              </Link>
+            )}
+          </p>
           <div className="mt-4 border-t border-[#e8eeee] pt-4">
             <AppDeveloperCredit />
           </div>

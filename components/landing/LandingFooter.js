@@ -108,6 +108,11 @@ export default function LandingFooter() {
               </Link>
             </li>
             <li>
+              <Link href="/excluir-conta" className="text-[#5c6f68] hover:text-[#0d1f19]">
+                Excluir conta
+              </Link>
+            </li>
+            <li>
               <a href={landingContactMailto()} className="text-[#5c6f68] hover:text-[#0d1f19]">
                 {LANDING_CONTACT_EMAIL}
               </a>
