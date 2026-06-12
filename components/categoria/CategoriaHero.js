@@ -60,7 +60,7 @@ export default function CategoriaHero({
               <IconBack />
             </Link>
             <span
-              className={`rounded-full border border-white/25 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-white/95 backdrop-blur-md ${meta.chipClass}`}
+              className={`rounded-full border border-white/40 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] shadow-sm backdrop-blur-md ${meta.chipClass}`}
             >
               {meta.icone} {meta.descricaoCurta}
             </span>

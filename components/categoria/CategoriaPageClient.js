@@ -7,8 +7,8 @@ import CategoriaDestaquesCarousel from "@/components/categoria/CategoriaDestaque
 import CategoriaEmptyState from "@/components/categoria/CategoriaEmptyState";
 import CategoriaHero from "@/components/categoria/CategoriaHero";
 import CategoriaSubcategoriaChips from "@/components/categoria/CategoriaSubcategoriaChips";
-import PlaceCard from "@/components/PlaceCard";
-import PlaceCardSkeleton from "@/components/home/PlaceCardSkeleton";
+import CategoriaLugarCard from "@/components/categoria/CategoriaLugarCard";
+import CategoriaLugarCardSkeleton from "@/components/categoria/CategoriaLugarCardSkeleton";
 import HomeSectionHeader from "@/components/home/HomeSectionHeader";
 import SupabaseConfigAlert from "@/components/SupabaseConfigAlert";
 import UserErrorAlert from "@/components/UserErrorAlert";
@@ -218,8 +218,8 @@ export default function CategoriaPageClient({
 
         {!fetchError && loading ? (
           <div className="space-y-4">
-            {[0, 1, 2, 3].map((item) => (
-              <PlaceCardSkeleton key={item} />
+            {[0, 1, 2, 3, 4].map((item) => (
+              <CategoriaLugarCardSkeleton key={item} />
             ))}
           </div>
         ) : null}
@@ -267,10 +267,10 @@ export default function CategoriaPageClient({
                   </p>
                 </div>
               ) : (
-                <ul className="grid list-none gap-4 p-0">
+                <ul className="grid list-none gap-3 p-0">
                   {lugaresComDistancia.map((lugar) => (
                     <li key={lugar.id}>
-                      <PlaceCard lugar={lugar} />
+                      <CategoriaLugarCard lugar={lugar} userPosition={userPosition} />
                     </li>
                   ))}
                 </ul>
