@@ -84,6 +84,7 @@ export default function LugarDetalheAirbnb(props) {
     handleAvaliacaoEnviada,
     launchNavigationApp,
     openRoute,
+    backHref = "/",
   } = props;
 
   const temNota = totalAvaliacoes > 0 && mediaAvaliacoes > 0;
@@ -105,6 +106,7 @@ export default function LugarDetalheAirbnb(props) {
 
       <LugarStickyHeader
         title={lugar.nome}
+        backHref={backHref}
         isFavorito={isFavorito}
         onFavoritar={handleFavoritar}
         onShare={handleShare}
@@ -115,6 +117,7 @@ export default function LugarDetalheAirbnb(props) {
           <LugarGalleryAirbnb
             nome={lugar.nome}
             imagens={imagens}
+            backHref={backHref}
             isFavorito={isFavorito}
             onFavoritar={handleFavoritar}
             onShare={handleShare}

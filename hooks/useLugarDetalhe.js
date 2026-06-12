@@ -47,6 +47,7 @@ import { registrarLog } from "@/lib/logs";
 import { MAP_PREFERENCE_STORAGE_KEY } from "@/lib/perfil";
 import { createClient } from "@/lib/supabase";
 import { getDiaAtualKey, getStatusFuncionamento } from "@/lib/horarios";
+import { getReturnPathFromSearch } from "@/lib/navigationReturn";
 
 /**
  * Estado e ações compartilhados entre layout legado e redesign Airbnb.
@@ -59,6 +60,10 @@ export function useLugarDetalhe(lugarIdFromServer) {
   const id = lugarIdFromServer ?? routeParam;
   const router = useRouter();
   const searchParams = useSearchParams();
+  const backHref = useMemo(
+    () => getReturnPathFromSearch(searchParams, "/"),
+    [searchParams]
+  );
   const supabase = useMemo(() => createClient(), []);
   const [lugar, setLugar] = useState(null);
   const [fotos, setFotos] = useState([]);
@@ -420,6 +425,7 @@ export function useLugarDetalhe(lugarIdFromServer) {
   return {
     id,
     router,
+    backHref,
     lugar,
     loading,
     fetchError,

@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import IconBack from "@/components/IconBack";
+import NavigationBackLink from "@/components/NavigationBackLink";
 import { HOME_CONTEXT_PILL_CLASS } from "@/components/home/homeTokens";
+import { GALLERY_FLOAT_BTN_CLASS } from "@/components/lugar/airbnb/lugarAirbnbTokens";
 
 /**
- * Hero editorial da listagem por categoria — capa, contexto e métricas.
+ * Hero editorial da listagem por categoria — capa full-bleed até o topo.
  */
 export default function CategoriaHero({
   meta,
@@ -29,8 +29,11 @@ export default function CategoriaHero({
       : null;
 
   return (
-    <section className="home-reveal -mx-4 mb-6" aria-labelledby="categoria-hero-title">
-      <div className="relative min-h-[248px] overflow-hidden rounded-b-[32px] ring-1 ring-[#e8eeee]/80">
+    <section
+      className="home-reveal -mx-4 mb-6"
+      aria-labelledby="categoria-hero-title"
+    >
+      <div className="relative min-h-[calc(248px+env(safe-area-inset-top,0px))] overflow-hidden rounded-b-[32px] ring-1 ring-[#e8eeee]/80">
         {capaUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -50,15 +53,13 @@ export default function CategoriaHero({
 
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#061612] via-[#061612]/72 to-[#061612]/20" />
 
-        <div className="relative flex min-h-[248px] flex-col justify-between p-4 pb-5">
+        <div className="relative flex min-h-[calc(248px+env(safe-area-inset-top,0px))] flex-col justify-between p-4 pb-5 pt-[max(1rem,env(safe-area-inset-top))]">
           <div className="flex items-start justify-between gap-3">
-            <Link
+            <NavigationBackLink
               href="/categorias"
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/20 bg-black/25 text-white shadow-sm backdrop-blur-md transition-transform active:scale-[0.97]"
-              aria-label="Voltar para Explorar"
-            >
-              <IconBack />
-            </Link>
+              className={GALLERY_FLOAT_BTN_CLASS}
+              ariaLabel="Voltar para Explorar"
+            />
             <span
               className={`rounded-full border border-white/40 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] shadow-sm backdrop-blur-md ${meta.chipClass}`}
             >

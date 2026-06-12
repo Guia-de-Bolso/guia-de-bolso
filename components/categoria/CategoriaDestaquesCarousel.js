@@ -7,7 +7,7 @@ import { HOME_CAROUSEL_TRACK_CLASS } from "@/components/home/homeTokens";
 /**
  * Carrossel horizontal com os primeiros lugares da categoria.
  */
-export default function CategoriaDestaquesCarousel({ lugares }) {
+export default function CategoriaDestaquesCarousel({ lugares, returnPath = "" }) {
   if (lugares.length === 0) return null;
 
   return (
@@ -23,7 +23,12 @@ export default function CategoriaDestaquesCarousel({ lugares }) {
       />
       <div className={`${HOME_CAROUSEL_TRACK_CLASS} -mx-4 px-4`}>
         {lugares.map((lugar, index) => (
-          <EmAltaCard key={lugar.id} lugar={lugar} priority={index === 0} />
+          <EmAltaCard
+            key={lugar.id}
+            lugar={lugar}
+            priority={index === 0}
+            returnPath={returnPath}
+          />
         ))}
       </div>
     </section>

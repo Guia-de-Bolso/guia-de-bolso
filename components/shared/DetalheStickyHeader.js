@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import IconBack from "@/components/IconBack";
+import NavigationBackLink from "@/components/NavigationBackLink";
 import {
   GALLERY_FAVORITO_ATIVO_BTN_CLASS,
   GALLERY_FLOAT_BTN_CLASS,
@@ -63,13 +62,11 @@ export default function DetalheStickyHeader({
     >
       <div className="border-b border-[#e8eeee]/80 bg-white/88 px-3 pb-2.5 pt-[max(0.5rem,env(safe-area-inset-top))] shadow-[0_4px_24px_rgba(26,46,40,0.06)] backdrop-blur-xl backdrop-saturate-150">
         <div className="flex items-center gap-2">
-          <Link
+          <NavigationBackLink
             href={backHref}
             className={`${GALLERY_FLOAT_BTN_CLASS} h-10 w-10 transition-transform active:scale-95`}
-            aria-label="Voltar"
-          >
-            <IconBack className="h-[18px] w-[18px]" />
-          </Link>
+            iconClassName="h-[18px] w-[18px]"
+          />
 
           <h2 className="min-w-0 flex-1 truncate text-center text-[15px] font-bold tracking-tight text-[#1a2e28]">
             {title}

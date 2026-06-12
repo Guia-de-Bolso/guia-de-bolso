@@ -71,13 +71,13 @@ body {
  */
 .detalhe-hero-sticky,
 .lugar-hero-sticky {
-  height: min(52vh, 28rem);
+  height: calc(min(52vh, 28rem) + env(safe-area-inset-top, 0px));
   overflow: hidden;
 }
 
 .detalhe-hero-media-layer,
 .lugar-hero-media-layer {
-  height: calc(min(52vh, 28rem) + 2.5rem);
+  height: calc(min(52vh, 28rem) + 2.5rem + env(safe-area-inset-top, 0px));
 }
 
 @supports (animation-timeline: scroll(root block)) {

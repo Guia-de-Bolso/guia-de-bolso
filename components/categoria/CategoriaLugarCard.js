@@ -32,7 +32,11 @@ function IconClock({ className = "h-3.5 w-3.5" }) {
 /**
  * Card horizontal rico para listagem de lugares dentro de uma categoria.
  */
-export default function CategoriaLugarCard({ lugar, userPosition = null }) {
+export default function CategoriaLugarCard({
+  lugar,
+  userPosition = null,
+  returnPath = "",
+}) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const imagemUrl = getCapaFromLugar(lugar);
 
@@ -49,7 +53,7 @@ export default function CategoriaLugarCard({ lugar, userPosition = null }) {
 
   return (
     <Link
-      href={getLugarPublicPath(lugar)}
+      href={getLugarPublicPath(lugar, { from: returnPath })}
       className="group flex gap-3.5 overflow-hidden rounded-[24px] bg-white p-3.5 ring-1 ring-[#e8eeee] transition-all duration-300 hover:ring-[#1a4a3a]/18 hover:shadow-[0_8px_28px_rgba(26,46,40,0.08)] active:scale-[0.99]"
     >
       <div className="relative h-[108px] w-[108px] shrink-0 overflow-hidden rounded-[20px] bg-[#e8eeee]">

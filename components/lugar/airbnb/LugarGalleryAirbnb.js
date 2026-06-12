@@ -10,6 +10,7 @@ import GalleryHeroAirbnb from "@/components/shared/GalleryHeroAirbnb";
 export default function LugarGalleryAirbnb({
   nome,
   imagens,
+  backHref = "/",
   isFavorito,
   onFavoritar,
   onShare,
@@ -21,7 +22,7 @@ export default function LugarGalleryAirbnb({
     <GalleryHeroAirbnb
       nome={nome}
       imagens={imagens}
-      backHref="/"
+      backHref={backHref}
       isFavorito={isFavorito}
       onFavoritar={onFavoritar}
       onShare={onShare}

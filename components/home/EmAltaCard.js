@@ -23,7 +23,7 @@ function getRatingMedio(lugar) {
 /**
  * EmAltaCard - Compact trending place card for the home carousel.
  */
-export default function EmAltaCard({ lugar, priority = false }) {
+export default function EmAltaCard({ lugar, priority = false, returnPath = "" }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const status = getStatusFuncionamento(lugar.horarios, lugar.mostrar_horarios);
   const tags = getTagsFromLugar(lugar).slice(0, 2);
@@ -33,7 +33,7 @@ export default function EmAltaCard({ lugar, priority = false }) {
 
   return (
     <Link
-      href={getLugarPublicPath(lugar)}
+      href={getLugarPublicPath(lugar, { from: returnPath })}
       className="group flex w-[208px] shrink-0 snap-start flex-col overflow-hidden rounded-[22px] bg-white ring-1 ring-[#e8eeee] transition-transform duration-300 active:scale-[0.98]"
     >
       <div className="relative h-[120px] overflow-hidden">

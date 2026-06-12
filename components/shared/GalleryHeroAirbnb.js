@@ -1,9 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useRef } from "react";
-import IconBack from "@/components/IconBack";
+import NavigationBackLink from "@/components/NavigationBackLink";
 import GalleryPhotoCounter from "@/components/shared/GalleryPhotoCounter";
 import {
   GALLERY_FAVORITO_ATIVO_BTN_CLASS,
@@ -103,8 +102,8 @@ export default function GalleryHeroAirbnb({
       <div
         className={
           immersiveScroll
-            ? "relative h-full w-full overflow-hidden bg-[#e8eeee]"
-            : "relative h-[min(52vh,28rem)] w-full overflow-hidden bg-[#e8eeee]"
+            ? "relative h-full w-full overflow-hidden bg-[#1a4a3a]"
+            : "relative h-[min(52vh,28rem)] w-full overflow-hidden bg-[#1a4a3a]"
         }
       >
         <div
@@ -171,9 +170,11 @@ export default function GalleryHeroAirbnb({
             immersiveScroll ? "detalhe-hero-actions-fade" : ""
           }`}
         >
-          <Link href={backHref} className={GALLERY_FLOAT_BTN_CLASS} aria-label="Voltar">
-            <IconBack className={GALLERY_FLOAT_ICON_CLASS} />
-          </Link>
+          <NavigationBackLink
+            href={backHref}
+            className={GALLERY_FLOAT_BTN_CLASS}
+            iconClassName={GALLERY_FLOAT_ICON_CLASS}
+          />
 
           <div className="flex gap-2.5">
             <button

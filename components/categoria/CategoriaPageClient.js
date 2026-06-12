@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import BottomNav from "@/components/BottomNav";
 import CategoriaDestaquesCarousel from "@/components/categoria/CategoriaDestaquesCarousel";
@@ -38,6 +39,12 @@ export default function CategoriaPageClient({
   const [userPosition, setUserPosition] = useState(null);
   const [loading, setLoading] = useState(initialLugares.length === 0);
   const [fetchError, setFetchError] = useState(false);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const returnPath = useMemo(() => {
+    const query = searchParams.toString();
+    return query ? `${pathname}?${query}` : pathname;
+  }, [pathname, searchParams]);
 
   useEffect(() => {
     if (!navigator.geolocation) return;
@@ -186,7 +193,7 @@ export default function CategoriaPageClient({
         </h1>
       </div>
 
-      <div className="mx-auto max-w-md px-4 pb-32 pt-2">
+      <div className="mx-auto max-w-md px-4 pb-32">
         <CategoriaHero
           meta={categoriaMeta}
           capaUrl={capaUrl}
@@ -231,7 +238,7 @@ export default function CategoriaPageClient({
         {!fetchError && !loading && lugaresNaCategoria.length > 0 ? (
           <>
             {subcategoriaSelecionada === "Todos" ? (
-              <CategoriaDestaquesCarousel lugares={destaques} />
+              <CategoriaDestaquesCarousel lugares={destaques} returnPath={returnPath} />
             ) : null}
 
             <CategoriaSubcategoriaChips
@@ -270,7 +277,11 @@ export default function CategoriaPageClient({
                 <ul className="grid list-none gap-3 p-0">
                   {lugaresComDistancia.map((lugar) => (
                     <li key={lugar.id}>
-                      <CategoriaLugarCard lugar={lugar} userPosition={userPosition} />
+                      <CategoriaLugarCard
+                        lugar={lugar}
+                        userPosition={userPosition}
+                        returnPath={returnPath}
+                      />
                     </li>
                   ))}
                 </ul>
