@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import CategoriaPageClient from "@/components/categoria/CategoriaPageClient";
 import JsonLdScript from "@/components/seo/JsonLdScript";
-import { getCategoriaByNome, getCategoriaHref } from "@/lib/categorias";
+import { getCategoriaByNome } from "@/lib/categorias";
 import { queryLugaresForCategoria } from "@/lib/lugaresQuery";
 import { buildCategoriaMetadata } from "@/lib/seo";
 import { buildCategoriaJsonLd } from "@/lib/seoJsonLd";
@@ -59,24 +59,19 @@ export default async function CategoriaPage({ params }) {
     console.error("[categoria] lugares:", lugaresError.message);
   }
 
-  const countLabel = `${(lugares ?? []).length} locais em ${categoria}, Imbituba`;
-
   return (
     <>
       <JsonLdScript data={buildCategoriaJsonLd(categoria, meta.descricao)} />
+      <div className="sr-only">
+        <h1>{categoria} em Imbituba</h1>
+        <p>{meta.descricao}</p>
+        <p>{(lugares ?? []).length} locais em {categoria}, Imbituba</p>
+      </div>
       <CategoriaPageClient
         categoria={categoria}
-        categoriaDescricao={meta.descricao}
-        lugaresCount={(lugares ?? []).length}
+        categoriaMeta={meta}
         initialLugares={lugares ?? []}
         initialSubcategorias={subcategorias ?? []}
-        seoHeader={
-          <header className="min-w-0 flex-1">
-            <h1 className="text-2xl font-bold text-[#1a2e28]">{categoria} em Imbituba</h1>
-            <p className="mt-1 text-sm leading-relaxed text-[#5a6b66]">{meta.descricao}</p>
-            <p className="mt-2 text-sm font-medium text-[#1a4a3a]">{countLabel}</p>
-          </header>
-        }
       />
     </>
   );

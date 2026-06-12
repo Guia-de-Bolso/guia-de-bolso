@@ -22,9 +22,6 @@ import { fetchExplorarFromApi } from "@/lib/fetchExplorarApi";
 
 /**
  * Tela Explorar — descoberta por categorias, intenções e busca IA.
- * @param {object} [props]
- * @param {Awaited<ReturnType<import('@/lib/explorarPageData').fetchExplorarPageData>>} [props.initialData]
- * @returns {import("react").JSX.Element}
  */
 export default function CategoriasExplorarClient({ initialData = null }) {
   const hasInitial = Boolean(initialData?.totalLugares);
@@ -55,7 +52,7 @@ export default function CategoriasExplorarClient({ initialData = null }) {
       });
 
     return undefined;
-  }, []);
+  }, [hasInitial]);
 
   const totalLugares = useMemo(
     () =>
@@ -73,10 +70,17 @@ export default function CategoriasExplorarClient({ initialData = null }) {
     [counts]
   );
 
-  const categoriasComLugares = useMemo(
-    () => categoriasOrdenadas.filter((item) => (counts[item.nome] || 0) > 0).length,
+  const categoriasComConteudo = useMemo(
+    () => categoriasOrdenadas.filter((item) => (counts[item.nome] || 0) > 0),
     [categoriasOrdenadas, counts]
   );
+
+  const categoriasEmBreve = useMemo(
+    () => categoriasOrdenadas.filter((item) => (counts[item.nome] || 0) === 0),
+    [categoriasOrdenadas, counts]
+  );
+
+  const categoriasComLugares = categoriasComConteudo.length;
 
   return (
     <div className="min-h-screen bg-[#f0f4f3] text-[#1a2e28]">
@@ -130,23 +134,64 @@ export default function CategoriasExplorarClient({ initialData = null }) {
               </section>
             )}
 
-            <section
-              className="home-reveal mb-10"
-              style={{ animationDelay: "100ms" }}
-              aria-labelledby="explorar-grid-title"
-            >
-              <HomeSectionHeader title="Todas as categorias" titleId="explorar-grid-title" />
-              <div className="grid grid-cols-2 gap-3">
-                {categoriasOrdenadas.map((categoria) => (
-                  <ExplorarCategoriaCard
-                    key={categoria.nome}
-                    categoria={categoria}
-                    count={counts[categoria.nome] || 0}
-                    imagemUrl={capas[categoria.nome]}
-                  />
-                ))}
+            {categoriasComConteudo.length > 0 && (
+              <section
+                className="home-reveal mb-10"
+                style={{ animationDelay: "100ms" }}
+                aria-labelledby="explorar-grid-title"
+              >
+                <HomeSectionHeader
+                  eyebrow="Com conteúdo"
+                  title="Explore por categoria"
+                  titleId="explorar-grid-title"
+                />
+                <div className="grid grid-cols-2 gap-3">
+                  {categoriasComConteudo.map((categoria) => (
+                    <ExplorarCategoriaCard
+                      key={categoria.nome}
+                      categoria={categoria}
+                      count={counts[categoria.nome] || 0}
+                      imagemUrl={capas[categoria.nome]}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {categoriasEmBreve.length > 0 && (
+              <section
+                className="home-reveal mb-10"
+                style={{ animationDelay: "140ms" }}
+                aria-labelledby="explorar-em-breve-title"
+              >
+                <HomeSectionHeader
+                  eyebrow="Em curadoria"
+                  title="Em breve no guia"
+                  titleId="explorar-em-breve-title"
+                />
+                <p className="-mt-2 mb-4 text-sm leading-relaxed text-[#5a6b66]">
+                  Estamos preparando estas categorias. Toque para saber mais sobre cada uma.
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  {categoriasEmBreve.map((categoria) => (
+                    <ExplorarCategoriaCard
+                      key={categoria.nome}
+                      categoria={categoria}
+                      count={0}
+                      imagemUrl={capas[categoria.nome]}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {categoriasComConteudo.length === 0 && categoriasEmBreve.length === 0 && (
+              <div className="home-reveal mb-10 rounded-[28px] bg-white p-6 text-center ring-1 ring-[#e8eeee]">
+                <p className="text-sm text-[#5a6b66]">
+                  Nenhuma categoria disponível no momento. Tente a busca inteligente abaixo.
+                </p>
               </div>
-            </section>
+            )}
 
             <ExplorarAtalhos />
           </>

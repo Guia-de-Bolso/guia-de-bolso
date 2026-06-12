@@ -2,12 +2,18 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import IconBack from "@/components/IconBack";
+import BottomNav from "@/components/BottomNav";
+import CategoriaDestaquesCarousel from "@/components/categoria/CategoriaDestaquesCarousel";
+import CategoriaEmptyState from "@/components/categoria/CategoriaEmptyState";
+import CategoriaHero from "@/components/categoria/CategoriaHero";
+import CategoriaSubcategoriaChips from "@/components/categoria/CategoriaSubcategoriaChips";
 import PlaceCard from "@/components/PlaceCard";
 import PlaceCardSkeleton from "@/components/home/PlaceCardSkeleton";
+import HomeSectionHeader from "@/components/home/HomeSectionHeader";
 import SupabaseConfigAlert from "@/components/SupabaseConfigAlert";
 import UserErrorAlert from "@/components/UserErrorAlert";
 import { fetchLugaresFromApi } from "@/lib/fetchLugaresApi";
+import { getCapaFromLugar } from "@/lib/fotos";
 import { isSupabasePublicConfigured } from "@/lib/supabase/publicEnv";
 import { buildReportContext } from "@/lib/reportContext";
 import { createClient } from "@/lib/supabase";
@@ -18,21 +24,11 @@ import {
 } from "@/lib/lugarTaxonomia";
 
 /**
- * Listagem por categoria — dados iniciais do servidor para SEO e primeiro paint.
- * @param {object} props
- * @param {string} props.categoria
- * @param {string} [props.categoriaDescricao]
- * @param {number} [props.lugaresCount]
- * @param {import('react').ReactNode} [props.seoHeader] - h1 + intro renderizados no servidor.
- * @param {object[]} [props.initialLugares]
- * @param {object[]} [props.initialSubcategorias]
- * @returns {import("react").ReactElement}
+ * Listagem por categoria — hero editorial, destaques, filtros e grid de lugares.
  */
 export default function CategoriaPageClient({
   categoria,
-  categoriaDescricao: _categoriaDescricao,
-  lugaresCount: _lugaresCount,
-  seoHeader = null,
+  categoriaMeta,
   initialLugares = [],
   initialSubcategorias = [],
 }) {
@@ -114,15 +110,39 @@ export default function CategoriaPageClient({
     [lugares, categoria]
   );
 
-  const subcategoriasComLocais = useMemo(() => {
-    const nomesEmUso = new Set(
-      lugaresNaCategoria
-        .map((lugar) => lugar.subcategoria?.trim())
-        .filter(Boolean)
-    );
+  const capaUrl = useMemo(() => {
+    for (const lugar of lugaresNaCategoria) {
+      const capa = getCapaFromLugar(lugar);
+      if (capa) return capa;
+    }
+    return "";
+  }, [lugaresNaCategoria]);
 
-    return subcategorias.filter((item) => nomesEmUso.has(item.nome));
+  const subcategoriasComLocais = useMemo(() => {
+    const counts = new Map();
+
+    for (const lugar of lugaresNaCategoria) {
+      const nome = lugar.subcategoria?.trim();
+      if (!nome) continue;
+      counts.set(nome, (counts.get(nome) || 0) + 1);
+    }
+
+    return subcategorias
+      .filter((item) => counts.has(item.nome))
+      .map((item) => ({
+        ...item,
+        count: counts.get(item.nome) || 0,
+      }))
+      .sort((a, b) => b.count - a.count || a.nome.localeCompare(b.nome, "pt-BR"));
   }, [lugaresNaCategoria, subcategorias]);
+
+  const chipOpcoes = useMemo(
+    () => [
+      { id: "todos", nome: "Todos", icone: "", count: lugaresNaCategoria.length },
+      ...subcategoriasComLocais,
+    ],
+    [lugaresNaCategoria.length, subcategoriasComLocais]
+  );
 
   useEffect(() => {
     if (
@@ -140,35 +160,40 @@ export default function CategoriaPageClient({
           (lugar) => lugar.subcategoria === subcategoriaSelecionada
         );
 
+  const lugaresComDistancia = useMemo(
+    () => lugaresFiltrados.map((lugar) => withDistanciaDinamica(lugar, userPosition)),
+    [lugaresFiltrados, userPosition]
+  );
+
+  const destaques = useMemo(() => lugaresComDistancia.slice(0, 6), [lugaresComDistancia]);
+
+  const listaTitulo =
+    subcategoriaSelecionada === "Todos"
+      ? "Todos os lugares"
+      : subcategoriaSelecionada;
+
+  const listaSubtitulo = loading
+    ? "Atualizando lista…"
+    : `${lugaresFiltrados.length} ${
+        lugaresFiltrados.length === 1 ? "lugar disponível" : "lugares disponíveis"
+      }`;
+
   return (
     <div className="min-h-screen bg-[#f0f4f3] text-[#1a2e28]">
-      <div className="mx-auto max-w-md px-4 pb-10 pt-6">
-        <header className="mb-6 flex items-start gap-3">
-          <Link
-            href="/"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-[#1a4a3a] shadow-sm"
-            aria-label="Voltar"
-          >
-            <IconBack />
-          </Link>
-          {seoHeader ?? (
-            <div className="min-w-0 flex-1">
-              <h1 className="text-2xl font-bold text-[#1a2e28]">{categoria} em Imbituba</h1>
-              <p className="mt-2 text-sm text-[#5a6b66]">
-                {loading
-                  ? "Carregando locais..."
-                  : `${lugaresFiltrados.length} locais encontrados`}
-              </p>
-            </div>
-          )}
-        </header>
-        {seoHeader ? (
-          <p className="mb-4 -mt-2 text-sm text-[#5a6b66]">
-            {loading
-              ? "Atualizando lista..."
-              : `${lugaresFiltrados.length} locais encontrados`}
-          </p>
-        ) : null}
+      <div className="sr-only">
+        <h1>
+          {categoria} em Imbituba — {categoriaMeta.descricao}
+        </h1>
+      </div>
+
+      <div className="mx-auto max-w-md px-4 pb-32 pt-2">
+        <CategoriaHero
+          meta={categoriaMeta}
+          capaUrl={capaUrl}
+          totalLugares={lugaresNaCategoria.length}
+          totalSubcategorias={subcategoriasComLocais.length}
+          loading={loading}
+        />
 
         <SupabaseConfigAlert />
 
@@ -185,61 +210,77 @@ export default function CategoriaPageClient({
                 href="/categorias"
                 className="inline-flex items-center gap-1.5 text-sm font-semibold text-red-800 underline"
               >
-                <IconBack className="h-4 w-4" />
-                Voltar
+                Voltar para Explorar
               </Link>
             }
           />
         )}
 
-        {subcategoriasComLocais.length > 0 && (
-          <div className="mb-5 flex gap-2 overflow-x-auto pb-1 scrollbar-hide [&::-webkit-scrollbar]:hidden">
-            {[
-              { id: "todos", nome: "Todos", icone: "" },
-              ...subcategoriasComLocais,
-            ].map((subcategoria) => {
-              const selected = subcategoriaSelecionada === subcategoria.nome;
-              return (
-                <button
-                  key={subcategoria.id ?? subcategoria.nome}
-                  type="button"
-                  onClick={() => setSubcategoriaSelecionada(subcategoria.nome)}
-                  className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold ${
-                    selected
-                      ? "bg-[#1a4a3a] text-white"
-                      : "bg-white text-[#1a4a3a] shadow-sm"
-                  }`}
-                >
-                  {subcategoria.icone && <span className="mr-1">{subcategoria.icone}</span>}
-                  {subcategoria.nome}
-                </button>
-              );
-            })}
+        {!fetchError && loading ? (
+          <div className="space-y-4">
+            {[0, 1, 2, 3].map((item) => (
+              <PlaceCardSkeleton key={item} />
+            ))}
           </div>
-        )}
+        ) : null}
 
-        <div className="grid gap-4">
-          {fetchError ? null : loading ? (
-            <>
-              {[0, 1, 2, 3, 4, 5].map((item) => (
-                <PlaceCardSkeleton key={item} />
-              ))}
-            </>
-          ) : lugaresFiltrados.length === 0 ? (
-            <p className="py-8 text-center text-sm text-[#5a6b66]">
-              Nenhum local encontrado nessa categoria.
-            </p>
-          ) : (
-            <ul className="grid list-none gap-4 p-0">
-              {lugaresFiltrados.map((lugar) => (
-                <li key={lugar.id}>
-                  <PlaceCard lugar={withDistanciaDinamica(lugar, userPosition)} />
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        {!fetchError && !loading && lugaresNaCategoria.length === 0 ? (
+          <CategoriaEmptyState meta={categoriaMeta} />
+        ) : null}
+
+        {!fetchError && !loading && lugaresNaCategoria.length > 0 ? (
+          <>
+            {subcategoriaSelecionada === "Todos" ? (
+              <CategoriaDestaquesCarousel lugares={destaques} />
+            ) : null}
+
+            <CategoriaSubcategoriaChips
+              selecionada={subcategoriaSelecionada}
+              onSelecionar={setSubcategoriaSelecionada}
+              opcoes={chipOpcoes}
+            />
+
+            <section
+              className="home-reveal"
+              style={{ animationDelay: "120ms" }}
+              aria-labelledby="categoria-lista-title"
+            >
+              <HomeSectionHeader
+                eyebrow={subcategoriaSelecionada === "Todos" ? "Catálogo completo" : "Filtrado"}
+                title={listaTitulo}
+                titleId="categoria-lista-title"
+              />
+              <p className="-mt-2 mb-4 text-sm font-medium text-[#5a6b66]">{listaSubtitulo}</p>
+
+              {lugaresFiltrados.length === 0 ? (
+                <div className="rounded-[24px] bg-white px-5 py-10 text-center ring-1 ring-[#e8eeee]">
+                  <p className="text-sm text-[#5a6b66]">
+                    Nenhum lugar neste filtro. Tente outro tipo ou volte para{" "}
+                    <button
+                      type="button"
+                      onClick={() => setSubcategoriaSelecionada("Todos")}
+                      className="font-semibold text-[#1a4a3a] underline"
+                    >
+                      Todos
+                    </button>
+                    .
+                  </p>
+                </div>
+              ) : (
+                <ul className="grid list-none gap-4 p-0">
+                  {lugaresComDistancia.map((lugar) => (
+                    <li key={lugar.id}>
+                      <PlaceCard lugar={lugar} />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          </>
+        ) : null}
       </div>
+
+      <BottomNav />
     </div>
   );
 }

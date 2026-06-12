@@ -7,7 +7,7 @@ import { getCategoriaHref } from "@/lib/categorias";
 function CategoriaCardContent({ categoria, count, imagemUrl, vazio, imgLoaded, onImageLoad }) {
   return (
     <>
-      <div className="relative h-[96px] w-full overflow-hidden">
+      <div className="relative h-[104px] w-full overflow-hidden">
         {imagemUrl && !vazio ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -24,12 +24,21 @@ function CategoriaCardContent({ categoria, count, imagemUrl, vazio, imgLoaded, o
             aria-hidden
           />
         )}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
         <span
           className={`absolute left-2.5 top-2.5 rounded-full border border-white/30 px-2.5 py-1 text-[10px] font-bold shadow-sm backdrop-blur-sm ${categoria.chipClass}`}
         >
           {categoria.icone}
         </span>
+        {!vazio ? (
+          <span className="absolute bottom-2.5 right-2.5 rounded-full border border-white/20 bg-black/45 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur-md">
+            {count} {count === 1 ? "lugar" : "lugares"}
+          </span>
+        ) : (
+          <span className="absolute bottom-2.5 right-2.5 rounded-full border border-white/25 bg-white/20 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white backdrop-blur-md">
+            Em breve
+          </span>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col p-3.5">
@@ -41,10 +50,10 @@ function CategoriaCardContent({ categoria, count, imagemUrl, vazio, imgLoaded, o
         </p>
         <p
           className={`mt-2.5 text-xs font-semibold ${
-            vazio ? "text-[#9aa8a3]" : "text-[#1a4a3a]"
+            vazio ? "text-[#8a9b94]" : "text-[#1a4a3a]"
           }`}
         >
-          {vazio ? "Em breve" : `${count} ${count === 1 ? "lugar" : "lugares"}`}
+          {vazio ? "Toque para ver detalhes" : "Explorar categoria →"}
         </p>
       </div>
     </>
@@ -57,37 +66,21 @@ function CategoriaCardContent({ categoria, count, imagemUrl, vazio, imgLoaded, o
 export default function ExplorarCategoriaCard({ categoria, count, imagemUrl }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const vazio = count === 0;
-  const baseClass = `group relative flex min-h-[156px] flex-col overflow-hidden rounded-[22px] ring-1 ${
+  const baseClass = `group relative flex min-h-[168px] flex-col overflow-hidden rounded-[22px] ring-1 bg-white transition-transform duration-300 active:scale-[0.98] ${
     vazio
-      ? "pointer-events-none cursor-not-allowed bg-gray-50 opacity-75 ring-gray-200/80"
-      : "bg-white ring-[#e8eeee] transition-transform duration-300 active:scale-[0.98] hover:ring-[#1a4a3a]/20"
+      ? "ring-[#e8eeee]/90 hover:ring-[#1a4a3a]/12"
+      : "ring-[#e8eeee] hover:ring-[#1a4a3a]/20"
   }`;
-
-  if (vazio) {
-    return (
-      <div
-        className={baseClass}
-        aria-disabled="true"
-        tabIndex={-1}
-        title={`${categoria.nome} — em breve, sem lugares cadastrados`}
-      >
-        <CategoriaCardContent
-          categoria={categoria}
-          count={count}
-          imagemUrl={imagemUrl}
-          vazio={vazio}
-          imgLoaded={imgLoaded}
-          onImageLoad={() => setImgLoaded(true)}
-        />
-      </div>
-    );
-  }
 
   return (
     <Link
       href={getCategoriaHref(categoria.nome)}
       className={baseClass}
-      aria-label={`${categoria.nome}, ${count} lugares`}
+      aria-label={
+        vazio
+          ? `${categoria.nome}, em breve`
+          : `${categoria.nome}, ${count} lugares`
+      }
     >
       <CategoriaCardContent
         categoria={categoria}
