@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { getCapaFromLugar } from "@/lib/fotos";
+import { getLugarPublicPath } from "@/lib/lugarPublicPath";
+import { ROTEIRO_RETURN_PATH } from "@/lib/roteiroDraft";
 import { getBadgeParceiroLabel } from "@/lib/lugarBadges";
 import {
   countRoteiroParadas,
@@ -49,14 +51,27 @@ function summarizeAtividades(atividades) {
 }
 
 /**
+ * @param {import("@/lib/roteiroParse").RoteiroParada} parada
+ * @param {Array<{ id: string, slug?: string|null }>} [lugaresCatalog]
+ * @param {string} [returnPath]
+ * @returns {string|null}
+ */
+function getParadaHref(parada, lugaresCatalog = [], returnPath = ROTEIRO_RETURN_PATH) {
+  if (!parada.lugarId) return null;
+  const lugar = lugaresCatalog.find((item) => String(item.id) === String(parada.lugarId));
+  return getLugarPublicPath(lugar ?? { id: parada.lugarId }, { from: returnPath });
+}
+
+/**
  * Card de parada com foto, duração destacada e texto resumido.
  * @param {object} props
  * @param {import("@/lib/roteiroParse").RoteiroParada} props.parada
  * @param {boolean} [props.ehParceiro]
  * @param {string} [props.capaUrl]
+ * @param {string} [props.lugarHref]
  * @returns {import("react").JSX.Element}
  */
-function RoteiroParadaCard({ parada, ehParceiro = false, capaUrl = "" }) {
+function RoteiroParadaCard({ parada, ehParceiro = false, capaUrl = "", lugarHref = null }) {
   const atividades = summarizeAtividades(parada.atividades);
   const dica = parada.dica ? truncateText(parada.dica, MAX_DICA_CHARS) : "";
   const duracao = parada.duracao ? stripMarkdownBold(parada.duracao) : "";
@@ -140,9 +155,9 @@ function RoteiroParadaCard({ parada, ehParceiro = false, capaUrl = "" }) {
           </div>
         ) : null}
 
-        {parada.lugarId && !temFoto ? (
+        {lugarHref && !temFoto ? (
           <Link
-            href={`/lugares/${parada.lugarId}`}
+            href={lugarHref}
             className="mt-2.5 inline-flex text-[13px] font-semibold text-[#1a4a3a] underline-offset-2 hover:underline"
           >
             Ver no guia →
@@ -152,10 +167,10 @@ function RoteiroParadaCard({ parada, ehParceiro = false, capaUrl = "" }) {
     </>
   );
 
-  if (parada.lugarId && temFoto) {
+  if (lugarHref && temFoto) {
     return (
       <Link
-        href={`/lugares/${parada.lugarId}`}
+        href={lugarHref}
         className="group block overflow-hidden rounded-xl border border-[#e3e9e6] bg-white shadow-sm transition-shadow hover:shadow-md"
       >
         {cardInner}
@@ -178,7 +193,7 @@ function RoteiroParadaCard({ parada, ehParceiro = false, capaUrl = "" }) {
  * @param {Map<string, string>} [props.capaPorLugarId]
  * @returns {import("react").JSX.Element|null}
  */
-function RoteiroPeriodoBlock({ periodo, parceiroPorLugarId, capaPorLugarId }) {
+function RoteiroPeriodoBlock({ periodo, parceiroPorLugarId, capaPorLugarId, lugaresCatalog, returnPath }) {
   if (!periodo.paradas?.length) return null;
 
   return (
@@ -204,6 +219,7 @@ function RoteiroPeriodoBlock({ periodo, parceiroPorLugarId, capaPorLugarId }) {
                 ? capaPorLugarId?.get(String(parada.lugarId)) ?? ""
                 : ""
             }
+            lugarHref={getParadaHref(parada, lugaresCatalog, returnPath)}
           />
         ))}
       </div>
@@ -225,6 +241,8 @@ function RoteiroDiaAccordion({
   defaultOpen,
   parceiroPorLugarId,
   capaPorLugarId,
+  lugaresCatalog,
+  returnPath,
 }) {
   const [open, setOpen] = useState(defaultOpen);
 
@@ -270,6 +288,8 @@ function RoteiroDiaAccordion({
               periodo={periodo}
               parceiroPorLugarId={parceiroPorLugarId}
               capaPorLugarId={capaPorLugarId}
+              lugaresCatalog={lugaresCatalog}
+              returnPath={returnPath}
             />
           ))}
           {dia.paradasSemPeriodo.length > 0 ? (
@@ -286,6 +306,7 @@ function RoteiroDiaAccordion({
                       ? capaPorLugarId?.get(String(parada.lugarId)) ?? ""
                       : ""
                   }
+                  lugarHref={getParadaHref(parada, lugaresCatalog, returnPath)}
                 />
               ))}
             </div>
@@ -317,6 +338,7 @@ export default function RoteiroItineraryView({
   lugaresCatalog = [],
   compactHeader = false,
   className = "",
+  returnPath = ROTEIRO_RETURN_PATH,
 }) {
   const parsed = useMemo(
     () => parseRoteiroMarkdown(conteudo, lugaresCatalog),
@@ -442,6 +464,8 @@ export default function RoteiroItineraryView({
             defaultOpen={index === 0 || parsed.dias.length === 1}
             parceiroPorLugarId={parceiroPorLugarId}
             capaPorLugarId={capaPorLugarId}
+            lugaresCatalog={lugaresCatalog}
+            returnPath={returnPath}
           />
         ))}
       </div>

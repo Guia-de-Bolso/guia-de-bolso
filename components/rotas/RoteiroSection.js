@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import LoginModal from "@/components/LoginModal";
 import DailyLimitCountdown from "@/components/DailyLimitCountdown";
 import PremiumPaywallSheet from "@/components/PremiumPaywallSheet";
@@ -12,6 +12,11 @@ import { fetchLugaresFromApi } from "@/lib/fetchLugaresApi";
 import { formatDiasViagem } from "@/lib/roteiroDias";
 import { createClient } from "@/lib/supabase";
 import { LIMITS } from "@/lib/premium";
+import {
+  clearRoteiroDraft,
+  hasRoteiroDraft,
+  loadRoteiroDraft,
+} from "@/lib/roteiroDraft";
 import { usePremiumUsage } from "@/lib/usePremiumUsage";
 
 /**
@@ -162,6 +167,7 @@ function RoteiroViewModal({ roteiro, onClose, onExcluir, lugaresCatalog = [] }) 
  */
 export default function RoteiroSection({ roteirosIniciais = [] }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [pendingCriar, setPendingCriar] = useState(false);
   const [user, setUser] = useState(null);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -170,6 +176,8 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
   const [roteiros, setRoteiros] = useState(roteirosIniciais);
   const [roteiroVisualizando, setRoteiroVisualizando] = useState(null);
   const [lugaresCatalog, setLugaresCatalog] = useState([]);
+  const [draftPendente, setDraftPendente] = useState(false);
+  const [resumeDraftOnOpen, setResumeDraftOnOpen] = useState(false);
 
   const {
     usage,
@@ -184,6 +192,20 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
   useEffect(() => {
     setRoteiros(roteirosIniciais);
   }, [roteirosIniciais]);
+
+  useEffect(() => {
+    const temDraft = hasRoteiroDraft();
+    setDraftPendente(temDraft);
+
+    if (temDraft && searchParams.get("resumeRoteiro") === "1") {
+      setResumeDraftOnOpen(true);
+      setSheetOpen(true);
+    }
+  }, [searchParams]);
+
+  function refreshDraftState() {
+    setDraftPendente(hasRoteiroDraft());
+  }
 
   useEffect(() => {
     const supabase = createClient();
@@ -237,6 +259,8 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
    */
   function handleRoteiroSalvo(novoRoteiro) {
     if (!novoRoteiro) return;
+    clearRoteiroDraft();
+    refreshDraftState();
     setRoteiros((atual) => [
       novoRoteiro,
       ...atual.filter((item) => item.id !== novoRoteiro.id),
@@ -305,8 +329,19 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
       return;
     }
 
+    setResumeDraftOnOpen(false);
     setSheetOpen(true);
   }, [usage, usageSynced, usageLoading, refreshUsage]);
+
+  function abrirSheetComRascunho() {
+    setResumeDraftOnOpen(true);
+    setSheetOpen(true);
+  }
+
+  function abrirSheetNovo() {
+    setResumeDraftOnOpen(false);
+    setSheetOpen(true);
+  }
 
   /**
    * Abre o sheet de criação ou exibe login/paywall conforme sessão e limites premium.
@@ -334,6 +369,44 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
 
   return (
     <>
+      {draftPendente && !sheetOpen && (
+        <section className="mb-4 overflow-hidden rounded-2xl border border-[#cfe5dd] bg-white p-4 shadow-sm ring-1 ring-[#e8eeee]">
+          <div className="flex items-start gap-3">
+            <span
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#d4ede8] text-lg"
+              aria-hidden
+            >
+              ✨
+            </span>
+            <div className="min-w-0 flex-1">
+              <h2 className="text-sm font-bold text-[#1a2e28]">Roteiro não salvo</h2>
+              <p className="mt-1 text-xs leading-relaxed text-[#5a6b66]">
+                {loadRoteiroDraft()?.titulo || "Seu roteiro gerado ainda está disponível."}
+              </p>
+            </div>
+          </div>
+          <div className="mt-3 flex gap-2">
+            <button
+              type="button"
+              onClick={abrirSheetComRascunho}
+              className="flex-1 rounded-xl bg-[#1a4a3a] py-2.5 text-sm font-semibold text-white"
+            >
+              Continuar roteiro
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                clearRoteiroDraft();
+                refreshDraftState();
+              }}
+              className="rounded-xl px-3 py-2.5 text-sm font-semibold text-[#5a6b66]"
+            >
+              Descartar
+            </button>
+          </div>
+        </section>
+      )}
+
       <section className="mb-6 overflow-hidden rounded-3xl bg-gradient-to-br from-gray-900 to-emerald-900 p-5 text-white shadow-sm">
         <span className="text-2xl" aria-hidden>
           ✨
@@ -421,7 +494,12 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
 
       <RoteiroBottomSheet
         isOpen={sheetOpen}
-        onClose={() => setSheetOpen(false)}
+        resumeDraft={resumeDraftOnOpen}
+        onClose={() => {
+          setSheetOpen(false);
+          setResumeDraftOnOpen(false);
+          refreshDraftState();
+        }}
         isLoggedIn={loggedIn}
         onLoginRequired={() => {
           setPendingCriar(true);

@@ -5,6 +5,7 @@ import Logo from "@/components/Logo";
 import RoteiroItineraryView from "@/components/rotas/RoteiroItineraryView";
 
 import UserErrorAlert from "@/components/UserErrorAlert";
+import { ROTEIRO_RETURN_PATH, clearRoteiroDraft, loadRoteiroDraft, saveRoteiroDraft } from "@/lib/roteiroDraft";
 import { ROTEIRO_DIAS_OPCOES, formatDiasViagem } from "@/lib/roteiroDias";
 import { buildReportContext } from "@/lib/reportContext";
 import {
@@ -104,6 +105,7 @@ function RoteiroLoadingView({ message }) {
  * @param {() => void} [props.onLimitReached] - Called when free tier limit is reached.
  * @param {(usage: object|null) => void} [props.onUsageRefresh] - Called after generation with updated usage.
  * @param {(roteiro: object) => void} [props.onRoteiroSalvo] - Called after a successful save.
+ * @param {boolean} [props.resumeDraft=false] - Restaura rascunho não salvo ao abrir.
  * @returns {import('react').ReactElement|null}
  */
 export default function RoteiroBottomSheet({
@@ -114,6 +116,7 @@ export default function RoteiroBottomSheet({
   onLimitReached,
   onUsageRefresh,
   onRoteiroSalvo,
+  resumeDraft = false,
 }) {
   const [dias, setDias] = useState("");
   const [perfil, setPerfil] = useState("");
@@ -136,13 +139,61 @@ export default function RoteiroBottomSheet({
 
     function handleEscape(event) {
       if (event.key === "Escape" && !loading && !salvando) {
-        onClose();
+        handleClose();
       }
     }
 
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
   }, [isOpen, loading, salvando, onClose]);
+
+  /**
+   * Restaura rascunho não salvo (ex.: após voltar do detalhe de um lugar).
+   * @param {import("@/lib/roteiroDraft").RoteiroDraft} draft
+   */
+  function applyDraft(draft) {
+    setDias(draft.dias ?? "");
+    setPerfil(draft.perfil ?? "");
+    setInteresses(Array.isArray(draft.interesses) ? draft.interesses : []);
+    setTitulo(draft.titulo ?? "");
+    setConteudo(draft.conteudo ?? "");
+    setLugaresCatalog(Array.isArray(draft.lugaresCatalog) ? draft.lugaresCatalog : []);
+    setErro("");
+    setErroContext(null);
+    setView("result");
+  }
+
+  /**
+   * Persiste o roteiro gerado enquanto ainda não foi salvo.
+   */
+  function persistDraft() {
+    if (view !== "result" || !conteudo.trim()) return;
+    saveRoteiroDraft({
+      titulo,
+      conteudo,
+      dias,
+      perfil,
+      interesses,
+      lugaresCatalog,
+    });
+  }
+
+  useEffect(() => {
+    if (!isOpen || !resumeDraft) return undefined;
+
+    const draft = loadRoteiroDraft();
+    if (draft?.conteudo?.trim()) {
+      applyDraft(draft);
+    }
+
+    return undefined;
+  }, [isOpen, resumeDraft]);
+
+  useEffect(() => {
+    if (!isOpen || view !== "result" || !conteudo.trim()) return undefined;
+    persistDraft();
+    return undefined;
+  }, [isOpen, view, titulo, conteudo, dias, perfil, interesses, lugaresCatalog]);
 
   useEffect(() => {
     if (view !== "loading") return undefined;
@@ -159,6 +210,7 @@ export default function RoteiroBottomSheet({
    * @returns {void}
    */
   function resetFormulario() {
+    clearRoteiroDraft();
     setDias("");
     setPerfil("");
     setInteresses([]);
@@ -176,6 +228,13 @@ export default function RoteiroBottomSheet({
    */
   function handleClose() {
     if (loading || salvando) return;
+
+    if (view === "result" && conteudo.trim()) {
+      persistDraft();
+      onClose();
+      return;
+    }
+
     resetFormulario();
     onClose();
   }
@@ -249,6 +308,14 @@ export default function RoteiroBottomSheet({
       setConteudo(data.conteudo ?? "");
       setLugaresCatalog(Array.isArray(data.lugaresCatalog) ? data.lugaresCatalog : []);
       setView("result");
+      saveRoteiroDraft({
+        titulo: data.titulo ?? `Roteiro ${dias} - ${perfil}`,
+        conteudo: data.conteudo ?? "",
+        dias,
+        perfil,
+        interesses,
+        lugaresCatalog: Array.isArray(data.lugaresCatalog) ? data.lugaresCatalog : [],
+      });
       onUsageRefresh?.(data.usage ?? null);
     } catch {
       setErro(getNetworkErrorMessage());
@@ -488,6 +555,7 @@ export default function RoteiroBottomSheet({
                   perfil={perfil}
                   interesses={interesses}
                   lugaresCatalog={lugaresCatalog}
+                  returnPath={ROTEIRO_RETURN_PATH}
                 />
 
                 {erro && (
