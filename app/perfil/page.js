@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppDeveloperCredit from "@/components/AppDeveloperCredit";
+import PrefeituraSupportLine from "@/components/PrefeituraSupportLine";
 import BottomNav from "@/components/BottomNav";
 import PremiumPaywallSheet from "@/components/PremiumPaywallSheet";
 import PerfilHero from "@/components/perfil/PerfilHero";
@@ -411,6 +412,7 @@ export default function PerfilPage() {
               </p>
             )}
 
+            <PrefeituraSupportLine variant="footer" showLink className="pb-2 text-center" />
             <AppDeveloperCredit showProductLine className="pb-2" />
           </div>
         )}

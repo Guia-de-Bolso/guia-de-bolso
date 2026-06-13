@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import AppDeveloperCredit from "@/components/AppDeveloperCredit";
+import PrefeituraSupportLine from "@/components/PrefeituraSupportLine";
 import AuthFlow from "@/components/AuthFlow";
 import Logo from "@/components/Logo";
 import LegalConsentLine from "@/components/legal/LegalConsentLine";
@@ -176,7 +177,8 @@ function LoginPageContent() {
             <LegalConsentLine />
           </div>
 
-          <AppDeveloperCredit className="mt-5" />
+          <PrefeituraSupportLine variant="footer" showLink className="mt-5 text-center" />
+          <AppDeveloperCredit className="mt-3" />
         </section>
       </div>
     </div>

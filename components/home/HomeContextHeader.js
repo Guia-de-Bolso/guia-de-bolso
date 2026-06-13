@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Logo from "@/components/Logo";
+import PrefeituraSupportLine from "@/components/PrefeituraSupportLine";
 import { HOME_CONTEXT_PILL_CLASS } from "@/components/home/homeTokens";
 
 /**
@@ -47,11 +48,14 @@ export default function HomeContextHeader({
     <header className="pb-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2.5">
-            <Logo size="md" variant="default" />
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#1a4a3a]/70">
-              Guia de Bolso
-            </p>
+          <div>
+            <div className="flex items-center gap-2.5">
+              <Logo size="md" variant="default" />
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#1a4a3a]/70">
+                Guia de Bolso
+              </p>
+            </div>
+            <PrefeituraSupportLine variant="inline" />
           </div>
 
           <p className="mt-3 text-sm font-medium text-[#5a6b66]">{saudacao} 👋</p>

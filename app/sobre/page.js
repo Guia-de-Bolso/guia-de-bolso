@@ -4,6 +4,10 @@ import { CATEGORIAS_EXPLORE, getCategoriaHref } from "@/lib/categorias";
 import { buildSobreMetadata } from "@/lib/seo";
 import { buildSobrePageJsonLd } from "@/lib/seoJsonLd";
 import { SITE_BRAND_NAME, SITE_NAME_SHORT } from "@/lib/seoBrand";
+import {
+  PREFETURA_SUPPORT_LINE,
+  PREFETURA_SUPPORT_SOBRE,
+} from "@/lib/institutionalSupport";
 import { SITE_CONTACT_EMAIL, SOCIAL_LINKS } from "@/lib/siteContact";
 
 export const metadata = buildSobreMetadata();
@@ -35,6 +39,21 @@ export default function SobrePage() {
           Rosa, gastronomia, trilhas, rotas curadas e busca com inteligência artificial para
           moradores e visitantes.
         </p>
+
+        <section className="mt-8 rounded-2xl bg-white p-5 ring-1 ring-[#e8eeee]">
+          <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#1a4a3a]">
+            {PREFETURA_SUPPORT_LINE}
+          </p>
+          <h2 className="mt-3 text-lg font-bold text-[#1a2e28]">
+            {PREFETURA_SUPPORT_SOBRE.title}
+          </h2>
+          <p className="mt-3 text-sm leading-relaxed text-[#5a6b66]">
+            {PREFETURA_SUPPORT_SOBRE.lead}
+          </p>
+          <p className="mt-3 text-sm leading-relaxed text-[#5a6b66]">
+            {PREFETURA_SUPPORT_SOBRE.body}
+          </p>
+        </section>
 
         <section className="mt-8 rounded-2xl bg-white p-5 ring-1 ring-[#e8eeee]">
           <h2 className="text-lg font-bold text-[#1a2e28]">

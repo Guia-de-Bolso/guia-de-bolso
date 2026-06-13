@@ -8,6 +8,7 @@ import LandingButton from "@/components/landing/LandingButton";
 import LandingHeroFloatingCards from "@/components/landing/LandingHeroFloatingCards";
 import LandingPhoneMockup from "@/components/landing/LandingPhoneMockup";
 import LandingWaitlistForm from "@/components/landing/LandingWaitlistForm";
+import PrefeituraSupportLine from "@/components/PrefeituraSupportLine";
 import { LANDING } from "@/components/landing/landingTheme";
 import {
   fadeUpHero,
@@ -201,6 +202,8 @@ function LandingHeroBody({
                   : LANDING_HERO.eyebrow}
               </span>
             </EyebrowTag>
+
+            <PrefeituraSupportLine variant="hero" className="mt-3" />
 
             <TitleTag
               id="landing-hero-title"

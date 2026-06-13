@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Logo from "@/components/Logo";
+import PrefeituraSupportLine from "@/components/PrefeituraSupportLine";
 import { ONBOARDING_SLIDES } from "@/lib/authImagery";
 import { createClient } from "@/lib/supabase/client";
 
@@ -265,6 +266,7 @@ export default function Onboarding({ isLoggedIn = false, onComplete }) {
         </div>
 
         <div className="mt-8 max-w-md">
+          <PrefeituraSupportLine variant="hero" className="mb-4 flex justify-center" />
           <div className="flex justify-center gap-2" role="tablist" aria-label="Slides">
             {ONBOARDING_SLIDES.map((_, index) => (
               <button

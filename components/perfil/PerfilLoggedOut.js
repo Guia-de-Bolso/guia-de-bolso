@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import AppDeveloperCredit from "@/components/AppDeveloperCredit";
+import PrefeituraSupportLine from "@/components/PrefeituraSupportLine";
 import AuthFlow from "@/components/AuthFlow";
 import Logo from "@/components/Logo";
 import PerfilSettingsGroup from "@/components/perfil/PerfilSettingsGroup";
@@ -126,6 +127,7 @@ export default function PerfilLoggedOut() {
         </a>
       </p>
 
+      <PrefeituraSupportLine variant="footer" showLink className="mt-4 text-center" />
       <AppDeveloperCredit showProductLine className="mt-4" />
     </div>
   );

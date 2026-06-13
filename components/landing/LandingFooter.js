@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Logo from "@/components/Logo";
+import PrefeituraSupportLine from "@/components/PrefeituraSupportLine";
 import { IconInstagram, IconMail, IconTikTok } from "@/components/landing/LandingIcons";
 import {
   LANDING_CONTACT_EMAIL,
@@ -25,6 +26,7 @@ export default function LandingFooter() {
             Guia de Bolso Imbituba — turismo local em SC. Não confundir com Guiabolso
             (finanças).
           </p>
+          <PrefeituraSupportLine variant="footer" className="mt-3 max-w-xs" />
         </div>
 
         <div>

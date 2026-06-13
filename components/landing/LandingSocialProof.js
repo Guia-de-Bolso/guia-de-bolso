@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useLandingRevealMotion } from "@/components/landing/useLandingRichMotion";
+import { PREFETURA_SUPPORT_LINE } from "@/lib/institutionalSupport";
 import { LANDING_TESTIMONIALS } from "@/lib/landingContent";
 
 /**
@@ -45,6 +46,9 @@ export default function LandingSocialProof({ stats, parceiros = [], showcase = [
           </p>
           <p className="landing-display mt-3 max-w-lg text-xl font-semibold tracking-tight text-[#0a1612] sm:text-2xl">
             Curadoria real de quem conhece Imbituba.
+          </p>
+          <p className="mt-3 text-sm font-medium text-[#1a4a3a]/70">
+            {PREFETURA_SUPPORT_LINE}
           </p>
         </motion.div>
 
