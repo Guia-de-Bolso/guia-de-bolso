@@ -115,6 +115,7 @@ export default function AuthFlow({
   const postLoginPath = safeRedirectPath(redirectAfterLogin);
   const [screen, setScreen] = useState("main");
   const [oauthLoading, setOauthLoading] = useState(false);
+  const [oauthError, setOauthError] = useState("");
   const [phone, setPhone] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [sendingCode, setSendingCode] = useState(false);
@@ -155,13 +156,37 @@ export default function AuthFlow({
 
   async function handleGoogle() {
     setOauthLoading(true);
-    const supabase = createClient();
-    if (!supabase) {
+    setOauthError("");
+
+    try {
+      const supabase = createClient();
+      if (!supabase) {
+        setOauthError("Serviço indisponível. Tente novamente.");
+        setOauthLoading(false);
+        return;
+      }
+
+      const { error, openedExternally } = await signInWithGoogleOAuth(
+        supabase,
+        postLoginPath,
+        { onDismissed: () => setOauthLoading(false) }
+      );
+
+      if (error) {
+        setOauthError(
+          error.message || "Não foi possível iniciar o login com Google."
+        );
+        setOauthLoading(false);
+        return;
+      }
+
+      if (!openedExternally) {
+        return;
+      }
+    } catch {
+      setOauthError("Não foi possível iniciar o login com Google.");
       setOauthLoading(false);
-      return;
     }
-    const { error } = await signInWithGoogleOAuth(supabase, postLoginPath);
-    if (error) setOauthLoading(false);
   }
 
   async function sendCode(isResend = false) {
@@ -440,6 +465,12 @@ export default function AuthFlow({
           <IconGoogle />
           {oauthLoading ? "Redirecionando..." : "Continuar com Google"}
         </button>
+
+        {oauthError ? (
+          <p className="text-sm text-red-600" role="alert">
+            {oauthError}
+          </p>
+        ) : null}
 
         <AppleSignInButtonDisabled compact={compact || immersive} />
 
