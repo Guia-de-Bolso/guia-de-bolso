@@ -149,9 +149,12 @@ export default function Onboarding({ isLoggedIn = false, onComplete }) {
       : "Entrar no guia"
     : "Próximo";
 
+  const showPrefeituraInFooter =
+    slide.kicker !== PREFETURA_SUPPORT_LINE && !isLastSlide;
+
   return (
     <section
-      className="fixed inset-0 z-50 overflow-hidden bg-[#071612] text-white"
+      className="fixed inset-0 z-50 flex flex-col overflow-hidden bg-[#071612] text-white"
       aria-label="Introdução ao Guia de Bolso"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
@@ -194,7 +197,7 @@ export default function Onboarding({ isLoggedIn = false, onComplete }) {
         ))}
       </div>
 
-      <header className="absolute inset-x-0 top-0 z-20 px-4 pt-[max(0.75rem,env(safe-area-inset-top))]">
+      <header className="relative z-20 shrink-0 px-4 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <div className="flex items-center justify-between gap-3">
           <span className="inline-flex items-center rounded-full bg-white/10 px-2.5 py-1 backdrop-blur-md">
             <Logo size="sm" variant="light" />
@@ -225,62 +228,83 @@ export default function Onboarding({ isLoggedIn = false, onComplete }) {
         </div>
       </header>
 
-      <div className="relative z-10 flex min-h-full min-h-[100dvh] flex-col justify-end overflow-y-auto px-5 pb-[max(1.75rem,env(safe-area-inset-bottom))] pt-[max(5.5rem,env(safe-area-inset-top))]">
-        <div key={currentSlide} className="onboarding-content-enter max-w-md">
-          {slide.kicker === PREFETURA_SUPPORT_LINE ? (
-            <PrefeituraSupportLine variant="onboarding" />
-          ) : (
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#b8e6d4]">
-              {slide.kicker}
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col px-5">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-3 pt-2">
+          <div key={currentSlide} className="onboarding-content-enter max-w-md">
+            {slide.kicker === PREFETURA_SUPPORT_LINE ? (
+              <PrefeituraSupportLine variant="onboarding" />
+            ) : (
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#b8e6d4]">
+                {slide.kicker}
+              </p>
+            )}
+            <h1
+              className={`mt-2 font-display font-extrabold leading-[1.08] tracking-tight text-white ${
+                isLastSlide ? "text-[1.65rem]" : "text-[1.85rem]"
+              }`}
+            >
+              {slide.title}
+            </h1>
+            <p
+              className={`mt-2 max-w-[20rem] leading-snug text-white/85 ${
+                isLastSlide ? "text-sm" : "text-[15px]"
+              }`}
+            >
+              {slide.subtitle}
             </p>
-          )}
-          <h1 className="mt-3 font-display text-[2rem] font-extrabold leading-[1.08] tracking-tight text-white">
-            {slide.title}
-          </h1>
-          <p className="mt-3 max-w-[20rem] text-[15px] leading-relaxed text-white/85">
-            {slide.subtitle}
-          </p>
 
-          <div className="mt-6 inline-flex max-w-full items-center gap-2 rounded-2xl bg-white/10 px-4 py-3 backdrop-blur-md ring-1 ring-white/15">
-            <span
-              className={`shrink-0 font-display font-extrabold leading-none text-[#b8e6d4] ${
-                slide.stat.compact ? "text-xl" : "text-3xl"
+            <div
+              className={`inline-flex max-w-full items-center gap-2 rounded-2xl bg-white/10 px-3.5 backdrop-blur-md ring-1 ring-white/15 ${
+                isLastSlide ? "mt-4 py-2.5" : "mt-5 py-3"
               }`}
             >
-              {slide.stat.value}
-            </span>
-            <span
-              className={`min-w-0 font-semibold uppercase leading-snug text-white/75 ${
-                slide.stat.compact ? "text-[10px] tracking-wide" : "pb-0.5 text-xs tracking-wide"
-              }`}
-            >
-              {slide.stat.label}
-            </span>
-          </div>
-
-          <ul className="mt-5 flex flex-col gap-2.5" aria-label="Destaques">
-            {slide.highlights.map((item, index) => (
-              <li
-                key={item.text}
-                className="flex items-center gap-3 rounded-2xl bg-white/10 px-4 py-3 backdrop-blur-md ring-1 ring-white/10"
-                style={
-                  reducedMotion
-                    ? undefined
-                    : { animationDelay: `${80 + index * 70}ms` }
-                }
+              <span
+                className={`shrink-0 font-display font-extrabold leading-none text-[#b8e6d4] ${
+                  slide.stat.compact ? "text-xl" : "text-3xl"
+                }`}
               >
-                <span className="text-xl" aria-hidden>
-                  {item.emoji}
-                </span>
-                <span className="text-sm font-semibold text-white/95">{item.text}</span>
-              </li>
-            ))}
-          </ul>
+                {slide.stat.value}
+              </span>
+              <span
+                className={`min-w-0 font-semibold uppercase leading-snug text-white/75 ${
+                  slide.stat.compact ? "text-[10px] tracking-wide" : "pb-0.5 text-xs tracking-wide"
+                }`}
+              >
+                {slide.stat.label}
+              </span>
+            </div>
+
+            <ul
+              className={`flex flex-col ${isLastSlide ? "mt-3 gap-2" : "mt-4 gap-2.5"}`}
+              aria-label="Destaques"
+            >
+              {slide.highlights.map((item, index) => (
+                <li
+                  key={item.text}
+                  className={`flex items-center gap-2.5 rounded-2xl bg-white/10 px-3.5 backdrop-blur-md ring-1 ring-white/10 ${
+                    isLastSlide ? "py-2.5" : "py-3"
+                  }`}
+                  style={
+                    reducedMotion
+                      ? undefined
+                      : { animationDelay: `${80 + index * 70}ms` }
+                  }
+                >
+                  <span className="text-lg" aria-hidden>
+                    {item.emoji}
+                  </span>
+                  <span className="text-sm font-semibold leading-snug text-white/95">
+                    {item.text}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
-        <div className="mt-8 max-w-md">
-          {slide.kicker !== PREFETURA_SUPPORT_LINE ? (
-            <PrefeituraSupportLine variant="hero" className="mb-4" />
+        <footer className="relative z-20 mx-auto w-full max-w-md shrink-0 border-t border-white/10 bg-gradient-to-t from-[#071612] via-[#071612]/95 to-transparent pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
+          {showPrefeituraInFooter ? (
+            <PrefeituraSupportLine variant="hero" className="mb-3" />
           ) : null}
           <div className="flex justify-center gap-2" role="tablist" aria-label="Slides">
             {ONBOARDING_SLIDES.map((_, index) => (
@@ -301,7 +325,7 @@ export default function Onboarding({ isLoggedIn = false, onComplete }) {
           <button
             type="button"
             onClick={handlePrimaryAction}
-            className={`mt-5 flex min-h-[54px] w-full items-center justify-center rounded-2xl bg-[#b8e6d4] text-base font-bold text-[#053d24] ${
+            className={`mt-4 flex min-h-12 w-full items-center justify-center rounded-2xl bg-[#b8e6d4] text-base font-bold text-[#053d24] ${
               !reducedMotion && isLastSlide ? "onboarding-cta-glow" : ""
             } transition active:scale-[0.98] active:bg-[#a3dcc8]`}
           >
@@ -313,22 +337,22 @@ export default function Onboarding({ isLoggedIn = false, onComplete }) {
               <button
                 type="button"
                 onClick={finishExplore}
-                className="mt-3 flex min-h-12 w-full items-center justify-center rounded-2xl text-sm font-semibold text-white/90 ring-1 ring-white/25 transition active:bg-white/10"
+                className="mt-2 flex min-h-11 w-full items-center justify-center rounded-2xl text-sm font-semibold text-white/90 ring-1 ring-white/25 transition active:bg-white/10"
               >
                 Explorar sem criar conta
               </button>
-              <p className="mt-3 text-center text-xs text-white/50">
+              <p className="mt-2 text-center text-[11px] leading-snug text-white/50">
                 {loggedIn
                   ? "Você já está conectado — continue explorando"
                   : "Entrar no guia abre login com Google ou SMS"}
               </p>
             </>
           ) : (
-            <p className="mt-3 text-center text-xs text-white/50">
+            <p className="mt-2 text-center text-[11px] text-white/50">
               Deslize ↔ ou toque em Próximo
             </p>
           )}
-        </div>
+        </footer>
       </div>
     </section>
   );
