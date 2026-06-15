@@ -1,8 +1,23 @@
 import { ensurePerfil } from "@/lib/ensurePerfil";
+import { APP_AUTH_ORIGIN } from "@/lib/authOrigins";
+import { isMarketingHost } from "@/lib/marketingHost";
 import { registrarLog } from "@/lib/logs";
 import { safeRedirectPath } from "@/lib/safeRedirectPath";
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+
+/**
+ * @param {string} origin
+ * @returns {string}
+ */
+function resolvePostAuthOrigin(origin) {
+  try {
+    const host = new URL(origin).hostname;
+    return isMarketingHost(host) ? APP_AUTH_ORIGIN : origin;
+  } catch {
+    return APP_AUTH_ORIGIN;
+  }
+}
 
 /**
  * OAuth callback: exchanges the auth code for a session and redirects on success.
@@ -28,9 +43,11 @@ export async function GET(request) {
       await registrarLog(supabase, user, "login", {
         provider: user?.app_metadata?.provider,
       });
-      return NextResponse.redirect(`${origin}${next}`);
+      const redirectOrigin = resolvePostAuthOrigin(origin);
+      return NextResponse.redirect(`${redirectOrigin}${next}`);
     }
   }
 
-  return NextResponse.redirect(`${origin}/login?error=auth`);
+  const redirectOrigin = resolvePostAuthOrigin(origin);
+  return NextResponse.redirect(`${redirectOrigin}/login?error=auth`);
 }
