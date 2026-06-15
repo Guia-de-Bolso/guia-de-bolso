@@ -197,6 +197,11 @@ export default function Onboarding({ isLoggedIn = false, onComplete }) {
         ))}
       </div>
 
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-[min(52dvh,420px)] bg-gradient-to-t from-[#071612]/80 from-[12%] via-[#071612]/18 via-[48%] to-transparent"
+        aria-hidden
+      />
+
       <header className="relative z-20 shrink-0 px-4 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <div className="flex items-center justify-between gap-3">
           <span className="inline-flex items-center rounded-full bg-white/10 px-2.5 py-1 backdrop-blur-md">
@@ -302,7 +307,7 @@ export default function Onboarding({ isLoggedIn = false, onComplete }) {
           </div>
         </div>
 
-        <footer className="relative z-20 mx-auto w-full max-w-md shrink-0 border-t border-white/10 bg-gradient-to-t from-[#071612] via-[#071612]/95 to-transparent pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
+        <footer className="relative z-20 mx-auto w-full max-w-md shrink-0 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
           {showPrefeituraInFooter ? (
             <PrefeituraSupportLine variant="hero" className="mb-3" />
           ) : null}
