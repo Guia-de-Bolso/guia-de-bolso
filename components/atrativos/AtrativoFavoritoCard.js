@@ -37,8 +37,11 @@ export default function AtrativoFavoritoCard({ rota, onRemover }) {
   const nome = getAtrativoNome(rota);
 
   return (
-    <article className="relative overflow-hidden rounded-2xl bg-white shadow-[0_2px_14px_-4px_rgba(26,46,40,0.08)] ring-1 ring-[#e8eeee]">
-      <Link href={`/atrativos/${rota.id}`} className="flex gap-3 p-3 pr-14">
+    <article className="relative box-border w-full min-w-0 max-w-full overflow-hidden rounded-2xl bg-white shadow-[0_2px_14px_-4px_rgba(26,46,40,0.08)] ring-1 ring-[#e8eeee]">
+      <Link
+        href={`/atrativos/${rota.id}`}
+        className="box-border flex w-full min-w-0 gap-3 overflow-hidden p-3 pr-14"
+      >
         <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54]">
           {foto ? (
             <Image src={foto} alt={nome} fill sizes="96px" className="object-cover" />
@@ -50,7 +53,7 @@ export default function AtrativoFavoritoCard({ rota, onRemover }) {
           </p>
           <h2 className="truncate text-base font-bold text-[#1a2e28]">{nome}</h2>
           {rota.descricao ? (
-            <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-[#5a6b66]">
+            <p className="mt-1 line-clamp-2 break-words text-sm leading-relaxed text-[#5a6b66]">
               {rota.descricao}
             </p>
           ) : null}

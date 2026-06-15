@@ -227,8 +227,8 @@ export default function FavoritosPage() {
     user && !loadingFavoritos && !fetchError && !hasAnyFavorito && !fetchAtrativosError;
 
   return (
-    <div className="min-h-screen bg-[#f0f4f3] text-[#1a2e28]">
-      <div className="mx-auto max-w-md px-4 pb-28 pt-safe-top">
+    <div className="min-h-screen overflow-x-hidden bg-[#f0f4f3] text-[#1a2e28]">
+      <div className="mx-auto box-border w-full min-w-0 max-w-md overflow-x-hidden px-4 pb-28 pt-safe-top">
         <header className="mb-6 flex items-start justify-between gap-3">
           <div className="min-w-0">
             <Logo size="sm" className="mb-3" />
@@ -335,22 +335,24 @@ export default function FavoritosPage() {
             </div>
           </section>
         ) : (
-          <div className="grid gap-8">
+          <div className="grid min-w-0 gap-8">
             {lugares.length > 0 ? (
-              <section>
+              <section className="min-w-0">
                 {atrativos.length > 0 ? (
                   <h2 className="mb-4 text-sm font-bold uppercase tracking-[0.12em] text-[#5a6b66]">
                     Lugares
                   </h2>
                 ) : null}
-                <ul className="grid list-none gap-4 p-0">
+                <ul className="grid min-w-0 list-none gap-4 p-0">
                   {lugares.map((lugar) => (
-                    <li key={lugar.id}>
-                      <PlaceCard
-                        lugar={lugar}
-                        isFavorito
-                        onFavoritar={handleRemoverFavorito}
-                      />
+                    <li key={lugar.id} className="min-w-0">
+                      <div className="box-border w-full min-w-0 max-w-full overflow-hidden">
+                        <PlaceCard
+                          lugar={lugar}
+                          isFavorito
+                          onFavoritar={handleRemoverFavorito}
+                        />
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -358,15 +360,15 @@ export default function FavoritosPage() {
             ) : null}
 
             {atrativos.length > 0 ? (
-              <section>
+              <section className="min-w-0">
                 {lugares.length > 0 ? (
                   <h2 className="mb-4 text-sm font-bold uppercase tracking-[0.12em] text-[#5a6b66]">
                     Atrativos
                   </h2>
                 ) : null}
-                <ul className="grid list-none gap-4 p-0">
+                <ul className="grid min-w-0 list-none gap-4 p-0">
                   {atrativos.map((rota) => (
-                    <li key={rota.id}>
+                    <li key={rota.id} className="min-w-0">
                       <AtrativoFavoritoCard
                         rota={rota}
                         onRemover={() => handleRemoverAtrativoFavorito(rota)}
