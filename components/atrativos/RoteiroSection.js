@@ -364,7 +364,7 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
   const roteiroLimiteDiarioAtingido = loggedIn && isDailyRoteiroLimitReached(usage);
 
   return (
-    <div className="min-w-0 max-w-full">
+    <div className="box-border min-w-0 max-w-full overflow-hidden">
       {savedToast ? (
         <div
           className="fixed left-4 right-4 top-4 z-[60] mx-auto max-w-md rounded-xl bg-[#1a4a3a] px-4 py-3 text-center text-sm font-semibold text-white shadow-lg"
@@ -374,7 +374,7 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
         </div>
       ) : null}
       {draftPendente && !sheetOpen && (
-        <section className="mb-4 w-full min-w-0 max-w-full overflow-hidden rounded-2xl border border-[#cfe5dd] bg-white p-4 shadow-sm ring-1 ring-[#e8eeee]">
+        <section className="mb-4 box-border w-full min-w-0 max-w-full overflow-hidden rounded-2xl border border-[#cfe5dd] bg-white p-4 shadow-sm">
           <div className="flex items-start gap-3">
             <span
               className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#d4ede8] text-lg"
@@ -411,7 +411,7 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
         </section>
       )}
 
-      <section className="mb-6 w-full min-w-0 max-w-full overflow-hidden rounded-3xl bg-gradient-to-br from-gray-900 to-emerald-900 p-5 text-white shadow-sm">
+      <section className="mb-6 box-border w-full min-w-0 max-w-full overflow-hidden rounded-3xl bg-gradient-to-br from-gray-900 to-emerald-900 p-5 text-white shadow-sm">
         <span className="text-2xl" aria-hidden>
           ✨
         </span>
@@ -448,7 +448,7 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
       </section>
 
       {loggedIn && roteiros.length === 0 && (
-        <section className="mb-6 rounded-2xl bg-white p-6 text-center shadow-sm">
+        <section className="mb-6 box-border w-full min-w-0 overflow-hidden rounded-2xl bg-white p-6 text-center shadow-sm">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#d4ede8] text-[#1a4a3a]">
             <svg className="h-11 w-11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
               <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
@@ -471,13 +471,13 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
       )}
 
       {loggedIn && roteiros.length > 0 && (
-        <section className="mb-6">
+        <section className="mb-6 min-w-0 max-w-full overflow-hidden">
           <h2 className="mb-3 text-lg font-bold text-[#1a2e28]">Meus roteiros</h2>
-          <div className="grid gap-3">
+          <div className="grid min-w-0 gap-3">
             {roteiros.map((roteiro) => (
               <article
                 key={roteiro.id ?? roteiro.created_at}
-                className="flex items-center justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm"
+                className="box-border flex min-w-0 items-center justify-between gap-3 overflow-hidden rounded-2xl bg-white p-4 shadow-sm"
               >
                 <div className="min-w-0 flex-1">
                   <h3 className="truncate font-semibold text-gray-950">{roteiro.titulo}</h3>

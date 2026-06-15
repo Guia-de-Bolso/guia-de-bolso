@@ -141,19 +141,21 @@ function AtrativoDoDiaCard({ rota, modo }) {
   return (
     <Link
       href={`/atrativos/${rota.id}`}
-      className="block w-full min-w-0 max-w-full overflow-hidden rounded-2xl bg-white shadow-sm"
+      className="box-border block w-full min-w-0 max-w-full overflow-hidden rounded-2xl bg-white shadow-sm"
     >
-      <div className="relative h-48 w-full">
+      <div className="relative h-48 w-full min-w-0 overflow-hidden">
         <CoverImage rota={rota} className="h-full w-full" priority />
         <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-[#1a4a3a] shadow-sm backdrop-blur-md">
           {badgeLabel}
         </span>
       </div>
-      <div className="p-4">
+      <div className="box-border min-w-0 p-4">
         <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#1a4a3a]">
           {categoria.icone} {categoria.nome}
         </p>
-        <h2 className="mt-1 text-2xl font-bold leading-tight text-[#1a2e28]">{getAtrativoNome(rota)}</h2>
+        <h2 className="mt-1 break-words text-2xl font-bold leading-tight text-[#1a2e28]">
+          {getAtrativoNome(rota)}
+        </h2>
         <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-[#5a6b66]">
           {rota.descricao}
         </p>
@@ -170,7 +172,10 @@ function CompactRouteCard({ rota }) {
   const categoria = getCategoriaAtrativoMeta(rota.categoria);
 
   return (
-    <Link href={`/atrativos/${rota.id}`} className="flex w-full min-w-0 max-w-full gap-3 rounded-2xl bg-white p-3 shadow-sm">
+    <Link
+      href={`/atrativos/${rota.id}`}
+      className="box-border flex w-full min-w-0 max-w-full gap-3 overflow-hidden rounded-2xl bg-white p-3 shadow-sm"
+    >
       <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl">
         <CoverImage rota={rota} className="h-full w-full" sizes="96px" />
       </div>
@@ -221,10 +226,10 @@ export default function AtrativosCatalogo({ atrativos }) {
     : atrativosFiltrados;
 
   return (
-    <div className="min-w-0 max-w-full">
+    <div className="box-border min-w-0 max-w-full overflow-hidden">
       {categoriasPresentes.length > 1 && (
-        <div className="-mx-4 mb-4 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <div className="flex w-max min-w-full gap-2">
+        <div className="mb-4 min-w-0 max-w-full overflow-x-auto pb-1 scrollbar-hide">
+          <div className="flex gap-2">
           <button
             type="button"
             onClick={() => setCategoriaFiltro(null)}
@@ -266,12 +271,12 @@ export default function AtrativosCatalogo({ atrativos }) {
       ) : (
         <ul className="grid w-full min-w-0 list-none gap-4 p-0">
           {rotaDoDia && (
-            <li>
+            <li className="min-w-0">
               <AtrativoDoDiaCard rota={rotaDoDia} modo={modoAtrativoDoDia} />
             </li>
           )}
           {outrosAtrativos.map((rota) => (
-            <li key={rota.id}>
+            <li key={rota.id} className="min-w-0">
               <CompactRouteCard rota={rota} />
             </li>
           ))}

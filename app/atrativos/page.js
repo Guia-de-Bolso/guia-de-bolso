@@ -1,4 +1,3 @@
-import Link from "next/link";
 import BottomNav from "@/components/BottomNav";
 import RoteiroSection from "@/components/atrativos/RoteiroSection";
 import AtrativosCatalogo from "@/components/atrativos/AtrativosCatalogo";
@@ -43,33 +42,33 @@ export default async function AtrativosPage() {
   const atrativos = data ?? [];
 
   return (
-    <div className="min-h-screen overflow-x-clip bg-[#f0f4f3] text-[#1a2e28]">
-      <header className="px-4 pb-5 pt-safe-top">
-        <div className="mx-auto max-w-md">
+    <div className="min-h-screen overflow-x-hidden bg-[#f0f4f3] text-[#1a2e28]">
+      <div className="mx-auto box-border w-full min-w-0 max-w-md overflow-x-hidden px-4 pb-28 pt-safe-top">
+        <header className="pb-5">
           <h1 className="text-2xl font-bold tracking-tight text-[#1a2e28]">Atrativos</h1>
           <p className="mt-1 text-sm text-[#5a6b66]">Trilhas e experiências selecionadas</p>
+        </header>
+
+        <div className="min-w-0 space-y-0 pt-5">
+          <RoteiroSection roteirosIniciais={roteiros} />
+
+          {atrativos.length === 0 ? (
+            <section className="overflow-hidden rounded-2xl bg-white p-6 text-center shadow-sm">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#d4ede8] text-[#1a4a3a]">
+                <IconMapEmpty />
+              </div>
+              <h2 className="mt-4 text-lg font-bold text-[#1a2e28]">
+                Nenhum atrativo cadastrado ainda
+              </h2>
+              <p className="mt-2 text-sm text-[#5a6b66]">
+                Em breve novos atrativos aparecerão aqui.
+              </p>
+            </section>
+          ) : (
+            <AtrativosCatalogo atrativos={atrativos} />
+          )}
         </div>
-      </header>
-
-      <main className="mx-auto w-full min-w-0 max-w-md px-4 pb-28 pt-5">
-        <RoteiroSection roteirosIniciais={roteiros} />
-
-        {atrativos.length === 0 ? (
-          <section className="rounded-2xl bg-white p-6 text-center shadow-sm">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#d4ede8] text-[#1a4a3a]">
-              <IconMapEmpty />
-            </div>
-            <h2 className="mt-4 text-lg font-bold text-[#1a2e28]">
-              Nenhum atrativo cadastrado ainda
-            </h2>
-            <p className="mt-2 text-sm text-[#5a6b66]">
-              Em breve novos atrativos aparecerão aqui.
-            </p>
-          </section>
-        ) : (
-          <AtrativosCatalogo atrativos={atrativos} />
-        )}
-      </main>
+      </div>
 
       <BottomNav />
     </div>
