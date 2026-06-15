@@ -8,6 +8,16 @@ const config: CapacitorConfig = {
     url: 'https://app.guiadebolso.app',
     cleartext: false,
   },
+  plugins: {
+    SocialLogin: {
+      providers: {
+        google: true,
+        facebook: false,
+        apple: false,
+        twitter: false,
+      },
+    },
+  },
 };
 
 export default config;

@@ -4,7 +4,6 @@ import { Capacitor } from "@capacitor/core";
 import { SplashScreen } from "@capacitor/splash-screen";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { useEffect } from "react";
-import { initCapacitorOAuthListener } from "@/lib/capacitorOAuth";
 import { initNativeSafeAreaInsets } from "@/lib/nativeSafeArea";
 
 /**
@@ -41,7 +40,6 @@ export default function CapacitorShell() {
       if (!cancelled) {
         document.documentElement.classList.add("capacitor-native");
         applySafeArea();
-        void initCapacitorOAuthListener();
       }
     })();
 

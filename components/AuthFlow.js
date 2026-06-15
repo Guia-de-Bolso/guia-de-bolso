@@ -166,21 +166,13 @@ export default function AuthFlow({
         return;
       }
 
-      const { error, openedExternally } = await signInWithGoogleOAuth(
-        supabase,
-        postLoginPath,
-        { onDismissed: () => setOauthLoading(false) }
-      );
+      const { error } = await signInWithGoogleOAuth(supabase, postLoginPath);
 
       if (error) {
         setOauthError(
           error.message || "Não foi possível iniciar o login com Google."
         );
         setOauthLoading(false);
-        return;
-      }
-
-      if (!openedExternally) {
         return;
       }
     } catch {
