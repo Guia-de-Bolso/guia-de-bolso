@@ -590,6 +590,5 @@ export default function RoteiroBottomSheet({
           </div>
         </div>
       </div>
-    </div>
   );
 }
