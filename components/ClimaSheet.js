@@ -51,6 +51,7 @@ export default function ClimaSheet({ isOpen, onClose, praia, clima }) {
   const { sheetRef, scrollAreaRef, dragY, isDragging, sheetMotionStyle } = useBottomSheetDrag({
     isOpen,
     onClose,
+    handleOnly: true,
   });
 
   const maxWave = Math.max(

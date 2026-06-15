@@ -58,6 +58,7 @@ export default function AvaliacaoForm({ isOpen, onClose, lugar, onSuccess }) {
   const { sheetRef, scrollAreaRef, dragY, isDragging, sheetMotionStyle } = useBottomSheetDrag({
     isOpen,
     onClose: handleDismiss,
+    handleOnly: true,
   });
 
   useEffect(() => {

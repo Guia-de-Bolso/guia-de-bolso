@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import BottomSheetShell from "@/components/BottomSheetShell";
 import LoginModal from "@/components/LoginModal";
 import DailyLimitCountdown from "@/components/DailyLimitCountdown";
 import PremiumPaywallSheet from "@/components/PremiumPaywallSheet";
@@ -47,16 +48,14 @@ function RoteiroViewModal({ roteiro, onClose, onExcluir, lugaresCatalog = [] }) 
   const [excluindo, setExcluindo] = useState(false);
   const [erroExclusao, setErroExclusao] = useState("");
 
-  if (!roteiro) return null;
-
-  const diasLabel = roteiro.diasLabel || formatDiasViagem(roteiro.dias);
-  const interesses = Array.isArray(roteiro.interesses) ? roteiro.interesses : [];
+  const diasLabel = roteiro?.diasLabel || formatDiasViagem(roteiro?.dias);
+  const interesses = Array.isArray(roteiro?.interesses) ? roteiro.interesses : [];
 
   /**
    * @returns {Promise<void>}
    */
   async function handleConfirmarExclusao() {
-    if (!roteiro.id || !onExcluir) return;
+    if (!roteiro?.id || !onExcluir) return;
     setExcluindo(true);
     setErroExclusao("");
     const ok = await onExcluir(roteiro.id);
@@ -70,39 +69,13 @@ function RoteiroViewModal({ roteiro, onClose, onExcluir, lugaresCatalog = [] }) 
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center overflow-x-hidden bg-black/55 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div
-        className="flex max-h-[92vh] w-full min-w-0 max-w-md flex-col rounded-t-[24px] bg-white shadow-2xl"
-        onClick={(event) => event.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="roteiro-view-title"
-      >
-        <div className="mx-auto mt-3 h-1.5 w-12 shrink-0 rounded-full bg-gray-200" />
-        <div className="shrink-0 border-b border-[#e8eeee] px-5 py-3">
-          <h2 id="roteiro-view-title" className="font-display text-lg font-extrabold text-[#1a2e28]">
-            {roteiro.titulo}
-          </h2>
-          <p className="mt-1 text-xs text-[#5a6b66]">
-            {formatData(roteiro.created_at)}
-            {diasLabel ? ` · ${diasLabel}` : ""}
-            {roteiro.perfil ? ` · ${roteiro.perfil}` : ""}
-          </p>
-        </div>
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-4">
-          <RoteiroItineraryView
-            conteudo={roteiro.conteudo}
-            diasLabel={diasLabel}
-            perfil={roteiro.perfil}
-            interesses={interesses}
-            lugaresCatalog={lugaresCatalog}
-            compactHeader
-          />
-        </div>
-        <div className="shrink-0 border-t border-[#e8eeee] px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] space-y-2">
+    <BottomSheetShell
+      isOpen={Boolean(roteiro)}
+      onClose={onClose}
+      ariaLabelledBy="roteiro-view-title"
+      maxHeight="min(92vh, 720px)"
+      footer={
+        <div className="shrink-0 space-y-2 border-t border-[#e8eeee] px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
           {erroExclusao ? (
             <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
               {erroExclusao}
@@ -111,7 +84,7 @@ function RoteiroViewModal({ roteiro, onClose, onExcluir, lugaresCatalog = [] }) 
           {confirmandoExclusao ? (
             <>
               <p className="text-center text-sm text-[#5a6b66]">
-                Excluir &ldquo;{roteiro.titulo}&rdquo;? Esta ação não pode ser desfeita.
+                Excluir &ldquo;{roteiro?.titulo}&rdquo;? Esta ação não pode ser desfeita.
               </p>
               <button
                 type="button"
@@ -139,7 +112,7 @@ function RoteiroViewModal({ roteiro, onClose, onExcluir, lugaresCatalog = [] }) 
               >
                 Fechar
               </button>
-              {roteiro.id && onExcluir ? (
+              {roteiro?.id && onExcluir ? (
                 <button
                   type="button"
                   onClick={() => {
@@ -154,8 +127,29 @@ function RoteiroViewModal({ roteiro, onClose, onExcluir, lugaresCatalog = [] }) 
             </>
           )}
         </div>
+      }
+    >
+      <div className="border-b border-[#e8eeee] px-5 py-3">
+        <h2 id="roteiro-view-title" className="font-display text-lg font-extrabold text-[#1a2e28]">
+          {roteiro?.titulo}
+        </h2>
+        <p className="mt-1 text-xs text-[#5a6b66]">
+          {formatData(roteiro?.created_at)}
+          {diasLabel ? ` · ${diasLabel}` : ""}
+          {roteiro?.perfil ? ` · ${roteiro.perfil}` : ""}
+        </p>
       </div>
-    </div>
+      <div className="px-5 py-4">
+        <RoteiroItineraryView
+          conteudo={roteiro?.conteudo}
+          diasLabel={diasLabel}
+          perfil={roteiro?.perfil}
+          interesses={interesses}
+          lugaresCatalog={lugaresCatalog}
+          compactHeader
+        />
+      </div>
+    </BottomSheetShell>
   );
 }
 
@@ -178,6 +172,7 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
   const [lugaresCatalog, setLugaresCatalog] = useState([]);
   const [draftPendente, setDraftPendente] = useState(false);
   const [resumeDraftOnOpen, setResumeDraftOnOpen] = useState(false);
+  const [savedToast, setSavedToast] = useState("");
 
   const {
     usage,
@@ -266,7 +261,8 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
       ...atual.filter((item) => item.id !== novoRoteiro.id),
     ]);
     setSheetOpen(false);
-    setRoteiroVisualizando(novoRoteiro);
+    setSavedToast("Roteiro salvo! Toque em Meus roteiros para abrir.");
+    window.setTimeout(() => setSavedToast(""), 3500);
   }
 
   /**
@@ -368,9 +364,17 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
   const roteiroLimiteDiarioAtingido = loggedIn && isDailyRoteiroLimitReached(usage);
 
   return (
-    <>
+    <div className="min-w-0 max-w-full">
+      {savedToast ? (
+        <div
+          className="fixed left-4 right-4 top-4 z-[60] mx-auto max-w-md rounded-xl bg-[#1a4a3a] px-4 py-3 text-center text-sm font-semibold text-white shadow-lg"
+          role="status"
+        >
+          {savedToast}
+        </div>
+      ) : null}
       {draftPendente && !sheetOpen && (
-        <section className="mb-4 overflow-hidden rounded-2xl border border-[#cfe5dd] bg-white p-4 shadow-sm ring-1 ring-[#e8eeee]">
+        <section className="mb-4 w-full min-w-0 max-w-full overflow-hidden rounded-2xl border border-[#cfe5dd] bg-white p-4 shadow-sm ring-1 ring-[#e8eeee]">
           <div className="flex items-start gap-3">
             <span
               className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#d4ede8] text-lg"
@@ -407,7 +411,7 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
         </section>
       )}
 
-      <section className="mb-6 overflow-hidden rounded-3xl bg-gradient-to-br from-gray-900 to-emerald-900 p-5 text-white shadow-sm">
+      <section className="mb-6 w-full min-w-0 max-w-full overflow-hidden rounded-3xl bg-gradient-to-br from-gray-900 to-emerald-900 p-5 text-white shadow-sm">
         <span className="text-2xl" aria-hidden>
           ✨
         </span>
@@ -539,6 +543,6 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
         onExcluir={loggedIn ? handleExcluirRoteiro : undefined}
         lugaresCatalog={lugaresCatalog}
       />
-    </>
+    </div>
   );
 }

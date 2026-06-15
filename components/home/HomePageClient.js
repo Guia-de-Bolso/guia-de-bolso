@@ -448,6 +448,30 @@ function Home({ initialHomeData = null }) {
     return undefined;
   }, [user?.id]);
 
+  useEffect(() => {
+    if (!user?.id || !isSupabasePublicConfigured()) return undefined;
+
+    const supabase = createClient();
+    if (!supabase) return undefined;
+
+    function resyncFavoritos() {
+      if (document.visibilityState !== "visible") return;
+      const fetchGen = favoritosSyncGuardRef.current.bump();
+      fetchFavoritoIds(supabase, user.id).then((ids) => {
+        if (!favoritosSyncGuardRef.current.isCurrent(fetchGen)) return;
+        setFavoritos(ids);
+      });
+    }
+
+    window.addEventListener("focus", resyncFavoritos);
+    document.addEventListener("visibilitychange", resyncFavoritos);
+
+    return () => {
+      window.removeEventListener("focus", resyncFavoritos);
+      document.removeEventListener("visibilitychange", resyncFavoritos);
+    };
+  }, [user?.id]);
+
   /**
    * Toggles favorite state for a place; opens login modal if guest.
    * @param {object} lugar - Place to favorite or unfavorite.

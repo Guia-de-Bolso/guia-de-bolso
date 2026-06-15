@@ -280,7 +280,7 @@ export default function Onboarding({ isLoggedIn = false, onComplete }) {
             </div>
 
             <ul
-              className={`flex flex-col ${isLastSlide ? "mt-3 gap-2" : "mt-4 gap-2.5"}`}
+              className={`flex flex-col ${isLastSlide ? "mt-3 max-h-[28vh] gap-2 overflow-y-auto overscroll-contain" : "mt-4 gap-2.5"}`}
               aria-label="Destaques"
             >
               {slide.highlights.map((item, index) => (
@@ -307,7 +307,7 @@ export default function Onboarding({ isLoggedIn = false, onComplete }) {
           </div>
         </div>
 
-        <footer className="relative z-20 mx-auto w-full max-w-md shrink-0 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3">
+        <footer className="relative z-20 mx-auto w-full max-w-md shrink-0 pb-safe-bottom pt-3">
           {showPrefeituraInFooter ? (
             <PrefeituraSupportLine variant="hero" className="mb-3" />
           ) : null}

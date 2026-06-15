@@ -21,6 +21,7 @@ function isInteractiveDragTarget(target) {
  * @param {object} options
  * @param {boolean} options.isOpen
  * @param {() => void} options.onClose
+ * @param {boolean} [options.handleOnly=false] - Só arrasta pelo handle (evita conflito com scroll).
  * @returns {{
  *   sheetRef: import("react").RefObject<HTMLDivElement|null>,
  *   scrollAreaRef: import("react").RefObject<HTMLDivElement|null>,
@@ -29,7 +30,7 @@ function isInteractiveDragTarget(target) {
  *   sheetMotionStyle: import("react").CSSProperties,
  * }}
  */
-export function useBottomSheetDrag({ isOpen, onClose }) {
+export function useBottomSheetDrag({ isOpen, onClose, handleOnly = false }) {
   const sheetRef = useRef(null);
   const scrollAreaRef = useRef(null);
   const dragStartYRef = useRef(null);
@@ -80,6 +81,7 @@ export function useBottomSheetDrag({ isOpen, onClose }) {
       const onHandle = Boolean(target.closest("[data-drag-handle='true']"));
       const inScroll = Boolean(scrollAreaRef.current?.contains(target));
 
+      if (handleOnly) return onHandle;
       if (onHandle) return true;
       if (inScroll && scrollTop > 4) return false;
       return true;
@@ -119,7 +121,7 @@ export function useBottomSheetDrag({ isOpen, onClose }) {
       sheet.removeEventListener("touchend", finishDrag);
       sheet.removeEventListener("touchcancel", finishDrag);
     };
-  }, [isOpen, finishDrag]);
+  }, [isOpen, finishDrag, handleOnly]);
 
   const sheetMotionStyle =
     dragY > 0

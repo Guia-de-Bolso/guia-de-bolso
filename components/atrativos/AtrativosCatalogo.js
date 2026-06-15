@@ -139,7 +139,10 @@ function AtrativoDoDiaCard({ rota, modo }) {
   const badgeLabel = modo === "fixada" ? "📌 Atrativo do dia" : "🗓️ Atrativo do dia";
 
   return (
-    <Link href={`/atrativos/${rota.id}`} className="block overflow-hidden rounded-2xl bg-white shadow-sm">
+    <Link
+      href={`/atrativos/${rota.id}`}
+      className="block w-full min-w-0 max-w-full overflow-hidden rounded-2xl bg-white shadow-sm"
+    >
       <div className="relative h-48 w-full">
         <CoverImage rota={rota} className="h-full w-full" priority />
         <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-[#1a4a3a] shadow-sm backdrop-blur-md">
@@ -167,7 +170,7 @@ function CompactRouteCard({ rota }) {
   const categoria = getCategoriaAtrativoMeta(rota.categoria);
 
   return (
-    <Link href={`/atrativos/${rota.id}`} className="flex gap-3 rounded-2xl bg-white p-3 shadow-sm">
+    <Link href={`/atrativos/${rota.id}`} className="flex w-full min-w-0 max-w-full gap-3 rounded-2xl bg-white p-3 shadow-sm">
       <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl">
         <CoverImage rota={rota} className="h-full w-full" sizes="96px" />
       </div>
@@ -218,9 +221,10 @@ export default function AtrativosCatalogo({ atrativos }) {
     : atrativosFiltrados;
 
   return (
-    <>
+    <div className="min-w-0 max-w-full">
       {categoriasPresentes.length > 1 && (
-        <div className="mb-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="-mx-4 mb-4 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex w-max min-w-full gap-2">
           <button
             type="button"
             onClick={() => setCategoriaFiltro(null)}
@@ -246,6 +250,7 @@ export default function AtrativosCatalogo({ atrativos }) {
               {formatCategoriaAtrativoLabel(item.nome)}
             </button>
           ))}
+          </div>
         </div>
       )}
 
@@ -259,7 +264,7 @@ export default function AtrativosCatalogo({ atrativos }) {
           </p>
         </section>
       ) : (
-        <ul className="grid list-none gap-4 p-0">
+        <ul className="grid w-full min-w-0 list-none gap-4 p-0">
           {rotaDoDia && (
             <li>
               <AtrativoDoDiaCard rota={rotaDoDia} modo={modoAtrativoDoDia} />
@@ -272,6 +277,6 @@ export default function AtrativosCatalogo({ atrativos }) {
           ))}
         </ul>
       )}
-    </>
+    </div>
   );
 }

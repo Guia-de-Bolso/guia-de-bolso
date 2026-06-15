@@ -14,7 +14,7 @@ import {
   DESTAQUE_CHIP_PREMIUM_CLASS,
   DETALHE_CARD_OVERLAP_CLASS,
 } from "@/components/lugar/airbnb/lugarAirbnbTokens";
-import { registrarLog } from "@/lib/logs";
+import { toggleRotasFavorita } from "@/lib/rotasFavoritas";
 import { createClient } from "@/lib/supabase";
 
 function VerifiedIcon() {
@@ -92,39 +92,7 @@ export default function AtrativoDetalhePremium({
     }
 
     const supabase = createClient();
-    const proximoEstado = !isFavorito;
-    setIsFavorito(proximoEstado);
-
-    if (isFavorito) {
-      const { error } = await supabase
-        .from("rotas_favoritas")
-        .delete()
-        .eq("user_id", user.id)
-        .eq("rota_id", rotaId);
-
-      if (error) {
-        setIsFavorito(true);
-      } else {
-        await registrarLog(supabase, user, "desfavoritou", {
-          rota_id: rotaId,
-          rota_nome: nome,
-        });
-      }
-      return;
-    }
-
-    const { error } = await supabase
-      .from("rotas_favoritas")
-      .insert({ user_id: user.id, rota_id: rotaId });
-
-    if (error) {
-      setIsFavorito(false);
-    } else {
-      await registrarLog(supabase, user, "favoritou", {
-        rota_id: rotaId,
-        rota_nome: nome,
-      });
-    }
+    await toggleRotasFavorita(supabase, user, rotaId, nome, setIsFavorito);
   }
 
   async function handleShare() {

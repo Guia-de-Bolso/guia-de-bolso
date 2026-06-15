@@ -128,7 +128,6 @@ export default function RoteiroBottomSheet({
   const [conteudo, setConteudo] = useState("");
   const [lugaresCatalog, setLugaresCatalog] = useState([]);
   const [salvando, setSalvando] = useState(false);
-  const [toast, setToast] = useState("");
   const [erro, setErro] = useState("");
   const [erroContext, setErroContext] = useState(null);
 
@@ -363,8 +362,6 @@ export default function RoteiroBottomSheet({
         return;
       }
 
-      setToast("Roteiro salvo!");
-      setTimeout(() => setToast(""), 3000);
       const salvo = data.roteiro ?? {
         titulo,
         dias,
@@ -393,14 +390,7 @@ export default function RoteiroBottomSheet({
   if (!isOpen) return null;
 
   return (
-    <>
-      {toast && (
-        <div className="fixed left-4 right-4 top-4 z-[70] mx-auto max-w-md rounded-2xl bg-[#1a4a3a] px-4 py-3 text-center text-sm font-semibold text-white shadow-lg">
-          {toast}
-        </div>
-      )}
-
-      <div
+    <div
         className="fixed inset-0 z-50 flex items-end justify-center overflow-x-hidden bg-black/55 backdrop-blur-sm"
         onClick={handleClose}
         style={{ animation: "roteiroOverlayIn 220ms ease-out forwards" }}
@@ -600,6 +590,6 @@ export default function RoteiroBottomSheet({
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
