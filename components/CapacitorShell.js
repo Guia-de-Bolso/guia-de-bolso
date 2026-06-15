@@ -4,6 +4,7 @@ import { Capacitor } from "@capacitor/core";
 import { SplashScreen } from "@capacitor/splash-screen";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { useEffect } from "react";
+import { initNativeSafeAreaInsets } from "@/lib/nativeSafeArea";
 
 /**
  * Inicializa status bar, splash e classe no document para safe areas no app nativo.
@@ -14,6 +15,10 @@ export default function CapacitorShell() {
     if (!Capacitor.isNativePlatform()) return undefined;
 
     let cancelled = false;
+
+    const applySafeArea = () => {
+      if (!cancelled) initNativeSafeAreaInsets();
+    };
 
     (async () => {
       try {
@@ -34,11 +39,17 @@ export default function CapacitorShell() {
 
       if (!cancelled) {
         document.documentElement.classList.add("capacitor-native");
+        applySafeArea();
       }
     })();
 
+    window.addEventListener("resize", applySafeArea);
+    window.addEventListener("orientationchange", applySafeArea);
+
     return () => {
       cancelled = true;
+      window.removeEventListener("resize", applySafeArea);
+      window.removeEventListener("orientationchange", applySafeArea);
       document.documentElement.classList.remove("capacitor-native");
     };
   }, []);

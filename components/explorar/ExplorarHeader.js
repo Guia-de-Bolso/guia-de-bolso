@@ -17,7 +17,7 @@ export default function ExplorarHeader({ loading, totalLugares, categoriasComLug
     : `${totalLugares} lugares em ${categoriasComLugares} categorias`;
 
   return (
-    <div className="-mx-4 px-4 pt-5 pb-1">
+    <div className="-mx-4 px-4 pt-safe-top pb-1">
       <div className="mb-3 flex items-center gap-2.5">
         <Logo size="md" variant="default" />
         <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#1a4a3a]/70">

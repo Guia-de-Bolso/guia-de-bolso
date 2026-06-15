@@ -182,7 +182,7 @@ export default function FavoritosPage() {
 
   return (
     <div className="min-h-screen bg-[#f0f4f3] text-[#1a2e28]">
-      <div className="mx-auto max-w-md px-4 pb-28 pt-[max(1.25rem,env(safe-area-inset-top))]">
+      <div className="mx-auto max-w-md px-4 pb-28 pt-safe-top">
         <header className="mb-6 flex items-start justify-between gap-3">
           <div className="min-w-0">
             <Logo size="sm" className="mb-3" />

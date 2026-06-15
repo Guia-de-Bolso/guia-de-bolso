@@ -155,6 +155,19 @@ body {
   }
 }
 
+:root {
+  --app-safe-top: 0px;
+  --app-safe-bottom: 0px;
+}
+
+.pt-safe-top {
+  padding-top: max(1.25rem, env(safe-area-inset-top, 0px), var(--app-safe-top));
+}
+
+.pb-safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px), var(--app-safe-bottom));
+}
+
 /* Home / Explorar: shell sticky só com busca IA (topo rola naturalmente) */
 .home-header-shell,
 .explorar-header-shell {
@@ -162,6 +175,12 @@ body {
   top: 0;
   z-index: 30;
   isolation: isolate;
+}
+
+html.capacitor-native .home-header-shell,
+html.capacitor-native .explorar-header-shell,
+html.capacitor-native .app-sticky-top-safe {
+  top: max(env(safe-area-inset-top, 0px), var(--app-safe-top));
 }
 
 .home-header-shell.is-stuck,

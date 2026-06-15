@@ -776,7 +776,7 @@ function Home({ initialHomeData = null }) {
   return (
     <div className="min-h-screen bg-[#f0f4f3] text-[#1a2e28]">
       <div className="mx-auto max-w-md px-4 pb-32">
-        <div className="-mx-4 px-4 pt-5">
+        <div className="-mx-4 px-4 pt-safe-top">
           <HomeContextHeader
             user={user}
             avatarUrl={avatarUrl}

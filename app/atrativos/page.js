@@ -44,7 +44,7 @@ export default async function AtrativosPage() {
 
   return (
     <div className="min-h-screen overflow-x-clip bg-[#f0f4f3] text-[#1a2e28]">
-      <header className="sticky top-0 z-30 border-b border-[#e3e9e6]/70 bg-[#f0f4f3]/95 px-4 py-5 backdrop-blur">
+      <header className="app-sticky-top-safe sticky top-0 z-30 border-b border-[#e3e9e6]/70 bg-[#f0f4f3]/95 px-4 pb-5 pt-safe-top backdrop-blur">
         <div className="mx-auto max-w-md">
           <h1 className="text-2xl font-bold tracking-tight text-[#1a2e28]">Atrativos</h1>
           <p className="mt-1 text-sm text-[#5a6b66]">Trilhas e experiências selecionadas</p>

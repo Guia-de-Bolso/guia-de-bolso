@@ -241,11 +241,19 @@ export default function Onboarding({ isLoggedIn = false, onComplete }) {
             {slide.subtitle}
           </p>
 
-          <div className="mt-6 inline-flex items-end gap-2 rounded-2xl bg-white/10 px-4 py-3 backdrop-blur-md ring-1 ring-white/15">
-            <span className="font-display text-3xl font-extrabold leading-none text-[#b8e6d4]">
+          <div className="mt-6 inline-flex max-w-full items-center gap-2 rounded-2xl bg-white/10 px-4 py-3 backdrop-blur-md ring-1 ring-white/15">
+            <span
+              className={`shrink-0 font-display font-extrabold leading-none text-[#b8e6d4] ${
+                slide.stat.compact ? "text-xl" : "text-3xl"
+              }`}
+            >
               {slide.stat.value}
             </span>
-            <span className="pb-0.5 text-xs font-semibold uppercase tracking-wide text-white/75">
+            <span
+              className={`min-w-0 font-semibold uppercase leading-snug text-white/75 ${
+                slide.stat.compact ? "text-[10px] tracking-wide" : "pb-0.5 text-xs tracking-wide"
+              }`}
+            >
               {slide.stat.label}
             </span>
           </div>
