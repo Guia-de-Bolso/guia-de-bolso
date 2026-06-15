@@ -252,7 +252,7 @@ export default function PerfilPage() {
 
   return (
     <div className="min-h-screen bg-[#f0f4f3] text-[#1a2e28]">
-      <header className="app-sticky-top-safe sticky top-0 z-30 border-b border-[#e8eeee]/80 bg-[#f0f4f3]/90 px-4 pb-4 pt-safe-top backdrop-blur-md">
+      <header className="px-4 pb-4 pt-safe-top">
         <div className="mx-auto max-w-md">
           <h1 className="text-2xl font-bold tracking-tight text-[#1a2e28]">
             Perfil
