@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import GalleryHeroAirbnb from "@/components/shared/GalleryHeroAirbnb";
 import LoginModal from "@/components/LoginModal";
 import { toggleRotasFavorita, createFavoritosSyncGuard } from "@/lib/rotasFavoritas";
+import { isMissingTableError } from "@/lib/supabaseErrors";
 import { createClient } from "@/lib/supabase";
 
 /**
@@ -65,6 +66,7 @@ export default function AtrativoGaleria({
       .then(({ data, error }) => {
         if (!favoritoSyncGuardRef.current.isCurrent(fetchGen)) return;
         if (error) {
+          if (isMissingTableError(error)) return;
           console.error("[rotas_favoritas] fetch galeria:", error);
           return;
         }
@@ -82,7 +84,11 @@ export default function AtrativoGaleria({
     if (!supabase) return;
 
     favoritoSyncGuardRef.current.bump();
-    await toggleRotasFavorita(supabase, user, rotaId, nome, setIsFavorito);
+    const ok = await toggleRotasFavorita(supabase, user, rotaId, nome, setIsFavorito);
+    if (ok === false) {
+      setToast("Não foi possível salvar o favorito. Tente novamente em instantes.");
+      setTimeout(() => setToast(""), 3000);
+    }
   }
 
   async function handleShare() {

@@ -137,10 +137,13 @@ export default function FavoritosPage() {
           }
         }
 
-        const { rotas, error: rotasError } = await fetchRotasFavoritas(supabase, user.id);
+        const { rotas, error: rotasError, tableMissing } = await fetchRotasFavoritas(
+          supabase,
+          user.id
+        );
         if (cancelled) return;
 
-        setFetchAtrativosError(Boolean(rotasError));
+        setFetchAtrativosError(Boolean(rotasError) && !tableMissing);
         setAtrativos(rotas);
         setLoadingFavoritos(false);
       });

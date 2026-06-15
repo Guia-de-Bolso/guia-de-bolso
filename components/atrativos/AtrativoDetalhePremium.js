@@ -15,6 +15,7 @@ import {
   DETALHE_CARD_OVERLAP_CLASS,
 } from "@/components/lugar/airbnb/lugarAirbnbTokens";
 import { toggleRotasFavorita, createFavoritosSyncGuard } from "@/lib/rotasFavoritas";
+import { isMissingTableError } from "@/lib/supabaseErrors";
 import { createClient } from "@/lib/supabase";
 
 function VerifiedIcon() {
@@ -87,6 +88,7 @@ export default function AtrativoDetalhePremium({
       .then(({ data, error }) => {
         if (!favoritoSyncGuardRef.current.isCurrent(fetchGen)) return;
         if (error) {
+          if (isMissingTableError(error)) return;
           console.error("[rotas_favoritas] fetch detalhe:", error);
           return;
         }
@@ -104,7 +106,11 @@ export default function AtrativoDetalhePremium({
     if (!supabase) return;
 
     favoritoSyncGuardRef.current.bump();
-    await toggleRotasFavorita(supabase, user, rotaId, nome, setIsFavorito);
+    const ok = await toggleRotasFavorita(supabase, user, rotaId, nome, setIsFavorito);
+    if (ok === false) {
+      setToast("Não foi possível salvar o favorito. Tente novamente em instantes.");
+      setTimeout(() => setToast(""), 3000);
+    }
   }
 
   async function handleShare() {

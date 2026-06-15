@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "node --test lib/*.test.js",
     "icons": "node scripts/refresh-brand-icons.mjs",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "db:rotas-favoritas": "node scripts/apply-rotas-favoritas.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.0",
@@ -35,6 +36,7 @@
     "docx": "^9.7.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "pg": "^8.16.3",
     "tailwindcss": "^4"
   }
 }
