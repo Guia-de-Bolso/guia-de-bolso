@@ -161,7 +161,7 @@ export default function AvaliacaoForm({ isOpen, onClose, lugar, onSuccess }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/55 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-end justify-center overflow-x-hidden bg-black/55 backdrop-blur-sm"
       onClick={handleDismiss}
     >
       <style>{`
@@ -173,7 +173,7 @@ export default function AvaliacaoForm({ isOpen, onClose, lugar, onSuccess }) {
 
       <div
         ref={sheetRef}
-        className="flex max-h-[90vh] w-full max-w-md flex-col rounded-t-[24px] bg-white shadow-2xl"
+        className="flex max-h-[90vh] w-full min-w-0 max-w-md flex-col rounded-t-[24px] bg-white shadow-2xl"
         onClick={(event) => event.stopPropagation()}
         style={{
           animation:

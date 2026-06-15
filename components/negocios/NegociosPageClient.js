@@ -23,7 +23,7 @@ function getNegociosClientFallback(base) {
     ...base,
     parceirosTodos: base.parceiros ?? [],
     curadoria: { count: 0, amostra: [] },
-    rotasAmostra: base.rotas ?? [],
+    atrativosAmostra: base.atrativos ?? [],
   };
 }
 
@@ -54,7 +54,7 @@ export default function NegociosPageClient({ initialData }) {
         />
         <NegociosCuradoriaSection
           curadoria={data.curadoria}
-          rotasAmostra={data.rotasAmostra}
+          atrativosAmostra={data.atrativosAmostra}
           stats={data.stats}
         />
         <NegociosPlans />

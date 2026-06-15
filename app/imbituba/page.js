@@ -22,7 +22,7 @@ export default function ImbitubaPage() {
           Cidade litorânea famosa pelas praias (Praia do Rosa, Praia da Vila, Ibiraquera),
           surf, observação de baleias francas na temporada e natureza preservada. O{" "}
           <strong className="font-semibold text-[#1a4a3a]">Guia de Bolso</strong> reúne
-          lugares verificados, rotas e busca com IA para moradores e visitantes.
+          lugares verificados, atrativos e busca com IA para moradores e visitantes.
         </p>
 
         <h2 className="mt-8 text-lg font-bold text-[#1a2e28]">Explore por categoria</h2>

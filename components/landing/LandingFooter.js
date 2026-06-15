@@ -44,7 +44,7 @@ export default function LandingFooter() {
             </li>
             <li>
               <Link href="/para-negocios#curadoria" className="text-[#5c6f68] hover:text-[#0d1f19]">
-                Curadoria e rotas
+                Curadoria e atrativos
               </Link>
             </li>
             <li>

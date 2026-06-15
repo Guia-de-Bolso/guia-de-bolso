@@ -10,10 +10,10 @@ import { NEGOCIOS_CURADORIA_COPY } from "@/lib/negociosContent";
 
 /**
  * @param {object} props
- * @param {import('@/lib/landingPageData').LandingRotaCard} props.rota
+ * @param {import('@/lib/landingPageData').LandingAtrativoCard} props.rota
  * @returns {import('react').ReactElement}
  */
-function NegociosRotaCard({ rota }) {
+function NegociosAtrativoCard({ rota }) {
   return (
     <article className="landing-card-hover overflow-hidden rounded-[1.35rem] bg-white/80 ring-1 ring-[rgba(13,31,25,0.05)] backdrop-blur-sm">
       <div className="relative aspect-[16/10] bg-[#e8f2ee]">
@@ -22,7 +22,7 @@ function NegociosRotaCard({ rota }) {
         ) : null}
         <div className="absolute inset-0 bg-gradient-to-t from-[#061612]/75 via-transparent to-transparent" />
         <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wide text-[#1a4a3a]">
-          Rota curada
+          Atrativo curado
         </span>
         <div className="absolute bottom-0 left-0 right-0 p-4">
           <h3 className="font-display text-lg font-semibold tracking-tight text-white">
@@ -41,21 +41,21 @@ function NegociosRotaCard({ rota }) {
 }
 
 /**
- * Curadoria e rotas — números + amostra de cards.
+ * Curadoria e atrativos — números + amostra de cards.
  * @param {object} props
  * @param {{ count: number, amostra: import('@/lib/landingPageData').LandingLugarCard[] }} props.curadoria
- * @param {import('@/lib/landingPageData').LandingRotaCard[]} props.rotasAmostra
+ * @param {import('@/lib/landingPageData').LandingAtrativoCard[]} props.atrativosAmostra
  * @param {import('@/lib/landingPageData').LandingPageData['stats']} [props.stats]
  * @returns {import('react').ReactElement|null}
  */
-export default function NegociosCuradoriaSection({ curadoria, rotasAmostra = [], stats }) {
+export default function NegociosCuradoriaSection({ curadoria, atrativosAmostra = [], stats }) {
   const { reveal, stagger, viewport } = useLandingRevealMotion();
 
   const lugaresCount = curadoria?.count ?? stats?.curadoriaCount ?? 0;
-  const rotasCount = stats?.rotasCount ?? rotasAmostra.length;
+  const atrativosCount = stats?.atrativosCount ?? atrativosAmostra.length;
   const lugaresAmostra = curadoria?.amostra ?? [];
 
-  if (lugaresCount === 0 && rotasCount === 0) return null;
+  if (lugaresCount === 0 && atrativosCount === 0) return null;
 
   return (
     <LandingSection id="curadoria" tone="mist" bridge={false}>
@@ -75,7 +75,7 @@ export default function NegociosCuradoriaSection({ curadoria, rotasAmostra = [],
       >
         {[
           { label: "Locais curados", value: lugaresCount },
-          { label: "Rotas montadas", value: rotasCount },
+          { label: "Atrativos montados", value: atrativosCount },
           { label: "Lugares no guia", value: stats?.totalLugares ?? "—", hideMobile: false },
         ]
           .filter((item) => item.value !== 0 || item.label === "Lugares no guia")
@@ -157,7 +157,7 @@ export default function NegociosCuradoriaSection({ curadoria, rotasAmostra = [],
         </div>
       ) : null}
 
-      {rotasAmostra.length > 0 ? (
+      {atrativosAmostra.length > 0 ? (
         <div className="mt-16">
           <motion.h3
             className="text-center font-display text-xl font-semibold tracking-tight text-[#0a1612]"
@@ -166,7 +166,7 @@ export default function NegociosCuradoriaSection({ curadoria, rotasAmostra = [],
             viewport={viewport}
             variants={reveal}
           >
-            Rotas curadas pela equipe
+            Atrativos curados pela equipe
           </motion.h3>
           <motion.p
             className="mx-auto mt-2 max-w-lg text-center text-sm text-[#5c6f68]"
@@ -175,7 +175,7 @@ export default function NegociosCuradoriaSection({ curadoria, rotasAmostra = [],
             viewport={viewport}
             variants={reveal}
           >
-            {rotasCount} roteiros prontos no app — passo a passo, dicas e ordem validada no
+            {atrativosCount} atrativos prontos no app — passo a passo, dicas e ordem validada no
             celular.
           </motion.p>
           <motion.ul
@@ -186,9 +186,9 @@ export default function NegociosCuradoriaSection({ curadoria, rotasAmostra = [],
             viewport={viewport}
             variants={stagger}
           >
-            {rotasAmostra.map((rota) => (
+            {atrativosAmostra.map((rota) => (
               <motion.li key={rota.id} variants={reveal}>
-                <NegociosRotaCard rota={rota} />
+                <NegociosAtrativoCard rota={rota} />
               </motion.li>
             ))}
           </motion.ul>

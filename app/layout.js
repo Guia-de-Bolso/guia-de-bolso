@@ -18,6 +18,13 @@ export const metadata = {
   ...DEFAULT_SITE_METADATA,
 };
 
+/** Safe areas no WebView nativo (Capacitor) e mobile. */
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 /**
  * Root HTML layout with global fonts and metadata for the app.
  * @param {{ children: import("react").ReactNode }} props - Layout children.

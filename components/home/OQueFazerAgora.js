@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { getCapaFromRota } from "@/lib/fotos";
+import { getCapaFromAtrativo } from "@/lib/fotos";
 import {
-  formatRotaDistancia,
-  formatRotaDuracao,
-  getRotaNome,
-} from "@/lib/rotaDetalheDisplay";
-import { formatCategoriaRotaLabel } from "@/lib/rotas";
+  formatAtrativoDistancia,
+  formatAtrativoDuracao,
+  getAtrativoNome,
+} from "@/lib/atrativoDetalheDisplay";
+import { formatCategoriaAtrativoLabel } from "@/lib/atrativos";
 import HomeSectionHeader from "@/components/home/HomeSectionHeader";
 
 /**
@@ -95,7 +95,7 @@ export default function OQueFazerAgora({ rota, temperatura = null }) {
   const temperaturaExibicao = Number.isFinite(tempNum)
     ? `${Math.round(tempNum)}°`
     : "--°";
-  const capa = getCapaFromRota(rota);
+  const capa = getCapaFromAtrativo(rota);
   const dificuldade = rota.dificuldade || "Fácil";
 
   return (
@@ -106,7 +106,7 @@ export default function OQueFazerAgora({ rota, temperatura = null }) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={capa}
-          alt={getRotaNome(rota)}
+          alt={getAtrativoNome(rota)}
           fetchPriority="high"
           decoding="async"
           onLoad={() => setImgLoaded(true)}
@@ -119,16 +119,16 @@ export default function OQueFazerAgora({ rota, temperatura = null }) {
 
         <div className="absolute left-4 right-4 top-4 flex flex-wrap gap-2">
           <span className="rounded-full bg-[#d4ede8]/95 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-[#1a4a3a] shadow-sm">
-            Rota curada
+            Atrativo curado
           </span>
           <span className="rounded-full border border-white/20 bg-white/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-white backdrop-blur-md">
-            {formatCategoriaRotaLabel(rota.categoria)}
+            {formatCategoriaAtrativoLabel(rota.categoria)}
           </span>
         </div>
 
         <div className="absolute inset-x-0 bottom-0 p-5 pb-6">
           <h3 className="font-display text-[1.65rem] font-extrabold leading-[1.1] tracking-tight text-white drop-shadow-sm">
-            {getRotaNome(rota)}
+            {getAtrativoNome(rota)}
           </h3>
           {rota.descricao && (
             <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-white/90">
@@ -137,17 +137,17 @@ export default function OQueFazerAgora({ rota, temperatura = null }) {
           )}
 
           <div className="mt-4 flex flex-wrap gap-2">
-            <MetricPill icon={<IconClock />} value={formatRotaDuracao(rota)} />
-            <MetricPill icon={<IconPin />} value={formatRotaDistancia(rota)} />
+            <MetricPill icon={<IconClock />} value={formatAtrativoDuracao(rota)} />
+            <MetricPill icon={<IconPin />} value={formatAtrativoDistancia(rota)} />
             <MetricPill icon={<IconBolt />} value={dificuldade} />
             <MetricPill icon={<IconSun />} value={temperaturaExibicao} />
           </div>
 
           <Link
-            href={`/rotas/${rota.id}`}
+            href={`/atrativos/${rota.id}`}
             className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#1a4a3a] py-4 text-center text-sm font-bold uppercase tracking-wide text-white shadow-[0_8px_24px_rgba(26,74,58,0.45)] transition-transform active:scale-[0.98]"
           >
-            Ver rota
+            Ver atrativo
             <span aria-hidden>→</span>
           </Link>
         </div>

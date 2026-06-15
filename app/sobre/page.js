@@ -36,7 +36,7 @@ export default function SobrePage() {
         <p className="mt-4 text-base leading-relaxed text-[#5a6b66]">
           O <strong className="text-[#1a4a3a]">{SITE_NAME_SHORT}</strong> é o guia
           turístico digital de <strong>Imbituba, Santa Catarina</strong>: praias, Praia do
-          Rosa, gastronomia, trilhas, rotas curadas e busca com inteligência artificial para
+          Rosa, gastronomia, trilhas, atrativos curados e busca com inteligência artificial para
           moradores e visitantes.
         </p>
 
@@ -73,7 +73,7 @@ export default function SobrePage() {
           <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed text-[#5a6b66]">
             <li>Lugares verificados com horários, mapa e avaliações moderadas</li>
             <li>Categorias: Natureza, Gastronomia, Noite, Hospedagem e mais</li>
-            <li>Rotas e roteiros com IA para planejar o dia</li>
+            <li>Atrativos e roteiros com IA para planejar o dia</li>
             <li>Guias editoriais para planejar viagem a Imbituba</li>
           </ul>
         </section>

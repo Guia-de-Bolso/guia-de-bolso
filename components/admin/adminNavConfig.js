@@ -9,7 +9,7 @@ export const ADMIN_NAV_LINKS = [
   { href: "/admin/ia", label: "IA & Custos", icon: "ia" },
   { href: "/admin/despesas", label: "Despesas", icon: "despesas" },
   { href: "/admin/locais", label: "Locais", icon: "locais" },
-  { href: "/admin/rotas", label: "Rotas", icon: "rotas" },
+  { href: "/admin/atrativos", label: "Atrativos", icon: "rotas" },
   { href: "/admin/avaliacoes", label: "Avaliações", icon: "avaliacoes" },
   { href: "/admin/feedback", label: "Feedback", icon: "feedback" },
   { href: "/admin/relatorios", label: "Relatórios", icon: "relatorios" },

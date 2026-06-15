@@ -83,7 +83,7 @@ function IconPerson({ className = "h-[22px] w-[22px]", active = false }) {
 const items = [
   { href: "/", label: "Início", Icon: IconHome },
   { href: "/categorias", label: "Explorar", Icon: IconGrid },
-  { href: "/rotas", label: "Rotas", Icon: IconMap },
+  { href: "/atrativos", label: "Atrativos", Icon: IconMap },
   { href: "/favoritos", label: "Favoritos", Icon: IconHeart },
   { href: "/perfil", label: "Perfil", Icon: IconPerson },
 ];

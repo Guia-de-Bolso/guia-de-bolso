@@ -1,5 +1,6 @@
 "use client";
 
+import CapacitorShell from "@/components/CapacitorShell";
 import FeedbackProvider from "@/components/FeedbackProvider";
 
 /**
@@ -9,5 +10,10 @@ import FeedbackProvider from "@/components/FeedbackProvider";
  * @returns {import("react").ReactElement}
  */
 export default function ClientProviders({ children }) {
-  return <FeedbackProvider>{children}</FeedbackProvider>;
+  return (
+    <FeedbackProvider>
+      <CapacitorShell />
+      {children}
+    </FeedbackProvider>
+  );
 }

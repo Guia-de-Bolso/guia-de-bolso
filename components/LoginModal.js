@@ -1,11 +1,13 @@
 "use client";
 
 import AuthFlow from "@/components/AuthFlow";
+import BottomSheetShell from "@/components/BottomSheetShell";
 
 const subtitles = {
   favoritar: "Salve seus lugares favoritos para acessar quando quiser",
   avaliar: "Compartilhe sua experiência e ajude outros viajantes",
-  rotas: "Acesse rotas detalhadas com dicas exclusivas para chegar lá",
+  rotas: "Acesse atrativos detalhados com dicas exclusivas para chegar lá",
+  atrativos: "Acesse atrativos detalhados com dicas exclusivas para chegar lá",
   busca: "Faça login para buscar lugares com inteligência artificial",
   clima: "Faça login para ver o clima das praias da região",
   premium: "Entre na sua conta para assinar o Guia Premium",
@@ -45,7 +47,7 @@ function IconLock({ className = "h-9 w-9" }) {
  * @param {boolean} props.isOpen - Whether the modal is visible.
  * @param {() => void} props.onClose - Called when the user dismisses the modal.
  * @param {string} [props.motivo] - Context key for subtitle copy (e.g. favoritar, rotas).
- * @param {string} [props.redirectAfterLogin] - Path pós-OAuth/SMS (padrão: `/rotas` se motivo=rotas).
+ * @param {string} [props.redirectAfterLogin] - Path pós-OAuth/SMS (padrão: `/atrativos` se motivo=atrativos).
  * @param {() => void} [props.onLoginSuccess] - Chamado após login SMS no modal (sem navegar).
  * @returns {import('react').ReactElement|null}
  */
@@ -57,60 +59,36 @@ export default function LoginModal({
   onLoginSuccess,
 }) {
   const postLoginPath =
-    redirectAfterLogin ?? (motivo === "rotas" ? "/rotas" : "/");
+    redirectAfterLogin ?? (motivo === "atrativos" || motivo === "rotas" ? "/atrativos" : "/");
   const MainIcon = motivo === "favoritar" ? IconHeart : IconLock;
   const subtitle =
     subtitles[motivo] ??
     "Salve seus lugares favoritos e acesse conteúdo exclusivo";
 
-  if (!isOpen) return null;
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end bg-black/55 backdrop-blur-sm"
-      onClick={onClose}
-      style={{
-        animation: "loginOverlayIn 220ms ease-out forwards",
-      }}
+    <BottomSheetShell
+      isOpen={isOpen}
+      onClose={onClose}
+      ariaLabelledBy="login-modal-title"
+      maxHeight="min(92vh, 720px)"
+      footer={
+        <div className="shrink-0 px-6 pb-[max(1.75rem,env(safe-area-inset-bottom))] pt-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full py-2 text-sm font-medium text-[#5a6b66] transition-colors hover:text-[#1a4a3a]"
+          >
+            Agora não
+          </button>
+        </div>
+      }
     >
-      <style>{`
-        @keyframes loginOverlayIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-        @keyframes loginSheetIn {
-          from {
-            transform: translateY(100%);
-          }
-          to {
-            transform: translateY(0);
-          }
-        }
-      `}</style>
-
-      <div
-        className="w-full rounded-t-[24px] bg-white px-6 pb-[max(1.75rem,env(safe-area-inset-bottom))] pt-3 shadow-2xl"
-        onClick={(event) => event.stopPropagation()}
-        style={{
-          animation: "loginSheetIn 240ms ease-out forwards",
-        }}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="login-modal-title"
-      >
-        <div className="mx-auto mb-5 h-1.5 w-12 rounded-full bg-[#d8dfdc]" />
-
+      <div className="px-6 pt-1">
         <div className="text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#d4ede8] text-[#1a4a3a]">
             <MainIcon className="h-8 w-8" />
           </div>
-          <p className="mt-3 text-sm leading-relaxed text-[#5a6b66]">
-            {subtitle}
-          </p>
+          <p className="mt-3 text-sm leading-relaxed text-[#5a6b66]">{subtitle}</p>
         </div>
 
         <div id="login-modal-title" className="mt-5 max-h-[min(70vh,520px)] overflow-y-auto overscroll-contain">
@@ -120,15 +98,7 @@ export default function LoginModal({
             onLoginSuccess={onLoginSuccess}
           />
         </div>
-
-        <button
-          type="button"
-          onClick={onClose}
-          className="mt-5 text-sm font-medium text-[#5a6b66] transition-colors hover:text-[#1a4a3a]"
-        >
-          Agora não
-        </button>
       </div>
-    </div>
+    </BottomSheetShell>
   );
 }

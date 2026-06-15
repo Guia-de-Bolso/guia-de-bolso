@@ -143,7 +143,7 @@ function LoginPageContent() {
             <span className="block text-[#b8e6d4]">descoberta começa aqui</span>
           </h1>
           <p className="mt-3 max-w-[18rem] text-sm leading-relaxed text-white/80">
-            O guia que une praias, trilhas, gastronomia e rotas — com mapa, clima e busca em português.
+            O guia que une praias, trilhas, gastronomia e atrativos — com mapa, clima e busca em português.
           </p>
           <div className="mt-5">
             <LoginValueCarousel />

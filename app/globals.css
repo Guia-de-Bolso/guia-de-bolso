@@ -28,10 +28,21 @@
 }
 */
 
+html {
+  overflow-x: clip;
+  width: 100%;
+  max-width: 100%;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  overflow-x: clip;
+  width: 100%;
+  max-width: 100%;
+  min-height: 100%;
+  min-height: 100dvh;
 }
 
 .scrollbar-hide {

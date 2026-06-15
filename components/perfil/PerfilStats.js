@@ -51,7 +51,7 @@ export default function PerfilStats({ favoritos, avaliacoes, roteiros }) {
     >
       <StatCard value={favoritos} label="Favoritos" href="/favoritos" />
       <StatCard value={avaliacoes} label="Avaliações" />
-      <StatCard value={roteiros} label="Roteiros" href="/rotas" />
+      <StatCard value={roteiros} label="Roteiros" href="/atrativos" />
     </section>
   );
 }

@@ -20,7 +20,7 @@ export default function PerfilNavAppSheet({ isOpen, onClose, selected, onSelect 
       title="App de navegação preferido"
     >
       <p className="mb-4 text-sm text-[#5a6b66]">
-        Usado no botão IR AGORA nos lugares e rotas.
+        Usado no botão IR AGORA nos lugares e atrativos.
       </p>
       <div className="grid gap-2">
         {NAV_APPS.map((app) => {

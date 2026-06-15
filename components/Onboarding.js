@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Logo from "@/components/Logo";
 import PrefeituraSupportLine from "@/components/PrefeituraSupportLine";
 import { ONBOARDING_SLIDES } from "@/lib/authImagery";
+import { PREFETURA_SUPPORT_LINE } from "@/lib/institutionalSupport";
 import { createClient } from "@/lib/supabase/client";
 
 const SWIPE_THRESHOLD_PX = 52;
@@ -224,11 +225,15 @@ export default function Onboarding({ isLoggedIn = false, onComplete }) {
         </div>
       </header>
 
-      <div className="relative z-10 flex min-h-full flex-col justify-end px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-24">
+      <div className="relative z-10 flex min-h-full min-h-[100dvh] flex-col justify-end overflow-y-auto px-5 pb-[max(1.75rem,env(safe-area-inset-bottom))] pt-[max(5.5rem,env(safe-area-inset-top))]">
         <div key={currentSlide} className="onboarding-content-enter max-w-md">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#b8e6d4]">
-            {slide.kicker}
-          </p>
+          {slide.kicker === PREFETURA_SUPPORT_LINE ? (
+            <PrefeituraSupportLine variant="onboarding" />
+          ) : (
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#b8e6d4]">
+              {slide.kicker}
+            </p>
+          )}
           <h1 className="mt-3 font-display text-[2rem] font-extrabold leading-[1.08] tracking-tight text-white">
             {slide.title}
           </h1>
@@ -266,7 +271,9 @@ export default function Onboarding({ isLoggedIn = false, onComplete }) {
         </div>
 
         <div className="mt-8 max-w-md">
-          <PrefeituraSupportLine variant="hero" className="mb-4 flex justify-center" />
+          {slide.kicker !== PREFETURA_SUPPORT_LINE ? (
+            <PrefeituraSupportLine variant="hero" className="mb-4" />
+          ) : null}
           <div className="flex justify-center gap-2" role="tablist" aria-label="Slides">
             {ONBOARDING_SLIDES.map((_, index) => (
               <button

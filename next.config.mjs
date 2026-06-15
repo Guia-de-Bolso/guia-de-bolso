@@ -35,6 +35,21 @@ assertSupabasePublicEnvForDeploy();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async redirects() {
+    return [
+      { source: "/rotas", destination: "/atrativos", permanent: true },
+      { source: "/rotas/:id", destination: "/atrativos/:id", permanent: true },
+      { source: "/admin/rotas", destination: "/admin/atrativos", permanent: true },
+      { source: "/admin/rotas/nova", destination: "/admin/atrativos/nova", permanent: true },
+      {
+        source: "/admin/rotas/:id/editar",
+        destination: "/admin/atrativos/:id/editar",
+        permanent: true,
+      },
+      { source: "/api/rotas", destination: "/api/atrativos", permanent: true },
+      { source: "/api/rotas/:path*", destination: "/api/atrativos/:path*", permanent: true },
+    ];
+  },
   images: {
     remotePatterns: [
       {

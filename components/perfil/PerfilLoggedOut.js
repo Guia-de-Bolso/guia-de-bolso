@@ -35,7 +35,7 @@ export default function PerfilLoggedOut() {
           Entre e personalize sua viagem
         </h2>
         <p className="relative mt-2 text-sm leading-relaxed text-white/85">
-          Favoritos, avaliações, rotas com IA e preferências salvas na sua conta.
+          Favoritos, avaliações, atrativos, roteiros com IA e preferências salvas na sua conta.
         </p>
       </div>
 

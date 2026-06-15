@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.guiadebolso.imbituba',
+  appId: 'app.guiadebolso',
   appName: 'Guia de Bolso',
   webDir: 'out',
   server: {

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Logo from "@/components/Logo";
-import RoteiroItineraryView from "@/components/rotas/RoteiroItineraryView";
+import RoteiroItineraryView from "@/components/atrativos/RoteiroItineraryView";
 
 import UserErrorAlert from "@/components/UserErrorAlert";
 import { ROTEIRO_RETURN_PATH, clearRoteiroDraft, loadRoteiroDraft, saveRoteiroDraft } from "@/lib/roteiroDraft";
@@ -295,7 +295,7 @@ export default function RoteiroBottomSheet({
         setErroContext(
           buildReportContext({
             code: mapped.code ?? data.code,
-            route: "/rotas",
+            route: "/atrativos",
             message: mapped.message,
           })
         );
@@ -319,7 +319,7 @@ export default function RoteiroBottomSheet({
       onUsageRefresh?.(data.usage ?? null);
     } catch {
       setErro(getNetworkErrorMessage());
-      setErroContext(buildReportContext({ code: "NETWORK", route: "/rotas" }));
+      setErroContext(buildReportContext({ code: "NETWORK", route: "/atrativos" }));
       onUsageRefresh?.(null);
       setView("form");
     } finally {
@@ -356,7 +356,7 @@ export default function RoteiroBottomSheet({
         setErroContext(
           buildReportContext({
             code: mapped.code ?? data.code,
-            route: "/rotas",
+            route: "/atrativos",
             message: mapped.message,
           })
         );
@@ -384,7 +384,7 @@ export default function RoteiroBottomSheet({
       onClose();
     } catch {
       setErro(getUserMessage("SERVER"));
-      setErroContext(buildReportContext({ code: "NETWORK", route: "/rotas" }));
+      setErroContext(buildReportContext({ code: "NETWORK", route: "/atrativos" }));
     } finally {
       setSalvando(false);
     }
@@ -401,7 +401,7 @@ export default function RoteiroBottomSheet({
       )}
 
       <div
-        className="fixed inset-0 z-50 flex items-end bg-black/55 backdrop-blur-sm"
+        className="fixed inset-0 z-50 flex items-end justify-center overflow-x-hidden bg-black/55 backdrop-blur-sm"
         onClick={handleClose}
         style={{ animation: "roteiroOverlayIn 220ms ease-out forwards" }}
       >
@@ -417,7 +417,7 @@ export default function RoteiroBottomSheet({
         `}</style>
 
         <div
-          className="flex max-h-[92vh] w-full flex-col rounded-t-[24px] bg-white shadow-2xl"
+          className="flex max-h-[92vh] w-full min-w-0 max-w-md flex-col rounded-t-[24px] bg-white shadow-2xl"
           onClick={(event) => event.stopPropagation()}
           style={{ animation: "roteiroSheetIn 260ms ease-out forwards" }}
           role="dialog"

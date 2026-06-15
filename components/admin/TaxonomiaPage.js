@@ -202,7 +202,7 @@ export default function TaxonomiaPage() {
   }, [subcategorias, filtroCategoriaSub, buscaSub]);
 
   const subcategoriasFiltroTag = useMemo(() => {
-    if (filtroCategoriaTag === "Todas" || filtroCategoriaTag === "Rotas") {
+    if (filtroCategoriaTag === "Todas" || filtroCategoriaTag === "Atrativos") {
       return subcategorias;
     }
     return subcategorias.filter((item) => item.categoria === filtroCategoriaTag);
@@ -211,7 +211,7 @@ export default function TaxonomiaPage() {
   const tagsFiltradas = useMemo(() => {
     const term = buscaTag.trim().toLowerCase();
     return tags.filter((item) => {
-      if (filtroCategoriaTag === "Rotas") {
+      if (filtroCategoriaTag === "Atrativos") {
         if (!item.aplica_em_rotas) return false;
       } else if (filtroCategoriaTag !== "Todas") {
         if (!item.categorias?.includes(filtroCategoriaTag)) return false;
@@ -238,7 +238,7 @@ export default function TaxonomiaPage() {
     () => ({
       subcategorias: subcategorias.length,
       tags: tags.length,
-      tagsRotas: tags.filter((t) => t.aplica_em_rotas).length,
+      tagsAtrativos: tags.filter((t) => t.aplica_em_rotas).length,
     }),
     [subcategorias, tags]
   );
@@ -460,9 +460,9 @@ export default function TaxonomiaPage() {
         </div>
         <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
           <p className="text-xs font-semibold uppercase tracking-wide text-[#5a6b66]">
-            Tags em rotas
+            Tags em atrativos
           </p>
-          <p className="mt-1 text-2xl font-bold text-purple-700">{stats.tagsRotas}</p>
+          <p className="mt-1 text-2xl font-bold text-purple-700">{stats.tagsAtrativos}</p>
         </div>
       </div>
 
@@ -621,10 +621,10 @@ export default function TaxonomiaPage() {
                 Todas
               </FilterChip>
               <FilterChip
-                active={filtroCategoriaTag === "Rotas"}
-                onClick={() => setFiltroCategoriaTag("Rotas")}
+                active={filtroCategoriaTag === "Atrativos"}
+                onClick={() => setFiltroCategoriaTag("Atrativos")}
               >
-                🗺️ Rotas
+                🗺️ Atrativos
               </FilterChip>
               {CATEGORIAS_EXPLORE.map((cat) => (
                 <FilterChip
@@ -639,7 +639,7 @@ export default function TaxonomiaPage() {
                 </FilterChip>
               ))}
             </div>
-            {subcategoriasFiltroTag.length > 0 && filtroCategoriaTag !== "Rotas" && (
+            {subcategoriasFiltroTag.length > 0 && filtroCategoriaTag !== "Atrativos" && (
               <div className="flex flex-wrap gap-2 border-t border-[#e3e9e6] pt-3">
                 <FilterChip
                   active={filtroSubcategoriaTag === "Todas"}
@@ -677,8 +677,8 @@ export default function TaxonomiaPage() {
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {tagsFiltradas.map((item) => {
-                const uso = tagUsage.get(item.id) || { lugares: 0, rotas: 0 };
-                const totalUso = uso.lugares + uso.rotas;
+                const uso = tagUsage.get(item.id) || { lugares: 0, atrativos: 0 };
+                const totalUso = uso.lugares + uso.atrativos;
 
                 return (
                   <article
@@ -691,7 +691,7 @@ export default function TaxonomiaPage() {
                       </span>
                       {item.aplica_em_rotas && (
                         <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-semibold text-purple-800">
-                          Rotas
+                          Atrativos
                         </span>
                       )}
                     </div>
@@ -707,7 +707,7 @@ export default function TaxonomiaPage() {
                         ? "Sem uso"
                         : [
                             uso.lugares > 0 && `${uso.lugares} local(is)`,
-                            uso.rotas > 0 && `${uso.rotas} rota(s)`,
+                            uso.atrativos > 0 && `${uso.atrativos} atrativo(s)`,
                           ]
                             .filter(Boolean)
                             .join(" · ")}
@@ -728,7 +728,7 @@ export default function TaxonomiaPage() {
                         disabled={totalUso > 0}
                         title={
                           totalUso > 0
-                            ? "Tag em uso — remova dos locais/rotas antes"
+                            ? "Tag em uso — remova dos locais/atrativos antes"
                             : "Excluir"
                         }
                         className="rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 disabled:cursor-not-allowed disabled:opacity-40"
@@ -909,9 +909,9 @@ export default function TaxonomiaPage() {
               }
             />
             <span>
-              <span className="font-semibold text-[#1a2e28]">Aplica em rotas</span>
+              <span className="font-semibold text-[#1a2e28]">Aplica em atrativos</span>
               <span className="mt-0.5 block text-xs text-[#5a6b66]">
-                Disponível no admin de rotas curadas
+                Disponível no admin de atrativos curados
               </span>
             </span>
           </label>

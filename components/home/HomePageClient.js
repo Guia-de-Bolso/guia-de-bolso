@@ -32,9 +32,9 @@ import { fetchClimaApis } from "@/lib/clima";
 import { IMBITUBA_COORDS, sortLugaresPorDistancia } from "@/lib/homeContext";
 import { enrichLugaresFlags } from "@/lib/lugarBadges";
 import { pickEmAltaCuradoria, pickParceirosPorCategoria } from "@/lib/homeSelection";
-import { resolveRotaDoDia } from "@/lib/rotaDoDia";
+import { resolveAtrativoDoDia } from "@/lib/atrativoDoDia";
 import { fetchLugaresFromApi } from "@/lib/fetchLugaresApi";
-import { fetchRotasFromApi } from "@/lib/fetchRotasApi";
+import { fetchAtrativosFromApi } from "@/lib/fetchAtrativosApi";
 import { fetchLugaresPopulares } from "@/lib/lugaresPopulares";
 import { isSupabasePublicConfigured } from "@/lib/supabase/publicEnv";
 import { getLugaresVisitados } from "@/lib/lugaresVisitados";
@@ -75,8 +75,8 @@ async function fetchLugaresAtivos(limit = 50) {
  * Loads active routes for the home hero.
  * @returns {Promise<object[]>}
  */
-async function fetchRotasAtivas() {
-  return fetchRotasFromApi({ limit: 50 });
+async function fetchAtrativosAtivos() {
+  return fetchAtrativosFromApi({ limit: 50 });
 }
 
 /**
@@ -121,7 +121,7 @@ function Home({ initialHomeData = null }) {
   const [onboardingChecked, setOnboardingChecked] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
-  const [rotasAtivas, setRotasAtivas] = useState(initialHomeData?.rotasAtivas ?? []);
+  const [atrativosAtivos, setAtrativosAtivos] = useState(initialHomeData?.atrativosAtivos ?? []);
   const [lugaresAtivos, setLugaresAtivos] = useState(initialHomeData?.lugaresAtivos ?? []);
   const [lugaresEmAlta, setLugaresEmAlta] = useState(initialHomeData?.lugaresEmAlta ?? []);
   const [lugaresProximos, setLugaresProximos] = useState(initialHomeData?.lugaresProximos ?? []);
@@ -171,8 +171,8 @@ function Home({ initialHomeData = null }) {
   } = usePremiumUsage(user);
 
   const heroRota = useMemo(
-    () => resolveRotaDoDia(rotasAtivas, { requireCapa: true }).rota,
-    [rotasAtivas]
+    () => resolveAtrativoDoDia(atrativosAtivos, { requireCapa: true }).rota,
+    [atrativosAtivos]
   );
 
   const emAltaExibidos = useMemo(() => {
@@ -257,15 +257,15 @@ function Home({ initialHomeData = null }) {
   useEffect(() => {
     if (!initialHomeData) return;
 
-    const rotas = initialHomeData.rotasAtivas ?? [];
+    const rotas = initialHomeData.atrativosAtivos ?? [];
     const enriched = initialHomeData.lugaresAtivos ?? [];
-    setRotasAtivas(rotas);
+    setAtrativosAtivos(rotas);
     setLugaresAtivos(enriched);
     setLugaresParceiros(initialHomeData.lugaresParceiros ?? pickParceirosPorCategoria(enriched));
     setLugaresEmAlta(initialHomeData.lugaresEmAlta ?? pickEmAltaCuradoria(enriched));
     setLugaresProximos(initialHomeData.lugaresProximos ?? enriched.slice(0, 6));
     setSectionErrors({
-      hero: !resolveRotaDoDia(rotas, { requireCapa: true }).rota,
+      hero: !resolveAtrativoDoDia(rotas, { requireCapa: true }).rota,
       emAlta: (initialHomeData.lugaresEmAlta ?? []).length === 0,
       perto: false,
       clima: false,
@@ -290,7 +290,7 @@ function Home({ initialHomeData = null }) {
       try {
         const [ativosSettled, rotasSettled] = await Promise.allSettled([
           fetchLugaresAtivos(),
-          fetchRotasAtivas(),
+          fetchAtrativosAtivos(),
         ]);
 
         if (cancelled) return;
@@ -302,7 +302,7 @@ function Home({ initialHomeData = null }) {
         if (rotasSettled.status === "rejected") {
           console.error("[home] rotas ativas:", rotasSettled.reason);
         }
-        setRotasAtivas(rotas);
+        setAtrativosAtivos(rotas);
 
         if (ativosSettled.status !== "fulfilled") {
           console.error("[home] lugares ativos:", ativosSettled.reason);
@@ -314,7 +314,7 @@ function Home({ initialHomeData = null }) {
         setLugaresParceiros(pickParceirosPorCategoria(enriched));
         setLugaresEmAlta(pickEmAltaCuradoria(enriched));
 
-        if (!resolveRotaDoDia(rotas, { requireCapa: true }).rota) {
+        if (!resolveAtrativoDoDia(rotas, { requireCapa: true }).rota) {
           errors.hero = true;
         }
         if (pickEmAltaCuradoria(enriched).length === 0) {
