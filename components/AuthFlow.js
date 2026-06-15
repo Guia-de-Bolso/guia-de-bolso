@@ -6,6 +6,7 @@ import IconApple from "@/components/IconApple";
 import IconBack from "@/components/IconBack";
 import LegalConsentLine from "@/components/legal/LegalConsentLine";
 import { ensurePerfil } from "@/lib/ensurePerfil";
+import { signInWithGoogleOAuth } from "@/lib/capacitorOAuth";
 import { safeRedirectPath } from "@/lib/safeRedirectPath";
 import { createClient } from "@/lib/supabase";
 
@@ -155,16 +156,11 @@ export default function AuthFlow({
   async function handleGoogle() {
     setOauthLoading(true);
     const supabase = createClient();
-    const nextQuery =
-      postLoginPath !== "/"
-        ? `?next=${encodeURIComponent(postLoginPath)}`
-        : "";
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback${nextQuery}`,
-      },
-    });
+    if (!supabase) {
+      setOauthLoading(false);
+      return;
+    }
+    const { error } = await signInWithGoogleOAuth(supabase, postLoginPath);
     if (error) setOauthLoading(false);
   }
 
@@ -228,13 +224,12 @@ export default function AuthFlow({
       await ensurePerfil(supabase, verifiedUser);
     }
 
-    setScreen("success");
-
     if (compact && onLoginSuccess) {
       onLoginSuccess();
       return;
     }
 
+    setScreen("success");
     setTimeout(() => router.push(postLoginPath), 1500);
   }
 
@@ -337,7 +332,7 @@ export default function AuthFlow({
         <p className={subtitleClass}>Enviamos para {phone}</p>
 
         <div
-          className="mt-6 flex justify-between gap-1.5"
+          className={`mt-6 grid w-full grid-cols-6 ${compact ? "gap-1" : "gap-1.5"}`}
           onPaste={handlePaste}
           role="group"
           aria-label="Código de 6 dígitos"
@@ -355,7 +350,9 @@ export default function AuthFlow({
               maxLength={1}
               onChange={(event) => updateCode(index, event.target.value)}
               onKeyDown={(event) => handleCodeKeyDown(index, event)}
-              className={`h-12 w-11 min-w-0 flex-1 rounded-xl border bg-white text-center text-lg font-bold text-[#1a2e28] outline-none focus-visible:ring-2 focus-visible:ring-[#1a4a3a]/30 ${
+              className={`aspect-square w-full min-w-0 max-h-12 rounded-xl border bg-white text-center font-bold text-[#1a2e28] outline-none focus-visible:ring-2 focus-visible:ring-[#1a4a3a]/30 ${
+                compact ? "text-base" : "text-lg"
+              } ${
                 codeError
                   ? "border-red-400"
                   : digit

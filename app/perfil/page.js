@@ -169,7 +169,7 @@ export default function PerfilPage() {
       setPerfil(null);
       setShowLogoutConfirm(false);
       router.refresh();
-      router.push("/");
+      router.push("/login");
     } catch {
       setFeedbackMessage("Não foi possível sair. Tente novamente.");
     } finally {

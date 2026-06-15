@@ -65,6 +65,14 @@ export default function LoginModal({
     subtitles[motivo] ??
     "Salve seus lugares favoritos e acesse conteúdo exclusivo";
 
+  function handleLoginSuccess() {
+    if (onLoginSuccess) {
+      onLoginSuccess();
+      return;
+    }
+    onClose();
+  }
+
   return (
     <BottomSheetShell
       isOpen={isOpen}
@@ -95,7 +103,7 @@ export default function LoginModal({
           <AuthFlow
             compact
             redirectAfterLogin={postLoginPath}
-            onLoginSuccess={onLoginSuccess}
+            onLoginSuccess={handleLoginSuccess}
           />
         </div>
       </div>
