@@ -8,10 +8,12 @@ import LoginModal from "@/components/LoginModal";
 import Logo from "@/components/Logo";
 import PlaceCard from "@/components/PlaceCard";
 import PlaceCardSkeleton from "@/components/home/PlaceCardSkeleton";
+import AtrativoFavoritoCard from "@/components/atrativos/AtrativoFavoritoCard";
 import UserErrorAlert from "@/components/UserErrorAlert";
 import { buildReportContext } from "@/lib/reportContext";
 import { createClient } from "@/lib/supabase";
 import { registrarLog } from "@/lib/logs";
+import { fetchRotasFavoritas } from "@/lib/rotasFavoritas";
 
 /**
  * Empty-state illustration for the favorites page.
@@ -50,8 +52,10 @@ export default function FavoritosPage() {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [lugares, setLugares] = useState([]);
+  const [atrativos, setAtrativos] = useState([]);
   const [loadingFavoritos, setLoadingFavoritos] = useState(false);
   const [fetchError, setFetchError] = useState(false);
+  const [fetchAtrativosError, setFetchAtrativosError] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
@@ -59,7 +63,10 @@ export default function FavoritosPage() {
 
     supabase.auth.getUser().then(({ data: { user: currentUser } }) => {
       setUser(currentUser);
-      if (!currentUser) setLugares([]);
+      if (!currentUser) {
+        setLugares([]);
+        setAtrativos([]);
+      }
       setAuthLoading(false);
     });
 
@@ -67,7 +74,10 @@ export default function FavoritosPage() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      if (!session?.user) setLugares([]);
+      if (!session?.user) {
+        setLugares([]);
+        setAtrativos([]);
+      }
       setAuthLoading(false);
     });
 
@@ -94,46 +104,44 @@ export default function FavoritosPage() {
         if (!error) {
           setFetchError(false);
           setLugares((data ?? []).map(normalizeLugarFromFavorito).filter(Boolean));
-          setLoadingFavoritos(false);
-          return;
+        } else {
+          const { data: favoritos, error: favoritosError } = await supabase
+            .from("favoritos")
+            .select("lugar_id")
+            .eq("user_id", user.id);
+
+          if (favoritosError) {
+            setFetchError(true);
+            setLugares([]);
+          } else {
+            const ids = (favoritos ?? []).map((favorito) => favorito.lugar_id);
+
+            if (ids.length === 0) {
+              setFetchError(false);
+              setLugares([]);
+            } else {
+              const { data: lugaresData, error: lugaresError } = await supabase
+                .from("lugares")
+                .select("*")
+                .in("id", ids)
+                .eq("status", "ativo");
+
+              if (lugaresError) {
+                setFetchError(true);
+                setLugares([]);
+              } else {
+                setFetchError(false);
+                setLugares(lugaresData ?? []);
+              }
+            }
+          }
         }
 
-        const { data: favoritos, error: favoritosError } = await supabase
-          .from("favoritos")
-          .select("lugar_id")
-          .eq("user_id", user.id);
+        const { rotas, error: rotasError } = await fetchRotasFavoritas(supabase, user.id);
+        if (cancelled) return;
 
-        if (favoritosError) {
-          setFetchError(true);
-          setLugares([]);
-          setLoadingFavoritos(false);
-          return;
-        }
-
-        const ids = (favoritos ?? []).map((favorito) => favorito.lugar_id);
-
-        if (ids.length === 0) {
-          setFetchError(false);
-          setLugares([]);
-          setLoadingFavoritos(false);
-          return;
-        }
-
-        const { data: lugaresData, error: lugaresError } = await supabase
-          .from("lugares")
-          .select("*")
-          .in("id", ids)
-          .eq("status", "ativo");
-
-        if (lugaresError) {
-          setFetchError(true);
-          setLugares([]);
-          setLoadingFavoritos(false);
-          return;
-        }
-
-        setFetchError(false);
-        setLugares(lugaresData ?? []);
+        setFetchAtrativosError(Boolean(rotasError));
+        setAtrativos(rotas);
         setLoadingFavoritos(false);
       });
 
@@ -177,8 +185,43 @@ export default function FavoritosPage() {
     }
   }
 
-  const showCount =
-    user && !authLoading && !loadingFavoritos && !fetchError && lugares.length > 0;
+  async function handleRemoverAtrativoFavorito(rota) {
+    if (!user) {
+      setIsModalOpen(true);
+      return;
+    }
+
+    const supabase = createClient();
+    if (!supabase) return;
+
+    const anteriores = atrativos;
+    const nome = rota.nome || rota.titulo || "Atrativo";
+
+    setAtrativos((atuais) => atuais.filter((item) => String(item.id) !== String(rota.id)));
+
+    const { error } = await supabase
+      .from("rotas_favoritas")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("rota_id", rota.id);
+
+    if (error) {
+      console.error("[rotas_favoritas] delete favoritos page:", error);
+      setAtrativos(anteriores);
+      return;
+    }
+
+    await registrarLog(supabase, user, "desfavoritou", {
+      rota_id: rota.id,
+      rota_nome: nome,
+    });
+  }
+
+  const totalFavoritos = lugares.length + atrativos.length;
+  const showCount = user && !authLoading && !loadingFavoritos && totalFavoritos > 0;
+  const hasAnyFavorito = totalFavoritos > 0;
+  const showEmptyState =
+    user && !loadingFavoritos && !fetchError && !hasAnyFavorito && !fetchAtrativosError;
 
   return (
     <div className="min-h-screen bg-[#f0f4f3] text-[#1a2e28]">
@@ -190,18 +233,34 @@ export default function FavoritosPage() {
               Favoritos
             </h1>
             <p className="mt-1 text-sm leading-relaxed text-[#5a6b66]">
-              Seus lugares salvos para visitar quando quiser.
+              Seus lugares e atrativos salvos para visitar quando quiser.
             </p>
           </div>
           {showCount && (
             <span
               className="shrink-0 rounded-full bg-[#d4ede8] px-3 py-1.5 text-sm font-bold tabular-nums text-[#1a4a3a]"
-              aria-label={`${lugares.length} favoritos`}
+              aria-label={`${totalFavoritos} favoritos`}
             >
-              {lugares.length}
+              {totalFavoritos}
             </span>
           )}
         </header>
+
+        {fetchAtrativosError && user && !loadingFavoritos && (
+          <UserErrorAlert
+            message="Não foi possível carregar seus atrativos favoritos. Tente novamente."
+            reportContext={buildReportContext({ code: "SERVER", route: "/favoritos" })}
+            action={
+              <button
+                type="button"
+                onClick={() => router.refresh()}
+                className="rounded-lg bg-red-700 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-red-800"
+              >
+                Tentar novamente
+              </button>
+            }
+          />
+        )}
 
         {fetchError && user && !loadingFavoritos && (
           <UserErrorAlert
@@ -242,40 +301,79 @@ export default function FavoritosPage() {
               Fazer login
             </button>
           </section>
-        ) : fetchError ? null : loadingFavoritos ? (
+        ) : loadingFavoritos ? (
           <div className="grid gap-4">
             {[0, 1, 2].map((item) => (
               <PlaceCardSkeleton key={item} />
             ))}
           </div>
-        ) : lugares.length === 0 ? (
+        ) : showEmptyState ? (
           <section className="rounded-3xl bg-white p-6 text-center shadow-[0_2px_14px_-4px_rgba(26,46,40,0.08)]">
             <EmptyIllustration />
             <h2 className="mt-5 font-display text-xl font-extrabold text-[#1a4a3a]">
               Nenhum favorito ainda
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-[#5a6b66]">
-              Explore o guia e toque no coração para salvar seus lugares.
+              Explore o guia e toque no coração para salvar lugares e atrativos.
             </p>
-            <Link
-              href="/categorias"
-              className="mt-6 block w-full rounded-xl bg-[#1a4a3a] py-3.5 text-sm font-semibold text-white transition-colors hover:bg-[#153d30] active:bg-[#123528]"
-            >
-              Explorar categorias
-            </Link>
+            <div className="mt-6 grid gap-3">
+              <Link
+                href="/categorias"
+                className="block w-full rounded-xl bg-[#1a4a3a] py-3.5 text-sm font-semibold text-white transition-colors hover:bg-[#153d30] active:bg-[#123528]"
+              >
+                Explorar categorias
+              </Link>
+              <Link
+                href="/atrativos"
+                className="block w-full rounded-xl border border-[#1a4a3a]/20 bg-white py-3.5 text-sm font-semibold text-[#1a4a3a] transition-colors hover:bg-[#eef5f2]"
+              >
+                Ver atrativos
+              </Link>
+            </div>
           </section>
         ) : (
-          <ul className="grid list-none gap-4 p-0">
-            {lugares.map((lugar) => (
-              <li key={lugar.id}>
-                <PlaceCard
-                  lugar={lugar}
-                  isFavorito
-                  onFavoritar={handleRemoverFavorito}
-                />
-              </li>
-            ))}
-          </ul>
+          <div className="grid gap-8">
+            {lugares.length > 0 ? (
+              <section>
+                {atrativos.length > 0 ? (
+                  <h2 className="mb-4 text-sm font-bold uppercase tracking-[0.12em] text-[#5a6b66]">
+                    Lugares
+                  </h2>
+                ) : null}
+                <ul className="grid list-none gap-4 p-0">
+                  {lugares.map((lugar) => (
+                    <li key={lugar.id}>
+                      <PlaceCard
+                        lugar={lugar}
+                        isFavorito
+                        onFavoritar={handleRemoverFavorito}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+
+            {atrativos.length > 0 ? (
+              <section>
+                {lugares.length > 0 ? (
+                  <h2 className="mb-4 text-sm font-bold uppercase tracking-[0.12em] text-[#5a6b66]">
+                    Atrativos
+                  </h2>
+                ) : null}
+                <ul className="grid list-none gap-4 p-0">
+                  {atrativos.map((rota) => (
+                    <li key={rota.id}>
+                      <AtrativoFavoritoCard
+                        rota={rota}
+                        onRemover={() => handleRemoverAtrativoFavorito(rota)}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+          </div>
         )}
       </div>
 

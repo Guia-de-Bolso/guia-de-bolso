@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 export const BOTTOM_SHEET_DRAG_CLOSE_PX = 110;
 export const BOTTOM_SHEET_DRAG_MAX_PX = 260;
+const SCROLL_TOP_DRAG_PX = 8;
+const DISMISS_DRAG_START_PX = 14;
 const INTERACTIVE_DRAG_BLOCK_SELECTOR =
   "button, a, input, textarea, select, label, [role='button'], [data-sheet-action]";
 
@@ -35,6 +37,7 @@ export function useBottomSheetDrag({ isOpen, onClose, handleOnly = false }) {
   const scrollAreaRef = useRef(null);
   const dragStartYRef = useRef(null);
   const isDraggingRef = useRef(false);
+  const pendingDismissRef = useRef(false);
   const dragYRef = useRef(0);
   const [dragY, setDragY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -43,12 +46,18 @@ export function useBottomSheetDrag({ isOpen, onClose, handleOnly = false }) {
     dragYRef.current = 0;
     dragStartYRef.current = null;
     isDraggingRef.current = false;
+    pendingDismissRef.current = false;
     setDragY(0);
     setIsDragging(false);
   }, []);
 
   const finishDrag = useCallback(() => {
-    if (!isDraggingRef.current) return;
+    pendingDismissRef.current = false;
+
+    if (!isDraggingRef.current) {
+      dragStartYRef.current = null;
+      return;
+    }
 
     const shouldClose = dragYRef.current >= BOTTOM_SHEET_DRAG_CLOSE_PX;
     isDraggingRef.current = false;
@@ -73,6 +82,12 @@ export function useBottomSheetDrag({ isOpen, onClose, handleOnly = false }) {
     const sheet = sheetRef.current;
     if (!isOpen || !sheet) return undefined;
 
+    function beginDrag(clientY) {
+      dragStartYRef.current = clientY;
+      isDraggingRef.current = true;
+      setIsDragging(true);
+    }
+
     function canStartDrag(target) {
       if (!(target instanceof Element)) return false;
       if (isInteractiveDragTarget(target)) return false;
@@ -83,7 +98,7 @@ export function useBottomSheetDrag({ isOpen, onClose, handleOnly = false }) {
 
       if (handleOnly) return onHandle;
       if (onHandle) return true;
-      if (inScroll && scrollTop > 4) return false;
+      if (inScroll && scrollTop > SCROLL_TOP_DRAG_PX) return false;
       return true;
     }
 
@@ -91,12 +106,42 @@ export function useBottomSheetDrag({ isOpen, onClose, handleOnly = false }) {
       if (event.touches.length !== 1) return;
       if (!canStartDrag(event.target)) return;
 
-      dragStartYRef.current = event.touches[0].clientY;
-      isDraggingRef.current = true;
-      setIsDragging(true);
+      const target = event.target;
+      const scrollTop = scrollAreaRef.current?.scrollTop ?? 0;
+      const onHandle = Boolean(target.closest("[data-drag-handle='true']"));
+      const inScroll = Boolean(scrollAreaRef.current?.contains(target));
+
+      if (!handleOnly && inScroll && !onHandle && scrollTop <= SCROLL_TOP_DRAG_PX) {
+        pendingDismissRef.current = true;
+        dragStartYRef.current = event.touches[0].clientY;
+        return;
+      }
+
+      beginDrag(event.touches[0].clientY);
     }
 
     function handleTouchMove(event) {
+      if (pendingDismissRef.current && !isDraggingRef.current) {
+        const scrollTop = scrollAreaRef.current?.scrollTop ?? 0;
+        const startY = dragStartYRef.current;
+        if (startY === null) {
+          pendingDismissRef.current = false;
+          return;
+        }
+
+        const deltaY = event.touches[0].clientY - startY;
+        if (scrollTop > SCROLL_TOP_DRAG_PX || deltaY < 0) {
+          pendingDismissRef.current = false;
+          dragStartYRef.current = null;
+          return;
+        }
+
+        if (deltaY < DISMISS_DRAG_START_PX) return;
+
+        pendingDismissRef.current = false;
+        beginDrag(startY);
+      }
+
       if (!isDraggingRef.current || dragStartYRef.current === null) return;
 
       const deltaY = event.touches[0].clientY - dragStartYRef.current;

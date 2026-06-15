@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import BottomNav from "@/components/BottomNav";
 import LoginModal from "@/components/LoginModal";
 import DetalheStickyHeader from "@/components/shared/DetalheStickyHeader";
@@ -14,7 +14,7 @@ import {
   DESTAQUE_CHIP_PREMIUM_CLASS,
   DETALHE_CARD_OVERLAP_CLASS,
 } from "@/components/lugar/airbnb/lugarAirbnbTokens";
-import { toggleRotasFavorita } from "@/lib/rotasFavoritas";
+import { toggleRotasFavorita, createFavoritosSyncGuard } from "@/lib/rotasFavoritas";
 import { createClient } from "@/lib/supabase";
 
 function VerifiedIcon() {
@@ -49,6 +49,7 @@ export default function AtrativoDetalhePremium({
   const [isFavorito, setIsFavorito] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toast, setToast] = useState("");
+  const favoritoSyncGuardRef = useRef(createFavoritosSyncGuard());
 
   useEffect(() => {
     const supabase = createClient();
@@ -73,6 +74,9 @@ export default function AtrativoDetalhePremium({
     }
 
     const supabase = createClient();
+    if (!supabase) return;
+
+    const fetchGen = favoritoSyncGuardRef.current.bump();
 
     supabase
       .from("rotas_favoritas")
@@ -80,7 +84,12 @@ export default function AtrativoDetalhePremium({
       .eq("user_id", user.id)
       .eq("rota_id", rotaId)
       .maybeSingle()
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (!favoritoSyncGuardRef.current.isCurrent(fetchGen)) return;
+        if (error) {
+          console.error("[rotas_favoritas] fetch detalhe:", error);
+          return;
+        }
         setIsFavorito(Boolean(data));
       });
   }, [user, rotaId]);
@@ -92,6 +101,9 @@ export default function AtrativoDetalhePremium({
     }
 
     const supabase = createClient();
+    if (!supabase) return;
+
+    favoritoSyncGuardRef.current.bump();
     await toggleRotasFavorita(supabase, user, rotaId, nome, setIsFavorito);
   }
 
