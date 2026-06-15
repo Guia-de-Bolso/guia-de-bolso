@@ -7,6 +7,7 @@ import IconBack from "@/components/IconBack";
 import LegalConsentLine from "@/components/legal/LegalConsentLine";
 import { ensurePerfil } from "@/lib/ensurePerfil";
 import { signInWithGoogleOAuth } from "@/lib/capacitorOAuth";
+import { formatNativeGoogleError } from "@/lib/nativeGoogleAuth";
 import { safeRedirectPath } from "@/lib/safeRedirectPath";
 import { createClient } from "@/lib/supabase";
 
@@ -175,8 +176,9 @@ export default function AuthFlow({
         setOauthLoading(false);
         return;
       }
-    } catch {
-      setOauthError("Não foi possível iniciar o login com Google.");
+    } catch (error) {
+      console.error("handleGoogle:", error);
+      setOauthError(formatNativeGoogleError(error));
       setOauthLoading(false);
     }
   }
