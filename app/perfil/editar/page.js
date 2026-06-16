@@ -8,6 +8,8 @@ import {
   AVATAR_COMPRESS_OPTIONS,
   compressImageFile,
 } from "@/lib/imageCompress";
+import { AVATAR_STORAGE_BUCKET, getAvatarObjectPath } from "@/lib/avatarStorage";
+import { usesPhoneAuth } from "@/lib/perfil";
 import { createClient } from "@/lib/supabase";
 
 /**
@@ -138,11 +140,10 @@ export default function EditarPerfilPage() {
     }
 
     const supabase = createClient();
-    const bucketName = "Guia de Bolso - Imagens";
-    const filePath = `avatars/${user.id}/avatar.jpg`;
+    const filePath = getAvatarObjectPath(user.id);
 
     const { error: uploadError } = await supabase.storage
-      .from(bucketName)
+      .from(AVATAR_STORAGE_BUCKET)
       .upload(filePath, uploadFile, {
         cacheControl: "3600",
         upsert: true,
@@ -150,13 +151,14 @@ export default function EditarPerfilPage() {
       });
 
     if (uploadError) {
+      console.error("[perfil] upload avatar:", uploadError);
       setMessage("Não foi possível enviar a foto. Tente novamente.");
       setUploading(false);
       event.target.value = "";
       return;
     }
 
-    const { data } = supabase.storage.from(bucketName).getPublicUrl(filePath);
+    const { data } = supabase.storage.from(AVATAR_STORAGE_BUCKET).getPublicUrl(filePath);
     const publicUrl = data.publicUrl;
     const previewPublicUrl = `${publicUrl}?v=${Date.now()}`;
 
@@ -249,6 +251,7 @@ export default function EditarPerfilPage() {
 
   const avatarUrl = previewUrl || fotoUrl;
   const messageIsSuccess = message && isSuccessMessage(message);
+  const loginPorSms = usesPhoneAuth(user);
 
   return (
     <div className="min-h-screen bg-[#f0f4f3] text-[#1a2e28]">
@@ -331,15 +334,17 @@ export default function EditarPerfilPage() {
               />
             </label>
 
-            <label className="mt-4 block text-sm font-semibold text-[#1a2e28]">
-              Email
-              <input
-                type="email"
-                value={user.email ?? ""}
-                readOnly
-                className="mt-2 w-full cursor-not-allowed rounded-xl bg-zinc-100 px-4 py-3 text-sm font-normal text-zinc-500"
-              />
-            </label>
+            {!loginPorSms && user.email ? (
+              <label className="mt-4 block text-sm font-semibold text-[#1a2e28]">
+                Email
+                <input
+                  type="email"
+                  value={user.email}
+                  readOnly
+                  className="mt-2 w-full cursor-not-allowed rounded-xl bg-zinc-100 px-4 py-3 text-sm font-normal text-zinc-500"
+                />
+              </label>
+            ) : null}
 
             {message && (
               <p

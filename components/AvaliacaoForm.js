@@ -45,6 +45,8 @@ export default function AvaliacaoForm({ isOpen, onClose, lugar, onSuccess }) {
 
   const opcoesAspectos = getAspectosParaLugar(lugar);
   const restantes = MAX_COMENTARIO_AVALIACAO - comentario.length;
+  const comentarioValido = comentario.trim().length > 0;
+  const podeEnviar = nota >= 1 && comentarioValido && !enviando;
 
   const handleDismiss = useCallback(() => {
     if (enviando) return;
@@ -113,6 +115,12 @@ export default function AvaliacaoForm({ isOpen, onClose, lugar, onSuccess }) {
   async function handleSubmit() {
     if (!lugar?.id || nota < 1) return;
 
+    const textoComentario = comentario.trim();
+    if (!textoComentario) {
+      setErro("Escreva um comentário sobre sua experiência antes de enviar.");
+      return;
+    }
+
     setEnviando(true);
     setErro("");
 
@@ -133,7 +141,7 @@ export default function AvaliacaoForm({ isOpen, onClose, lugar, onSuccess }) {
         lugar_id: lugar.id,
         user_id: user.id,
         nota,
-        comentario: comentario.trim() || null,
+        comentario: textoComentario,
         aspectos,
         status: "pendente",
       })
@@ -267,15 +275,19 @@ export default function AvaliacaoForm({ isOpen, onClose, lugar, onSuccess }) {
 
           <div className="mt-6">
             <label className="text-sm font-semibold text-[#1a2e28]" htmlFor="avaliacao-comentario">
-              Comentário
+              Comentário <span className="text-[#d9534f]">*</span>
             </label>
             <textarea
               id="avaliacao-comentario"
               value={comentario}
               maxLength={MAX_COMENTARIO_AVALIACAO}
-              onChange={(event) => setComentario(event.target.value)}
-              placeholder="Conte sua experiência (opcional)"
+              onChange={(event) => {
+                setComentario(event.target.value);
+                if (erro) setErro("");
+              }}
+              placeholder="Conte sua experiência neste lugar"
               rows={4}
+              required
               className="mt-2 w-full resize-none rounded-xl bg-[#f0f4f3] p-3 text-base text-[#1a2e28] outline-none ring-[#1a4a3a]/20 focus:ring-2"
             />
             <p className="mt-1 text-right text-xs text-[#9aa8a3]">
@@ -297,7 +309,7 @@ export default function AvaliacaoForm({ isOpen, onClose, lugar, onSuccess }) {
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={nota < 1 || enviando}
+            disabled={!podeEnviar}
             className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#1a4a3a] py-3.5 text-base font-semibold text-white disabled:opacity-50"
           >
             {enviando ? (
