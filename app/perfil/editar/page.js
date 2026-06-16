@@ -8,7 +8,11 @@ import {
   AVATAR_COMPRESS_OPTIONS,
   compressImageFile,
 } from "@/lib/imageCompress";
-import { AVATAR_STORAGE_BUCKET, getAvatarObjectPath } from "@/lib/avatarStorage";
+import {
+  AVATAR_STORAGE_BUCKET,
+  AVATAR_STORAGE_BUCKET_CANDIDATES,
+  getAvatarObjectPath,
+} from "@/lib/avatarStorage";
 import { usesPhoneAuth } from "@/lib/perfil";
 import { createClient } from "@/lib/supabase";
 
@@ -142,13 +146,24 @@ export default function EditarPerfilPage() {
     const supabase = createClient();
     const filePath = getAvatarObjectPath(user.id);
 
-    const { error: uploadError } = await supabase.storage
-      .from(AVATAR_STORAGE_BUCKET)
-      .upload(filePath, uploadFile, {
+    let uploadBucket = AVATAR_STORAGE_BUCKET;
+    let uploadError = null;
+
+    for (const bucket of AVATAR_STORAGE_BUCKET_CANDIDATES) {
+      const result = await supabase.storage.from(bucket).upload(filePath, uploadFile, {
         cacheControl: "3600",
         upsert: true,
         contentType: uploadFile.type || "image/jpeg",
       });
+
+      if (!result.error) {
+        uploadBucket = bucket;
+        uploadError = null;
+        break;
+      }
+
+      uploadError = result.error;
+    }
 
     if (uploadError) {
       console.error("[perfil] upload avatar:", uploadError);
@@ -158,7 +173,7 @@ export default function EditarPerfilPage() {
       return;
     }
 
-    const { data } = supabase.storage.from(AVATAR_STORAGE_BUCKET).getPublicUrl(filePath);
+    const { data } = supabase.storage.from(uploadBucket).getPublicUrl(filePath);
     const publicUrl = data.publicUrl;
     const previewPublicUrl = `${publicUrl}?v=${Date.now()}`;
 
