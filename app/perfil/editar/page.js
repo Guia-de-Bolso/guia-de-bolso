@@ -8,11 +8,6 @@ import {
   AVATAR_COMPRESS_OPTIONS,
   compressImageFile,
 } from "@/lib/imageCompress";
-import {
-  AVATAR_STORAGE_BUCKET,
-  AVATAR_STORAGE_BUCKET_CANDIDATES,
-  getAvatarObjectPath,
-} from "@/lib/avatarStorage";
 import { usesPhoneAuth } from "@/lib/perfil";
 import { createClient } from "@/lib/supabase";
 
@@ -144,54 +139,27 @@ export default function EditarPerfilPage() {
     }
 
     const supabase = createClient();
-    const filePath = getAvatarObjectPath(user.id);
+    const formData = new FormData();
+    formData.append("file", uploadFile, uploadFile.name || "avatar.jpg");
 
-    let uploadBucket = AVATAR_STORAGE_BUCKET;
-    let uploadError = null;
+    const response = await fetch("/api/perfil/avatar", {
+      method: "POST",
+      body: formData,
+      credentials: "same-origin",
+    });
 
-    for (const bucket of AVATAR_STORAGE_BUCKET_CANDIDATES) {
-      const result = await supabase.storage.from(bucket).upload(filePath, uploadFile, {
-        cacheControl: "3600",
-        upsert: true,
-        contentType: uploadFile.type || "image/jpeg",
-      });
+    const payload = await response.json().catch(() => ({}));
 
-      if (!result.error) {
-        uploadBucket = bucket;
-        uploadError = null;
-        break;
-      }
-
-      uploadError = result.error;
-    }
-
-    if (uploadError) {
-      console.error("[perfil] upload avatar:", uploadError);
-      setMessage("Não foi possível enviar a foto. Tente novamente.");
+    if (!response.ok) {
+      console.error("[perfil] upload avatar:", payload);
+      setMessage(payload.error || "Não foi possível enviar a foto. Tente novamente.");
       setUploading(false);
       event.target.value = "";
       return;
     }
 
-    const { data } = supabase.storage.from(uploadBucket).getPublicUrl(filePath);
-    const publicUrl = data.publicUrl;
+    const publicUrl = payload.foto_url;
     const previewPublicUrl = `${publicUrl}?v=${Date.now()}`;
-
-    const { error: perfilError } = await supabase.from("perfis").upsert(
-      {
-        id: user.id,
-        nome: nome.trim() || getUserName(user),
-        foto_url: publicUrl,
-      },
-      { onConflict: "id" }
-    );
-
-    if (perfilError) {
-      setMessage("Foto enviada, mas não foi possível salvar no perfil.");
-      setUploading(false);
-      event.target.value = "";
-      return;
-    }
 
     await supabase.auth.updateUser({
       data: {
