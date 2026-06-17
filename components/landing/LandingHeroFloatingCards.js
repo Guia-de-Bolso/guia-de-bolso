@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
+import RemotePhoto from "@/components/shared/RemotePhoto";
 import { fadeUpHero, floatCard } from "@/components/landing/landingMotion";
 
 /**
@@ -45,12 +45,11 @@ export default function LandingHeroFloatingCards({ places = [] }) {
             aria-hidden
           >
             <div className="relative aspect-[4/5] w-full">
-              <Image
+              <RemotePhoto
                 src={lugar.capa}
                 alt=""
                 fill
                 className="object-cover"
-                sizes="136px"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0a1612]/55 via-transparent to-transparent" />
             </div>

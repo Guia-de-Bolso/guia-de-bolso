@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
+import RemotePhoto from "@/components/shared/RemotePhoto";
 import { getCapaFromAtrativo } from "@/lib/fotos";
 import { getCategoriaAtrativoMeta } from "@/lib/atrativos";
 
@@ -44,7 +44,7 @@ export default function AtrativoFavoritoCard({ rota, onRemover }) {
       >
         <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54]">
           {foto ? (
-            <Image src={foto} alt={nome} fill sizes="96px" className="object-cover" />
+            <RemotePhoto src={foto} alt={nome} fill className="object-cover" />
           ) : null}
         </div>
         <div className="min-w-0 flex-1 py-1">

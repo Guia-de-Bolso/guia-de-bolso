@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
+import RemotePhoto from "@/components/shared/RemotePhoto";
 import { useMemo, useState } from "react";
 import { getCapaFromLugar } from "@/lib/fotos";
 import { getLugarPublicPath } from "@/lib/lugarPublicPath";
@@ -82,11 +82,10 @@ function RoteiroParadaCard({ parada, ehParceiro = false, capaUrl = "", lugarHref
     <>
       {temFoto ? (
         <div className="relative h-[5.5rem] w-full shrink-0 overflow-hidden bg-[#e8eeee] sm:h-24">
-          <Image
+          <RemotePhoto
             src={capaUrl}
             alt={nome}
             fill
-            sizes="(max-width: 390px) 100vw, 390px"
             className="object-cover"
           />
           <div

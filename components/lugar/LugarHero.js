@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import RemotePhoto from "@/components/shared/RemotePhoto";
 import Link from "next/link";
 import { useRef } from "react";
 import IconBack from "@/components/IconBack";
@@ -107,11 +107,10 @@ export default function LugarHero({
             key={`${foto}-${index}`}
             className={PHOTO_GALLERY_SLIDE_CLASS}
           >
-            <Image
+            <RemotePhoto
               src={foto}
               alt={nome}
               fill
-              sizes="100vw"
               className="object-cover"
               priority={index === 0}
             />

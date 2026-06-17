@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
+import RemotePhoto from "@/components/shared/RemotePhoto";
 import LandingPlaceCard from "@/components/landing/LandingPlaceCard";
 import LandingSection, { LandingSectionHeader } from "@/components/landing/LandingSection";
 import { useLandingRevealMotion } from "@/components/landing/useLandingRichMotion";
@@ -18,7 +18,7 @@ function NegociosAtrativoCard({ rota }) {
     <article className="landing-card-hover overflow-hidden rounded-[1.35rem] bg-white/80 ring-1 ring-[rgba(13,31,25,0.05)] backdrop-blur-sm">
       <div className="relative aspect-[16/10] bg-[#e8f2ee]">
         {rota.capa ? (
-          <Image src={rota.capa} alt="" fill className="object-cover" sizes="360px" />
+          <RemotePhoto src={rota.capa} alt="" fill className="object-cover" />
         ) : null}
         <div className="absolute inset-0 bg-gradient-to-t from-[#061612]/75 via-transparent to-transparent" />
         <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wide text-[#1a4a3a]">

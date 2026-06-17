@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
+import RemotePhoto from "@/components/shared/RemotePhoto";
 import { getCapaFromLugar } from "@/lib/fotos";
 import { getLugarPublicPath } from "@/lib/lugarPublicPath";
 import {
@@ -58,14 +58,12 @@ export default function CategoriaLugarCard({
     >
       <div className="relative h-[108px] w-[108px] shrink-0 overflow-hidden rounded-[20px] bg-[#e8eeee]">
         {imagemUrl ? (
-          <Image
+          <RemotePhoto
             src={imagemUrl}
             alt={lugar.nome}
-            width={216}
-            height={216}
-            sizes="108px"
+            fill
             onLoad={() => setImgLoaded(true)}
-            className={`home-image-fade h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${
+            className={`home-image-fade object-cover transition-transform duration-500 group-hover:scale-105 ${
               imgLoaded ? "is-loaded" : ""
             }`}
           />

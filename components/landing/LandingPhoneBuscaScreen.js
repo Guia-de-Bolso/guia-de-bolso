@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import RemotePhoto from "@/components/shared/RemotePhoto";
 
 /**
  * Prévia de resultados de busca com IA destacando um parceiro.
@@ -47,7 +47,7 @@ export default function LandingPhoneBuscaScreen({ lugar }) {
           <div className="flex gap-2.5 p-2.5">
             <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-[#e8f2ee]">
               {capa ? (
-                <Image src={capa} alt="" fill className="object-cover" sizes="56px" />
+                <RemotePhoto src={capa} alt="" fill className="object-cover" />
               ) : (
                 <div className="h-full w-full bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54]" />
               )}

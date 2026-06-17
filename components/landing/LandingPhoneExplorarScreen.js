@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import RemotePhoto from "@/components/shared/RemotePhoto";
 import { CATEGORIAS_EXPLORE, getCategoriasEmDestaque } from "@/lib/categorias";
 
 /**
@@ -16,7 +16,7 @@ function MockExplorarCategoriaCard({ categoria, count, capa }) {
     <div className="flex min-h-[72px] flex-col overflow-hidden rounded-[14px] bg-white ring-1 ring-[#e8eeee]">
       <div className="relative h-[52px] w-full overflow-hidden">
         {capa ? (
-          <Image src={capa} alt="" fill className="object-cover" sizes="120px" />
+          <RemotePhoto src={capa} alt="" fill className="object-cover" />
         ) : (
           <div className={`h-full w-full bg-gradient-to-br ${categoria.gradient}`} />
         )}
@@ -48,7 +48,7 @@ function MockExplorarDestaqueCard({ categoria, count, capa }) {
   return (
     <div className="relative flex h-[88px] w-[148px] shrink-0 snap-start flex-col justify-end overflow-hidden rounded-[16px] ring-1 ring-[#e8eeee]">
       {capa ? (
-        <Image src={capa} alt="" fill className="object-cover" sizes="148px" priority />
+        <RemotePhoto src={capa} alt="" fill className="object-cover" />
       ) : (
         <div className={`absolute inset-0 bg-gradient-to-br ${categoria.gradient}`} />
       )}

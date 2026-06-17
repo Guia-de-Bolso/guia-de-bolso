@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import RemotePhoto from "@/components/shared/RemotePhoto";
 import { useMemo, useState } from "react";
 import { getCapaFromAtrativo } from "@/lib/fotos";
 import {
@@ -73,11 +74,25 @@ function dificuldadeClass(value) {
   return "text-[#1a4a3a]";
 }
 
-function CoverImage({ rota, className, priority = false, sizes = "(max-width: 768px) 100vw, 400px" }) {
+function CoverImage({
+  rota,
+  className,
+  priority = false,
+  sizes = "(max-width: 768px) 100vw, 400px",
+  compact = false,
+}) {
   const foto = getCapaFromAtrativo(rota);
 
   if (!foto) {
     return <div className={`${className} bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54]`} />;
+  }
+
+  if (compact) {
+    return (
+      <div className={`${className} relative overflow-hidden`}>
+        <RemotePhoto src={foto} alt={getAtrativoNome(rota)} fill className="object-cover" />
+      </div>
+    );
   }
 
   return (
@@ -87,6 +102,7 @@ function CoverImage({ rota, className, priority = false, sizes = "(max-width: 76
         alt={getAtrativoNome(rota)}
         fill
         sizes={sizes}
+        quality={60}
         className="object-cover"
         priority={priority}
       />
@@ -177,7 +193,7 @@ function CompactRouteCard({ rota }) {
       className="box-border flex w-full min-w-0 max-w-full gap-3 overflow-hidden rounded-2xl bg-white p-3 shadow-sm"
     >
       <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl">
-        <CoverImage rota={rota} className="h-full w-full" sizes="96px" />
+        <CoverImage rota={rota} className="h-full w-full" compact />
       </div>
       <div className="min-w-0 flex-1 py-1">
         <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#1a4a3a]">

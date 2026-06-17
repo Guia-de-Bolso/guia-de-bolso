@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
+import RemotePhoto from "@/components/shared/RemotePhoto";
 import { useLandingRevealMotion } from "@/components/landing/useLandingRichMotion";
 import { PREFETURA_SUPPORT_LINE } from "@/lib/institutionalSupport";
 import { LANDING_TESTIMONIALS } from "@/lib/landingContent";
@@ -89,7 +89,7 @@ export default function LandingSocialProof({ stats, parceiros = [], showcase = [
                   key={p.id}
                   className="relative inline-block h-10 w-10 overflow-hidden rounded-full ring-2 ring-white shadow-sm sm:h-11 sm:w-11"
                 >
-                  <Image src={p.capa} alt="" fill className="object-cover" sizes="44px" />
+                  <RemotePhoto src={p.capa} alt="" fill className="object-cover" />
                 </span>
               ))}
             </div>
@@ -152,7 +152,7 @@ export default function LandingSocialProof({ stats, parceiros = [], showcase = [
                   <article className="flex h-full items-center gap-3 rounded-2xl bg-white/80 p-3 ring-1 ring-[rgba(13,31,25,0.05)]">
                     <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl bg-[#e8f2ee]">
                       {p.capa ? (
-                        <Image src={p.capa} alt="" fill className="object-cover" sizes="44px" />
+                        <RemotePhoto src={p.capa} alt="" fill className="object-cover" />
                       ) : (
                         <span className="flex h-full items-center justify-center text-sm text-[#1a4a3a]">
                           ✓

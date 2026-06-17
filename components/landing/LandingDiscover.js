@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
+import RemotePhoto from "@/components/shared/RemotePhoto";
 import LandingAmbient from "@/components/landing/LandingAmbient";
 import LandingPlaceCard from "@/components/landing/LandingPlaceCard";
 import { LandingSectionHeader } from "@/components/landing/LandingSection";
@@ -90,7 +90,7 @@ export default function LandingDiscover({ discoverShowcase = [], categorias, has
                 {cat.capa && (
                   <>
                     <div className="landing-category-card__media pointer-events-none absolute inset-0">
-                      <Image src={cat.capa} alt="" fill className="object-cover" sizes="200px" />
+                      <RemotePhoto src={cat.capa} alt="" fill className="object-cover" />
                     </div>
                     <div className="landing-category-card__scrim pointer-events-none absolute inset-0" />
                   </>

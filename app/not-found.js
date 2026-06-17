@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import RemotePhoto from "@/components/shared/RemotePhoto";
 import Logo from "@/components/Logo";
 
 /**
@@ -19,11 +19,10 @@ export default function NotFound() {
 
         <div className="relative mt-6 overflow-hidden rounded-[28px] shadow-lg ring-1 ring-black/5">
           <div className="relative h-52 w-full">
-            <Image
+            <RemotePhoto
               src="https://picsum.photos/seed/imbituba-litoral/800/520"
               alt="Paisagem do litoral de Imbituba"
               fill
-              sizes="(max-width: 768px) 100vw, 400px"
               className="object-cover"
               priority
             />

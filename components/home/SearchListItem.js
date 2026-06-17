@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import RemotePhoto from "@/components/shared/RemotePhoto";
 import Link from "next/link";
 
 /**
@@ -13,12 +13,9 @@ import Link from "next/link";
 function PlaceThumb({ imagemUrl, nome }) {
   if (imagemUrl) {
     return (
-      <Image
+      <RemotePhoto
         src={imagemUrl}
         alt={nome}
-        width={80}
-        height={80}
-        sizes="80px"
         className="h-10 w-10 shrink-0 rounded-full object-cover"
       />
     );

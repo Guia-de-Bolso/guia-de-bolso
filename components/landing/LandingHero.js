@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useScroll, useTransform } from "framer-motion";
-import Image from "next/image";
+import RemotePhoto from "@/components/shared/RemotePhoto";
 import { useEffect, useRef, useState } from "react";
 import LandingAmbient from "@/components/landing/LandingAmbient";
 import LandingButton from "@/components/landing/LandingButton";
@@ -140,13 +140,12 @@ function LandingHeroBody({
               <source src={HERO_VIDEO_URL} type="video/mp4" />
             </video>
           ) : (
-            <Image
+            <RemotePhoto
               src={heroPosterUrl}
               alt=""
               fill
               priority
               className="landing-hero-video-frame object-cover object-[center_40%]"
-              sizes="100vw"
             />
           )}
           <div className="landing-cinematic-overlay-video absolute inset-0" />
@@ -191,7 +190,7 @@ function LandingHeroBody({
                       key={p.id}
                       className="relative inline-block h-6 w-6 overflow-hidden rounded-full ring-2 ring-white"
                     >
-                      <Image src={p.capa} alt="" fill className="object-cover" sizes="24px" />
+                      <RemotePhoto src={p.capa} alt="" fill className="object-cover" />
                     </span>
                   ))}
                 </span>

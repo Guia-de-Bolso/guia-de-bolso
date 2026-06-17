@@ -30,6 +30,7 @@ export default function LandingPlaceCard({ lugar, priority = false, className = 
             alt={lugar.nome}
             fill
             sizes="(max-width: 768px) 88vw, 340px"
+            quality={60}
             className={`object-cover ${
               richMotion
                 ? "transition-transform duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.025]"

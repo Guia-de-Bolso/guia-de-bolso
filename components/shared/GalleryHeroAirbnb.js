@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { useRef } from "react";
+import RemotePhoto from "@/components/shared/RemotePhoto";
 import NavigationBackLink from "@/components/NavigationBackLink";
 import GalleryPhotoCounter from "@/components/shared/GalleryPhotoCounter";
 import {
@@ -48,26 +48,6 @@ function ShareIcon({ className = GALLERY_FLOAT_ICON_CLASS }) {
       <path d="M16 6l-4-4-4 4" />
       <path d="M12 2v14" />
     </svg>
-  );
-}
-
-/**
- * @param {object} props
- * @param {string} props.src
- * @param {string} props.alt
- * @param {boolean} [props.priority]
- */
-function HeroPhoto({ src, alt, priority = false }) {
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={src}
-      alt={alt}
-      decoding="async"
-      fetchPriority={priority ? "high" : "auto"}
-      loading={priority ? "eager" : "lazy"}
-      className="absolute inset-0 h-full w-full object-cover"
-    />
   );
 }
 
@@ -119,18 +99,13 @@ export default function GalleryHeroAirbnb({
             <div ref={carouselRef} className={`${PHOTO_GALLERY_TRACK_CLASS} h-full min-h-full w-full`}>
               {fotos.map((foto, index) => (
                 <div key={`${foto}-${index}`} className={PHOTO_GALLERY_SLIDE_CLASS}>
-                  {immersiveScroll ? (
-                    <HeroPhoto src={foto} alt={nome} priority={index === 0} />
-                  ) : (
-                    <Image
-                      src={foto}
-                      alt={nome}
-                      fill
-                      sizes="(max-width: 448px) 100vw, 448px"
-                      className="object-cover"
-                      priority={index === 0}
-                    />
-                  )}
+                  <RemotePhoto
+                    src={foto}
+                    alt={nome}
+                    fill
+                    className="object-cover"
+                    priority={index === 0}
+                  />
                 </div>
               ))}
             </div>

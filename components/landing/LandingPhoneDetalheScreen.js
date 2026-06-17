@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import RemotePhoto from "@/components/shared/RemotePhoto";
 import { getBadgeParceiroLabel } from "@/lib/lugarBadges";
 
 /**
@@ -18,7 +18,7 @@ export default function LandingPhoneDetalheScreen({ lugar }) {
     <div className="h-full overflow-hidden bg-[#f0f4f3]">
       <div className="relative h-[42%] min-h-[140px]">
         {capa ? (
-          <Image src={capa} alt="" fill className="object-cover" sizes="280px" priority />
+          <RemotePhoto src={capa} alt="" fill className="object-cover" priority />
         ) : (
           <div className="h-full w-full bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54]" />
         )}

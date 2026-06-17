@@ -77,6 +77,7 @@ export default function PlaceCard({
           alt={lugar.nome}
           fill
           sizes={immersive ? "300px" : "(max-width: 768px) 100vw, 400px"}
+          quality={60}
           onLoad={() => setImgLoaded(true)}
           className={`home-image-fade object-cover transition-transform duration-500 group-hover:scale-105 ${
             imgLoaded ? "is-loaded" : ""

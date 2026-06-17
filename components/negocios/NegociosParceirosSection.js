@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
+import RemotePhoto from "@/components/shared/RemotePhoto";
 import LandingSection, { LandingSectionHeader } from "@/components/landing/LandingSection";
 import { useLandingRevealMotion } from "@/components/landing/useLandingRichMotion";
 import { NEGOCIOS_PARCEIROS_COPY } from "@/lib/negociosContent";
@@ -66,7 +66,7 @@ export default function NegociosParceirosSection({ parceirosTodos = [], total = 
           >
             <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-[#e8f2ee]">
               {p.capa ? (
-                <Image src={p.capa} alt="" fill className="object-cover" sizes="48px" />
+                <RemotePhoto src={p.capa} alt="" fill className="object-cover" />
               ) : (
                 <span className="flex h-full items-center justify-center text-sm font-bold text-[#1a4a3a]">
                   ✓

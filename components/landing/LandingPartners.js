@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
+import RemotePhoto from "@/components/shared/RemotePhoto";
 import LandingSection, { LandingSectionHeader } from "@/components/landing/LandingSection";
 import { useLandingRevealMotion } from "@/components/landing/useLandingRichMotion";
 import { LANDING_SECTION_IDS } from "@/lib/landingContent";
@@ -87,7 +87,7 @@ export default function LandingPartners({
               <article className="landing-card-hover flex h-full items-center gap-4 rounded-[1.35rem] bg-white/90 p-4 ring-1 ring-[rgba(13,31,25,0.05)]">
                 <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-[#e8f2ee]">
                   {p.capa ? (
-                    <Image src={p.capa} alt="" fill className="object-cover" sizes="56px" />
+                    <RemotePhoto src={p.capa} alt="" fill className="object-cover" />
                   ) : (
                     <span className="flex h-full items-center justify-center text-lg text-[#1a4a3a]">
                       ✓

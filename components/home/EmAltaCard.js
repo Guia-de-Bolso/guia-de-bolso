@@ -44,6 +44,7 @@ export default function EmAltaCard({ lugar, priority = false, returnPath = "" })
             width={416}
             height={312}
             sizes="208px"
+            quality={60}
             onLoad={() => setImgLoaded(true)}
             className={`home-image-fade h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${
               imgLoaded ? "is-loaded" : ""

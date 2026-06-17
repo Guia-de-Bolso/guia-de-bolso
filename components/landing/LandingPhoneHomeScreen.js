@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import RemotePhoto from "@/components/shared/RemotePhoto";
 import { HOME_CAROUSEL_TRACK_CLASS } from "@/components/home/homeTokens";
 import { CATEGORIAS_EXPLORE } from "@/lib/categorias";
 
@@ -16,12 +16,11 @@ function MockEmAltaCard({ lugar, priority = false }) {
     <div className="flex w-[168px] shrink-0 snap-start flex-col overflow-hidden rounded-[18px] bg-white ring-1 ring-[#e8eeee]">
       <div className="relative h-[96px] overflow-hidden">
         {lugar.capa ? (
-          <Image
+          <RemotePhoto
             src={lugar.capa}
             alt=""
             fill
             className="object-cover"
-            sizes="168px"
             priority={priority}
           />
         ) : (
@@ -52,7 +51,7 @@ function MockParceiroCard({ lugar }) {
   return (
     <div className="relative flex h-[140px] w-[220px] shrink-0 snap-start flex-col justify-end overflow-hidden rounded-[20px] ring-1 ring-[#e8eeee]">
       {lugar.capa ? (
-        <Image src={lugar.capa} alt="" fill className="object-cover" sizes="220px" />
+        <RemotePhoto src={lugar.capa} alt="" fill className="object-cover" />
       ) : (
         <div className="absolute inset-0 bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54]" />
       )}

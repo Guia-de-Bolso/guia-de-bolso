@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import RemotePhoto from "@/components/shared/RemotePhoto";
 import { formatCategoriaAtrativoLabel, getCategoriaAtrativoMeta } from "@/lib/atrativos";
 
 /**
@@ -48,7 +48,7 @@ function MockAtrativoDoDiaCard({ rota }) {
     <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
       <div className="relative h-[108px] w-full">
         {rota.capa ? (
-          <Image src={rota.capa} alt="" fill className="object-cover" sizes="260px" priority />
+          <RemotePhoto src={rota.capa} alt="" fill className="object-cover" priority />
         ) : (
           <div className="h-full w-full bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54]" />
         )}
@@ -89,7 +89,7 @@ function MockCompactAtrativoCard({ rota }) {
     <div className="flex gap-2.5 rounded-2xl bg-white p-2.5 shadow-sm">
       <div className="relative h-[72px] w-[72px] shrink-0 overflow-hidden rounded-xl">
         {rota.capa ? (
-          <Image src={rota.capa} alt="" fill className="object-cover" sizes="72px" />
+          <RemotePhoto src={rota.capa} alt="" fill className="object-cover" />
         ) : (
           <div className="h-full w-full bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54]" />
         )}
