@@ -107,6 +107,7 @@ Run in order for a **new environment** that already has base tables from the Sup
 | 15c | `lugares_purge_inativos.sql` | `lugares.desativado_em` + trigger; retenção 30 dias e alertas no admin |
 | 10 | `fotos_migration.sql` | `lugares.fotos`, `rotas.fotos`; public storage read |
 | 11 | `storage-policies.sql` | Avatar policies on `imagens` |
+| 11b | `storage_avatar_legacy_bucket.sql` | Avatar policies on **Guia de Bolso - Imagens** (production bucket) |
 | 12 | `logs_policies.sql` | FK `logs.user_id` → `perfis`; RLS |
 | 13 | `lugares_visibilidade.sql` | `mostrar_endereco`, `mostrar_horarios` |
 | 14 | `taxonomia_lugares_cleanup.sql` | Subcategorias + tag seeds + lugar migrations |

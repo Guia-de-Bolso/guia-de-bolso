@@ -134,7 +134,7 @@ Get a single strong recommendation without searching.
 **Main flows**
 1. Phase 1 loads active routes via `GET /api/rotas` → `pickHeroRotaCiclo` picks **one** route per day (round-robin: no repeat until all eligible routes shown, then restarts). Pool: `ativa !== false` + valid cover (`getCapaFromRota`). TZ: America/Sao_Paulo via `dailySeed`.
 2. Secondary home load fetches Open-Meteo for Imbituba → `temperaturaClima` passed into the hero.
-3. Metrics: duration, distance, difficulty (+ temperature). CTA → `/rotas/[id]`.
+3. Metrics: duration, distance, difficulty (+ temperature). CTA → `/atrativos/[id]`.
 
 **Selection criteria**  
 Stable order by route `id`; index = `daysSinceEpoch(dailySeed) % pool.length`. Not places/curadoria.
@@ -287,7 +287,7 @@ Decide to go now, contact the business, or navigate.
 **Edge cases**
 - Inactive or missing id → “Lugar não encontrado”.
 - Supabase error loading place → full-page `UserErrorAlert` with “Tentar novamente” (`router.refresh()`) and report hint.
-- No photos → placeholder/gradient from `getCapaFromLugar`; hero uses `next/image` with descriptive `alt` (place name).
+- No photos → placeholder/gradient from `getCapaFromLugar`; hero gallery uses **`RemotePhoto`** (`GalleryHeroAirbnb` on V2 detail) or legacy `LugarHero`, with descriptive `alt` (place name).
 - Photo carousel uses `lib/horizontalCarousel.js` (`snap-mandatory`, `useControlledPhotoCarousel` — at most ±1 slide per gesture); used in `GalleryHeroAirbnb`, `LugarHero`.
 - **SEO (P0):** canonical place URLs `/lugares/{slug}` (301 from UUID), `generateMetadata` on place/route detail, `app/sitemap.js`, `app/robots.js`, shared helpers in `lib/seo.js` and `lib/lugarPublicPath.js`.
 - **SEO (P1):** JSON-LD (`lib/seoJsonLd.js`) on place, route, and category pages; server `h1` + intro (`LugarSeoStatic`, category SSR header); category list SSR via `CategoriaPageClient` + `queryLugaresAtivos`; visible UI titles use `h2` where `h1` is reserved for SEO shell.
@@ -332,7 +332,7 @@ Build a personal shortlist for the trip.
 ## 15. Reviews (ratings & comments)
 
 **Description**  
-Logged-in users submit 1–5 stars, optional **aspect chips** (category-aware via `lib/avaliacaoAspectos.js`), and optional comment. Claude pre-moderation runs via `POST /api/avaliacoes/analisar` and stores a hint on `sugestao_ia` for operators. Public list shows distribution, aspects, and recommendation summary after admin approval.
+Logged-in users submit 1–5 stars, optional **aspect chips** (category-aware via `lib/avaliacaoAspectos.js`), and a **required comment** (non-empty after trim). Claude pre-moderation runs via `POST /api/avaliacoes/analisar` and stores a hint on `sugestao_ia` for operators. Public list shows distribution, aspects, and recommendation summary after admin approval.
 
 **User goal**  
 Share experience and read social proof.
@@ -345,6 +345,7 @@ Share experience and read social proof.
 **Edge cases**
 - Guest → `LoginModal` (`avaliar`).
 - One review per user per place.
+- Submit disabled until rating ≥ 1 and `comentario.trim()` is non-empty.
 - Toast confirms submission; content hidden until approved.
 - Aggregate rating on hero uses only approved reviews.
 - AI analysis failure does not block submission; admin can still moderate manually.
@@ -433,14 +434,14 @@ Manage identity, preferences, and session.
 ## 20. Edit profile
 
 **Description**  
-`/perfil/editar` — update display name and upload avatar to Storage (`imagens` bucket).
+`/perfil/editar` — update display name and upload avatar via **`POST /api/perfil/avatar`** (server-side Storage upload).
 
 **User goal**  
 Personalize account appearance.
 
 **Main flows**
-1. Load `perfis` nome/foto → edit → save upsert.
-2. Photo upload → client compression (`lib/imageCompress.js`, avatar max 512px) → Storage → public URL → `perfis.foto_url` + `auth.updateUser` metadata.
+1. Load `perfis` nome/foto → edit → save upsert on `perfis`.
+2. Photo upload → client compression (`lib/imageCompress.js`, avatar max 512px) → `multipart/form-data` to `/api/perfil/avatar` → `lib/avatarStorage.js` writes `avatars/{user_id}/avatar.jpg` to **Guia de Bolso - Imagens** (legacy production bucket) or `imagens` if present → updates `perfis.foto_url` (and `auth.updateUser` metadata on save).
 3. Entry point: hero **Editar perfil** on `/perfil` (not duplicated under Conta settings).
 
 **Image compression (client)**  
@@ -448,21 +449,22 @@ Personalize account appearance.
 
 **Edge cases**
 - Requires session; unauthenticated users not routed here from profile edit link.
+- SMS-only accounts (`usesPhoneAuth`) do not see the read-only email field on this screen.
 - Upload failure leaves partial state with error message.
-- Upsert depends on RLS allowing own-row write.
+- API returns `503` if `SUPABASE_SERVICE_ROLE_KEY` is missing on the server.
 
 ---
 
-## 21. Curated routes (admin-published trails)
+## 21. Curated atrativos (admin-published trails)
 
 **Description**  
-Editorial routes at `/rotas` and `/rotas/[id]`: cover, **tipo de rota** (categorias fixas em `lib/rotas.js`), **tags** (subset compartilhado do catálogo), difficulty, duration, distance, ordered **pontos** (steps) with optional link to a **lugar**. Featured route highlighted; list page supports filter chips by route type.
+Editorial atrativos at **`/atrativos`** and **`/atrativos/[id]`** (`/rotas` redirects 301): cover, **tipo de experiência** (fixed categories in `lib/atrativos.js`), **tags**, difficulty, duration, distance, ordered **pontos** with optional link to a **lugar**. “Atrativo do dia” featured card; list supports filter chips by experience type (`AtrativosCatalogo`).
 
 **User goal**  
 Follow a predefined trail or city walk with guidance.
 
 **Main flows**
-1. `/rotas` (server-rendered) lists routes with app palette (`#f0f4f3` / `#1a4a3a`); cover images via `next/image`; featured card if `destaque=true`; horizontal chips filter by route type when multiple categories exist.
+1. `/atrativos` lists atrativos with app palette (`#f0f4f3` / `#1a4a3a`); compact rows use **`RemotePhoto`**; featured “Atrativo do dia” cover uses **`next/image`** (`quality={60}`); horizontal chips filter by category when multiple types exist.
 2. Tap route → detail with category icon, tag chips, step list with **ordered description lines per point**, **ordered tips** at the bottom, and metrics.
 3. Admin `RotaForm`: route type, tags, multiple descriptions per step (no place link), map start point, dicas.
 4. No login required to **view** list/detail (public read).
@@ -484,17 +486,17 @@ Multi-step form (days, traveler profile, interests) → Claude generates markdow
 Get a custom day-by-day plan for the region.
 
 **Main flows**
-1. `/rotas` → “Roteiro personalizado com IA” → login check → quota check → `RoteiroBottomSheet`.
+1. `/atrativos` → “Roteiro personalizado com IA” → login check → quota check → `RoteiroBottomSheet`.
 2. Submit → `POST /api/roteiro` → `lib/roteiroParse.js` builds day/period/stop timeline → `RoteiroItineraryView` (accordion); footer **Salvar** fixed on scroll.
-3. “Salvar” → `POST /api/roteiro/salvar` → list on `/rotas`.
-4. Saved list → tap → `RoteiroViewModal` with the same timeline UI (`components/rotas/RoteiroSection.js`).
+3. “Salvar” → `POST /api/roteiro/salvar` → list on `/atrativos`.
+4. Saved list → tap → `RoteiroViewModal` with the same timeline UI (`components/atrativos/RoteiroSection.js`).
 5. Delete saved item → `DELETE /api/roteiro/[id]` (server verifies row removed; requires `supabase/roteiros_policies.sql` on Supabase).
 
 **Edge cases**
 - Parser drops empty period blocks; stops link to catalog names when `lugaresCatalog` from API matches.
 - Guest → login modal.
 - No saved roteiros yet → empty state in `RoteiroSection` (“Nenhum roteiro salvo ainda”).
-- Daily limit 2/day → paywall (`roteiro`) with countdown; compact `DailyLimitCountdown` on `/rotas` card when blocked (`Novos roteiros em HH:MM:SS`, light text on dark gradient).
+- Daily limit 2/day → paywall (`roteiro`) with countdown; compact `DailyLimitCountdown` on `/atrativos` card when blocked (`Novos roteiros em HH:MM:SS`, light text on dark gradient).
 - Usage counter: same hydrate → sync pattern as search (`usePremiumUsage`); label `X/2 roteiros gratuitos hoje`.
 - Incomplete form blocked client-side.
 - Save without login impossible (API 401).
@@ -513,14 +515,14 @@ Understand the daily free quota, when it renews, or upgrade for unlimited use.
 
 **Main flows**
 1. Hit daily limit → paywall with feature copy (busca/roteiro) + countdown + plan benefits.
-2. While blocked on home (search open) or `/rotas` → countdown visible before/at paywall.
+2. While blocked on home (search open) or `/atrativos` → countdown visible before/at paywall.
 3. “Assinar” / CTA → may open login if needed (`premium` motivo) — **payment not integrated** (Asaas planned).
 
 **Edge cases**
 - `premium_ativo` + `premium_ate` enforced server-side and in RPC.
 - Paywall is informational today — no in-app purchase flow.
 - Premium users see unlimited counters in UI (`null` remaining).
-- Countdown (`DailyLimitCountdown`): ticks every second via `getMsUntilDailyReset()`; may seed from `usage.msUntilReset` after API/RPC. Compact mode on `/rotas` inherits parent text color (timer visible on dark card).
+- Countdown (`DailyLimitCountdown`): ticks every second via `getMsUntilDailyReset()`; may seed from `usage.msUntilReset` after API/RPC. Compact mode on `/atrativos` inherits parent text color (timer visible on dark card).
 - Legacy `uso_ia_mes` (`YYYY-MM`) or a previous day’s key: UI shows **0/N** for the new day; server realigns counters on read/increment so limits are not blocked by stale rows. After quota is used, UI and API both show `used === limit`.
 
 ---
@@ -589,7 +591,8 @@ Understand when content failed vs. is empty; navigate with keyboard/screen reade
 | **FeedbackSheet** | Global (`FeedbackProvider`) | Perfil → Ajuda e feedback; pré-preenche em reportes de erro |
 | **Admin feedback** | `/admin/feedback` | Filter by status/tipo; update status and `admin_notas` |
 | **PlaceCardSkeleton** | Favorites, category list, search results | Pulse placeholders matching card height |
-| **`next/image`** | `PlaceCard`, `EmAltaCard`, search rows, lugar hero, route covers | Remote hosts allowed in `next.config.mjs` (Supabase Storage, picsum) |
+| **`RemotePhoto`** | Thumbnails, heroes, search rows, category cards, compact atrativos, roteiro parada banners | Direct CDN `<img>` via `components/shared/RemotePhoto.js` — bypasses Vercel Image Optimization |
+| **`next/image`** | `PlaceCard`, `EmAltaCard`, `LandingPlaceCard`, featured atrativo cover | Explicit `sizes`, `quality={60}`; `minimumCacheTTL` 30 days in `next.config.mjs` |
 | **Design tokens** | `app/globals.css` | `--color-primary`, `--color-background`, etc.; system dark mode media query **disabled** until full theme ships |
 | **Focus** | Global | `*:focus-visible` outline in brand green |
 | **Dialogs** | Bottom sheets (detail, profile) | `role="dialog"`, `aria-modal`, labelled titles |
@@ -597,7 +600,7 @@ Understand when content failed vs. is empty; navigate with keyboard/screen reade
 **Edge cases**
 - Home loads in **two phases**: primary (`lugares` ativos + populares) then secondary (perto + clima); each phase uses `Promise.allSettled` so one failure does not block the other.
 - Search network errors still use inline message in the results panel (unchanged).
-- `OQueFazerAgora` hero still uses a plain `<img>` (not yet migrated to `next/image`).
+- `OQueFazerAgora` hero still uses a plain `<img>` (not `RemotePhoto` or `next/image`).
 
 ---
 
@@ -759,8 +762,8 @@ Entender gasto atual, eficiência de cache e risco de escala antes de aumentar b
 | Place detail | `/lugares/[id]` |
 | QR short link | `/q/[slug]` → `/lugares/[id]?ref=qr` |
 | Favorites | `/favoritos` |
-| Curated routes | `/rotas`, `/rotas/[id]` |
-| AI roteiro | `/rotas` (sheet) |
+| Curated atrativos | `/atrativos`, `/atrativos/[id]` (`/rotas` → 301) |
+| AI roteiro | `/atrativos` (sheet) |
 | Profile | `/perfil`, `/perfil/editar` |
 | Login | `/login`, modal, `/auth/callback` |
 | Admin | `/admin`, `/admin/logs`, `/admin/relatorios`, `/admin/taxonomia`, … |

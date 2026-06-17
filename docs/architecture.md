@@ -88,7 +88,7 @@ There is no global React Context for auth or premium; each page or hook loads se
 | `/lugares/[id]` | `app/lugares/[id]/page.js` | Conversion-focused place detail |
 | `/categorias`, `/categoria/[slug]` | Category discovery |
 | `/favoritos` | Saved places (auth) |
-| `/rotas`, `/rotas/[id]` | Curated routes + AI itineraries |
+| `/atrativos`, `/atrativos/[id]` | Curated atrativos + AI roteiro (`/rotas` → 301 redirect) |
 | `/perfil`, `/perfil/editar` | User profile |
 | `/login` | `app/login/page.js` | Auth entry |
 | `/auth/callback` | `app/auth/callback/route.js` | OAuth code exchange (Route Handler) |
@@ -102,7 +102,7 @@ Requires `perfis.role` ∈ `admin`, `dev` (`lib/adminRoles.js` → `canAccessAdm
 | `/admin` | Dashboard (hero, KPI grid, moderation queue, operational summary, activity timeline) |
 | `/admin/locais`, `/admin/locais/novo`, `/admin/locais/[id]/editar` | Place CRUD |
 | `/admin/lugares` | Legacy alias of locais grid |
-| `/admin/rotas`, `/admin/rotas/nova`, `/admin/rotas/[id]/editar` | Curated route CRUD |
+| `/admin/atrativos`, `/admin/atrativos/nova`, `/admin/atrativos/[id]/editar` | Curated atrativo CRUD (`/admin/rotas` → 301 redirect) |
 | `/admin/avaliacoes` | Review moderation (`?tab=` for filter chips) |
 | `/admin/usuarios` | User management, roles, Premium IA |
 | `/admin/logs` | Activity log browser (`?acao=`, `?user_id=`, period filters) |
@@ -154,16 +154,17 @@ components/
 
 ### Image delivery
 
-Place and route covers use **`next/image`** (not raw `<img>`) on main list/detail surfaces: `PlaceCard`, `EmAltaCard`, `SearchListItem`, `LugarHero`, `/rotas` list and detail.
+Hybrid model to limit **Vercel Image Optimization** transformations while keeping responsive listing cards:
 
-`next.config.mjs` whitelists remote hosts:
+| Layer | Where | Behavior |
+|-------|--------|----------|
+| **`RemotePhoto`** | `components/shared/RemotePhoto.js` | Plain `<img>` to Supabase CDN — thumbnails, search rows (`SearchListItem`), category cards (`CategoriaLugarCard`), detail heroes (`GalleryHeroAirbnb`, `LugarHero`), compact atrativo rows, landing mockups, roteiro parada banners |
+| **`next/image`** | `PlaceCard`, `EmAltaCard`, `LandingPlaceCard`, featured cover in `AtrativosCatalogo` | Explicit `sizes`, `quality={60}`; optional `priority` on first above-the-fold card |
+| **Config** | `next.config.mjs` | `images.remotePatterns` (Supabase Storage, picsum); `minimumCacheTTL: 2592000` (30 days) |
 
-| Host | Path |
-|------|------|
-| `rsdjbqzjdyeaedyqwrvc.supabase.co` | `/storage/v1/object/public/**` |
-| `picsum.photos` | (dev/placeholder) |
+Exception: `OQueFazerAgora` hero still uses a plain `<img>` (not `RemotePhoto`).
 
-Above-the-fold cards may pass `priority` (first `EmAltaCard`, first `PlaceCard` in “Perto de você”). Exception: `OQueFazerAgora` hero still uses `<img>`.
+Above-the-fold cards may pass `priority` (first `EmAltaCard`, first `PlaceCard` in “Perto de você”). Hero carousels pass `priority` only to slide index `0`.
 
 ### Home data loading (resilience)
 
@@ -411,7 +412,7 @@ flowchart LR
 
 ### 6. Roteiro (itinerary) path
 
-1. User completes form on `/rotas` (logged in).  
+1. User completes form on `/atrativos` (logged in).  
 2. `POST /api/roteiro` — premium check, filtered place list (`lib/roteiroLugares.js`), Claude returns strict markdown + `lugaresCatalog`.  
 3. `lib/roteiroParse.js` → `RoteiroItineraryView` in `RoteiroBottomSheet` / `RoteiroViewModal`.  
 4. Optional `POST /api/roteiro/salvar` — persists to `roteiros` table.  
@@ -485,7 +486,7 @@ On first login, Supabase creates `auth.users`. The app expects a matching row in
 | **Premium features** | `perfis.premium_ativo`; daily counters `buscas_ia` / `roteiros_ia` in `uso_ia_mes` (day key `YYYY-MM-DD`, SP); limits 5 buscas + 2 roteiros/day; Premium unlimited |
 | **Admin** | `perfis.role` ∈ `admin`, `dev` (`canAccessAdmin`) |
 | **Public content** | RLS: active places, approved reviews |
-| **Gated UI** | `LoginModal` for favorites, reviews, **AI search**, and **AI roteiro**; curated `/rotas` list and route detail are public |
+| **Gated UI** | `LoginModal` for favorites, reviews, **AI search**, and **AI roteiro**; curated `/atrativos` list and detail are public |
 
 API returns machine-readable codes: `LOGIN_REQUIRED` (401), `LIMIT_REACHED` (403).
 
@@ -495,7 +496,7 @@ API returns machine-readable codes: `LOGIN_REQUIRED` (401), `LIMIT_REACHED` (403
 
 1. `supabase.auth.getUser()` on mount.  
 2. `onAuthStateChange` to update user + clear favorites on sign-out.  
-3. Premium hook `usePremiumUsage(user)` hydrates same-day cache, then fetches `/api/uso-premium`; home search and `/rotas` show usage + `DailyLimitCountdown` when limit reached.
+3. Premium hook `usePremiumUsage(user)` hydrates same-day cache, then fetches `/api/uso-premium`; home search and `/atrativos` show usage + `DailyLimitCountdown` when limit reached.
 
 ---
 
@@ -538,7 +539,7 @@ No server-side routing API. `openRoute()` in place detail:
 - **Buckets:** `lugares-fotos`, `rotas-fotos` (see `supabase/storage-policies.sql`)
 - **Upload:** `lib/storageUpload.js` from admin forms
 - **Public URLs** stored on place/route/profile records
-- **Delivery:** browser loads Storage URLs through **`next/image`** (optimized sizing, lazy load) where integrated; URLs must match `images.remotePatterns` in `next.config.mjs`
+- **Delivery:** listing cards use **`next/image`** (`sizes`, `quality={60}`); thumbnails and heroes use **`RemotePhoto`** (direct CDN `<img>`). URLs must match `images.remotePatterns` in `next.config.mjs`. Avatar upload: `POST /api/perfil/avatar` → `Guia de Bolso - Imagens` or `imagens` bucket (`lib/avatarStorage.js`).
 
 ---
 

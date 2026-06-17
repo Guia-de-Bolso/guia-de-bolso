@@ -590,6 +590,7 @@ RLS policies for **`rotas`** and related tables are in [`rotas_policies.sql`](..
 | `storage.objects` | lugares-fotos / rotas-fotos read | `fotos_migration.sql` | Public read |
 | `storage.objects` | lugares-fotos / rotas-fotos write | `storage_admin_fotos.sql` | Admin-only upload/update/delete |
 | `storage.objects` | `imagens` avatars | `storage-policies.sql` | Insert/update only under `avatars/{user_id}/` |
+| `storage.objects` | legacy avatar bucket | `storage_avatar_legacy_bucket.sql` | Same path on **Guia de Bolso - Imagens** (production) |
 
 ### Expected policies (inferred from app)
 
@@ -650,9 +651,10 @@ Granted to `authenticated`. Called from `lib/premiumServer.js` via `supabase.rpc
 |--------|--------------|----------|---------|
 | `lugares-fotos` | `{lugar_id}/{timestamp}-{name}.jpg` | `fotos_migration.sql` | Admin place photos |
 | `rotas-fotos` | `{rota_id}/...` | `fotos_migration.sql` | Admin route photos |
-| `imagens` | `avatars/{user_id}/avatar.jpg` | `storage-policies.sql` | Profile photo upload |
+| **Guia de Bolso - Imagens** | `avatars/{user_id}/avatar.jpg` | `storage_avatar_legacy_bucket.sql` (production) | Profile avatar upload (`POST /api/perfil/avatar`) |
+| `imagens` | `avatars/{user_id}/avatar.jpg` | `storage-policies.sql` | Profile avatars (fallback bucket name) |
 
-Legacy bucket name **“Guia de Bolso - Imagens”** may still host older assets.
+Production may use only the legacy bucket above; `lib/avatarStorage.js` tries **Guia de Bolso - Imagens** first, then `imagens`.
 
 ---
 
@@ -666,7 +668,7 @@ Quick summary for existing projects that already have base tables:
 2. Perfis RLS + guards: `perfis_rls_fix.sql`, `perfis_premium_policies.sql`, `perfis_privileged_guard.sql`, `perfis_role_check.sql`
 3. Content & taxonomy: `tags_categorias.sql`, `fotos_migration.sql`, `lugares_visibilidade.sql`, `taxonomia_lugares_cleanup.sql`, `lugares_qr_slug.sql`
 4. Routes: `rotas_taxonomia.sql`, `rota_dicas.sql`, **`rotas_policies.sql`** (re-run after route child tables), `rotas_localizacoes.sql`, `rota_ponto_detalhes.sql`, `rotas_favoritas.sql`
-5. Security P0: `lugares_public_read.sql`, `lugares_related_public_read.sql`, `lugares_admin_write.sql`, `logs_policies.sql`, `storage_admin_fotos.sql`
+5. Security P0: `lugares_public_read.sql`, `lugares_related_public_read.sql`, `lugares_admin_write.sql`, `logs_policies.sql`, `storage_admin_fotos.sql`, **`storage_avatar_legacy_bucket.sql`** (if avatars use legacy bucket)
 6. Performance: `db_indexes.sql`, `db_indexes_phase2.sql`, `lugares_populares_rpc.sql`, **`lugares_populares_rpc_fix.sql`**
 
 ---

@@ -60,8 +60,8 @@ Detalhe de pastas: [`project-structure.md`](./project-structure.md).
 - **Tailwind CSS 4**, mobile-first (`max-w-md` centralizado no desktop).
 - Paleta principal: fundo `#f0f4f3`, primário `#1a4a3a` — preferir tokens em `app/globals.css` para código novo.
 - Dark mode global **desligado** até tema completo (overrides comentados em `globals.css`).
-- Imagens de lista/detalhe: **`next/image`**; hosts em `next.config.mjs`.
-- Upload admin/avatar: **`lib/imageCompress.js`** antes de Storage.
+- Imagens: **`RemotePhoto`** para thumbs/heróis CDN; **`next/image`** com `sizes` + `quality={60}` em cards de lista; `minimumCacheTTL` em `next.config.mjs`.
+- Upload avatar: **`POST /api/perfil/avatar`** + `lib/avatarStorage.js`; admin/entity: **`lib/imageCompress.js`** antes de Storage.
 - Bottom sheets: `role="dialog"`, `aria-modal="true"`, `aria-labelledby` com `useId()`.
 - Erros de página: `role="alert"`.
 

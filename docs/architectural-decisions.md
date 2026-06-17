@@ -123,13 +123,13 @@ Registro das decisões técnicas principais do **Guia de Bolso** (formato ADR si
 
 ---
 
-## ADR-012 — Imagens via next/image + Supabase Storage
+## ADR-012 — Hybrid image delivery (RemotePhoto + next/image)
 
 | | |
 |---|---|
-| **Status** | Aceito |
-| **Decisão** | URLs públicas Storage; hosts em `next.config.mjs`; compressão client antes upload admin |
-| **Consequências** | Novo domínio de imagem exige atualizar `remotePatterns` |
+| **Status** | Aceito (atualizado) |
+| **Decisão** | URLs públicas no Supabase Storage; **`RemotePhoto`** (`<img>` direto) para miniaturas e heróis; **`next/image`** só em cards de lista com `sizes` + `quality={60}`; `minimumCacheTTL` 30 dias em `next.config.mjs`; compressão client antes do upload admin/avatar |
+| **Consequências** | Novo domínio de imagem exige `remotePatterns`; uploads de avatar preferem `POST /api/perfil/avatar` + bucket legado **Guia de Bolso - Imagens** |
 
 ---
 

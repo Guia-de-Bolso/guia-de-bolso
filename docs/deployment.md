@@ -313,9 +313,12 @@ Create **public** buckets if they do not exist:
 |--------|---------|
 | `lugares-fotos` | Place gallery (admin upload) |
 | `rotas-fotos` | Route covers |
-| `imagens` | User avatars (`avatars/{user_id}/`) |
+| `imagens` | User avatars (`avatars/{user_id}/`) — fallback if created |
+| **Guia de Bolso - Imagens** | Production avatars (legacy bucket; primary in `lib/avatarStorage.js`) |
 
-Apply policies from `fotos_migration.sql` and `storage-policies.sql`.
+Apply policies from `fotos_migration.sql`, `storage-policies.sql`, and **`storage_avatar_legacy_bucket.sql`** for the legacy bucket.
+
+Avatar upload in the app uses **`POST /api/perfil/avatar`** (requires `SUPABASE_SERVICE_ROLE_KEY` on Vercel).
 
 ### 5. First admin user
 
@@ -375,7 +378,7 @@ Use this list for **first launch** and **each major release**.
 - [ ] Login (Google + SMS) → redirect to `/` via `/auth/callback`
 - [ ] Logged-in user: favorite, review submit (pending moderation)
 - [ ] AI search (`POST /api/buscar`) — success and limit/paywall when applicable
-- [ ] AI roteiro on `/rotas` — generate and save
+- [ ] AI roteiro on `/atrativos` — generate and save
 - [ ] Maps CTA on place detail opens Google / Apple / Waze
 - [ ] Admin `/admin` — dashboard, edit place, moderate review
 - [ ] Admin `/admin/logs` and `/admin/taxonomia` (admin role)
@@ -413,7 +416,7 @@ Use this list for **first launch** and **each major release**.
 | 3 | Open `/lugares/<id>` | Detail, photos, CTA |
 | 4 | `/login` → Google or SMS | Session + avatar on home |
 | 5 | `/favoritos` | List or empty state when logged in |
-| 6 | `/rotas` → create roteiro | Sheet works; save appears in list |
+| 6 | `/atrativos` → create roteiro | Sheet works; save appears in list |
 | 7 | `/admin` as admin | Dashboard metrics load |
 | 8 | `/admin/logs` | Filter logs; open place from `ir_agora` row |
 | 9 | `/categorias` | Explorar grid; submit review → pending + IA hint in admin |
@@ -443,7 +446,7 @@ Use this list for **first launch** and **each major release**.
 
 ## Performance notes
 
-- Place/route images are served from **Supabase Storage** (CDN), delivered in the app via **`next/image`** where integrated (`next.config.mjs` `images.remotePatterns`).
+- Place/route images are served from **Supabase Storage** (CDN). **Listing cards** use **`next/image`** with `sizes`, `quality={60}`, and `minimumCacheTTL: 2592000` (30 days) in `next.config.mjs`. **Thumbnails and heroes** use **`RemotePhoto`** (`components/shared/RemotePhoto.js`) to reduce Vercel Image Optimization quota.
 - Home loads catalog in **two phases** (primary then nearby + weather) so hero/trending are not blocked by secondary fetches.
 - Category page counts use **one** `lugares` query, not per-category `count` head requests.
 - AI routes are **serverless** — cold starts possible after idle periods.

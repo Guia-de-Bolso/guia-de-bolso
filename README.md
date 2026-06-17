@@ -75,7 +75,7 @@ The product combines a curated place catalog, live context (opening hours, geolo
 - **Category exploration** — full taxonomy via `/categorias` and filtered listings
 - **Authentication** — Google OAuth and SMS OTP (Supabase Auth + Twilio)
 - **Engagement** — favorites, moderated reviews, share, onboarding flow
-- **Resilient UX** — skeleton loaders, visible error banners, optimized images via `next/image`, shared design tokens and focus styles (see [`docs/features.md`](./docs/features.md) §26)
+- **Resilient UX** — skeleton loaders, visible error banners, hybrid image delivery (`RemotePhoto` + `next/image`), shared design tokens and focus styles (see [`docs/features.md`](./docs/features.md) §26)
 
 ### Guia Premium (subscription)
 

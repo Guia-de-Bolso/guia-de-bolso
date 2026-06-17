@@ -308,6 +308,26 @@ Registra logs de moderação em `logs_ia` (feature `moderacao`) com latência, t
 
 ---
 
+### `POST /api/perfil/avatar`
+
+Authenticated profile photo upload. Uses **service role** server-side to write to Storage when client RLS is unavailable on the legacy bucket.
+
+**Auth:** Supabase session cookie (401 `{ code: "UNAUTHORIZED" }` if missing).
+
+**Body:** `multipart/form-data` with field `file` (JPEG, PNG, or WebP; max 5 MB).
+
+**Requires:** `SUPABASE_SERVICE_ROLE_KEY` on the server (503 if missing).
+
+**Success (200):** `{ "foto_url": "<public url>", "bucket": "Guia de Bolso - Imagens" | "imagens" }`
+
+**Side effects:** Upserts `perfis.foto_url` for the authenticated user.
+
+**Errors:** `400` validation (`code: "VALIDATION"`); `500` storage (`STORAGE`) or profile save (`PERFIL`).
+
+Implementation: `app/api/perfil/avatar/route.js`, `lib/avatarStorage.js`; client: `app/perfil/editar/page.js`.
+
+---
+
 ### `GET /api/uso-premium`
 
 Returns current user's premium status and **daily** AI usage (with optional `resetsAt` / `msUntilReset` for countdown UI).

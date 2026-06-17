@@ -19,11 +19,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **Establishment QR codes** — short URL `/q/{slug}` with redirect + `escaneou_qr` log; admin preview/PDF download (`LugarQrSection`, `lib/qrPdf.js`, `lib/lugarQr.js`, `lib/slug.js`); slug on `lugares`; eligible categories exclude Natureza/Aventura; scan KPI in `/admin/relatorios`.
 - **Place detail redesign (Airbnb-style)** — `LugarDetalheAirbnb`, shared `hooks/useLugarDetalhe.js`, legacy preserved in `LugarDetalheLegacy`; opt-out via `NEXT_PUBLIC_LUGAR_DETALHE_V2=false` (V2 is default everywhere).
 
+- **Profile avatar upload API** — `POST /api/perfil/avatar` uploads via service role when Storage RLS is missing on the legacy bucket (`lib/avatarStorage.js`, `app/perfil/editar/page.js`); optional RLS in `supabase/storage_avatar_legacy_bucket.sql`.
+- **RemotePhoto CDN delivery** — `components/shared/RemotePhoto.js` serves Supabase Storage URLs without Vercel Image Optimization for thumbnails, heroes, search rows, category cards, compact atrativo cards, and landing mockups.
+
 ### Changed
 
 - **Admin establishment reports** — KPI **Escaneamentos QR** (`escaneou_qr`) separate from page views; included in PDF and WhatsApp summary.
 - **Place profile visibility** — full public profile (gallery, tags, quick actions, long about) for all active places; only Parceiro badge remains tied to paid highlight (`lib/lugarVisibilidade.js`, `PlaceCard.js`).
-
+- **Vercel image delivery** — `minimumCacheTTL: 2592000` (30 days) in `next.config.mjs`; listing cards keep `next/image` with explicit `sizes` and `quality={60}` (`PlaceCard`, `EmAltaCard`, `LandingPlaceCard`, featured cover in `AtrativosCatalogo`); heroes and small thumbs use `RemotePhoto` (`GalleryHeroAirbnb`, `LugarHero`, `SearchListItem`, `CategoriaLugarCard`, etc.).
+- **Review submit** — `AvaliacaoForm` requires a non-empty comment; submit stays disabled until rating + trimmed comment (`components/AvaliacaoForm.js`).
+- **SMS profile edit** — `/perfil/editar` hides the read-only email field when `usesPhoneAuth(user)` (`lib/perfil.js`).
 - **Admin tag limit** — places and curated routes allow **5 tags** (was 3) in `LocalForm` / `RotaForm` (`MAX_TAGS`, `MAX_TAGS_ROTA` in `lib/rotas.js`).
 - **Onboarding assets** — backgrounds from `/public/onboarding/*.jpg` (compressed local JPGs); guest finish/skip routes to `/login?from=onboarding`, logged-in users to home (`components/Onboarding.js`, `app/page.js`, `lib/authImagery.js`).
 - **Place & route photo carousels** — controlled swipe: `snap-mandatory` + `useControlledPhotoCarousel` (max ±1 slide per gesture) in `lib/horizontalCarousel.js`; `GalleryHeroAirbnb`, `LugarHero`.
@@ -35,6 +40,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- **Profile avatar upload in production** — server-side upload tries legacy bucket **Guia de Bolso - Imagens** then `imagens` (`lib/avatarStorage.js`); client no longer depends on direct Storage RLS for avatars.
 - **Saved roteiro delete** — `DELETE /api/roteiro/[id]` server route verifies row removal; client uses API instead of direct Supabase delete; RLS policies in `supabase/roteiros_policies.sql` (`components/rotas/RoteiroSection.js`).
 - **Admin hours editor** — turn 2 inputs editable while validating (local draft state); overnight second shift allowed with daytime first shift (`components/admin/HorarioEditor.js`, `validarIntervalos` in `lib/horarios.js`).
 
@@ -42,6 +48,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - Synced `/docs` with post-0.5.0 code: home ranking criteria, admin reports, roteiro parser, `visualizou_lugar`, free-tier search limit (5/day).
 - Updated hours model, tag limit (5), onboarding navigation, carousel behavior, and `[Unreleased]` changelog entries.
+- Synced image delivery (`RemotePhoto` vs `next/image`), avatar API (`POST /api/perfil/avatar`), review comment requirement, legacy avatar bucket SQL, and `/atrativos` routes (301 from `/rotas`).
 
 ## [0.5.0] - 2026-05-21
 

@@ -27,9 +27,10 @@ Use a ferramenta com **153 casos de teste**, passo a passo por dispositivo, resu
 | QR estabelecimento | Admin editar local → PDF; scan `/q/{slug}` | Natureza/Aventura sem QR |
 | Ver lugar | Cards → `/lugares/[id]` | Nenhuma |
 | Favoritar | Coração home/detalhe, `/favoritos` | Login |
-| Avaliar | Detalhe → `AvaliacaoForm` | Login; moderação admin |
-| Roteiro IA | `/rotas` → Criar roteiro | Login + limite 2/dia (free); excluir salvo via `DELETE /api/roteiro/[id]` |
-| Rotas curadas | `/rotas`, `/rotas/[id]` | Nenhuma (só listagem) |
+| Avaliar | Detalhe → `AvaliacaoForm` | Login; comentário obrigatório; moderação admin |
+| Roteiro IA | `/atrativos` → Criar roteiro | Login + limite 2/dia (free); excluir salvo via `DELETE /api/roteiro/[id]` |
+| Atrativos curados | `/atrativos`, `/atrativos/[id]` | Nenhuma (só listagem) |
+| Avatar | `/perfil/editar` → upload foto | Login; `POST /api/perfil/avatar` + `SUPABASE_SERVICE_ROLE_KEY` no servidor |
 | Clima | Hero home; `LugarClimaWidget` no detalhe | Sheet completo = login |
 | Perfil | `/perfil`, `/perfil/editar` | Stats só logado |
 | Admin | `/admin` + nav | `role` admin ou dev |

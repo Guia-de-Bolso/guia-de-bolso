@@ -307,7 +307,7 @@ guia-de-bolso/
 - [x] Página de favoritos com remoção de favoritos
 - [x] Bottom nav com navegação ativa por rota
 - [x] Página de perfil com foto, nome, email e estatísticas
-- [x] Editar perfil com upload de foto para Supabase Storage
+- [x] Editar perfil com upload de foto via `POST /api/perfil/avatar` (`lib/avatarStorage.js`)
 - [x] Upload de foto de perfil funcionando
 - [x] Tela de perfil sem login com benefícios e opções de entrada
 - [x] Logout com confirmação
@@ -328,6 +328,7 @@ guia-de-bolso/
 - [x] QR Code por estabelecimento — URL curta `/q/{slug}`, PDF no admin, contagem de scans nos relatórios
 - [x] Roteiro IA com timeline (`lib/roteiroParse.js`, `RoteiroItineraryView`)
 - [x] Compressão de imagem no cliente (`lib/imageCompress.js`) para avatar e fotos admin
+- [x] Entrega híbrida de imagens — `RemotePhoto` (CDN direto) + `next/image` em cards de lista; `minimumCacheTTL` em `next.config.mjs`
 - [x] Sistema de avaliações com moderação
 - [x] Editor de horários com time picker (Fechado/24h, **dois turnos por dia**, fechamento após meia-noite, copiar entre dias — `HorarioEditor`, `lib/horarios.js`)
 - [x] Testes unitários de horários (`lib/horarios.test.js`) e premium (`lib/premium.test.js`)
