@@ -961,6 +961,16 @@ function Home({ initialHomeData = null }) {
       <PremiumPaywallSheet
         isOpen={paywallOpen}
         feature={paywallFeature}
+        user={user}
+        onLoginRequired={() => {
+          setPaywallOpen(false);
+          setMotivoModal("premium");
+          setIsModalOpen(true);
+        }}
+        onPremiumActivated={(nextUsage) => {
+          if (nextUsage) setPremiumUsage(nextUsage);
+          else refreshPremiumUsage();
+        }}
         onClose={() => setPaywallOpen(false)}
       />
     </div>

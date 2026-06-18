@@ -53,7 +53,8 @@ export default function PerfilPage() {
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
-  const { usage: premiumUsage } = usePremiumUsage(user);
+  const { usage: premiumUsage, refresh: refreshPremiumUsage, setUsage: setPremiumUsage } =
+    usePremiumUsage(user);
   const isPremium = isPremiumActive(perfil) || Boolean(premiumUsage?.premium);
 
   useEffect(() => {
@@ -466,6 +467,15 @@ export default function PerfilPage() {
       <PremiumPaywallSheet
         isOpen={paywallOpen}
         feature="geral"
+        user={user}
+        onLoginRequired={() => {
+          setPaywallOpen(false);
+          router.push("/login?next=/perfil");
+        }}
+        onPremiumActivated={(nextUsage) => {
+          if (nextUsage) setPremiumUsage(nextUsage);
+          else refreshPremiumUsage();
+        }}
         onClose={() => setPaywallOpen(false)}
       />
     </div>

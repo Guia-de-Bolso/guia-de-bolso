@@ -1,10 +1,13 @@
 "use client";
 
+import { useCallback, useState } from "react";
 import BottomSheetShell from "@/components/BottomSheetShell";
 import DailyLimitCountdown from "@/components/DailyLimitCountdown";
 import { useBottomSheetDrag } from "@/hooks/useBottomSheetDrag";
 import { PREMIUM_BENEFITS } from "@/lib/premiumBenefits";
 import { LIMITS, PREMIUM_PRICE_LABEL } from "@/lib/premium";
+import { canPurchasePlayPremium } from "@/lib/playPremiumConfig";
+import { purchasePlayPremium, restorePlayPremiumPurchases } from "@/lib/playPremiumPurchase";
 
 const COPY = {
   busca: {
@@ -34,6 +37,9 @@ const COPY = {
  * @param {() => void} props.onClose - Called when the user dismisses the sheet.
  * @param {'busca'|'roteiro'|'clima'|'geral'} [props.feature] - Feature context for copy.
  * @param {boolean} [props.showCountdown=true] - Exibe contador até o reset diário.
+ * @param {import('@supabase/supabase-js').User|null} [props.user] - Usuário logado (necessário para compra).
+ * @param {() => void} [props.onLoginRequired] - Abre fluxo de login quando não autenticado.
+ * @param {(usage: import('@/lib/premium').PremiumUsage|null) => void} [props.onPremiumActivated] - Callback após ativação.
  * @returns {import('react').ReactElement|null}
  */
 export default function PremiumPaywallSheet({
@@ -41,14 +47,83 @@ export default function PremiumPaywallSheet({
   onClose,
   feature = "geral",
   showCountdown = true,
+  user = null,
+  onLoginRequired,
+  onPremiumActivated,
 }) {
   const { sheetRef, scrollAreaRef, dragY, isDragging, sheetMotionStyle } = useBottomSheetDrag({
     isOpen,
     onClose,
   });
 
+  const [purchasing, setPurchasing] = useState(false);
+  const [restoring, setRestoring] = useState(false);
+  const [purchaseError, setPurchaseError] = useState("");
+
   const copy = COPY[feature] ?? COPY.geral;
   const isLimitFeature = feature === "busca" || feature === "roteiro";
+  const canPurchase = canPurchasePlayPremium();
+  const isBusy = purchasing || restoring;
+
+  const handlePurchase = useCallback(async () => {
+    setPurchaseError("");
+
+    if (!user?.id) {
+      onLoginRequired?.();
+      return;
+    }
+
+    setPurchasing(true);
+    try {
+      const result = await purchasePlayPremium({ userId: user.id });
+
+      if (result.cancelled) return;
+
+      if (!result.ok) {
+        setPurchaseError(result.message ?? "Não foi possível concluir a compra.");
+        return;
+      }
+
+      onPremiumActivated?.(result.usage ?? null);
+      onClose();
+    } catch {
+      setPurchaseError("Não foi possível concluir a compra. Tente novamente.");
+    } finally {
+      setPurchasing(false);
+    }
+  }, [user, onLoginRequired, onPremiumActivated, onClose]);
+
+  const handleRestore = useCallback(async () => {
+    setPurchaseError("");
+
+    if (!user?.id) {
+      onLoginRequired?.();
+      return;
+    }
+
+    setRestoring(true);
+    try {
+      const result = await restorePlayPremiumPurchases();
+
+      if (!result.ok) {
+        setPurchaseError(result.message ?? "Não foi possível restaurar a assinatura.");
+        return;
+      }
+
+      onPremiumActivated?.(result.usage ?? null);
+      onClose();
+    } catch {
+      setPurchaseError("Não foi possível restaurar a assinatura.");
+    } finally {
+      setRestoring(false);
+    }
+  }, [user, onLoginRequired, onPremiumActivated, onClose]);
+
+  const primaryLabel = purchasing
+    ? "Processando…"
+    : user
+      ? `Assinar Premium · ${PREMIUM_PRICE_LABEL}`
+      : "Entrar para assinar";
 
   return (
     <BottomSheetShell
@@ -63,19 +138,48 @@ export default function PremiumPaywallSheet({
       dragY={dragY}
       footer={
         <div className="shrink-0 border-t border-gray-100 px-6 pb-[max(1.75rem,env(safe-area-inset-bottom))] pt-3 touch-auto">
-          <button
-            type="button"
-            disabled
-            aria-disabled="true"
-            className="w-full cursor-not-allowed rounded-xl bg-[#1a4a3a] py-3.5 text-sm font-semibold text-white opacity-50"
-          >
-            Pagamento em breve
-          </button>
+          {canPurchase ? (
+            <>
+              <button
+                type="button"
+                disabled={isBusy}
+                onClick={handlePurchase}
+                className="w-full rounded-xl bg-[#1a4a3a] py-3.5 text-sm font-semibold text-white transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {primaryLabel}
+              </button>
+
+              <button
+                type="button"
+                disabled={isBusy}
+                onClick={handleRestore}
+                className="mt-2 w-full py-2 text-sm text-[#1a4a3a] underline-offset-2 hover:underline disabled:opacity-50"
+              >
+                {restoring ? "Restaurando…" : "Restaurar assinatura"}
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              className="w-full cursor-not-allowed rounded-xl bg-[#1a4a3a] py-3.5 text-sm font-semibold text-white opacity-50"
+            >
+              Pagamento em breve na web
+            </button>
+          )}
+
+          {purchaseError ? (
+            <p className="mt-3 text-center text-xs leading-relaxed text-red-600" role="alert">
+              {purchaseError}
+            </p>
+          ) : null}
 
           <button
             type="button"
             onClick={onClose}
-            className="mt-2 w-full py-2 text-sm text-[#5a6b66]"
+            disabled={isBusy}
+            className="mt-2 w-full py-2 text-sm text-[#5a6b66] disabled:opacity-50"
           >
             Agora não
           </button>
@@ -124,6 +228,13 @@ export default function PremiumPaywallSheet({
         <p className="mt-1 pb-2 text-center text-xs text-[#5a6b66]">
           Uso ilimitado · Pagamento recorrente · Cancele quando quiser
         </p>
+
+        {canPurchase ? (
+          <p className="pb-2 text-center text-[10px] leading-relaxed text-[#8a9a94]">
+            Cobrança via Google Play. Renovação automática até cancelar nas configurações da Play
+            Store.
+          </p>
+        ) : null}
       </div>
     </BottomSheetShell>
   );

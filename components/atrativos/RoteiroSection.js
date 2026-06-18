@@ -534,6 +534,15 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
       <PremiumPaywallSheet
         isOpen={paywallOpen}
         feature="roteiro"
+        user={user}
+        onLoginRequired={() => {
+          setPaywallOpen(false);
+          setLoginOpen(true);
+        }}
+        onPremiumActivated={(nextUsage) => {
+          if (nextUsage) setPremiumUsage(nextUsage);
+          else refreshUsage();
+        }}
         onClose={() => setPaywallOpen(false)}
       />
 
