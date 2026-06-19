@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import AppDeveloperCredit from "@/components/AppDeveloperCredit";
 import IconBack from "@/components/IconBack";
 import { LEGAL_LAST_UPDATED, LEGAL_RESPONSAVEL } from "@/lib/legalContent";
+import { SITE_WHATSAPP_URL, getSiteTelHref } from "@/lib/siteContact";
 
 /**
  * Página legal estática (privacidade ou termos).
@@ -95,6 +96,22 @@ export default function LegalDocument({ kind, title, sections }) {
               className="font-semibold text-[#1a4a3a] underline"
             >
               {LEGAL_RESPONSAVEL.email}
+            </a>
+            {" · "}
+            <a
+              href={getSiteTelHref()}
+              className="font-semibold text-[#1a4a3a] underline"
+            >
+              {LEGAL_RESPONSAVEL.telefone}
+            </a>
+            {" · "}
+            <a
+              href={SITE_WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-[#1a4a3a] underline"
+            >
+              WhatsApp
             </a>
           </p>
           <p className="mt-2 flex flex-wrap justify-center gap-x-3 gap-y-1">

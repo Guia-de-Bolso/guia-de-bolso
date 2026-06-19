@@ -24,7 +24,13 @@ import {
   resolveAvatarUrl,
 } from "@/lib/perfil";
 import { isPremiumActive } from "@/lib/premium";
-import { SITE_CONTACT_EMAIL, SOCIAL_LINKS } from "@/lib/siteContact";
+import {
+  SITE_CONTACT_EMAIL,
+  SITE_CONTACT_PHONE_DISPLAY,
+  SITE_WHATSAPP_URL,
+  SOCIAL_LINKS,
+  getSiteTelHref,
+} from "@/lib/siteContact";
 import { usePremiumUsage } from "@/lib/usePremiumUsage";
 import { createClient } from "@/lib/supabase";
 import { useFeedback } from "@/components/FeedbackProvider";
@@ -354,6 +360,24 @@ export default function PerfilPage() {
             <PerfilSettingsGroup
               title="Contato"
               items={[
+                {
+                  key: "telefone",
+                  icon: "📞",
+                  label: "Telefone",
+                  detail: SITE_CONTACT_PHONE_DISPLAY,
+                  onClick: () => {
+                    window.location.href = getSiteTelHref();
+                  },
+                },
+                {
+                  key: "whatsapp",
+                  icon: "💬",
+                  label: "WhatsApp",
+                  detail: SITE_CONTACT_PHONE_DISPLAY,
+                  onClick: () => {
+                    window.open(SITE_WHATSAPP_URL, "_blank", "noopener,noreferrer");
+                  },
+                },
                 {
                   key: "email",
                   icon: "✉️",

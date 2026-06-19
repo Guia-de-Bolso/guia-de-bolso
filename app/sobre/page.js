@@ -8,7 +8,13 @@ import {
   PREFETURA_SUPPORT_LINE,
   PREFETURA_SUPPORT_SOBRE,
 } from "@/lib/institutionalSupport";
-import { SITE_CONTACT_EMAIL, SOCIAL_LINKS } from "@/lib/siteContact";
+import {
+  SITE_CONTACT_EMAIL,
+  SITE_CONTACT_PHONE_DISPLAY,
+  SITE_WHATSAPP_URL,
+  SOCIAL_LINKS,
+  getSiteTelHref,
+} from "@/lib/siteContact";
 
 export const metadata = buildSobreMetadata();
 
@@ -120,8 +126,21 @@ export default function SobrePage() {
         <section className="mt-8">
           <h2 className="text-lg font-bold text-[#1a2e28]">Contato e redes</h2>
           <p className="mt-3 text-sm text-[#5a6b66]">
-            <a href={`mailto:${SITE_CONTACT_EMAIL}`} className="font-semibold text-[#1a4a3a]">
+            <a href={`mailto:${SITE_CONTACT_EMAIL}`} className="font-semibold text-[#1a4a3a] hover:underline">
               {SITE_CONTACT_EMAIL}
+            </a>
+            {" · "}
+            <a href={getSiteTelHref()} className="font-semibold text-[#1a4a3a] hover:underline">
+              {SITE_CONTACT_PHONE_DISPLAY}
+            </a>
+            {" · "}
+            <a
+              href={SITE_WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-[#1a4a3a] hover:underline"
+            >
+              WhatsApp
             </a>
           </p>
           <ul className="mt-3 flex flex-wrap gap-3 text-sm">

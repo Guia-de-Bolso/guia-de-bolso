@@ -4,10 +4,11 @@ import PrefeituraSupportLine from "@/components/PrefeituraSupportLine";
 import { IconInstagram, IconMail, IconTikTok } from "@/components/landing/LandingIcons";
 import {
   LANDING_CONTACT_EMAIL,
+  LANDING_CONTACT_PHONE,
   LANDING_SECTION_IDS,
   landingContactMailto,
 } from "@/lib/landingContent";
-import { SITE_DOMAIN, SOCIAL_LINKS } from "@/lib/siteContact";
+import { SITE_DOMAIN, SITE_WHATSAPP_URL, SOCIAL_LINKS, getSiteTelHref } from "@/lib/siteContact";
 
 /**
  * Rodapé minimal.
@@ -113,6 +114,21 @@ export default function LandingFooter() {
               <Link href="/excluir-conta" className="text-[#5c6f68] hover:text-[#0d1f19]">
                 Excluir conta
               </Link>
+            </li>
+            <li>
+              <a href={getSiteTelHref()} className="text-[#5c6f68] hover:text-[#0d1f19]">
+                {LANDING_CONTACT_PHONE}
+              </a>
+            </li>
+            <li>
+              <a
+                href={SITE_WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#5c6f68] hover:text-[#0d1f19]"
+              >
+                WhatsApp
+              </a>
             </li>
             <li>
               <a href={landingContactMailto()} className="text-[#5c6f68] hover:text-[#0d1f19]">

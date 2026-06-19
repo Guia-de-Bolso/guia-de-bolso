@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import IconApple from "@/components/IconApple";
 import IconBack from "@/components/IconBack";
@@ -9,7 +9,13 @@ import { ensurePerfil } from "@/lib/ensurePerfil";
 import { signInWithGoogleOAuth } from "@/lib/capacitorOAuth";
 import { formatNativeGoogleError } from "@/lib/nativeGoogleAuth";
 import { safeRedirectPath } from "@/lib/safeRedirectPath";
+import {
+  otpDigitsFromInput,
+  otpDigitsToCode,
+  requestWebSmsOtp,
+} from "@/lib/smsOtpAutofill";
 import { createClient } from "@/lib/supabase";
+import { SITE_CONTACT_PHONE_DISPLAY } from "@/lib/siteContact";
 
 /**
  * IconGoogle - Google brand icon for OAuth button.
@@ -149,11 +155,34 @@ export default function AuthFlow({
   const inputClass =
     "mt-6 w-full min-h-[52px] rounded-2xl border border-[#e3ebe7] bg-white px-4 py-3 text-base text-[#1a2e28] outline-none focus-visible:ring-2 focus-visible:ring-[#1a4a3a]/25";
 
+  const applyOtpDigits = useCallback((raw) => {
+    const digits = otpDigitsFromInput(raw);
+    const next = otpDigitsToCode(digits);
+    if (!next) return false;
+
+    setCode(next);
+    setCodeError("");
+    setTimeout(() => inputsRef.current[5]?.focus(), 0);
+    return true;
+  }, []);
+
   useEffect(() => {
     if (screen !== "code" || resendSeconds <= 0) return undefined;
     const timer = setTimeout(() => setResendSeconds((current) => current - 1), 1000);
     return () => clearTimeout(timer);
   }, [screen, resendSeconds]);
+
+  useEffect(() => {
+    if (screen !== "code") return undefined;
+
+    const controller = new AbortController();
+
+    requestWebSmsOtp({ signal: controller.signal }).then((otpCode) => {
+      if (otpCode) applyOtpDigits(otpCode);
+    });
+
+    return () => controller.abort();
+  }, [screen, resendCount, applyOtpDigits]);
 
   async function handleGoogle() {
     setOauthLoading(true);
@@ -253,7 +282,10 @@ export default function AuthFlow({
   }
 
   function updateCode(index, value) {
-    const digit = value.replace(/\D/g, "").slice(-1);
+    const digits = value.replace(/\D/g, "");
+    if (digits.length > 1 && applyOtpDigits(digits)) return;
+
+    const digit = digits.slice(-1);
     const next = [...code];
     next[index] = digit;
     setCode(next);
@@ -268,11 +300,8 @@ export default function AuthFlow({
   }
 
   function handlePaste(event) {
-    const pasted = event.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
-    if (pasted.length !== 6) return;
+    if (!applyOtpDigits(event.clipboardData.getData("text"))) return;
     event.preventDefault();
-    setCode(pasted.split(""));
-    inputsRef.current[5]?.focus();
   }
 
   function resetPhone() {
@@ -317,7 +346,7 @@ export default function AuthFlow({
             setPhone(formatPhone(event.target.value));
             setPhoneError("");
           }}
-          placeholder="(48) 9 9608-7543"
+          placeholder={SITE_CONTACT_PHONE_DISPLAY}
           className={inputClass}
         />
         {phoneError && (
