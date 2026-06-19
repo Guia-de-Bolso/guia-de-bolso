@@ -202,7 +202,7 @@ function LandingHeroBody({
               </span>
             </EyebrowTag>
 
-            <PrefeituraSupportLine variant="hero" className="mt-3" />
+            <PrefeituraSupportLine variant="hero" className="mt-3 [&_p]:justify-start" />
 
             <TitleTag
               id="landing-hero-title"
