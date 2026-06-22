@@ -6,12 +6,13 @@ import RemotePhoto from "@/components/shared/RemotePhoto";
  * Prévia de resultados de busca com IA destacando um parceiro.
  * @param {object} props
  * @param {import('@/lib/landingPageData').LandingLugarCard} [props.lugar]
+ * @param {boolean} [props.genericPartners]
  * @returns {import('react').ReactElement}
  */
-export default function LandingPhoneBuscaScreen({ lugar }) {
-  const nome = lugar?.nome || "Seu estabelecimento";
-  const categoria = lugar?.categoria || "Gastronomia";
-  const capa = lugar?.capa;
+export default function LandingPhoneBuscaScreen({ lugar, genericPartners = false }) {
+  const nome = genericPartners ? "Estabelecimento parceiro" : lugar?.nome || "Seu estabelecimento";
+  const categoria = genericPartners ? "Gastronomia" : lugar?.categoria || "Gastronomia";
+  const capa = genericPartners ? null : lugar?.capa;
 
   const outros = [
     { nome: "Opção local", categoria: "Gastronomia" },

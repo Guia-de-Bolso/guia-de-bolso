@@ -10,6 +10,7 @@ import {
   useLandingRichMotion,
 } from "@/components/landing/useLandingRichMotion";
 import { LANDING_SECTION_IDS } from "@/lib/landingContent";
+import { formatParceirosCadastrados } from "@/lib/landingPartnerCopy";
 import { NEGOCIOS_APP_TOUCHPOINTS } from "@/lib/negociosContent";
 
 /**
@@ -21,6 +22,7 @@ import { NEGOCIOS_APP_TOUCHPOINTS } from "@/lib/negociosContent";
  * @param {import('@/lib/landingPageData').LandingPageData['stats']} [props.stats]
  * @param {string} [props.sectionId]
  * @param {boolean} [props.compact]
+ * @param {boolean} [props.genericPartners]
  * @returns {import('react').ReactElement}
  */
 export default function LandingBusinessShowcase({
@@ -30,6 +32,7 @@ export default function LandingBusinessShowcase({
   stats,
   sectionId = LANDING_SECTION_IDS.negociosShowcase,
   compact = false,
+  genericPartners = false,
 }) {
   const richMotion = useLandingRichMotion();
   const { reveal, viewport } = useLandingRevealMotion();
@@ -39,7 +42,8 @@ export default function LandingBusinessShowcase({
   const active =
     NEGOCIOS_APP_TOUCHPOINTS.find((t) => t.id === activeId) ?? NEGOCIOS_APP_TOUCHPOINTS[0];
 
-  const emAlta = showcase.length > 0 ? showcase : parceiros;
+  const emAlta = showcase.length > 0 ? showcase : genericPartners ? [] : parceiros;
+  const parceirosLabel = formatParceirosCadastrados(stats?.parceirosCount);
 
   return (
     <LandingSection
@@ -53,7 +57,11 @@ export default function LandingBusinessShowcase({
           <LandingSectionHeader
             eyebrow="No app de verdade"
             title="Veja onde seu negócio aparece."
-            subtitle="Exemplos reais do Guia de Bolso — carrossel, perfil completo e busca com IA."
+            subtitle={
+              genericPartners
+                ? "Prévia do Guia de Bolso — carrossel, perfil completo e busca com IA."
+                : "Exemplos reais do Guia de Bolso — carrossel, perfil completo e busca com IA."
+            }
           />
 
           <div
@@ -96,7 +104,7 @@ export default function LandingBusinessShowcase({
             <p className="mt-3 text-base leading-relaxed text-[#5c6f68]">{active.body}</p>
           </motion.div>
 
-          {!compact && (
+          {!compact && parceirosLabel ? (
             <motion.p
               initial="hidden"
               whileInView="visible"
@@ -105,9 +113,9 @@ export default function LandingBusinessShowcase({
               className="mt-8 inline-flex items-center gap-2 rounded-full bg-[#e8f2ee]/90 px-4 py-2 text-sm font-medium text-[#1a4a3a]"
             >
               <span aria-hidden>📍</span>
-              Dados e fotos de parceiros reais de Imbituba
+              {parceirosLabel}
             </motion.p>
-          )}
+          ) : null}
         </div>
 
         <div className="relative flex justify-center lg:justify-end">
@@ -116,11 +124,12 @@ export default function LandingBusinessShowcase({
             <LandingPhoneMockup
               screen={active.screen}
               size="showcase"
-              parceiros={parceiros}
+              parceiros={genericPartners ? [] : parceiros}
               emAlta={emAlta}
               places={emAlta}
               categorias={categorias}
               stats={stats}
+              genericPartners={genericPartners}
               animateEntrance={richMotion}
             />
           </PhoneWrap>

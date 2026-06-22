@@ -9,9 +9,12 @@ import { LANDING_SECTION_IDS, landingContactMailto } from "@/lib/landingContent"
 import {
   NEGOCIOS_CONTACT_MAILTO,
   NEGOCIOS_PLANO_PARCEIRO,
-  NEGOCIOS_TESTIMONIALS,
   NEGOCIOS_VALUE_PROPS,
 } from "@/lib/negociosContent";
+import {
+  LANDING_GENERIC_BUSINESS_TESTIMONIALS,
+  formatParceirosNoGuia,
+} from "@/lib/landingPartnerCopy";
 
 /**
  * Benefícios para negócios — valor claro + plano + prova social.
@@ -21,8 +24,9 @@ import {
  */
 export default function LandingBusinessBenefits({ stats }) {
   const { reveal, stagger, viewport } = useLandingRevealMotion();
-  const featuredTestimonial = NEGOCIOS_TESTIMONIALS[0];
+  const featuredTestimonial = LANDING_GENERIC_BUSINESS_TESTIMONIALS[0];
   const plano = NEGOCIOS_PLANO_PARCEIRO;
+  const parceirosLabel = formatParceirosNoGuia(stats?.parceirosCount);
 
   return (
     <LandingSection id={LANDING_SECTION_IDS.negocios} className="bg-[#0f2e24] text-white">
@@ -131,10 +135,8 @@ export default function LandingBusinessBenefits({ stats }) {
             </footer>
           </blockquote>
 
-          {stats?.parceirosCount ? (
-            <p className="text-center text-xs text-white/45">
-              {stats.parceirosCount}+ parceiros já no guia
-            </p>
+          {parceirosLabel ? (
+            <p className="text-center text-xs text-white/45">{parceirosLabel}</p>
           ) : null}
         </motion.aside>
       </div>

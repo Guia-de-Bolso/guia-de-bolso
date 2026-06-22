@@ -31,7 +31,6 @@ const HERO_VIDEO_URL =
  * @property {import('@/lib/landingPageData').LandingPageData['stats']} stats
  * @property {boolean} hasLiveData
  * @property {import('@/lib/landingPageData').LandingLugarCard[]} [showcase]
- * @property {import('@/lib/landingPageData').LandingLugarCard[]} [parceiros]
  * @property {import('@/lib/landingPageData').LandingPageData['categorias']} [categorias]
  * @property {string|null} [heroBackdrop]
  * @property {boolean} richMotion
@@ -74,7 +73,6 @@ function LandingHeroBody({
   stats,
   hasLiveData,
   showcase = [],
-  parceiros = [],
   categorias = [],
   heroBackdrop = null,
   richMotion,
@@ -289,8 +287,9 @@ function LandingHeroBody({
                   screen="home"
                   size="hero"
                   emAlta={showcase}
-                  parceiros={parceiros}
                   categorias={categorias}
+                  stats={stats}
+                  genericPartners
                   animateEntrance={richMotion}
                   className="relative z-[1] drop-shadow-[0_40px_80px_rgba(7,15,12,0.28)]"
                 />

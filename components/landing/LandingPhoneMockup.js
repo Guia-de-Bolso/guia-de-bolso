@@ -11,6 +11,7 @@ import {
   getLandingPhoneMetrics,
   PHONE_OUTER_WIDTH,
 } from "@/lib/landingPhoneSpecs";
+import { LANDING_MOCK_PARTNER_PLACE } from "@/lib/landingPartnerCopy";
 
 /**
  * Mockup de smartphone — chassi matte, proporção 19,5:9, punch-hole.
@@ -24,6 +25,7 @@ import {
  * @param {import('@/lib/landingPageData').LandingLugarCard[]} [props.places]
  * @param {string} [props.className]
  * @param {boolean} [props.animateEntrance]
+ * @param {boolean} [props.genericPartners]
  * @returns {import('react').ReactElement}
  */
 export default function LandingPhoneMockup({
@@ -36,6 +38,7 @@ export default function LandingPhoneMockup({
   places = [],
   className = "",
   animateEntrance = true,
+  genericPartners = false,
 }) {
   const outerWidth = PHONE_OUTER_WIDTH[size] ?? PHONE_OUTER_WIDTH.hero;
   const m = getLandingPhoneMetrics(outerWidth);
@@ -49,21 +52,28 @@ export default function LandingPhoneMockup({
   };
   const ariaLabel = ariaLabels[screen] ?? ariaLabels.home;
 
-  const featuredParceiro =
-    parceiros.find((p) => p.capa) ?? alta.find((p) => p.ehParceiro && p.capa) ?? alta[0];
+  const featuredParceiro = genericPartners
+    ? LANDING_MOCK_PARTNER_PLACE
+    : parceiros.find((p) => p.capa) ?? alta.find((p) => p.ehParceiro && p.capa) ?? alta[0];
 
   const screenContent = (() => {
     if (screen === "explorar") {
       return <LandingPhoneExplorarScreen categorias={categorias} stats={stats} />;
     }
     if (screen === "detalhe") {
-      return <LandingPhoneDetalheScreen lugar={featuredParceiro} />;
+      return <LandingPhoneDetalheScreen lugar={featuredParceiro} genericPartners={genericPartners} />;
     }
     if (screen === "busca") {
-      return <LandingPhoneBuscaScreen lugar={featuredParceiro} />;
+      return <LandingPhoneBuscaScreen lugar={featuredParceiro} genericPartners={genericPartners} />;
     }
     return (
-      <LandingPhoneHomeScreen emAlta={alta} parceiros={parceiros} categorias={categorias} />
+      <LandingPhoneHomeScreen
+        emAlta={alta}
+        parceiros={genericPartners ? [] : parceiros}
+        categorias={categorias}
+        genericPartners={genericPartners}
+        parceirosCount={stats?.parceirosCount}
+      />
     );
   })();
 

@@ -7,12 +7,13 @@ import { getBadgeParceiroLabel } from "@/lib/lugarBadges";
  * Prévia da página de detalhe de um parceiro dentro do mockup.
  * @param {object} props
  * @param {import('@/lib/landingPageData').LandingLugarCard} [props.lugar]
+ * @param {boolean} [props.genericPartners]
  * @returns {import('react').ReactElement}
  */
-export default function LandingPhoneDetalheScreen({ lugar }) {
-  const nome = lugar?.nome || "Seu estabelecimento";
-  const categoria = lugar?.categoria || "Gastronomia";
-  const capa = lugar?.capa;
+export default function LandingPhoneDetalheScreen({ lugar, genericPartners = false }) {
+  const nome = genericPartners ? "Estabelecimento parceiro" : lugar?.nome || "Seu estabelecimento";
+  const categoria = genericPartners ? "Gastronomia" : lugar?.categoria || "Gastronomia";
+  const capa = genericPartners ? null : lugar?.capa;
 
   return (
     <div className="h-full overflow-hidden bg-[#f0f4f3]">

@@ -11,7 +11,7 @@ import { CATEGORIAS_EXPLORE } from "@/lib/categorias";
  * @param {boolean} [props.priority]
  * @returns {import('react').ReactElement}
  */
-function MockEmAltaCard({ lugar, priority = false }) {
+function MockEmAltaCard({ lugar, priority = false, hidePartnerBadge = false }) {
   return (
     <div className="flex w-[168px] shrink-0 snap-start flex-col overflow-hidden rounded-[18px] bg-white ring-1 ring-[#e8eeee]">
       <div className="relative h-[96px] overflow-hidden">
@@ -27,7 +27,7 @@ function MockEmAltaCard({ lugar, priority = false }) {
           <div className="h-full w-full bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54]" />
         )}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 to-transparent" />
-        {lugar.ehParceiro ? (
+        {lugar.ehParceiro && !hidePartnerBadge ? (
           <span className="absolute left-2 top-2 rounded-full bg-[#f5e6b8]/95 px-2 py-0.5 text-[8px] font-bold uppercase tracking-wide text-[#7a6520]">
             Parceiro
           </span>
@@ -36,6 +36,28 @@ function MockEmAltaCard({ lugar, priority = false }) {
       <div className="p-2.5">
         <p className="line-clamp-1 text-[13px] font-bold tracking-tight text-[#1a2e28]">{lugar.nome}</p>
         <p className="mt-0.5 line-clamp-1 text-[10px] font-medium text-[#5a6b66]">{lugar.categoria}</p>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Card parceiro genérico para mockup da landing (sem identificar estabelecimento).
+ * @returns {import('react').ReactElement}
+ */
+function MockParceiroCardGeneric() {
+  return (
+    <div className="relative flex h-[140px] w-[220px] shrink-0 snap-start flex-col justify-end overflow-hidden rounded-[20px] ring-1 ring-[#e8eeee]">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54]" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#061612] via-[#061612]/55 to-transparent" />
+      <span className="absolute left-2.5 top-2.5 rounded-full bg-[#f5e6b8]/95 px-2 py-0.5 text-[8px] font-bold uppercase tracking-wide text-[#7a6520]">
+        Parceiro
+      </span>
+      <div className="relative p-3 pb-3.5">
+        <p className="line-clamp-2 text-[14px] font-bold leading-tight text-white drop-shadow-sm">
+          Estabelecimento parceiro
+        </p>
+        <p className="mt-0.5 text-[10px] font-medium text-white/85">Gastronomia · Hospedagem · mais</p>
       </div>
     </div>
   );
@@ -75,19 +97,24 @@ function MockParceiroCard({ lugar }) {
  * @param {import('@/lib/landingPageData').LandingLugarCard[]} [props.emAlta]
  * @param {import('@/lib/landingPageData').LandingLugarCard[]} [props.parceiros]
  * @param {import('@/lib/landingPageData').LandingPageData['categorias']} [props.categorias]
+ * @param {boolean} [props.genericPartners]
+ * @param {number} [props.parceirosCount]
  * @returns {import('react').ReactElement}
  */
 export default function LandingPhoneHomeScreen({
   emAlta = [],
   parceiros = [],
   categorias = [],
+  genericPartners = false,
+  parceirosCount = 0,
 }) {
   const altaComFoto = emAlta.filter((l) => l.capa).slice(0, 4);
-  const parceirosComFoto = (
-    parceiros.length > 0 ? parceiros : emAlta.filter((l) => l.ehParceiro && l.capa)
-  )
-    .filter((l) => l.capa)
-    .slice(0, 3);
+  const parceirosComFoto = genericPartners
+    ? []
+    : (parceiros.length > 0 ? parceiros : emAlta.filter((l) => l.ehParceiro && l.capa))
+        .filter((l) => l.capa)
+        .slice(0, 3);
+  const showGenericParceiros = genericPartners && parceirosCount > 0;
 
   const chips =
     categorias.length > 0
@@ -155,31 +182,42 @@ export default function LandingPhoneHomeScreen({
           </div>
           <div className={`${HOME_CAROUSEL_TRACK_CLASS} mt-2.5 px-3.5`}>
             {altaComFoto.map((lugar, i) => (
-              <MockEmAltaCard key={lugar.id} lugar={lugar} priority={i === 0} />
+              <MockEmAltaCard
+                key={lugar.id}
+                lugar={lugar}
+                priority={i === 0}
+                hidePartnerBadge={genericPartners}
+              />
             ))}
           </div>
         </section>
       ) : null}
 
-      {parceirosComFoto.length > 0 ? (
+      {showGenericParceiros || parceirosComFoto.length > 0 ? (
         <section className="mt-4">
           <div className="px-3.5">
             <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#1a4a3a]/75">
               Parceiros
             </p>
             <p className="font-display text-[15px] font-bold tracking-tight text-[#1a2e28]">
-              Parceiros do Guia
+              {showGenericParceiros
+                ? `${parceirosCount} parceiros no guia`
+                : "Parceiros do Guia"}
             </p>
           </div>
           <div className={`${HOME_CAROUSEL_TRACK_CLASS} mt-2.5 px-3.5`}>
-            {parceirosComFoto.map((lugar) => (
-              <MockParceiroCard key={lugar.id} lugar={lugar} />
-            ))}
+            {showGenericParceiros
+              ? Array.from({ length: Math.min(parceirosCount, 3) }, (_, i) => (
+                  <MockParceiroCardGeneric key={`generic-partner-${i}`} />
+                ))
+              : parceirosComFoto.map((lugar) => (
+                  <MockParceiroCard key={lugar.id} lugar={lugar} />
+                ))}
           </div>
         </section>
       ) : null}
 
-      {altaComFoto.length === 0 && parceirosComFoto.length === 0 ? (
+      {altaComFoto.length === 0 && !showGenericParceiros && parceirosComFoto.length === 0 ? (
         <div className="mt-6 space-y-2 px-3.5">
           <div className="h-24 rounded-2xl bg-white/80" />
           <div className="h-24 rounded-2xl bg-white/60" />

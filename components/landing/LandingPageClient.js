@@ -36,13 +36,11 @@ export default function LandingPageClient({ initialData }) {
           stats={data.stats}
           hasLiveData={data.hasLiveData}
           showcase={data.showcase}
-          parceiros={data.parceirosDestaque?.length ? data.parceirosDestaque : data.parceiros}
           categorias={data.categorias}
           heroBackdrop={data.heroBackdrop}
         />
         <LandingSocialProof
           stats={data.stats}
-          parceiros={data.parceirosDestaque?.length ? data.parceirosDestaque : data.parceiros}
           showcase={data.showcase}
           hasLiveData={data.hasLiveData}
         />
@@ -54,15 +52,15 @@ export default function LandingPageClient({ initialData }) {
         <LandingHowItWorks />
         <LandingTouristBenefits />
         <LandingAppShowcase categorias={data.categorias} stats={data.stats} />
-        <LandingPartners parceiros={data.parceiros} stats={data.stats} />
+        <LandingPartners stats={data.stats} />
         <LandingBusinessShowcase
-          parceiros={data.parceirosDestaque?.length ? data.parceirosDestaque : data.parceiros}
           showcase={data.showcase}
           categorias={data.categorias}
           stats={data.stats}
+          genericPartners
         />
         <LandingBusinessBenefits stats={data.stats} />
-        <LandingBusinessTestimonials />
+        <LandingBusinessTestimonials genericPartners />
         <LandingTestimonials stats={data.stats} />
         <LandingFinalCta />
       </main>

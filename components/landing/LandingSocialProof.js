@@ -5,23 +5,23 @@ import RemotePhoto from "@/components/shared/RemotePhoto";
 import { useLandingRevealMotion } from "@/components/landing/useLandingRichMotion";
 import { PREFETURA_SUPPORT_LINE } from "@/lib/institutionalSupport";
 import { LANDING_TESTIMONIALS } from "@/lib/landingContent";
+import { formatParceirosCadastrados } from "@/lib/landingPartnerCopy";
 
 /**
- * Prova social — logos, métricas e depoimento em destaque.
+ * Prova social — métricas e depoimento em destaque (sem identificar parceiros).
  * @param {object} props
  * @param {import('@/lib/landingPageData').LandingPageData['stats']} props.stats
- * @param {import('@/lib/landingPageData').LandingLugarCard[]} props.parceiros
  * @param {import('@/lib/landingPageData').LandingLugarCard[]} props.showcase
  * @param {boolean} props.hasLiveData
  * @returns {import('react').ReactElement|null}
  */
-export default function LandingSocialProof({ stats, parceiros = [], showcase = [], hasLiveData }) {
+export default function LandingSocialProof({ stats, showcase = [], hasLiveData }) {
   const { reveal, stagger, viewport } = useLandingRevealMotion();
   const featured = LANDING_TESTIMONIALS[0];
-  const partnerNames = parceiros.map((p) => p.nome).filter(Boolean);
   const faces = showcase.filter((p) => p.capa).slice(0, 5);
+  const parceirosLabel = formatParceirosCadastrados(stats?.parceirosCount);
 
-  if (!hasLiveData && partnerNames.length === 0) return null;
+  if (!hasLiveData && !parceirosLabel) return null;
 
   return (
     <section
@@ -97,17 +97,17 @@ export default function LandingSocialProof({ stats, parceiros = [], showcase = [
           </motion.div>
         )}
 
-        {partnerNames.length > 0 && (
-          <div className="landing-logo-rail mt-10" aria-label="Estabelecimentos parceiros">
-            <div className="landing-logo-rail-track">
-              {[...partnerNames, ...partnerNames].map((name, idx) => (
-                <span key={`${name}-${idx}`} className="landing-logo-pill">
-                  {name}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
+        {parceirosLabel ? (
+          <motion.p
+            className="mx-auto mt-10 max-w-md text-center text-sm font-medium text-[#5d6d67]"
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewport}
+            variants={reveal}
+          >
+            {parceirosLabel} no guia oficial de Imbituba
+          </motion.p>
+        ) : null}
 
         <motion.div
           className="landing-fluid-panel mx-auto mt-12 max-w-3xl rounded-[1.5rem] p-8 text-center sm:p-10"
@@ -129,46 +129,6 @@ export default function LandingSocialProof({ stats, parceiros = [], showcase = [
             </span>
           </footer>
         </motion.div>
-
-        {parceiros.length > 0 && (
-          <motion.div
-            className="landing-centered-rail mt-10"
-            initial="hidden"
-            whileInView="visible"
-            viewport={viewport}
-            variants={stagger}
-          >
-            <ul
-              className="landing-centered-rail__track landing-centered-rail__track--partners"
-              role="list"
-              aria-label="Parceiros em destaque"
-            >
-              {parceiros.map((p) => (
-                <motion.li
-                  key={p.id}
-                  variants={reveal}
-                  className="landing-centered-rail__item"
-                >
-                  <article className="flex h-full items-center gap-3 rounded-2xl bg-white/80 p-3 ring-1 ring-[rgba(13,31,25,0.05)]">
-                    <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl bg-[#e8f2ee]">
-                      {p.capa ? (
-                        <RemotePhoto src={p.capa} alt="" fill className="object-cover" />
-                      ) : (
-                        <span className="flex h-full items-center justify-center text-sm text-[#1a4a3a]">
-                          ✓
-                        </span>
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="truncate text-xs font-semibold text-[#0d1f19]">{p.nome}</p>
-                      <p className="truncate text-[10px] text-[#8a9b94]">{p.categoria}</p>
-                    </div>
-                  </article>
-                </motion.li>
-              ))}
-            </ul>
-          </motion.div>
-        )}
       </div>
     </section>
   );
