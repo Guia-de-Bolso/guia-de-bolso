@@ -44,7 +44,7 @@ export default function LandingDiscover({ discoverShowcase = [], categorias, has
         title="Lugares que valem o desvio."
         subtitle={
           hasLiveData
-            ? "Do pôr do sol na praia ao jantar especial — feitos para Imbituba."
+            ? "Seleção curada pela nossa equipe — praias, trilhas e favoritos de morador."
             : "Em breve, os endereços essenciais da cidade."
         }
       />
