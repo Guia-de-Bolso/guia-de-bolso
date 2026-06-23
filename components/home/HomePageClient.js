@@ -498,6 +498,7 @@ function Home({ initialHomeData = null }) {
     setTermoResultado("");
     setResultadosBusca([]);
     setLoadingBusca(false);
+    setFiltroBuscaStatus(FILTRO_STATUS_BUSCA.TODOS);
     searchInputRef.current?.blur();
   }
 
@@ -829,8 +830,9 @@ function Home({ initialHomeData = null }) {
               onChange={setTermoBusca}
               onClose={fecharBusca}
               onChipClick={(chip) => {
-                if (chip.filtro) setFiltroBuscaStatus(chip.filtro);
-                executarBusca(chip.query, chip.filtro);
+                const filtro = chip.filtro ?? FILTRO_STATUS_BUSCA.TODOS;
+                setFiltroBuscaStatus(filtro);
+                executarBusca(chip.query, filtro);
               }}
               showChips={!searchMode}
             />
