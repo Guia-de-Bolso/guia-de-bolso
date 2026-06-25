@@ -168,6 +168,60 @@ body {
   padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px), var(--app-safe-bottom));
 }
 
+/* Home: atmosfera no topo (header + busca) */
+.home-context-atmosphere {
+  position: relative;
+  isolation: isolate;
+  margin-bottom: 0.25rem;
+  padding-bottom: 0.5rem;
+}
+
+.home-context-atmosphere__mesh {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  animation: home-atmosphere-in 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+  background: linear-gradient(
+    165deg,
+    rgba(212, 237, 232, 0.55) 0%,
+    rgba(240, 244, 243, 0.2) 42%,
+    rgba(240, 244, 243, 0) 78%
+  );
+}
+
+.home-context-atmosphere__mesh::before {
+  content: "";
+  position: absolute;
+  inset: -30% -10% -8%;
+  background:
+    radial-gradient(ellipse 85% 65% at 12% -5%, rgba(127, 212, 174, 0.45), transparent 58%),
+    radial-gradient(ellipse 75% 55% at 96% 8%, rgba(26, 74, 58, 0.22), transparent 52%),
+    radial-gradient(ellipse 70% 48% at 55% 95%, rgba(45, 107, 84, 0.14), transparent 50%);
+}
+
+.home-context-atmosphere__mesh::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(240, 244, 243, 0.15) 65%,
+    rgba(240, 244, 243, 0.85) 100%
+  );
+}
+
+@keyframes home-atmosphere-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* Home / Explorar: shell sticky só com busca IA (topo rola naturalmente) */
 .home-header-shell,
 .explorar-header-shell {
@@ -244,6 +298,10 @@ html.capacitor-native .app-sticky-top-safe {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .home-context-atmosphere__mesh {
+    animation: none;
+  }
+
   .home-reveal {
     animation: none;
   }
