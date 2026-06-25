@@ -1,7 +1,6 @@
 "use client";
 
 import Logo from "@/components/Logo";
-import { HOME_CONTEXT_PILL_CLASS } from "@/components/home/homeTokens";
 
 /**
  * Topo editorial da Explorar (rola com a página; busca IA fica em shell sticky separado).
@@ -32,21 +31,7 @@ export default function ExplorarHeader({ loading, totalLugares, categoriasComLug
         Explorar
       </h2>
 
-      <div className="mt-4 flex flex-wrap items-center gap-3">
-        <span className={HOME_CONTEXT_PILL_CLASS} aria-label="Imbituba, SC">
-          <svg
-            className="h-3.5 w-3.5 shrink-0 text-[#1a4a3a]"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            aria-hidden
-          >
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z" />
-          </svg>
-          <span className="truncate">Imbituba, SC</span>
-        </span>
-      </div>
-
-      <p className="mt-3 text-sm font-medium text-[#5a6b66]">{subtitulo}</p>
+      <p className="mt-2 text-sm font-medium text-[#5a6b66]">{subtitulo}</p>
     </div>
   );
 }

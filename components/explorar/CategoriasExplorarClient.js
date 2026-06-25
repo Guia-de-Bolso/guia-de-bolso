@@ -5,19 +5,13 @@ import BottomNav from "@/components/BottomNav";
 import ExplorarAtalhos from "@/components/explorar/ExplorarAtalhos";
 import ExplorarBuscaBar from "@/components/explorar/ExplorarBuscaBar";
 import ExplorarCategoriaCard from "@/components/explorar/ExplorarCategoriaCard";
-import ExplorarDestaqueCard from "@/components/explorar/ExplorarDestaqueCard";
 import ExplorarHeader from "@/components/explorar/ExplorarHeader";
 import { useStickyShellRef } from "@/hooks/useHomeHeaderScroll";
 import ExplorarSkeleton from "@/components/explorar/ExplorarSkeleton";
 import HomeSectionHeader from "@/components/home/HomeSectionHeader";
-import { HOME_CAROUSEL_TRACK_CLASS } from "@/components/home/homeTokens";
 import SupabaseConfigAlert from "@/components/SupabaseConfigAlert";
 import { isSupabasePublicConfigured } from "@/lib/supabase/publicEnv";
-import {
-  CATEGORIAS_EXPLORE,
-  getCategoriasEmDestaque,
-  sortCategoriasPorContagem,
-} from "@/lib/categorias";
+import { CATEGORIAS_EXPLORE, sortCategoriasPorContagem } from "@/lib/categorias";
 import { fetchExplorarFromApi } from "@/lib/fetchExplorarApi";
 
 /**
@@ -65,11 +59,6 @@ export default function CategoriasExplorarClient({ initialData = null }) {
     [counts]
   );
 
-  const destaques = useMemo(
-    () => getCategoriasEmDestaque(CATEGORIAS_EXPLORE, counts, 3),
-    [counts]
-  );
-
   const categoriasComConteudo = useMemo(
     () => categoriasOrdenadas.filter((item) => (counts[item.nome] || 0) > 0),
     [categoriasOrdenadas, counts]
@@ -91,10 +80,10 @@ export default function CategoriasExplorarClient({ initialData = null }) {
           categoriasComLugares={categoriasComLugares}
         />
 
-        <div ref={stickyShellRef} className="explorar-header-shell -mx-4 px-4 pb-4 pt-2">
+        <div ref={stickyShellRef} className="explorar-header-shell -mx-4 px-4 pb-2 pt-1">
           {loading ? (
             <div
-              className="home-explorar-search-section mb-6 mt-1 h-[60px] animate-pulse rounded-[24px] bg-[#e8eeee]"
+              className="home-explorar-search-section mb-4 mt-1 h-[48px] animate-pulse rounded-[20px] bg-[#e8eeee]"
               aria-hidden
             />
           ) : (
@@ -107,33 +96,6 @@ export default function CategoriasExplorarClient({ initialData = null }) {
           <ExplorarSkeleton />
         ) : (
           <>
-            {destaques.length > 0 && (
-              <section
-                className="home-reveal mb-10 overflow-visible"
-                style={{ animationDelay: "60ms" }}
-                aria-labelledby="explorar-destaques-title"
-              >
-                <HomeSectionHeader
-                  eyebrow="Em destaque"
-                  title="Mais visitadas agora"
-                  titleId="explorar-destaques-title"
-                />
-                <div className={`${HOME_CAROUSEL_TRACK_CLASS} -mx-4 px-4`}>
-                  {destaques.map((categoria, index) => (
-                    <ExplorarDestaqueCard
-                      key={categoria.nome}
-                      categoria={{
-                        ...categoria,
-                        destaque: index === 0 ? "Mais popular" : undefined,
-                      }}
-                      count={counts[categoria.nome] || 0}
-                      imagemUrl={capas[categoria.nome]}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-
             {categoriasComConteudo.length > 0 && (
               <section
                 className="home-reveal mb-10"

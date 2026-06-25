@@ -25,31 +25,26 @@ function IconSend({ className = "h-[17px] w-[17px]" }) {
  */
 export default function ExplorarBuscaBar() {
   return (
-    <section className="home-explorar-search-section relative mb-6 mt-1">
+    <section className="home-explorar-search-section relative mb-4 mt-1">
       <Link
         href="/?busca=1"
         className={`home-ai-search-surface group block ${HOME_SURFACE_CLASS} shadow-none ring-[#e8eeee] transition-shadow duration-200 active:scale-[0.98]`}
         aria-label="Buscar lugares com inteligência artificial"
       >
-        <div className="home-ai-search-input-row flex items-center gap-3 px-4 py-3.5">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#eef6f2] text-[#1a4a3a]">
-            <IconSparkle />
+        <div className="home-ai-search-input-row flex items-center gap-2.5 px-3 py-2.5">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#eef6f2] text-[#1a4a3a]">
+            <IconSparkle className="h-4 w-4" />
           </span>
 
-          <span className="min-w-0 flex-1">
-            <span className="block text-[10px] font-bold uppercase tracking-[0.16em] text-[#1a4a3a]/50">
-              Pergunte à IA
-            </span>
-            <span className="mt-0.5 block text-[16px] leading-snug text-[#9aa8a3]">
-              O que você quer descobrir hoje?
-            </span>
+          <span className="min-w-0 flex-1 truncate text-[15px] leading-tight text-[#9aa8a3]">
+            Pergunte à IA
           </span>
 
           <span
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#1a4a3a] text-white shadow-[0_6px_20px_rgba(26,74,58,0.32)]"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#1a4a3a] text-white shadow-[0_4px_14px_rgba(26,74,58,0.28)]"
             aria-hidden
           >
-            <IconSend className="h-[17px] w-[17px] -rotate-45" />
+            <IconSend className="h-[15px] w-[15px] -rotate-45" />
           </span>
         </div>
       </Link>
