@@ -57,7 +57,7 @@ Document what was applied in the PR or deploy notes.
 ### Post-apply checklist
 
 1. [security-rls.md](./security-rls.md) — manual RLS tests (non-admin cannot read `logs`, upload photos, escalate `role`).
-2. Confirm `authenticated` can execute `increment_busca_ia`, `increment_roteiro_ia`, `lugares_populares_ids`.
+2. Confirm `authenticated` can execute `increment_busca_ia`, `increment_roteiro_ia`, `decrement_busca_ia`, `decrement_roteiro_ia`, `lugares_populares_ids`.
 3. `EXPLAIN ANALYZE` on heavy paths: full active `lugares` select (busca), admin log filter, popular places RPC.
 4. Compare Dashboard policies vs repo for `favoritos`, `destaques` (not fully versioned yet).
 
@@ -77,7 +77,7 @@ Run in order for a **new environment** that already has base tables from the Sup
 |---|------|---------|
 | 0 | *(Dashboard)* | Core tables: `lugares`, `localizacoes`, `perfis`, `favoritos`, `tags`, `lugares_tags`, `subcategorias`, `avaliacoes`, `destaques`, `planos`, `logs`, … |
 | 1 | `premium_usuario.sql` | `premium_*`, `buscas_ia`, `roteiros_ia`, `uso_ia_mes` on `perfis` |
-| 2 | `increment_uso_ia.sql` | RPC `increment_busca_ia`, `increment_roteiro_ia` |
+| 2 | `increment_uso_ia.sql` | RPC `increment_*_ia` + `decrement_*_ia` (reserva/estorno de cota) |
 | 2b | `premium_uso_diario.sql` | Optional: comment on `uso_ia_mes` (daily key) |
 | 2c | `premium_uso_dia_fix.sql` | Optional: one-time fix for legacy month keys |
 | 3 | `perfis_email_admin.sql` | `perfis.email` + admin read |

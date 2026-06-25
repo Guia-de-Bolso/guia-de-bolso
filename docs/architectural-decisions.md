@@ -68,7 +68,7 @@ Registro das decisões técnicas principais do **Guia de Bolso** (formato ADR si
 | | |
 |---|---|
 | **Status** | Aceito |
-| **Decisão** | Incremento atômico via `increment_busca_ia` / `increment_roteiro_ia`; bucket diário `YYYY-MM-DD` (SP) |
+| **Decisão** | Reserva atômica via `increment_*_ia` antes da Claude; estorno via `decrement_*_ia` em falha; bucket diário `YYYY-MM-DD` (SP) |
 | **Consequências** | Cliente não pode “zerar” contador com update direto; alinhar dia em `GET /api/uso-premium` |
 
 ---

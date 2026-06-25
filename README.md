@@ -303,7 +303,7 @@ guia-de-bolso/
 - AI keys and usage increments run **server-side only** (`app/api/*`)
 - User-generated reviews require moderation before public display
 - Administrative functions gated by `perfis.role`
-- Atomic usage counters via `SECURITY DEFINER` SQL functions (`increment_busca_ia`, `increment_roteiro_ia`)
+- Atomic AI quota via `SECURITY DEFINER` SQL (`increment_*_ia` reserve before Claude, `decrement_*_ia` release on failure)
 
 Report security concerns via [GitHub Issues](https://github.com/BrunoDislilerDev/guia-de-bolso/issues) (private disclosure process can be defined as the project matures).
 
@@ -395,5 +395,4 @@ historiadores locais.
 - [ ] Dark mode completo (CSS variables)
 - [ ] Dark mode no admin
 - [ ] Role "estabelecimento" com painel próprio
-- [ ] Apple Sign In (pós Apple Developer Program)
 - [ ] WhatsApp Auth (pós aprovação Meta)

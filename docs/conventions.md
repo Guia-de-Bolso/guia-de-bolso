@@ -75,7 +75,7 @@ Fluxo padrão para rotas protegidas com IA:
 2. Validar body (`trim`, tipos, arrays).
 3. `getAuthUser()` se sessão obrigatória.
 4. `checkIaRateLimit(request, user?.id)` em rotas Claude.
-5. `checkBuscaAccess` / `checkRoteiroAccess` com `{ increment: true }` quando consumir cota.
+5. `checkBuscaAccess` / `checkRoteiroAccess` com `{ increment: false }` para falha rápida; **`reserve*IaUsage`** (`increment: true`) imediatamente antes da Claude; **`release*IaUsage`** se a Claude falhar.
 6. Resposta `NextResponse.json` com HTTP e `code` estáveis (`LOGIN_REQUIRED`, `LIMIT_REACHED`, `RATE_LIMITED`).
 7. Nunca vazar stack trace ao cliente.
 

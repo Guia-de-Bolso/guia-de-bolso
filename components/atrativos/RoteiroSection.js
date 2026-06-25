@@ -300,9 +300,10 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
   }
 
   /**
-   * Abre o sheet após login confirmado (sem re-checar autenticação).
+   * Valida login e cota diária de roteiro com IA (sem abrir o sheet).
+   * @returns {Promise<boolean>}
    */
-  const abrirSheetSePermitido = useCallback(async () => {
+  const validarRoteiroPermitido = useCallback(async () => {
     let usageForGate = usage;
     let usageSyncedForGate = usageSynced;
 
@@ -322,12 +323,22 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
         setPendingCriar(true);
         setLoginOpen(true);
       }
-      return;
+      return false;
     }
+
+    return true;
+  }, [usage, usageSynced, usageLoading, refreshUsage]);
+
+  /**
+   * Abre o sheet após login confirmado (sem re-checar autenticação).
+   */
+  const abrirSheetSePermitido = useCallback(async () => {
+    const allowed = await validarRoteiroPermitido();
+    if (!allowed) return;
 
     setResumeDraftOnOpen(false);
     setSheetOpen(true);
-  }, [usage, usageSynced, usageLoading, refreshUsage]);
+  }, [validarRoteiroPermitido]);
 
   function abrirSheetComRascunho() {
     setResumeDraftOnOpen(true);
@@ -510,6 +521,7 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
           setLoginOpen(true);
         }}
         onLimitReached={() => setPaywallOpen(true)}
+        onValidateBeforeGenerate={validarRoteiroPermitido}
         onRoteiroSalvo={handleRoteiroSalvo}
         onUsageRefresh={(nextUsage) => {
           if (nextUsage) setPremiumUsage(nextUsage);

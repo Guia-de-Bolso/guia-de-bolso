@@ -106,13 +106,20 @@ sequenceDiagram
   participant AI as Claude
 
   UI->>API: { query, filtroStatus }
-  API->>PS: getAuthUser + checkBuscaAccess
-  PS->>RPC: increment se permitido
+  API->>PS: getAuthUser + checkBuscaAccess (read)
   API->>SB: lugares ativos + joins
   API->>API: buscaRetrieval + resumo
+  API->>PS: reserveBuscaIaUsage
+  PS->>RPC: increment atômico
   API->>AI: ranking IDs
-  AI-->>API: JSON ids
-  API-->>UI: { lugares, usage }
+  alt Claude OK
+    AI-->>API: JSON ids
+    API-->>UI: { lugares, usage }
+  else Claude erro
+    API->>PS: releaseBuscaIaUsage
+    PS->>RPC: decrement
+    API-->>UI: 500 + usage estornado
+  end
 ```
 
 **Pré-filtro:** `lib/buscaRetrieval.js` reduz tokens antes do Claude.
@@ -133,9 +140,13 @@ sequenceDiagram
   participant AI as Claude
 
   UI->>API: dias, perfil, interesses
-  API->>PS: checkRoteiroAccess + increment
+  API->>PS: checkRoteiroAccess (read) + reserveRoteiroIaUsage
   API->>AI: markdown estruturado
-  API-->>UI: conteudo + lugaresCatalog + usage
+  alt Claude OK
+    API-->>UI: conteudo + lugaresCatalog + usage
+  else Claude erro
+    API->>PS: releaseRoteiroIaUsage
+  end
   UI->>UI: roteiroParse → timeline
   opt Salvar
     UI->>API: POST /api/roteiro/salvar

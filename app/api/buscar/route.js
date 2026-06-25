@@ -12,7 +12,7 @@ import { checkIaRateLimit } from "@/lib/iaRateLimit";
 import { logIA } from "@/lib/logIA";
 import { reportError } from "@/lib/observability";
 import { parseJsonArrayFromText } from "@/lib/parseModelJson";
-import { checkBuscaAccess, getAuthUser, recordBuscaIaUsage } from "@/lib/premiumServer";
+import { checkBuscaAccess, getAuthUser, releaseBuscaIaUsage, reserveBuscaIaUsage } from "@/lib/premiumServer";
 import { supabase } from "@/lib/supabase/anon";
 import { buildApiErrorBody } from "@/lib/userMessages";
 
@@ -152,6 +152,21 @@ ${JSON.stringify(lugaresResumo)}`,
       ],
     };
 
+    const reserved = await reserveBuscaIaUsage(user?.id, { user });
+    if (!reserved.allowed) {
+      return NextResponse.json(
+        {
+          error: reserved.message,
+          code: reserved.code,
+          usage: reserved.usage ?? access.usage ?? null,
+        },
+        { status: reserved.status }
+      );
+    }
+
+    const reservedUsage = reserved.usage ?? access.usage ?? null;
+    const shouldReleaseQuota = !reservedUsage?.premium;
+
     const start = Date.now();
     let claudeData;
     try {
@@ -179,7 +194,13 @@ ${JSON.stringify(lugaresResumo)}`,
           sucesso: false,
           erro: `Claude HTTP ${claudeResponse.status}`,
         });
-        return NextResponse.json(buildApiErrorBody("CLAUDE_ERROR"), { status: 500 });
+        const usageAfterRelease = shouldReleaseQuota
+          ? (await releaseBuscaIaUsage(user?.id, { user })) ?? reservedUsage
+          : reservedUsage;
+        return NextResponse.json(
+          { ...buildApiErrorBody("CLAUDE_ERROR"), usage: usageAfterRelease },
+          { status: 500 }
+        );
       }
 
       claudeData = JSON.parse(claudeRaw);
@@ -200,6 +221,9 @@ ${JSON.stringify(lugaresResumo)}`,
         sucesso: false,
         erro: error?.message || "Erro ao chamar Anthropic",
       });
+      if (shouldReleaseQuota) {
+        await releaseBuscaIaUsage(user?.id, { user });
+      }
       throw error;
     }
 
@@ -219,11 +243,9 @@ ${JSON.stringify(lugaresResumo)}`,
 
     filtrados = filtrarLugaresPorStatus(filtrados, filtroStatus);
 
-    const recorded = await recordBuscaIaUsage(user?.id, { user });
-
     return NextResponse.json({
       lugares: filtrados,
-      usage: recorded.usage ?? access.usage ?? null,
+      usage: reservedUsage,
       filtroStatus,
     });
   } catch (err) {

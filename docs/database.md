@@ -609,7 +609,7 @@ RLS policies for **`rotas`** and related tables are in [`rotas_policies.sql`](..
 
 **Admin access:** The app checks `perfis.role` in the client (`useAdminAuth`). RLS must still allow admin writes on content tables; otherwise admin CRUD fails even with UI access.
 
-**Premium counters:** Updates to `buscas_ia` / `roteiros_ia` should go through **`increment_busca_ia`** / **`increment_roteiro_ia`** (`SECURITY DEFINER`) to avoid race conditions and RLS edge cases. Fallback: direct `perfis` update in `lib/premiumServer.js` when RPC is missing.
+**Premium counters:** Reserva atômica via **`increment_busca_ia`** / **`increment_roteiro_ia`** antes da Claude; estorno em falha via **`decrement_busca_ia`** / **`decrement_roteiro_ia`**. Fallback: update direto em `perfis` em `lib/premiumServer.js` quando RPC ausente.
 
 ---
 
@@ -617,8 +617,10 @@ RLS policies for **`rotas`** and related tables are in [`rotas_policies.sql`](..
 
 | Function | Parameter | Returns | Purpose | File |
 |----------|-----------|---------|---------|------|
-| `increment_busca_ia` | `p_user_id uuid` | `jsonb` | Auth check, **daily** reset (`YYYY-MM-DD`), increment search count (limit **5**/day), premium bypass | `increment_uso_ia.sql` |
+| `increment_busca_ia` | `p_user_id uuid` | `jsonb` | Auth check, **daily** reset (`YYYY-MM-DD`), reserva 1 busca (limit **5**/day), premium bypass | `increment_uso_ia.sql` |
 | `increment_roteiro_ia` | `p_user_id uuid` | `jsonb` | Same for roteiros (limit 2/day); returns `resets_at` (next midnight SP) in `usage` | `increment_uso_ia.sql` |
+| `decrement_busca_ia` | `p_user_id uuid` | `jsonb` | Estorna 1 busca após falha da Claude (não premium) | `increment_uso_ia.sql` |
+| `decrement_roteiro_ia` | `p_user_id uuid` | `jsonb` | Estorna 1 roteiro após falha da Claude (não premium) | `increment_uso_ia.sql` |
 | `lugares_populares_ids` | `p_limit int` | `(lugar_id bigint, favoritos_count bigint)` | Top places by favorite count; use **`lugares_populares_rpc_fix.sql`** if return type was `uuid` | `lugares_populares_rpc.sql` |
 
 **Return payload (conceptual):**
@@ -733,7 +735,7 @@ Quick summary for existing projects that already have base tables:
 
 | Step | Query / call |
 |------|----------------|
-| Auth + quota | `getAuthUser()` → `increment_busca_ia` RPC (or fallback) |
+| Auth + quota | `getAuthUser()` → `checkBuscaAccess` (read) → `reserveBuscaIaUsage` / `increment_busca_ia` antes da Claude; `releaseBuscaIaUsage` / `decrement_busca_ia` em falha |
 | Catalog | `supabase` (anon) `.from("lugares")` `.select("*, localizacoes(*), lugares_tags(tags(*))")` `.eq("status","ativo")` |
 | Rank | Anthropic API — returns place IDs only |
 | Response | Map IDs to rows; client applies distance |
@@ -759,8 +761,10 @@ Quick summary for existing projects that already have base tables:
 | Use case | Query / call |
 |----------|----------------|
 | Read usage | `GET /api/uso-premium` → `perfis` select premium fields |
-| Increment search | `rpc("increment_busca_ia", { p_user_id })` |
-| Increment roteiro | `rpc("increment_roteiro_ia", { p_user_id })` |
+| Reserve search | `reserveBuscaIaUsage` → `rpc("increment_busca_ia", { p_user_id })` (before Claude) |
+| Release search | `releaseBuscaIaUsage` → `rpc("decrement_busca_ia", { p_user_id })` (Claude error) |
+| Reserve roteiro | `reserveRoteiroIaUsage` → `rpc("increment_roteiro_ia", { p_user_id })` |
+| Release roteiro | `releaseRoteiroIaUsage` → `rpc("decrement_roteiro_ia", { p_user_id })` |
 | Client cache | `localStorage` key `guia_premium_usage_{userId}` — hydrate on load if `day` matches today; overwritten after successful `GET /api/uso-premium` or post-search `usage` payload (server is source of truth) |
 
 ### Analytics logging

@@ -21,7 +21,7 @@ Canonical document for **modeling, normalization, integrity, performance, scalab
 2. **Hybrid schema source** — Base tables were created in the Supabase Dashboard; incremental DDL/RLS lives in the repo. Treat production as source of truth until a `schema_baseline.sql` export exists.
 3. **Single city, curated catalog** — Optimized for hundreds of places in Imbituba, not millions of rows globally.
 4. **Pragmatic denormalization** — JSON galleries, denormalized log fields, and text-matched taxonomy are accepted trade-offs with a documented deprecation path.
-5. **Server-side integrity for quotas** — AI usage counters use `SECURITY DEFINER` RPCs (`increment_busca_ia`, `increment_roteiro_ia`), not client-only updates.
+5. **Server-side integrity for quotas** — Reserva/estorno via RPCs `SECURITY DEFINER` (`increment_*_ia`, `decrement_*_ia`), not client-only updates.
 
 ### Documentation map
 

@@ -121,13 +121,16 @@ Optional success fields: `message` (e.g. filter empty), `filtroStatus` echo.
 
 **Flow:**
 
-1. `checkBuscaAccess(user?.id, { increment: true })` validates limits and increments.
+1. `checkBuscaAccess(user?.id, { increment: false })` — falha rápida se limite/login.
 2. Loads active `lugares` with `localizacoes`, `lugares_tags`.
 3. Builds compact context with `abertoAgora` per place.
-4. Claude returns JSON array of place IDs.
-5. Post-filter by `filtroStatus`.
-6. `increment_busca_ia` via RPC; returns updated `usage`.
-7. IA observability: registra `logs_ia` com tokens, custo, latência e sucesso/erro (`lib/logIA.js`).
+4. **`reserveBuscaIaUsage`** → `increment_busca_ia` (reserva atômica **antes** da Claude).
+5. Claude returns JSON array of place IDs.
+6. Post-filter by `filtroStatus`.
+7. On Claude error: **`releaseBuscaIaUsage`** → `decrement_busca_ia` (refund for non-premium).
+8. Success returns `usage` da reserva; IA observability via `lib/logIA.js`.
+
+Filtro de horário sem lugares elegíveis retorna `{ lugares: [] }` **sem** reservar cota.
 
 ---
 
@@ -153,7 +156,7 @@ All three fields are required. `dias` and `perfil` must be non-empty **strings**
 **Success:** `{ "conteudo": "<markdown>", "titulo": "Roteiro 3 - casal", "lugaresCatalog": [{ "id", "nome" }, ...], "usage": { ... } }`  
 **Errors:** Same pattern as `/api/buscar` (`LOGIN_REQUIRED`, `LIMIT_REACHED`)
 
-Implementation: `app/api/roteiro/route.js` (strict markdown system prompt, `max_tokens: 2400`, default model `claude-sonnet-4-5` or `ANTHROPIC_MODEL`). Client parses markdown via `lib/roteiroParse.js` → `RoteiroItineraryView`. IA observability via `lib/logIA.js`.
+Implementation: `app/api/roteiro/route.js` (strict markdown system prompt, `max_tokens: 2400`, default model `claude-sonnet-4-5` or `ANTHROPIC_MODEL`). Quota flow matches search: `checkRoteiroAccess` (read) → `reserveRoteiroIaUsage` before Claude → `releaseRoteiroIaUsage` on failure. Client parses markdown via `lib/roteiroParse.js` → `RoteiroItineraryView`. IA observability via `lib/logIA.js`.
 
 ---
 

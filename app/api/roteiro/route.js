@@ -4,7 +4,7 @@ import { enrichLugarFlags } from "@/lib/lugarBadges";
 import { checkIaRateLimit } from "@/lib/iaRateLimit";
 import { logIA } from "@/lib/logIA";
 import { reportError } from "@/lib/observability";
-import { checkRoteiroAccess, getAuthUser, recordRoteiroIaUsage } from "@/lib/premiumServer";
+import { checkRoteiroAccess, getAuthUser, releaseRoteiroIaUsage, reserveRoteiroIaUsage } from "@/lib/premiumServer";
 import { selecionarLugaresParaRoteiro } from "@/lib/roteiroLugares";
 import { supabase } from "@/lib/supabase/anon";
 import { buildApiErrorBody } from "@/lib/userMessages";
@@ -101,6 +101,21 @@ export async function POST(request) {
       ? interesses.join(", ")
       : String(interesses);
 
+    const reserved = await reserveRoteiroIaUsage(user?.id, { user });
+    if (!reserved.allowed) {
+      return NextResponse.json(
+        {
+          error: reserved.message,
+          code: reserved.code,
+          usage: reserved.usage ?? access.usage ?? null,
+        },
+        { status: reserved.status }
+      );
+    }
+
+    const reservedUsage = reserved.usage ?? access.usage ?? null;
+    const shouldReleaseQuota = !reservedUsage?.premium;
+
     const start = Date.now();
     let claudeData;
     try {
@@ -156,7 +171,13 @@ export async function POST(request) {
           sucesso: false,
           erro: `Claude HTTP ${claudeResponse.status}`,
         });
-        return NextResponse.json(buildApiErrorBody("ROTEIRO_ERROR"), { status: 500 });
+        const usageAfterRelease = shouldReleaseQuota
+          ? (await releaseRoteiroIaUsage(user?.id, { user })) ?? reservedUsage
+          : reservedUsage;
+        return NextResponse.json(
+          { ...buildApiErrorBody("ROTEIRO_ERROR"), usage: usageAfterRelease },
+          { status: 500 }
+        );
       }
 
       claudeData = JSON.parse(claudeRaw);
@@ -177,6 +198,9 @@ export async function POST(request) {
         sucesso: false,
         erro: error?.message || "Erro ao chamar Anthropic",
       });
+      if (shouldReleaseQuota) {
+        await releaseRoteiroIaUsage(user?.id, { user });
+      }
       throw error;
     }
 
@@ -200,13 +224,11 @@ export async function POST(request) {
       fotos: lugar.fotos ?? null,
     }));
 
-    const recorded = await recordRoteiroIaUsage(user?.id, { user });
-
     return NextResponse.json({
       conteudo,
       titulo: `Roteiro ${dias} - ${perfil}`,
       lugaresCatalog,
-      usage: recorded.usage ?? access.usage ?? null,
+      usage: reservedUsage,
     });
   } catch (err) {
     reportError(err, { route: "POST /api/roteiro" });

@@ -16,6 +16,8 @@ Referência única para configuração local, Vercel e CI. Template versionado: 
 | `ANTHROPIC_MODEL` | Recomendado | Runtime server | Default no código: `claude-sonnet-4-5` |
 | `NEXT_PUBLIC_SITE_URL` | Opcional | Build | URL canônica (QR, links absolutos) |
 | `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Opcional | Build | Admin Places + mapa estático no detalhe |
+| `NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID` | App nativo | Build | Google Sign-In Android/iOS + Supabase |
+| `NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID` | App iOS | Build | Google Sign-In iOS (`lib/nativeSocialLoginInit.js`) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Opcional | Runtime server | Guest feedback, logs QR, cron purge — **nunca** `NEXT_PUBLIC_` |
 | `CRON_SECRET` | Opcional* | Runtime server | Protege `/api/cron/lugares-purge` (*obrigatório se cron Vercel ativo) |
 | `NEXT_PUBLIC_SENTRY_DSN` | Opcional | Build | Observabilidade (`lib/observability.js`) |
@@ -69,6 +71,20 @@ O projeto valida presença de `NEXT_PUBLIC_SUPABASE_*` no build (`next.config.mj
 - **Places API** — autocomplete no admin (`EnderecoAutocomplete`)
 - **Maps Static API** — preview no detalhe (`getStaticMapUrl`)
 - Sem chave: UI degrada para link Maps sem imagem estática
+
+### `NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID`
+
+- **Web:** Supabase Google OAuth (same value in Supabase Dashboard → Authentication → Google).
+- **Capacitor Android:** native Google Sign-In via `@capgo/capacitor-social-login` (`lib/nativeGoogleAuth.js`); use the **Web** Client ID, not the Android OAuth client ID.
+- **Capacitor iOS:** passed as `iOSServerClientId` alongside `NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID`.
+- Requires Vercel **redeploy** after change (`NEXT_PUBLIC_*` is baked at build time; the app WebView loads `https://app.guiadebolso.app`).
+
+### `NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID`
+
+- **Capacitor iOS only** — OAuth iOS client from Google Cloud (bundle `app.guiadebolso`).
+- Must match the **reversed client ID** in `ios/GoogleAuth.xcconfig` → `Info.plist` URL scheme.
+- Helper: `getGoogleIOSUrlScheme()` in `lib/nativeSocialLoginInit.js`.
+- See [authentication.md](./authentication.md#iosgoogleauthxcconfig--google-url-scheme).
 
 ### `SUPABASE_SERVICE_ROLE_KEY`
 

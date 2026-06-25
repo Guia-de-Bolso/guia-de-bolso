@@ -247,8 +247,8 @@ lib/supabase.js
 |----------|------|----------------|
 | `GET /api/lugares` | Public | Cached catalog reads (`mode=populares`, `destaques`, `ids`, `categoria`, `limit`) via anon server client |
 | `GET /api/health` | Public | Deploy smoke `{ ok, service, timestamp }` |
-| `POST /api/buscar` | Required (non-empty `query`) | Premium check → load places → Claude ranking → filter → `increment_busca_ia`; empty `query` returns `{ lugares: [] }` without auth |
-| `POST /api/roteiro` | Required | Generate itinerary (Claude), premium check, token-optimized prompt |
+| `POST /api/buscar` | Required (non-empty `query`) | Premium check → load places → **reserve quota** → Claude ranking → filter; `decrement_*` on Claude error; empty `query` returns `{ lugares: [] }` without auth |
+| `POST /api/roteiro` | Required | **Reserve quota** → generate itinerary (Claude); release on failure |
 | `POST /api/roteiro/salvar` | Required | Insert into `roteiros` |
 | `GET /api/uso-premium` | Optional | Returns `{ loggedIn, usage }`; `usage` when session present |
 
@@ -259,7 +259,7 @@ Server-only secrets: `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`. These never use the
 | Module | Layer | Role |
 |--------|-------|------|
 | `premium.js` | Shared | Daily limits, `getUsageDayKey()`, `isSameUsageDay()`, `normalizeUsageFromPerfil`, `isDailyBuscaLimitReached` |
-| `premiumServer.js` | Server | `getAuthUser`, `checkBuscaAccess`, RPC increment wrappers |
+| `premiumServer.js` | Server | `getAuthUser`, `checkBuscaAccess`, `reserve*IaUsage`, `release*IaUsage`, RPC wrappers |
 | `busca.js` | Shared | Open/closed filter, compact summaries for Claude |
 | `horarios.js` | Shared | Brazil timezone hours: `parseHorarioDia`, `validarIntervalos`, `getStatusFuncionamento` (multi-shift + overnight carry-over, optional `mostrar_horarios` for badges, optional `referencia` for tests), `horariosTemCadastro`; tests in `lib/horarios.test.js` |
 | `horizontalCarousel.js` | Client | Photo gallery carousels (`PHOTO_GALLERY_*`, `useControlledPhotoCarousel`) for `GalleryHeroAirbnb`, `LugarHero` |
@@ -351,15 +351,22 @@ sequenceDiagram
   participant AI as Anthropic API
 
   UI->>API: { query, filtroStatus }
-  API->>PS: getAuthUser + checkBuscaAccess(increment)
+  API->>PS: getAuthUser + checkBuscaAccess (read)
   PS->>SB: auth.getUser (cookies)
-  PS->>RPC: increment on allow
   API->>SB: select active lugares + relations
   API->>API: buildLugarBuscaResumo, filtrarLugaresPorStatus
+  API->>PS: reserveBuscaIaUsage
+  PS->>RPC: increment atômico
   API->>AI: messages + place summaries
-  AI-->>API: JSON array of place IDs
-  API->>API: map IDs to full rows, post-filter
-  API-->>UI: { lugares, usage, message? }
+  alt Claude OK
+    AI-->>API: JSON array of place IDs
+    API->>API: map IDs to full rows, post-filter
+    API-->>UI: { lugares, usage, message? }
+  else Claude erro
+    API->>PS: releaseBuscaIaUsage
+    PS->>RPC: decrement
+    API-->>UI: 500 + usage
+  end
   UI->>UI: setUsage / refresh from response.usage
 ```
 
@@ -475,6 +482,22 @@ sequenceDiagram
 
 Phone validation: 11 digits (DDD + number), formatted in UI. Resend is rate-limited in the client (counter + cooldown).
 
+### Native apps (Capacitor)
+
+The Android and iOS shells load production from `https://app.guiadebolso.app` (`capacitor.config.ts`). Social login uses `@capgo/capacitor-social-login` — no browser redirect on native.
+
+| Platform | Google | Apple |
+|----------|--------|-------|
+| Web | `signInWithOAuth` → `/auth/callback` | — |
+| Android | `signInWithGoogleNative` → `signInWithIdToken` | — |
+| iOS | `signInWithGoogleNative` (Web + iOS client IDs) | `signInWithAppleNative` |
+
+Entry points: `lib/capacitorOAuth.js`, `lib/nativeGoogleAuth.js`, `lib/nativeAppleAuth.js`, `lib/nativeSocialLoginInit.js`, `components/AuthFlow.js`.
+
+**iOS-only setup:** `NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID` (Vercel), reversed URL scheme in `ios/GoogleAuth.xcconfig`, Sign in with Apple in `ios/App/App/App.entitlements`, Google URL handler in `AppDelegate.swift`.
+
+Full checklist: [`authentication.md`](./authentication.md#native-login-capacitor).
+
 ### Profile bootstrap
 
 On first login, Supabase creates `auth.users`. The app expects a matching row in **`perfis`** (same `id`). Profile fields (`nome`, `foto_url`, `role`, premium columns) are read on admin check and profile pages. Creation may occur via trigger or first profile update—verify in Supabase project settings.
@@ -507,7 +530,8 @@ API returns machine-readable codes: `LOGIN_REQUIRED` (401), `LIMIT_REACHED` (403
 | **Supabase** | `lib/supabase/*`, all data/auth | PostgreSQL, Auth, Storage, RLS, RPC | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` |
 | **Anthropic Claude** | `app/api/buscar`, `app/api/roteiro` | Semantic search + itineraries | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` |
 | **Vercel** | Git push → deploy | Hosting, serverless, CDN | Vercel project env vars |
-| **Google OAuth** | Supabase Auth provider | Social login | Configured in Supabase dashboard |
+| **Google OAuth** | Supabase Auth provider (web); `@capgo/capacitor-social-login` + `signInWithIdToken` (Capacitor) | Social login | Supabase dashboard; `NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID`; iOS also `NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID` + `ios/GoogleAuth.xcconfig` |
+| **Apple Sign-In** | Capacitor iOS only (`lib/nativeAppleAuth.js`) | Social login on App Store build | Supabase Apple provider; `ios/App/App/App.entitlements` |
 | **Twilio** | Supabase Auth (SMS provider) | OTP delivery | Supabase + Twilio config |
 | **Open-Meteo** | `lib/clima.js`, `LugarClimaWidget`, `ClimaSheet` | Weather/marine forecast (home + outdoor place detail) | None (public API) |
 | **Google Maps** | `EnderecoAutocomplete`, `getStaticMapUrl`, user deep links | Places autocomplete (admin), Static Maps preview on detail, navigation | `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` (Places + Static Maps APIs) |
@@ -549,7 +573,7 @@ No server-side routing API. `openRoute()` in place detail:
 |---------|----------------|
 | **RLS** | Required on production tables; repo versions policies for `perfis`, `logs`, and Storage — anonymous users read only public catalog data |
 | **Server-side AI** | API keys never exposed to browser |
-| **Usage integrity** | `increment_busca_ia` / `increment_roteiro_ia` as `SECURITY DEFINER` RPC |
+| **Usage integrity** | `increment_*_ia` / `decrement_*_ia` as `SECURITY DEFINER` RPC; reserva antes da Claude |
 | **Review moderation** | Public select policy on `status = aprovada` only |
 | **Admin** | Role check in UI + RLS on mutations |
 | **HTTPS** | Enforced by Vercel in production |

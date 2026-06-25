@@ -81,6 +81,8 @@ Apply to **Production**, **Preview**, and **Development** as appropriate (previe
 | `ANTHROPIC_API_KEY` | Yes | Server only | Claude API secret for `/api/buscar` and `/api/roteiro` |
 | `ANTHROPIC_MODEL` | Recommended | Server only | Model id, e.g. `claude-sonnet-4-5` (fallback in code if omitted) |
 | `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Optional | Client | Admin Places Autocomplete (`EnderecoAutocomplete`); place detail static map (`getStaticMapUrl` in `lib/lugarDetalhe.js`) |
+| `NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID` | Capacitor + Supabase | Client (build) | Native Google Sign-In on Android/iOS; same Web Client ID as Supabase Google provider |
+| `NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID` | Capacitor iOS | Client (build) | iOS Google Sign-In only (`lib/nativeSocialLoginInit.js`); pair with `ios/GoogleAuth.xcconfig` |
 
 ### Variables you must NOT expose
 
@@ -105,6 +107,17 @@ NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=AIza...
 ```
 
 After changing env vars in Vercel, **redeploy** (or trigger a new deployment) so serverless functions and the client bundle pick up new values.
+
+### Capacitor native apps (Android / iOS)
+
+The mobile shells wrap the production web app (`capacitor.config.ts` → `server.url: https://app.guiadebolso.app`). Native social login does **not** use `/auth/callback`.
+
+| Platform | Google | Apple | Repo config |
+|----------|--------|-------|-------------|
+| Android | `NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID` on Vercel + SHA-1 on GCP OAuth client | — | `lib/nativeGoogleAuth.js` |
+| iOS | Web + iOS client IDs on Vercel | Sign in with Apple | `ios/GoogleAuth.xcconfig`, `App.entitlements`, `AppDelegate.swift` |
+
+Setup details: [authentication.md](./authentication.md#native-login-capacitor).
 
 **Symptom:** home / Explorar show no places, empty sections, or an amber “Supabase não configurado no deploy” banner.
 
@@ -303,7 +316,7 @@ Minimum for a legacy DB that already has base schema:
 After migrations:
 
 - Confirm **RLS enabled** on each application table (repo scripts only enable `perfis` and `logs`; verify policies in Dashboard).
-- Grant `authenticated` execute on `increment_busca_ia` / `increment_roteiro_ia`.
+- Grant `authenticated` execute on `increment_busca_ia`, `increment_roteiro_ia`, `decrement_busca_ia`, `decrement_roteiro_ia`.
 
 ### 4. Storage buckets
 
@@ -365,10 +378,12 @@ Use this list for **first launch** and **each major release**.
 - [ ] Production project region and backups understood (plan limits)
 - [ ] Migrations applied in documented order
 - [ ] RLS enabled and tested (anonymous read / authenticated write / admin writes)
-- [ ] RPC `increment_busca_ia` and `increment_roteiro_ia` exist and are granted to `authenticated`
+- [ ] RPC `increment_*_ia` and `decrement_*_ia` exist and are granted to `authenticated`
 - [ ] Storage buckets + policies applied
 - [ ] Auth Site URL and Redirect URLs include production (and previews if needed)
 - [ ] Google OAuth and SMS tested end-to-end on production domain
+- [ ] Capacitor iOS (physical device): Google native (`NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID` + `ios/GoogleAuth.xcconfig`) and Sign in with Apple (`App.entitlements`, Supabase Apple provider)
+- [ ] Capacitor Android: native Google (`NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID`, release SHA-1 in GCP)
 - [ ] At least one `admin` or `dev` user on `perfis`
 
 ### Application smoke tests

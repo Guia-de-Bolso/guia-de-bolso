@@ -151,6 +151,7 @@ Central index: **[docs/README.md](./README.md)**. When adding features, update a
 | Schema / RLS | `docs/database.md`, `supabase/*.sql`, `docs/migrations.md` |
 | Product behavior | `docs/features.md`, `docs/CHANGELOG.md` |
 | Env var | `.env.example`, `docs/environment.md` |
+| Native auth (Capacitor) | `docs/authentication.md`, `docs/deployment.md` |
 | ADR | `docs/architectural-decisions.md` |
 | Overview | `README.md` (brief), detail in `docs/` |
 | Agents | `CLAUDE.md` (optional) |

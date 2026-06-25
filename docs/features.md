@@ -392,23 +392,28 @@ Start turn-by-turn navigation immediately.
 ## 18. Authentication
 
 **Description**  
-Sign-in via **Google OAuth** or **SMS OTP** (Brazil +55, 11 digits). Used on `/login`, profile (guest), and `LoginModal` for gated actions.
+Sign-in via **Google OAuth** (web redirect or native on Capacitor), **Sign in with Apple** (Capacitor iOS only), or **SMS OTP** (Brazil +55, 11 digits). Used on `/login`, profile (guest), and `LoginModal` for gated actions.
 
 **User goal**  
 Access favorites, reviews, AI features, and saved roteiros.
 
 **Main flows**
-1. **Google** → Supabase OAuth → `/auth/callback` → exchange code → log `login` → redirect home.
-2. **SMS** → enter phone → OTP → verify → success → redirect home.
-3. **Login page** `/login` → redirects to `/` if already sessioned.
-4. **Modal** context subtitles vary by motivo (`favoritar`, `busca`, `avaliar`, `rotas`, `premium`, etc.).
+1. **Google (web)** → Supabase OAuth → `/auth/callback` → exchange code → log `login` → redirect home.
+2. **Google (Capacitor Android/iOS)** → `@capgo/capacitor-social-login` → `signInWithIdToken` → `ensurePerfil` → log `login` → redirect (no `/auth/callback`).
+3. **Apple (Capacitor iOS only)** → same native ID-token flow via `lib/nativeAppleAuth.js`; button hidden on web/Android.
+4. **SMS** → enter phone → OTP → verify → success → redirect home.
+5. **Login page** `/login` → redirects to `/` if already sessioned.
+6. **Modal** context subtitles vary by motivo (`favoritar`, `busca`, `avaliar`, `rotas`, `premium`, etc.).
 
 **Edge cases**
 - OAuth error → redirect `/login?error=auth`.
+- Native Google cancel → retry without nonce (`lib/nativeGoogleAuth.js`); Apple cancel → silent dismiss (`cancelled` flag).
 - SMS: invalid length blocked client-side; resend cooldown 30s; max 3 resends then wait message.
 - Wrong/expired OTP → clear code + error message.
-- Apple Sign-In / WhatsApp: **not implemented** (planned).
+- WhatsApp Auth: **not implemented** (planned).
 - Account deletion signs out and logs request — **does not** call Supabase admin delete API (manual follow-up implied).
+
+**Native config:** see [`authentication.md`](./authentication.md#native-login-capacitor) (`ios/GoogleAuth.xcconfig`, Vercel client IDs).
 
 ---
 
@@ -487,7 +492,7 @@ Get a custom day-by-day plan for the region.
 
 **Main flows**
 1. `/atrativos` → “Roteiro personalizado com IA” → login check → quota check → `RoteiroBottomSheet`.
-2. Submit → `POST /api/roteiro` → `lib/roteiroParse.js` builds day/period/stop timeline → `RoteiroItineraryView` (accordion); footer **Salvar** fixed on scroll.
+2. Submit → `onValidateBeforeGenerate` re-checks login/quota (`validarRoteiroPermitido` in `RoteiroSection.js`) → `POST /api/roteiro` → `lib/roteiroParse.js` builds day/period/stop timeline → `RoteiroItineraryView` (accordion); footer **Salvar** fixed on scroll.
 3. “Salvar” → `POST /api/roteiro/salvar` → list on `/atrativos`.
 4. Saved list → tap → `RoteiroViewModal` with the same timeline UI (`components/atrativos/RoteiroSection.js`).
 5. Delete saved item → `DELETE /api/roteiro/[id]` (server verifies row removed; requires `supabase/roteiros_policies.sql` on Supabase).
@@ -743,7 +748,7 @@ Entender gasto atual, eficiência de cache e risco de escala antes de aumentar b
 
 | Feature | Status |
 |---------|--------|
-| Apple Sign-In | Removed pending Apple Developer Program |
+| Sign in with Apple (web) | Not offered — iOS Capacitor only (`canUseNativeAppleSignIn`) |
 | WhatsApp Auth | Waiting Meta approval |
 | Asaas billing & establishment self-service portal | Documented in business model, not built |
 | Legacy multi-plan destaques carousel | Replaced by **Parceiros** carousel (`ParceirosCarrossel`) for vigent highlights only |

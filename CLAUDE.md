@@ -280,9 +280,9 @@ guia-de-bolso/
 - [x] Login via SMS com Twilio funcionando
 - [x] Novo visual da página de login (foto de fundo, painel verde escuro)
 - [x] Novo visual da página de login com foto de fundo
-- [x] Removido Apple Sign In (pendente Apple Developer Program)
-- [x] Apple Sign In removido (pendente Apple Developer Program)
-- [x] Fluxo de verificação com contador de reenvio e tratamento de erros
+- [x] Sign in with Apple no app iOS (Capacitor) — `lib/nativeAppleAuth.js`, botão em `AuthFlow` só no iOS nativo
+- [x] Google Sign-In nativo Android/iOS — `@capgo/capacitor-social-login` + `signInWithIdToken` (`lib/nativeGoogleAuth.js`, `lib/nativeSocialLoginInit.js`)
+- [x] Fluxo de verificação SMS com contador de reenvio e tratamento de erros
 - [x] Carrossel de destaques na home com auto-scroll e dots
 - [x] Sistema de planos (Básico, Padrão, Premium) com badges visuais
 - [x] Clima regional via Open-Meteo (home header + hero + detalhe Natureza/Aventura)
@@ -347,7 +347,6 @@ guia-de-bolso/
 
 - [ ] Rotas com etapas e fotos
 - [ ] WhatsApp Auth (pós aprovação Meta)
-- [ ] Apple Sign In (pós Apple Developer Program)
 
 ---
 
@@ -357,7 +356,7 @@ guia-de-bolso/
 |---|---|---|
 | Ver lugares | ✅ | ✅ |
 | Ver destaques | ✅ | ✅ |
-| Busca por IA | ✅ | ✅ |
+| Busca por IA | ❌ → modal login | ✅ |
 | Favoritar | ❌ → modal login | ✅ |
 | Avaliar | ❌ → modal login | ✅ |
 | Seção Rotas | ❌ → modal login | ✅ |
@@ -407,7 +406,7 @@ Edita no Cursor → git add . → git commit -m "mensagem" → git push → Verc
 - A busca por IA usa **todos os lugares do banco** como contexto para a Claude decidir quais retornar
 - O campo `distancia` é texto estático por enquanto — geolocalização real vem depois
 - O campo `destaque` na tabela lugares é legado — a lógica de destaques migrará para a tabela `destaques`
-- O Apple Sign-In foi removido até aprovação/configuração no Apple Developer Program
+- O Apple Sign-In está ativo **somente no app iOS nativo** (Capacitor); web e Android usam Google + SMS. Config: `docs/authentication.md`, `ios/GoogleAuth.xcconfig`, `NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID`
 - A Vercel precisa ter todas as env vars configuradas em Production
 - O painel Admin deve ser protegido por role = 'admin' no perfil do usuário
 - Avaliações só aparecem para o usuário após aprovação pelo admin

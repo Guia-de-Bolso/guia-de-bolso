@@ -21,9 +21,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - **Profile avatar upload API** — `POST /api/perfil/avatar` uploads via service role when Storage RLS is missing on the legacy bucket (`lib/avatarStorage.js`, `app/perfil/editar/page.js`); optional RLS in `supabase/storage_avatar_legacy_bucket.sql`.
 - **RemotePhoto CDN delivery** — `components/shared/RemotePhoto.js` serves Supabase Storage URLs without Vercel Image Optimization for thumbnails, heroes, search rows, category cards, compact atrativo cards, and landing mockups.
+- **Native Sign in with Apple (iOS)** — `lib/nativeAppleAuth.js`, `signInWithAppleAuth` in `lib/capacitorOAuth.js`; Apple button in `components/AuthFlow.js` when `canUseNativeAppleSignIn()` (`SocialLogin.login` + `signInWithIdToken`).
+- **Native Google Sign-In (iOS)** — `NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID`, `ios/GoogleAuth.xcconfig` (reversed URL scheme → `Info.plist`), `AppDelegate.swift` + `CapAppAuthURLHandler` (`ios/App/CapApp-SPM/`).
+- **Capacitor social login init** — shared `lib/nativeSocialLoginInit.js` for Android (`webClientId`) and iOS (Google + Apple providers).
 
 ### Changed
 
+- **AI quota — atomic reserve** — `reserveBuscaIaUsage` / `reserveRoteiroIaUsage` call RPC **before** Claude; `releaseBuscaIaUsage` / `releaseRoteiroIaUsage` on failure (`decrement_*_ia` in `supabase/increment_uso_ia.sql`; `app/api/buscar/route.js`, `app/api/roteiro/route.js`). Fixes TOCTOU race on parallel requests.
+- **AI roteiro client gate** — `RoteiroBottomSheet` accepts `onValidateBeforeGenerate`; `RoteiroSection.js` re-validates login/quota before `POST /api/roteiro`.
 - **Admin establishment reports** — KPI **Escaneamentos QR** (`escaneou_qr`) separate from page views; included in PDF and WhatsApp summary.
 - **Place profile visibility** — full public profile (gallery, tags, quick actions, long about) for all active places; only Parceiro badge remains tied to paid highlight (`lib/lugarVisibilidade.js`, `PlaceCard.js`).
 - **Vercel image delivery** — `minimumCacheTTL: 2592000` (30 days) in `next.config.mjs`; listing cards keep `next/image` with explicit `sizes` and `quality={60}` (`PlaceCard`, `EmAltaCard`, `LandingPlaceCard`, featured cover in `AtrativosCatalogo`); heroes and small thumbs use `RemotePhoto` (`GalleryHeroAirbnb`, `LugarHero`, `SearchListItem`, `CategoriaLugarCard`, etc.).
@@ -49,6 +54,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Synced `/docs` with post-0.5.0 code: home ranking criteria, admin reports, roteiro parser, `visualizou_lugar`, free-tier search limit (5/day).
 - Updated hours model, tag limit (5), onboarding navigation, carousel behavior, and `[Unreleased]` changelog entries.
 - Synced image delivery (`RemotePhoto` vs `next/image`), avatar API (`POST /api/perfil/avatar`), review comment requirement, legacy avatar bucket SQL, and `/atrativos` routes (301 from `/rotas`).
+- Native auth (Capacitor iOS/Android): `authentication.md`, `architecture.md`, `deployment.md`, `environment.md`, `features.md`, `TESTING-CHECKLIST.md`, `CLAUDE.md`.
 
 ## [0.5.0] - 2026-05-21
 

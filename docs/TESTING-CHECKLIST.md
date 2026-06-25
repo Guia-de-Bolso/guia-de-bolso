@@ -20,15 +20,25 @@ Use a ferramenta com **153 casos de teste**, passo a passo por dispositivo, resu
 
 | Fluxo | Entrada principal | Restrição guest |
 |-------|-------------------|-----------------|
-| Login | `/login`, `LoginModal`, Perfil | — |
-| Cadastro | Primeiro login (Google/SMS) + `/perfil/editar` | — |
+| Login | `/login`, `LoginModal`, Perfil; Capacitor iOS also Apple + native Google | — |
+| Cadastro | Primeiro login (Google/SMS/Apple iOS) + `/perfil/editar` | — |
 | Busca IA | Home `SmartSearch`, `/?busca=1`, `/?q=` | Login + limite 5/dia (free) |
 | Relatórios admin | `/admin/relatorios` | Admin/dev; lugar ativo + período |
 | QR estabelecimento | Admin editar local → PDF; scan `/q/{slug}` | Natureza/Aventura sem QR |
 | Ver lugar | Cards → `/lugares/[id]` | Nenhuma |
 | Favoritar | Coração home/detalhe, `/favoritos` | Login |
 | Avaliar | Detalhe → `AvaliacaoForm` | Login; comentário obrigatório; moderação admin |
-| Roteiro IA | `/atrativos` → Criar roteiro | Login + limite 2/dia (free); excluir salvo via `DELETE /api/roteiro/[id]` |
+| Roteiro IA | `/atrativos` → Criar roteiro | Login + limite 2/dia (free); quota re-checked in sheet before API; excluir salvo via `DELETE /api/roteiro/[id]` |
+
+### Capacitor native auth (manual)
+
+| # | Action | Expected |
+|---|--------|----------|
+| N-03 | iOS app → `/login` → **Continuar com Apple** | Apple sheet → session; button **not** shown on web/Android |
+| N-04 | iOS app → Google (device with Google account) | Native picker → session; no browser `/auth/callback` |
+| N-05 | Android app → Google | Native flow with `NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID` |
+| N-06 | iOS Google fails to return | Verify `ios/GoogleAuth.xcconfig` reversed ID + Vercel `NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID` |
+
 | Atrativos curados | `/atrativos`, `/atrativos/[id]` | Nenhuma (só listagem) |
 | Avatar | `/perfil/editar` → upload foto | Login; `POST /api/perfil/avatar` + `SUPABASE_SERVICE_ROLE_KEY` no servidor |
 | Clima | Hero home; `LugarClimaWidget` no detalhe | Sheet completo = login |

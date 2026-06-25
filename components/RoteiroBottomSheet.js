@@ -103,6 +103,7 @@ function RoteiroLoadingView({ message }) {
  * @param {boolean} props.isLoggedIn - Whether the user is authenticated.
  * @param {() => void} [props.onLoginRequired] - Called when login is required.
  * @param {() => void} [props.onLimitReached] - Called when free tier limit is reached.
+ * @param {() => Promise<boolean>} [props.onValidateBeforeGenerate] - Gate client-side antes de chamar a API.
  * @param {(usage: object|null) => void} [props.onUsageRefresh] - Called after generation with updated usage.
  * @param {(roteiro: object) => void} [props.onRoteiroSalvo] - Called after a successful save.
  * @param {boolean} [props.resumeDraft=false] - Restaura rascunho não salvo ao abrir.
@@ -114,6 +115,7 @@ export default function RoteiroBottomSheet({
   isLoggedIn,
   onLoginRequired,
   onLimitReached,
+  onValidateBeforeGenerate,
   onUsageRefresh,
   onRoteiroSalvo,
   resumeDraft = false,
@@ -259,6 +261,11 @@ export default function RoteiroBottomSheet({
     if (!isLoggedIn) {
       onLoginRequired?.();
       return;
+    }
+
+    if (onValidateBeforeGenerate) {
+      const allowed = await onValidateBeforeGenerate();
+      if (!allowed) return;
     }
 
     setErro("");

@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import IconApple from "@/components/IconApple";
 import IconBack from "@/components/IconBack";
 import LegalConsentLine from "@/components/legal/LegalConsentLine";
 import { ensurePerfil } from "@/lib/ensurePerfil";
-import { signInWithGoogleOAuth } from "@/lib/capacitorOAuth";
+import { signInWithAppleAuth, signInWithGoogleOAuth } from "@/lib/capacitorOAuth";
+import { canUseNativeAppleSignIn, formatNativeAppleError } from "@/lib/nativeAppleAuth";
 import { formatNativeGoogleError } from "@/lib/nativeGoogleAuth";
 import { safeRedirectPath } from "@/lib/safeRedirectPath";
 import {
@@ -49,36 +50,27 @@ function IconMessage({ className = "h-5 w-5" }) {
 }
 
 /**
- * Botão Apple desativado (OAuth pendente Apple Developer Program).
+ * Botão Sign in with Apple (iOS nativo).
  * @param {object} props
  * @param {boolean} props.compact
+ * @param {boolean} props.loading
+ * @param {() => void} props.onClick
  * @returns {import("react").ReactElement}
  */
-function AppleSignInButtonDisabled({ compact }) {
-  const hintId = useId();
+function AppleSignInButton({ compact, loading, onClick }) {
+  const appleBtn = `${compact ? "border border-[#1a2e28]/10 " : ""}flex min-h-[52px] w-full items-center justify-center gap-3 rounded-2xl bg-[#1a2e28] py-3.5 text-sm font-semibold text-white transition active:scale-[0.99] disabled:opacity-60`;
 
   return (
-    <div className="flex flex-col gap-1.5">
-      {/* TODO: habilitar quando Apple Developer Program estiver ativo */}
-      <button
-        type="button"
-        disabled
-        aria-disabled="true"
-        aria-label="Entrar com Apple — indisponível no momento"
-        aria-describedby={hintId}
-        className={`flex min-h-[52px] w-full cursor-not-allowed items-center justify-center gap-3 rounded-2xl py-3.5 text-sm font-semibold opacity-50 ${
-          compact
-            ? "border border-[#1a2e28]/10 bg-[#1a2e28] text-white"
-            : "bg-[#1a2e28] text-white"
-        }`}
-      >
-        <IconApple dark />
-        Continuar com Apple
-      </button>
-      <p id={hintId} className="text-center text-[10px] leading-snug text-[#9aa8a3]">
-        Em breve — Apple Developer Program
-      </p>
-    </div>
+    <button
+      type="button"
+      disabled={loading}
+      onClick={onClick}
+      aria-label="Entrar com Apple"
+      className={appleBtn}
+    >
+      <IconApple dark />
+      {loading ? "Conectando..." : "Continuar com Apple"}
+    </button>
   );
 }
 
@@ -105,7 +97,7 @@ function cleanPhone(value) {
 }
 
 /**
- * AuthFlow — Google, Apple (UI off) e SMS OTP.
+ * AuthFlow — Google, Apple (iOS nativo) e SMS OTP.
  * @param {object} props
  * @param {boolean} [props.compact] - Modal LoginModal.
  * @param {"default" | "immersive"} [props.variant] - Visual da página /login.
@@ -122,7 +114,10 @@ export default function AuthFlow({
   const postLoginPath = safeRedirectPath(redirectAfterLogin);
   const [screen, setScreen] = useState("main");
   const [oauthLoading, setOauthLoading] = useState(false);
+  const [appleLoading, setAppleLoading] = useState(false);
   const [oauthError, setOauthError] = useState("");
+  const showAppleSignIn = canUseNativeAppleSignIn();
+  const socialLoading = oauthLoading || appleLoading;
   const [phone, setPhone] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [sendingCode, setSendingCode] = useState(false);
@@ -183,6 +178,39 @@ export default function AuthFlow({
 
     return () => controller.abort();
   }, [screen, resendCount, applyOtpDigits]);
+
+  async function handleApple() {
+    setAppleLoading(true);
+    setOauthError("");
+
+    try {
+      const supabase = createClient();
+      if (!supabase) {
+        setOauthError("Serviço indisponível. Tente novamente.");
+        setAppleLoading(false);
+        return;
+      }
+
+      const { error, cancelled } = await signInWithAppleAuth(supabase, postLoginPath);
+
+      if (cancelled) {
+        setAppleLoading(false);
+        return;
+      }
+
+      if (error) {
+        setOauthError(
+          error.message || "Não foi possível iniciar o login com Apple."
+        );
+        setAppleLoading(false);
+        return;
+      }
+    } catch (error) {
+      console.error("handleApple:", error);
+      setOauthError(formatNativeAppleError(error));
+      setAppleLoading(false);
+    }
+  }
 
   async function handleGoogle() {
     setOauthLoading(true);
@@ -472,7 +500,9 @@ export default function AuthFlow({
           <p className={subtitleClass}>
             {compact
               ? "Salve favoritos, avalie lugares e use a busca com IA."
-              : "Google, SMS e em breve Apple."}
+              : showAppleSignIn
+                ? "Google, Apple e SMS."
+                : "Google e SMS."}
           </p>
         </>
       )}
@@ -480,22 +510,28 @@ export default function AuthFlow({
       <div className={`flex flex-col gap-3 ${immersive ? "mt-5" : "mt-6"}`}>
         <button
           type="button"
-          disabled={oauthLoading}
+          disabled={socialLoading}
           onClick={handleGoogle}
           className={googleBtn}
           aria-label="Entrar com Google"
         >
           <IconGoogle />
-          {oauthLoading ? "Redirecionando..." : "Continuar com Google"}
+          {oauthLoading ? "Conectando..." : "Continuar com Google"}
         </button>
+
+        {showAppleSignIn ? (
+          <AppleSignInButton
+            compact={compact || immersive}
+            loading={appleLoading}
+            onClick={handleApple}
+          />
+        ) : null}
 
         {oauthError ? (
           <p className="text-sm text-red-600" role="alert">
             {oauthError}
           </p>
         ) : null}
-
-        <AppleSignInButtonDisabled compact={compact || immersive} />
 
         <div className="flex items-center gap-3 py-0.5">
           <div className="h-px flex-1 bg-[#e3ebe7]" />
