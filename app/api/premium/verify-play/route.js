@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { activatePremiumFromPlayPurchase } from "@/lib/premiumActivation";
 import { verifyPlaySubscription } from "@/lib/playBillingVerify";
 import { PLAY_PREMIUM_PRODUCT_ID } from "@/lib/playPremiumConfig";
-import { getAuthUser, getPerfilUsage } from "@/lib/premiumServer";
+import { getAuthUser, getPerfilUsageFromAdmin } from "@/lib/premiumServer";
 import { reportError } from "@/lib/observability";
 import { createServiceClient } from "@/lib/supabase/service";
 import { buildApiErrorBody } from "@/lib/userMessages";
@@ -69,7 +69,7 @@ export async function POST(request) {
       );
     }
 
-    const usage = await getPerfilUsage(user.id);
+    const usage = await getPerfilUsageFromAdmin(admin, user.id);
 
     return NextResponse.json({
       ok: true,

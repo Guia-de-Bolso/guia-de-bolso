@@ -9,18 +9,20 @@ SET search_path = public
 AS $$
 BEGIN
   IF TG_OP = 'INSERT' THEN
-    IF NOT public.is_admin_or_dev() THEN
-      NEW.role := 'usuario';
-      NEW.premium_ativo := COALESCE(NEW.premium_ativo, false);
-      IF NEW.premium_ativo IS TRUE THEN
-        NEW.premium_ativo := false;
-      END IF;
-      NEW.premium_ate := NULL;
+    IF auth.role() = 'service_role' OR public.is_admin_or_dev() THEN
+      RETURN NEW;
     END IF;
+
+    NEW.role := 'usuario';
+    NEW.premium_ativo := COALESCE(NEW.premium_ativo, false);
+    IF NEW.premium_ativo IS TRUE THEN
+      NEW.premium_ativo := false;
+    END IF;
+    NEW.premium_ate := NULL;
     RETURN NEW;
   END IF;
 
-  IF public.is_admin_or_dev() THEN
+  IF auth.role() = 'service_role' OR public.is_admin_or_dev() THEN
     RETURN NEW;
   END IF;
 

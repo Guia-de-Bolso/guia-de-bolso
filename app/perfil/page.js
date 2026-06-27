@@ -496,9 +496,25 @@ export default function PerfilPage() {
           setPaywallOpen(false);
           router.push("/login?next=/perfil");
         }}
-        onPremiumActivated={(nextUsage) => {
-          if (nextUsage) setPremiumUsage(nextUsage);
-          else refreshPremiumUsage();
+        onPremiumActivated={async (nextUsage) => {
+          if (nextUsage?.premium) {
+            setPremiumUsage(nextUsage);
+          } else {
+            await refreshPremiumUsage();
+          }
+
+          if (user?.id) {
+            const supabase = createClient();
+            const { data: perfilData } = await supabase
+              .from("perfis")
+              .select("*")
+              .eq("id", user.id)
+              .maybeSingle();
+
+            if (perfilData) {
+              setPerfil(perfilData);
+            }
+          }
         }}
         onClose={() => setPaywallOpen(false)}
       />

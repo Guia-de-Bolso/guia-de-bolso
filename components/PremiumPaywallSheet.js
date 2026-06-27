@@ -111,7 +111,7 @@ export default function PremiumPaywallSheet({
         return;
       }
 
-      onPremiumActivated?.(result.usage ?? null);
+      await onPremiumActivated?.(result.usage ?? null);
       onClose();
     } catch {
       setPurchaseError("Não foi possível concluir a compra. Tente novamente.");
@@ -137,7 +137,7 @@ export default function PremiumPaywallSheet({
         return;
       }
 
-      onPremiumActivated?.(result.usage ?? null);
+      await onPremiumActivated?.(result.usage ?? null);
       onClose();
     } catch {
       setPurchaseError("Não foi possível restaurar a assinatura.");
