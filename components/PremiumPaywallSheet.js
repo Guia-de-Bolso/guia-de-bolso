@@ -1,13 +1,18 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import BottomSheetShell from "@/components/BottomSheetShell";
 import DailyLimitCountdown from "@/components/DailyLimitCountdown";
 import { useBottomSheetDrag } from "@/hooks/useBottomSheetDrag";
 import { PREMIUM_BENEFITS } from "@/lib/premiumBenefits";
 import { LIMITS, PREMIUM_PRICE_LABEL } from "@/lib/premium";
-import { canPurchasePlayPremium } from "@/lib/playPremiumConfig";
-import { purchasePlayPremium, restorePlayPremiumPurchases } from "@/lib/playPremiumPurchase";
+import {
+  canPurchaseNativePremium,
+  getNativePremiumBillingDisclaimer,
+  getNativePremiumStoreProduct,
+  purchaseNativePremium,
+  restoreNativePremiumPurchases,
+} from "@/lib/premiumNativePurchase";
 
 const COPY = {
   busca: {
@@ -59,11 +64,33 @@ export default function PremiumPaywallSheet({
   const [purchasing, setPurchasing] = useState(false);
   const [restoring, setRestoring] = useState(false);
   const [purchaseError, setPurchaseError] = useState("");
+  const [storePriceLabel, setStorePriceLabel] = useState(null);
 
   const copy = COPY[feature] ?? COPY.geral;
   const isLimitFeature = feature === "busca" || feature === "roteiro";
-  const canPurchase = canPurchasePlayPremium();
+  const canPurchase = canPurchaseNativePremium();
   const isBusy = purchasing || restoring;
+  const priceLabel = storePriceLabel ?? PREMIUM_PRICE_LABEL;
+  const billingDisclaimer = getNativePremiumBillingDisclaimer();
+
+  useEffect(() => {
+    if (!isOpen || !canPurchase) {
+      setStorePriceLabel(null);
+      return undefined;
+    }
+
+    let cancelled = false;
+
+    getNativePremiumStoreProduct().then(({ priceString }) => {
+      if (!cancelled && priceString) {
+        setStorePriceLabel(`${priceString}/mês`);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, canPurchase]);
 
   const handlePurchase = useCallback(async () => {
     setPurchaseError("");
@@ -75,7 +102,7 @@ export default function PremiumPaywallSheet({
 
     setPurchasing(true);
     try {
-      const result = await purchasePlayPremium({ userId: user.id });
+      const result = await purchaseNativePremium({ userId: user.id });
 
       if (result.cancelled) return;
 
@@ -103,7 +130,7 @@ export default function PremiumPaywallSheet({
 
     setRestoring(true);
     try {
-      const result = await restorePlayPremiumPurchases();
+      const result = await restoreNativePremiumPurchases();
 
       if (!result.ok) {
         setPurchaseError(result.message ?? "Não foi possível restaurar a assinatura.");
@@ -122,7 +149,7 @@ export default function PremiumPaywallSheet({
   const primaryLabel = purchasing
     ? "Processando…"
     : user
-      ? `Assinar Premium · ${PREMIUM_PRICE_LABEL}`
+      ? `Assinar Premium · ${priceLabel}`
       : "Entrar para assinar";
 
   return (
@@ -222,17 +249,14 @@ export default function PremiumPaywallSheet({
           renovados à meia-noite.
         </p>
 
-        <p className="mt-4 text-center text-2xl font-bold text-[#1a4a3a]">
-          {PREMIUM_PRICE_LABEL}
-        </p>
+        <p className="mt-4 text-center text-2xl font-bold text-[#1a4a3a]">{priceLabel}</p>
         <p className="mt-1 pb-2 text-center text-xs text-[#5a6b66]">
           Uso ilimitado · Pagamento recorrente · Cancele quando quiser
         </p>
 
-        {canPurchase ? (
+        {canPurchase && billingDisclaimer ? (
           <p className="pb-2 text-center text-[10px] leading-relaxed text-[#8a9a94]">
-            Cobrança via Google Play. Renovação automática até cancelar nas configurações da Play
-            Store.
+            {billingDisclaimer}
           </p>
         ) : null}
       </div>
