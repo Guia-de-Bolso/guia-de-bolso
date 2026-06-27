@@ -28,6 +28,9 @@ export async function POST(request) {
         ? body.productId.trim()
         : APPLE_PREMIUM_PRODUCT_ID;
 
+    const jwsRepresentation =
+      typeof body?.jwsRepresentation === "string" ? body.jwsRepresentation.trim() : null;
+
     if (!transactionId) {
       return NextResponse.json(
         buildApiErrorBody("VALIDATION", { error: "ID da transação é obrigatório." }),
@@ -35,7 +38,11 @@ export async function POST(request) {
       );
     }
 
-    const verification = await verifyAppleSubscription({ transactionId, productId });
+    const verification = await verifyAppleSubscription({
+      transactionId,
+      productId,
+      jwsRepresentation,
+    });
 
     if (!verification.valid) {
       return NextResponse.json(
