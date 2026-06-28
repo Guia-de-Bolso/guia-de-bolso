@@ -31,11 +31,13 @@ O projeto separa bem segredos de servidor (`ANTHROPIC_API_KEY`, `SUPABASE_SERVIC
 | Prioridade | Item | Status | Notas |
 |------------|------|--------|-------|
 | P0 | Policy `logs` SELECT com `USING (true)` | Aberto | Qualquer cliente com anon key pode ler PII |
-| P0 | `perfis` UPDATE próprio sem restrição de colunas | Aberto | Escalação `role` / `premium_ativo` |
+| P0 | `perfis` UPDATE próprio sem restrição de colunas | Mitigado | Trigger bloqueia `role`, `premium_*` e contadores IA; cotas só via RPC |
 | P0 | Storage `lugares-fotos` / `rotas-fotos` INSERT para `authenticated` | Aberto | Qualquer login envia fotos |
-| P0 | Policies de escrita `lugares` / `destaques` não versionadas | Risco | Só SELECT no repo; admin depende do Dashboard |
+| P0 | Policies de escrita `lugares` / `destaques` não versionadas | Mitigado | `lugares_admin_write.sql`, `destaques_planos_policies.sql` |
+| P0 | RLS `favoritos` não versionado | Mitigado | `favoritos_policies.sql` |
+| P0 | Admin UPDATE `perfis` de outro usuário | Mitigado | `perfis_admin_policies.sql` + trigger |
 | P1 | Admin `/admin` só no cliente (`useAdminAuth`) | Parcial | `app/admin/layout.js` server guard; RLS + PostgREST do browser ainda crítico |
-| P1 | Sem rate limit em `/api/buscar` e `/api/roteiro` | Mitigado | `lib/iaRateLimit.js`; `/api/avaliacoes/analisar` também |
+| P1 | Sem rate limit em `/api/buscar` e `/api/roteiro` | Mitigado | `lib/iaRateLimit.js` (Upstash + fallback memória); cotas premium |
 | P1 | Fallback fail-open em `premiumServer` | Mitigado | `USAGE_CHECK_FAILED` fail-closed; `/api/uso-premium` não inventa cota em erro |
 | P1 | Open redirect em `auth/callback?next=` | Mitigado | `lib/safeRedirectPath.js` + `?next=` no OAuth via login |
 | P2 | `rota_dicas` / `rotas_tags` policy “Authenticated write” legada | Verificar | Substituir por `is_admin_user()` |
@@ -73,7 +75,7 @@ O projeto separa bem segredos de servidor (`ANTHROPIC_API_KEY`, `SUPABASE_SERVIC
 | **Impacto** | Usuário autenticado pode definir `role = 'admin'` ou `premium_ativo = true` e obter acesso ao painel admin ou IA ilimitada, conforme colunas graváveis. |
 | **Probabilidade** | Likely se policy `perfis_update_own_usage` / `perfis_update_own` permitir UPDATE na linha inteira. |
 | **Evidência** | `supabase/perfis_premium_policies.sql` — `WITH CHECK (auth.uid() = id)` sem lista branca de colunas. App atualiza `buscas_ia`, `maps_preferido`, etc. via cliente. |
-| **Solução** | (1) Policy de UPDATE restrita a colunas não sensíveis via trigger `BEFORE UPDATE` que rejeita mudança em `role`, `premium_ativo`, `premium_ate` exceto por `SECURITY DEFINER` admin. (2) Policy separada `perfis_update_admin` com `is_admin_or_dev()` para `/admin/usuarios`. (3) Remover updates de contadores do cliente; só RPC/API server. |
+| **Solução** | (1) Trigger `BEFORE UPDATE` em `perfis_privileged_guard.sql` congela `role`, `premium_ativo`, `premium_ate`, `buscas_ia`, `roteiros_ia`, `uso_ia_mes` exceto via RPC (`perfis_ia_usage_write_bypass`). (2) Policy separada `perfis_update_admin` com `is_admin_or_dev()` para `/admin/usuarios`. (3) Contadores IA só via RPC `increment_*_ia` / `align_perfil_usage_to_day` — sem UPDATE client em `premiumServer.js`. |
 
 ---
 

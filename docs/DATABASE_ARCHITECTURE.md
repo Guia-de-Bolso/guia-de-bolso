@@ -301,7 +301,7 @@ Taxonomy joins, destaques by place, review moderation, route steps, GIN on `logs
 ### Phase 1 — Current performance (1–2 sprints)
 
 - [ ] Apply `db_indexes_phase2.sql` on staging
-- [ ] Narrow `select` in `/api/buscar` and `/api/roteiro`; cap catalog rows
+- [x] Narrow `select` in `/api/buscar` and `/api/roteiro`; cap catalog rows sent to Claude
 - [ ] Single embedded query for place detail (replace fan-out)
 - [ ] SQL `COUNT` for premium users in admin dashboard
 - [ ] Remove unbounded `favoritos` fallback when RPC exists

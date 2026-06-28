@@ -14,7 +14,7 @@ Documento financeiro para planejamento de lançamento. **Não substitui contabil
 
 | Linha | Quem paga | Valor no código / produto | Relevância |
 |-------|-----------|---------------------------|------------|
-| **B2B Parceiro (principal)** | Estabelecimento | **R$ 199/mês** — `lib/planoComercial.js`, `plano_comercial_unico.sql` | Carrossel Parceiros, prioridade na busca IA, badges |
+| **B2B Parceiro (principal)** | Estabelecimento | **R$ 299/mês** — `lib/planoComercial.js`, `plano_comercial_unico.sql` | Carrossel Parceiros, prioridade na busca IA, badges |
 | **B2C Guia Premium (secundário)** | Usuário final | **R$ 9,90/mês** — IA ilimitada (`lib/premium.js`) | Não paga o negócio sozinho; cobre heavy users parcialmente |
 | **Free tier IA** | — | 5 buscas/dia + 2 roteiros/dia (America/Sao_Paulo) | Teto teórico de custo variável |
 
@@ -29,8 +29,8 @@ Documento financeiro para planejamento de lançamento. **Não substitui contabil
 
 | Endpoint | Arquivo | `max_tokens` saída | Escala com catálogo |
 |----------|---------|-------------------|---------------------|
-| Busca | `app/api/buscar/route.js` | **256** | **Sim** — envia `JSON.stringify(lugaresResumo)` de **todos** os lugares `status=ativo` |
-| Roteiro | `app/api/roteiro/route.js` | **1400** | **Fraca** — no máx. **24** lugares (`selecionarLugaresParaRoteiro` em `lib/roteiroLugares.js`) |
+| Busca | `app/api/buscar/route.js` | **256** | **Parcial** — catálogo enxuto no DB; **top 60** após `rankLugaresForBusca`; `descricao` truncada em **120** chars |
+| Roteiro | `app/api/roteiro/route.js` | **2400** | **Fraca** — no máx. **24** lugares (`selecionarLugaresParaRoteiro` em `lib/roteiroLugares.js`) |
 | Moderação avaliação | `app/api/avaliacoes/analisar/route.js` | **500** | Não — 1 avaliação por chamada |
 
 **Modelo:** `claude-sonnet-4-5` (env `ANTHROPIC_MODEL`).
@@ -42,26 +42,26 @@ Documento financeiro para planejamento de lançamento. **Não substitui contabil
 
 ### 2.1 Estimativa de tokens por chamada
 
-Método: tamanho médio do payload no código (`buildLugarBuscaResumo` + string `contexto` em `buscar/route.js`).
+Método: payload real no código — `rankLugaresForBusca` limita a **60** lugares; `buildLugarBuscaResumo` trunca `descricao` em 120 chars; select enxuto `LUGAR_SELECT_BUSCA_CONTEXT`.
 
-| Componente | ~100 lugares | ~300 lugares |
-|------------|--------------|--------------|
-| Entrada busca (system + user + catálogo JSON) | **~8.500 tokens** | **~24.500 tokens** |
-| Saída busca (média observada) | **~80 tokens** | **~80 tokens** |
-| Entrada roteiro (system + ≤24 lugares, `descricao` truncada 100 chars) | **~4.500 tokens** | **~4.500 tokens** |
-| Saída roteiro (média, &lt; max 1400) | **~900 tokens** | **~900 tokens** |
+| Componente | ~100 lugares (DB) | ~300 lugares (DB) | Enviado ao Claude |
+|------------|-------------------|-------------------|-------------------|
+| Entrada busca (system + user + top-60 JSON) | **~3.200 tokens** | **~3.200 tokens** | Sempre ≤60 lugares |
+| Saída busca (média observada) | **~80 tokens** | **~80 tokens** | |
+| Entrada roteiro (system + ≤24 lugares, `descricao` truncada 100 chars) | **~4.500 tokens** | **~4.500 tokens** | |
+| Saída roteiro (média, &lt; max 2400) | **~900 tokens** | **~900 tokens** | |
 | Entrada moderação | **~450 tokens** | **~450 tokens** |
 | Saída moderação | **~120 tokens** | **~120 tokens** |
 
 ### 2.2 Custo unitário por chamada (premissa câmbio R$ 5,90)
 
-| Chamada | 100 lugares | 300 lugares |
-|---------|-------------|-------------|
-| **1 busca** | US$ ~0,026 → **R$ 0,15** | US$ ~0,074 → **R$ 0,44** |
+| Chamada | 100 lugares (DB) | 300 lugares (DB) |
+|---------|------------------|------------------|
+| **1 busca** | US$ ~0,010 → **R$ 0,06** | idem (top-60 fixo) |
 | **1 roteiro** | US$ ~0,027 → **R$ 0,16** | idem |
 | **1 moderação** | US$ ~0,003 → **R$ 0,02** | idem |
 
-> Recalcule na planilha se descrições de lugares ficarem muito longas (o campo `descricao` entra inteiro na busca).
+> Recalcule na planilha se mudar `BUSCA_DESCRICAO_MAX_CHARS` ou o limite top-60 em `rankLugaresForBusca`.
 
 ---
 
@@ -89,34 +89,25 @@ Método: tamanho médio do payload no código (`buildLugarBuscaResumo` + string 
 
 ## 4. Tabela A — Custo variável de IA por MAU (R$/mês)
 
-Valores **médios** (cenário **Médio**). Colunas **100** vs **300** lugares.
+Valores **médios** (cenário **Médio**). Desde **jun/2026**, a busca envia no máximo **60** lugares ao Claude — colunas 100 vs 300 lugares refletem sobretudo carga no Supabase, **não** tokens de busca.
 
-| MAU | Usuários IA | Buscas/mês | Roteiros/mês | Mod./mês | IA (100 lug.) | IA (300 lug.) |
-|-----|-------------|------------|--------------|----------|---------------|---------------|
-| **10** | 2 | 22 | 3 | 1 | **R$ 4** | **R$ 11** |
-| **100** | 18 | 216 | 27 | 8 | **R$ 37** | **R$ 105** |
-| **200** | 36 | 432 | 54 | 16 | **R$ 74** | **R$ 210** |
-| **500** | 90 | 1.080 | 135 | 40 | **R$ 185** | **R$ 525** |
+| MAU | Usuários IA | Buscas/mês | Roteiros/mês | Mod./mês | IA/mês (top-60) |
+|-----|-------------|------------|--------------|----------|-----------------|
+| **10** | 2 | 22 | 3 | 1 | **R$ 2** |
+| **100** | 18 | 216 | 27 | 8 | **R$ 18** |
+| **200** | 36 | 432 | 54 | 16 | **R$ 35** |
+| **500** | 90 | 1.080 | 135 | 40 | **R$ 87** |
 
-### Mesma MAU — outros cenários (catálogo **100 lugares**)
-
-| MAU | Conservador | Médio | Alta temporada | Teto teórico |
-|-----|-------------|-------|----------------|--------------|
-| 10 | R$ 1 | R$ 4 | R$ 9 | R$ 15 |
-| 100 | R$ 10 | R$ 37 | R$ 86 | R$ 143 |
-| 200 | R$ 20 | R$ 74 | R$ 172 | R$ 286 |
-| 500 | R$ 50 | R$ 185 | R$ 430 | R$ 715 |
-
-### Mesma MAU — outros cenários (catálogo **300 lugares**)
+### Mesma MAU — outros cenários (busca top-60, jun/2026)
 
 | MAU | Conservador | Médio | Alta temporada | Teto teórico |
 |-----|-------------|-------|----------------|--------------|
-| 10 | R$ 3 | R$ 11 | R$ 25 | R$ 42 |
-| 100 | R$ 30 | R$ 105 | R$ 245 | R$ 408 |
-| 200 | R$ 60 | R$ 210 | R$ 490 | R$ 816 |
-| 500 | R$ 150 | R$ 525 | R$ 1.225 | R$ 2.040 |
+| 10 | R$ 1 | R$ 2 | R$ 4 | R$ 7 |
+| 100 | R$ 5 | R$ 18 | R$ 42 | R$ 70 |
+| 200 | R$ 10 | R$ 35 | R$ 84 | R$ 140 |
+| 500 | R$ 24 | R$ 87 | R$ 210 | R$ 350 |
 
-*(Teto com 500 MAU e 300 lugares é cenário de stress — configurar alertas de billing antes.)*
+*(Teto com 500 MAU é cenário de stress — configurar alertas de billing antes.)*
 
 ---
 
@@ -150,7 +141,7 @@ Exemplo **lançamento (Médio, MAU 100, 100 lugares):** R$ 543 + R$ 37 + R$ 15 �
 
 ### B2B — Parceiros (receita principal)
 
-**V1 (código hoje):** ticket **R$ 199/mês** por parceiro ativo.
+**V1 (código hoje):** ticket **R$ 299/mês** por parceiro ativo.
 
 Premissas editáveis:
 
@@ -163,7 +154,7 @@ Premissas editáveis:
 
 **Cenário V2 multi-tier** (planilha — não implementado):
 
-Exemplo mix em 18 parceiros: 40% Estabelecido (99) + 35% Destaque (149) + 25% Parceiro (229) → ticket médio **~R$ 152** → MRR **~R$ 2.736** (vs R$ 3.582 se todos a R$ 199).
+Exemplo mix em 18 parceiros: 40% Estabelecido (99) + 35% Destaque (149) + 25% Parceiro (229) → ticket médio **~R$ 152** → MRR **~R$ 2.736** (vs R$ 5.382 se todos a R$ 299).
 
 ### B2C — Premium R$ 9,90 (secundário)
 
@@ -185,37 +176,37 @@ Premium **não cobre** IA de power users sozinho; ajuda margem e sinal de produt
 
 ### Só stack fixo (recomendado ~R$ 543/mês)
 
-| Item | Parceiros a R$ 199 |
+| Item | Parceiros a R$ 299 |
 |------|-------------------|
-| Empatar fixos | **3 parceiros** (R$ 597) |
+| Empatar fixos | **2 parceiros** (R$ 598) |
 
 ### Stack + IA (Médio)
 
-| MAU | Lugares | Custo total ~ | Parceiros R$ 199 para empatar |
+| MAU | Lugares | Custo total ~ | Parceiros R$ 299 para empatar |
 |-----|---------|---------------|-------------------------------|
-| 100 | 100 | R$ 595 | **3** (sobra pouco) / **4** confortável |
-| 100 | 300 | R$ 663 | **4** |
-| 500 | 100 | R$ 743 | **4** |
-| 500 | 300 | R$ 1.083 | **6** |
+| 100 | 100 | R$ 595 | **2** |
+| 100 | 300 | R$ 663 | **3** |
+| 500 | 100 | R$ 743 | **3** |
+| 500 | 300 | R$ 1.083 | **4** |
 
 ### Margem bruta simplificada (lançamento, Médio)
 
 | | R$/mês |
 |---|--------|
-| MRR B2B (5 parceiros) | 995 |
+| MRR B2B (5 parceiros) | 1.495 |
 | MRR B2C (3 premium) | 30 |
-| **Receita** | **1.025** |
+| **Receita** | **1.525** |
 | Custo operação | 595 |
-| **Margem bruta** | **~R$ 430** (~42%) |
+| **Margem bruta** | **~R$ 930** (~61%) |
 
-Com **9 parceiros** + custos iguais: receita R$ 1.821 − R$ 595 ≈ **R$ 1.226/mês**.
+Com **9 parceiros** + custos iguais: receita R$ 2.721 − R$ 595 ≈ **R$ 2.126/mês**.
 
 ---
 
 ## 8. Riscos e alavancas
 
-- **Catálogo 300 lugares** multiplica ~3× o input da busca → maior risco variável; mitigar: pré-filtro por categoria, resumo sem `descricao` completa, Haiku para ranking + Sonnet só no top 10.
-- **Busca manda catálogo inteiro** (`app/api/buscar/route.js`) — confirmado; qualquer lugar novo aumenta custo linearmente.
+- **Catálogo 300 lugares** aumenta carga no Supabase (select enxuto + ranking local), mas **não** multiplica tokens da busca (top-60 + descrição truncada).
+- **Busca** — `LUGAR_SELECT_BUSCA_CONTEXT` + `rankLugaresForBusca(60)` + `truncateBuscaDescricao(120)`; custo Claude estável ao crescer catálogo.
 - **Roteiro** limitado a 24 lugares — custo estável ao crescer catálogo.
 - **WhatsApp vs Google OAuth** — se OTP WhatsApp dominar, custo auth sobe; Google continua R$ 0 marginal.
 - **Lojas** — ~**R$ 61/mês** amortizado (Apple + Play) **mesmo com 10 MAU**.
@@ -243,9 +234,9 @@ Arquivo: [`custos-planilha.csv`](./custos-planilha.csv)
 
 ## 10. Resumo executivo (5 bullets)
 
-1. **Lançamento mais provável (100 lugares, MAU 100, cenário Médio, 5 parceiros):** custo operação **~R$ 595/mês**; receita **~R$ 1.025/mês**; margem bruta **~R$ 430**.
-2. **Mês 6 (300 lugares, MAU 300–500, 18–32 parceiros):** custo **~R$ 700–1.100/mês**; MRR B2B **R$ 3.600–6.400** se conversão 10–18% dos comerciais.
-3. **Break-even:** **3–4 parceiros a R$ 199** cobrem stack recomendado + IA em MAU 100; B2C Premium sozinho não empata o negócio.
+1. **Lançamento mais provável (100 lugares, MAU 100, cenário Médio, 5 parceiros):** custo operação **~R$ 595/mês**; receita **~R$ 1.525/mês**; margem bruta **~R$ 930**.
+2. **Mês 6 (300 lugares, MAU 300–500, 18–32 parceiros):** custo **~R$ 700–1.100/mês**; MRR B2B **R$ 5.382–9.568** se conversão 10–18% dos comerciais.
+3. **Break-even:** **2 parceiros a R$ 299** cobrem stack recomendado + IA em MAU 100; B2C Premium sozinho não empata o negócio.
 4. **Maior risco variável:** busca IA com catálogo completo crescendo para 300 lugares + cenário teto de limites diários free.
 5. **Próximos passos:** alerta de billing Anthropic; medir tokens reais nas primeiras 2 semanas; priorizar OAuth vs WhatsApp; planejar otimização de contexto da busca antes de 300 lugares; implementar cobrança B2B (Asaas) quando houver 5+ parceiros pagando manualmente.
 

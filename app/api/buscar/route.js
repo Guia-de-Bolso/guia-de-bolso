@@ -7,7 +7,12 @@ import {
 } from "@/lib/busca";
 import { getClaudeModel } from "@/lib/anthropicConfig";
 import { rankLugaresForBusca } from "@/lib/buscaRetrieval";
-import { enrichLugarFlags } from "@/lib/lugarBadges";
+import {
+  LUGAR_SELECT_BUSCA_CONTEXT,
+  orderLugaresByIds,
+  queryLugaresByIds,
+} from "@/lib/lugaresQuery";
+import { enrichLugarFlags, enrichLugaresFlags } from "@/lib/lugarBadges";
 import { checkIaRateLimit } from "@/lib/iaRateLimit";
 import { logIA } from "@/lib/logIA";
 import { reportError } from "@/lib/observability";
@@ -42,7 +47,7 @@ export async function POST(request) {
 
     const { user } = await getAuthUser();
 
-    const rate = checkIaRateLimit(request, user?.id);
+    const rate = await checkIaRateLimit(request, user?.id);
     if (!rate.allowed) {
       return NextResponse.json(buildApiErrorBody("RATE_LIMITED"), {
         status: 429,
@@ -73,7 +78,7 @@ export async function POST(request) {
 
     const { data: lugares, error } = await supabase
       .from("lugares")
-      .select("*, localizacoes(*), lugares_tags(tags(*))")
+      .select(LUGAR_SELECT_BUSCA_CONTEXT)
       .eq("status", "ativo");
 
     if (error) {
@@ -236,10 +241,20 @@ ${JSON.stringify(lugaresResumo)}`,
     const text = claudeData.content?.[0]?.text ?? "[]";
     const ids = parseJsonArrayFromText(text);
 
-    const lugaresPorId = new Map(lugaresAtivos.map((l) => [String(l.id), l]));
-    let filtrados = ids
-      .map((id) => lugaresPorId.get(String(id)))
-      .filter(Boolean);
+    const { data: lugaresResultado, error: idsError } = await queryLugaresByIds(
+      supabase,
+      ids
+    );
+
+    if (idsError) {
+      console.error("Busca — erro ao carregar resultados:", idsError);
+      return NextResponse.json(buildApiErrorBody("SERVER"), { status: 500 });
+    }
+
+    let filtrados = orderLugaresByIds(
+      enrichLugaresFlags(lugaresResultado ?? []),
+      ids
+    );
 
     filtrados = filtrarLugaresPorStatus(filtrados, filtroStatus);
 

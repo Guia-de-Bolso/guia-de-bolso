@@ -1,0 +1,10 @@
+-- Patch P0: bloqueia bypass de cotas IA via UPDATE client em perfis.
+--
+-- Aplicar no SQL Editor (ordem):
+--   1. perfis_ia_usage_write.sql
+--   2. increment_uso_ia.sql          (re-run — adiciona bypass nas RPCs)
+--   3. perfis_privileged_guard.sql
+--   4. align_perfil_usage_to_day.sql
+--
+-- Teste pós-deploy: usuário comum não pode zerar buscas_ia/roteiros_ia via UPDATE.
+-- Ver docs/security-rls.md e docs/migrations.md (manifest 1b, 7, 7b).

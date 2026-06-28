@@ -11,6 +11,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **P0 — contadores IA em `perfis`** — trigger estende proteção a `buscas_ia`, `roteiros_ia`, `uso_ia_mes`; só RPCs alteram contadores; removido fallback client-side em `lib/premiumServer.js`.
 - **P0 — RLS versionado** — `favoritos_policies.sql`, `destaques_planos_policies.sql`, `perfis_admin_policies.sql`, `avaliacoes_admin_policies.sql`; manifest de auditoria em `docs/security-rls.md`.
 
+### Performance
+
+- **P1 — busca IA** — select enxuto `LUGAR_SELECT_BUSCA_CONTEXT`, top-60 inalterado, `descricao` truncada (120 chars), resultados via `queryLugaresByIds` + `orderLugaresByIds`.
+- **P1 — rate limit IA** — Upstash Redis em `lib/iaRateLimit.js` (fallback in-memory); env `UPSTASH_REDIS_*`.
+- **P1 — cache** — clima na home via `fetchClimaApisCached`; `fetchLugaresFromApi` respeita CDN de `/api/lugares`.
+- **Docs** — `docs/CUSTOS.md` alinhado (top-60, roteiro `max_tokens: 2400`).
+
+### Performance (P2-lite)
+
+- **Debounce `acessou_app`** — no máximo 1 log por usuário/dia (SP) via `lib/acessouAppLog.js` + `localStorage`.
+- **Índices fase 2** — aplicar `supabase/db_indexes_phase2.sql` no Supabase (manual; já versionado no repo).
+
 ### Added
 
 - **Automated QA pipeline** — ~40 unit test files in `lib/*.test.js` (`npm test`); Playwright smoke in `e2e/smoke.spec.js` (10 cases: health, home, login, explorar, atrativos, favoritos, perfil, admin redirect, bottom nav); GitHub Actions runs lint → unit tests → build → Playwright (Chromium) on PRs and pushes to `main`.

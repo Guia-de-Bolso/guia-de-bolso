@@ -10,7 +10,8 @@
     "test": "node --test lib/*.test.js",
     "icons": "node scripts/refresh-brand-icons.mjs",
     "test:e2e": "playwright test",
-    "db:rotas-favoritas": "node scripts/apply-rotas-favoritas.mjs"
+    "db:rotas-favoritas": "node scripts/apply-rotas-favoritas.mjs",
+    "contrato:docx": "node scripts/generate-contrato-docx.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.0",
@@ -25,6 +26,8 @@
     "@capgo/native-purchases": "^8.4.4",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.105.4",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.38.0",
     "framer-motion": "^12.40.0",
     "google-auth-library": "^10.7.0",
     "jsonwebtoken": "^9.0.3",

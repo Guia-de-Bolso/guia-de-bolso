@@ -28,7 +28,7 @@ import {
 import { FILTRO_STATUS_BUSCA } from "@/lib/busca";
 import { buildReportContext } from "@/lib/reportContext";
 import { getNetworkErrorMessage, mapApiErrorResponse } from "@/lib/userMessages";
-import { fetchClimaApis } from "@/lib/clima";
+import { fetchClimaApisCached } from "@/lib/clima";
 import { IMBITUBA_COORDS, sortLugaresPorDistancia } from "@/lib/homeContext";
 import { enrichLugaresFlags } from "@/lib/lugarBadges";
 import { pickEmAltaCuradoria, pickParceirosPorCategoria } from "@/lib/homeSelection";
@@ -39,6 +39,7 @@ import { fetchLugaresPopulares } from "@/lib/lugaresPopulares";
 import { isSupabasePublicConfigured } from "@/lib/supabase/publicEnv";
 import { getLugaresVisitados } from "@/lib/lugaresVisitados";
 import { withDistanciaDinamica } from "@/lib/localizacao";
+import { shouldLogAcessouAppToday } from "@/lib/acessouAppLog";
 import { ensurePerfil } from "@/lib/ensurePerfil";
 import { LIMITS, canUseBusca, isDailyBuscaLimitReached } from "@/lib/premium";
 import { usePremiumUsage } from "@/lib/usePremiumUsage";
@@ -206,6 +207,14 @@ function Home({ initialHomeData = null }) {
 
     let accessLogged = false;
 
+    function logAcessouAppOnce(currentUser) {
+      if (!currentUser || accessLogged || !shouldLogAcessouAppToday(currentUser.id)) {
+        return;
+      }
+      accessLogged = true;
+      registrarLog(supabase, currentUser, "acessou_app");
+    }
+
     function applySession(sessionUser) {
       setUser(sessionUser);
       if (!sessionUser) setFavoritos([]);
@@ -217,9 +226,8 @@ function Home({ initialHomeData = null }) {
       .then(({ data: { session } }) => {
         const currentUser = session?.user ?? null;
         applySession(currentUser);
-        if (currentUser && !accessLogged) {
-          accessLogged = true;
-          registrarLog(supabase, currentUser, "acessou_app");
+        if (currentUser) {
+          logAcessouAppOnce(currentUser);
           ensurePerfil(supabase, currentUser);
         }
       })
@@ -236,10 +244,7 @@ function Home({ initialHomeData = null }) {
       if (currentUser && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
         ensurePerfil(supabase, currentUser);
       }
-      if (currentUser && !accessLogged) {
-        accessLogged = true;
-        registrarLog(supabase, currentUser, "acessou_app");
-      }
+      logAcessouAppOnce(currentUser);
     });
 
     const safetyTimer = window.setTimeout(() => {
@@ -353,7 +358,7 @@ function Home({ initialHomeData = null }) {
       try {
         const [proximosResult, climaResult] = await Promise.allSettled([
           fetchLugaresProximos(),
-          fetchClimaApis(IMBITUBA_COORDS.latitude, IMBITUBA_COORDS.longitude),
+          fetchClimaApisCached(IMBITUBA_COORDS.latitude, IMBITUBA_COORDS.longitude),
         ]);
 
         if (cancelled) return;

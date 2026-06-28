@@ -1,0 +1,9 @@
+-- Patch P0: RLS favoritos, destaques/planos, perfis admin, avaliacoes admin.
+--
+-- Aplicar no SQL Editor (ordem, após perfis_rls_fix.sql):
+--   1. favoritos_policies.sql
+--   2. destaques_planos_policies.sql
+--   3. perfis_admin_policies.sql
+--   4. avaliacoes_admin_policies.sql
+--
+-- Auditoria pós-deploy: docs/security-rls.md

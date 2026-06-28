@@ -79,7 +79,7 @@ export async function POST(request) {
       return NextResponse.json(buildApiErrorBody("UNAUTHORIZED"), { status: 401 });
     }
 
-    const rate = checkIaRateLimit(request, user.id);
+    const rate = await checkIaRateLimit(request, user.id);
     if (!rate.allowed) {
       return NextResponse.json(buildApiErrorBody("RATE_LIMITED"), {
         status: 429,

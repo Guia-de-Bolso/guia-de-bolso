@@ -166,7 +166,7 @@ export async function POST(request) {
     }
 
     const { user } = await getAuthUser();
-    const rate = checkIaRateLimit(request, user?.id);
+    const rate = await checkIaRateLimit(request, user?.id);
     if (!rate.allowed) {
       return NextResponse.json(
         buildApiErrorBody("RATE_LIMIT"),

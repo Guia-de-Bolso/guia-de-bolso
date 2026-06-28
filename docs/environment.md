@@ -20,6 +20,8 @@ Referência única para configuração local, Vercel e CI. Template versionado: 
 | `NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID` | App iOS | Build | Google Sign-In iOS (`lib/nativeSocialLoginInit.js`) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Opcional | Runtime server | Guest feedback, logs QR, cron purge — **nunca** `NEXT_PUBLIC_` |
 | `CRON_SECRET` | Opcional* | Runtime server | Protege `/api/cron/lugares-purge` (*obrigatório se cron Vercel ativo) |
+| `UPSTASH_REDIS_REST_URL` | Opcional | Runtime server | Rate limit distribuído IA (`lib/iaRateLimit.js`); fallback in-memory se ausente |
+| `UPSTASH_REDIS_REST_TOKEN` | Opcional | Runtime server | Par Upstash Redis REST |
 | `NEXT_PUBLIC_SENTRY_DSN` | Opcional | Build | Observabilidade (`lib/observability.js`) |
 | `NEXT_PUBLIC_OPENWEATHER_API_KEY` | Opcional | Build | Legado; clima principal usa Open-Meteo |
 

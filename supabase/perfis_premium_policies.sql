@@ -1,5 +1,6 @@
--- Permite que o usuário autenticado atualize o próprio perfil (contadores IA, nome, foto).
--- Rode após premium_usuario.sql. Obrigatório também: perfis_privileged_guard.sql (bloqueia role/premium_*).
+-- Permite que o usuário autenticado atualize o próprio perfil (nome, foto, maps_preferido).
+-- Contadores IA (buscas_ia, roteiros_ia, uso_ia_mes) são bloqueados pelo trigger em perfis_privileged_guard.sql.
+-- Rode após premium_usuario.sql. Obrigatório também: perfis_ia_usage_write.sql, perfis_privileged_guard.sql.
 
 ALTER TABLE perfis ENABLE ROW LEVEL SECURITY;
 

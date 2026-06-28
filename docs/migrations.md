@@ -57,9 +57,9 @@ Document what was applied in the PR or deploy notes.
 ### Post-apply checklist
 
 1. [security-rls.md](./security-rls.md) — manual RLS tests (non-admin cannot read `logs`, upload photos, escalate `role`).
-2. Confirm `authenticated` can execute `increment_busca_ia`, `increment_roteiro_ia`, `decrement_busca_ia`, `decrement_roteiro_ia`, `lugares_populares_ids`.
+2. Confirm `authenticated` can execute `increment_busca_ia`, `increment_roteiro_ia`, `decrement_busca_ia`, `decrement_roteiro_ia`, `align_perfil_usage_to_day`, `lugares_populares_ids`.
 3. `EXPLAIN ANALYZE` on heavy paths: full active `lugares` select (busca), admin log filter, popular places RPC.
-4. Compare Dashboard policies vs repo for `favoritos`, `destaques` (not fully versioned yet).
+4. Compare Dashboard policies vs repo using [security-rls.md → Manifest](./security-rls.md#manifest-versionado-por-tabela) (`favoritos`, `destaques`, `planos`, `perfis` admin).
 
 ### Baseline export (recommended)
 
@@ -77,6 +77,7 @@ Run in order for a **new environment** that already has base tables from the Sup
 |---|------|---------|
 | 0 | *(Dashboard)* | Core tables: `lugares`, `localizacoes`, `perfis`, `favoritos`, `tags`, `lugares_tags`, `subcategorias`, `avaliacoes`, `destaques`, `planos`, `logs`, … |
 | 1 | `premium_usuario.sql` | `premium_*`, `buscas_ia`, `roteiros_ia`, `uso_ia_mes` on `perfis` |
+| 1b | `perfis_ia_usage_write.sql` | Helper `perfis_ia_usage_write_bypass()` for RPC counter writes |
 | 2 | `increment_uso_ia.sql` | RPC `increment_*_ia` + `decrement_*_ia` (reserva/estorno de cota) |
 | 2b | `premium_uso_diario.sql` | Optional: comment on `uso_ia_mes` (daily key) |
 | 2c | `premium_uso_dia_fix.sql` | Optional: one-time fix for legacy month keys |
@@ -89,7 +90,9 @@ Run in order for a **new environment** that already has base tables from the Sup
 | 4 | `rotas_policies.sql` | Defines `is_admin_user()` (needed before some policies) |
 | 5 | `perfis_rls_fix.sql` | `is_admin_or_dev()`, admin SELECT all perfis |
 | 6 | `perfis_premium_policies.sql` | Own-row insert/select/update usage |
-| 7 | `perfis_privileged_guard.sql` | Trigger: block self-escalation on `role`, premium |
+| 7 | `perfis_privileged_guard.sql` | Trigger: block self-escalation on `role`, premium, IA counters |
+| 7b | `align_perfil_usage_to_day.sql` | RPC `align_perfil_usage_to_day` (realinhamento diário sem UPDATE client) |
+| 7c | `perfis_admin_policies.sql` | Admin UPDATE any `perfis` (role em `/admin/usuarios`) |
 | 8 | `perfis_role_check.sql` | CHECK roles; migrate `user` → `usuario` |
 
 ### C — Content, storage, taxonomy
@@ -134,6 +137,9 @@ Run in order for a **new environment** that already has base tables from the Sup
 | # | File | Purpose |
 |---|------|---------|
 | 22 | `avaliacoes_moderacao.sql` | Moderation columns + RLS |
+| 22b | `avaliacoes_admin_policies.sql` | Admin SELECT/UPDATE all `avaliacoes` (moderação) |
+| 22c | `favoritos_policies.sql` | Own-row CRUD + admin SELECT (relatórios) |
+| 22d | `destaques_planos_policies.sql` | `planos` read public / write admin; `destaques` admin only |
 | 23 | `plano_comercial_unico.sql` | Single Parceiro plan seed |
 | 24 | `roteiros_policies.sql` | RLS on AI `roteiros` |
 | 25 | `feedback.sql` | Support table + RLS |
@@ -175,11 +181,12 @@ Run in order for a **new environment** that already has base tables from the Sup
 If you only need to align security on a live DB, minimum order from [security-rls.md](./security-rls.md):
 
 1. `rotas_policies.sql`
-2. `perfis_rls_fix.sql` → `perfis_premium_policies.sql` → `perfis_privileged_guard.sql`
-3. `lugares_public_read.sql` + `lugares_admin_write.sql` + `lugares_related_public_read.sql`
-4. `logs_policies.sql`
-5. `storage_admin_fotos.sql` (after buckets exist)
-6. `db_indexes.sql` + `db_indexes_phase2.sql` + `lugares_populares_rpc_fix.sql`
+2. `perfis_rls_fix.sql` → `perfis_premium_policies.sql` → `perfis_ia_usage_write.sql` → `increment_uso_ia.sql` → `perfis_privileged_guard.sql` → `align_perfil_usage_to_day.sql` → `perfis_admin_policies.sql`
+3. `favoritos_policies.sql` → `destaques_planos_policies.sql` → `avaliacoes_admin_policies.sql`
+4. `lugares_public_read.sql` + `lugares_admin_write.sql` + `lugares_related_public_read.sql`
+5. `logs_policies.sql`
+6. `storage_admin_fotos.sql` (after buckets exist)
+7. `db_indexes.sql` + `db_indexes_phase2.sql` + `lugares_populares_rpc_fix.sql`
 
 ---
 

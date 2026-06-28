@@ -1,6 +1,7 @@
 -- Funções atômicas para contadores de IA (limite diário, fuso America/Sao_Paulo).
 -- A coluna perfis.uso_ia_mes armazena a chave do dia (YYYY-MM-DD).
--- Rode no SQL Editor do Supabase após premium_usuario.sql
+-- Depende de: premium_usuario.sql, perfis_ia_usage_write.sql
+-- Após aplicar, rode perfis_privileged_guard.sql (bloqueia UPDATE client nos contadores).
 
 CREATE OR REPLACE FUNCTION increment_busca_ia(p_user_id uuid)
 RETURNS jsonb
@@ -33,6 +34,7 @@ BEGIN
   SELECT * INTO v_perfil FROM perfis WHERE id = p_user_id;
 
   IF NOT FOUND THEN
+    PERFORM public.perfis_ia_usage_write_bypass();
     INSERT INTO perfis (id, nome, uso_ia_mes, buscas_ia, roteiros_ia)
     VALUES (
       p_user_id,
@@ -98,6 +100,7 @@ BEGIN
     );
   END IF;
 
+  PERFORM public.perfis_ia_usage_write_bypass();
   UPDATE perfis
   SET uso_ia_mes = v_day,
       buscas_ia = v_used + 1,
@@ -150,6 +153,7 @@ BEGIN
   SELECT * INTO v_perfil FROM perfis WHERE id = p_user_id;
 
   IF NOT FOUND THEN
+    PERFORM public.perfis_ia_usage_write_bypass();
     INSERT INTO perfis (id, nome, uso_ia_mes, buscas_ia, roteiros_ia)
     VALUES (
       p_user_id,
@@ -210,6 +214,7 @@ BEGIN
     );
   END IF;
 
+  PERFORM public.perfis_ia_usage_write_bypass();
   UPDATE perfis
   SET uso_ia_mes = v_day,
       roteiros_ia = v_used + 1,
@@ -284,6 +289,7 @@ BEGIN
   END;
 
   IF v_used > 0 THEN
+    PERFORM public.perfis_ia_usage_write_bypass();
     UPDATE perfis
     SET uso_ia_mes = v_day,
         buscas_ia = v_used - 1,
@@ -359,6 +365,7 @@ BEGIN
   END;
 
   IF v_used > 0 THEN
+    PERFORM public.perfis_ia_usage_write_bypass();
     UPDATE perfis
     SET uso_ia_mes = v_day,
         roteiros_ia = v_used - 1,
