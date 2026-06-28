@@ -304,6 +304,7 @@ guia-de-bolso/
 - [x] Seção Sobre com "Leia mais"
 - [x] Botão IR AGORA com escolha de app (Google Maps, Apple Maps, Waze)
 - [x] Favoritos reais salvos no Supabase
+- [x] Favoritos offline automáticos (IndexedDB + rotas `/favoritos/lugar|atrativo/[id]`)
 - [x] Página de favoritos com remoção de favoritos
 - [x] Bottom nav com navegação ativa por rota
 - [x] Página de perfil com foto, nome, email e estatísticas

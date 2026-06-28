@@ -26,7 +26,7 @@ Pirâmide de QA do projeto:
 | 4 | `/categorias` | Heading Explorar + categoria Natureza |
 | 5 | `/atrativos` | Header da página |
 | 6 | `/favoritos` (guest) | Gate “Faça login para ver seus favoritos” |
-| 7 | Favoritos → Fazer login | Modal com auth (Google) |
+| 7 | Favoritos → Fazer login | Modal com auth; subtítulo menciona offline |
 | 8 | `/perfil` (guest) | Benefícios + Google |
 | 9 | `/admin` (guest) | Redirect para `/login` |
 | 10 | Bottom nav Início → Explorar | Navega para `/categorias` |
@@ -35,7 +35,7 @@ Regras de código e quando adicionar testes: [`CODING_STANDARDS.md`](../CODING_S
 
 ## Checklist interativo (recomendado)
 
-Use a ferramenta com **153 casos de teste**, passo a passo por dispositivo, resultado esperado, avisos e botões **Passou / Falhou / Resetar**:
+Use a ferramenta com **155 casos de teste**, passo a passo por dispositivo, resultado esperado, avisos e botões **Passou / Falhou / Resetar**:
 
 **[Abrir checklist interativo](/checklist-testes.html)**  
 (produção: `https://guiadebolso.app/checklist-testes.html` · local: `http://localhost:3000/checklist-testes.html`)
@@ -89,7 +89,7 @@ Use a ferramenta com **153 casos de teste**, passo a passo por dispositivo, resu
 | E | Explorar (`/categorias`) | 6 |
 | F | Categoria (`/categoria/[slug]`) | 5 |
 | G | Detalhe do lugar | 25 |
-| H | Favoritos | 5 |
+| H | Favoritos | 8 |
 | I | Rotas e roteiro IA | 13 |
 | J | Perfil | 9 |
 | K | Casos extremos | 8 |
@@ -97,6 +97,15 @@ Use a ferramenta com **153 casos de teste**, passo a passo por dispositivo, resu
 | L-QR | QR codes (admin + scan) | 6 |
 | N | Feedback e erros PT | 5 |
 | M | Smoke pós-release | 6 |
+
+### H — Favoritos offline (manual)
+
+| ID | Caso | Passos | Esperado |
+|----|------|--------|----------|
+| H-OFF-1 | Cache ao favoritar | Logado, favorite lugar + trilha online | Toast “Disponível offline”; banner em `/favoritos` |
+| H-OFF-2 | Lista offline | DevTools → Offline → `/favoritos` | Lista e banner “Modo offline” |
+| H-OFF-3 | Detalhe offline | Offline → toque item | `/favoritos/lugar/[id]` ou `/favoritos/atrativo/[id]` abre com badge |
+| H-OFF-4 | Desfavoritar | Offline ou online, remova coração | Some da lista; cache limpo ao voltar online |
 
 ---
 

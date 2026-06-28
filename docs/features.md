@@ -309,21 +309,26 @@ Decide to go now, contact the business, or navigate.
 ## 14. Favorites
 
 **Description**  
-Per-user saved places synced in Supabase; available from home (toggle), detail, and `/favoritos`.
+Per-user saved **places** (`favoritos`) and **curated atrativos** (`rotas_favoritas`) synced in Supabase. **Fase 1 offline:** ao favoritar, o app grava automaticamente um pacote local (IndexedDB + até 4 fotos via Cache API) para leitura sem sinal. Copy do benefício em onboarding, login, landing e `LoginModal` (`FAVORITO_OFFLINE_BENEFIT_BODY` em `lib/favoritosOffline.js`).
 
 **User goal**  
-Build a personal shortlist for the trip.
+Build a personal shortlist for the trip — including trails and beaches usable offline after favoriting once online.
 
 **Main flows**
-1. Logged in → heart on cards/detail → `favoritos` insert/delete + log.
-2. `/favoritos` lists active places (join or fallback two-step query); loading uses `PlaceCardSkeleton` rows.
-3. Remove from list → delete row + optimistic UI revert on error.
+1. Logged in → heart on cards/detail → `favoritos` or `rotas_favoritas` insert/delete + log + **cache offline** (`lib/favoritosOfflineFetch.js`).
+2. `/favoritos` — online: `syncAllFavoritosOffline` refreshes cache; offline: `listOfflineFavoritos` from IndexedDB; banner “Disponível offline” / “Modo offline”.
+3. Tap place → `/favoritos/lugar/[id]` (client-only, `offlinePreferred` in `useLugarDetalhe`); tap atrativo → `/favoritos/atrativo/[id]`.
+4. Remove from list → Supabase delete + `purgeOfflineFavorito` + optimistic UI revert on error.
+5. Toast on add: *“Salvo! Disponível offline quando não houver sinal.”*
 
 **Edge cases**
-- Guest on `/favoritos` → CTA + `LoginModal`.
-- Fetch failure → `UserErrorAlert` with “Tentar novamente” (`router.refresh()`) and report hint.
-- Deactivated place drops from list (`lugares!inner` + `status=ativo`).
-- Optimistic UI rollback if RLS/network fails.
+- Guest on `/favoritos` → CTA + `LoginModal` (subtitle mentions offline).
+- Online fetch failure with prior sync → falls back to cached list (no hard error if cache exists).
+- Online fetch failure with empty cache → `UserErrorAlert` with retry.
+- Deactivated place drops from list (`status=ativo` filter on sync).
+- Unfavoriting removes IndexedDB row; desfavoritar atrativo idem.
+- **Not offline:** IA search, live weather, new reviews, admin — require network.
+- **Capacitor** remote URL: app cold start without prior load may still need network; favorited **content** works once shell loaded.
 - Favorite state on home resets when session ends.
 - Place list rendered as semantic `<ul>` / `<li>`.
 

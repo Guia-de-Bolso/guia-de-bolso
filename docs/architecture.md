@@ -142,6 +142,7 @@ components/
 | Recent places (search) | `lib/lugaresVisitados.js` → `localStorage` |
 | Preferred maps app | `localStorage` key `map_app_preferido` |
 | Onboarding | `localStorage` key `onboarding_visto` |
+| **Favoritos offline** | `lib/favoritosOffline.js` → IndexedDB (`guia_favoritos_offline_v1`); imagens em Cache API (`guia-favoritos-images-v1`); sync em `lib/favoritosOfflineFetch.js` no favoritar e ao abrir `/favoritos` |
 | Geolocation | `navigator.geolocation` on home and place detail for distance |
 
 ### UI constraints

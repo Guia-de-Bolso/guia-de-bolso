@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-05-24T01:52:52.079Z",
+  "generatedAt": "2026-06-28T02:22:37.943Z",
   "sections": [
     {
       "id": "A",
@@ -2669,35 +2669,96 @@
     {
       "id": "h-04",
       "sectionId": "H",
-      "title": "Erro fetch: banner retry",
+      "title": "Offline: lista do cache",
       "route": "/favoritos",
       "roles": [
         "user"
       ],
       "tags": [
-        "favoritos"
+        "favoritos",
+        "offline"
       ],
       "steps": {
         "mobile": [
           "Abra o app no celular (~390px).",
-          "Erro fetch: banner retry"
+          "Offline: lista do cache"
         ],
         "desktop": [
           "No desktop, use janela ~390px ou DevTools iPhone.",
-          "Erro fetch: banner retry"
+          "Offline: lista do cache"
         ],
         "tablet": [
           "No tablet (~768px) ou iPad; layout mobile centralizado.",
-          "Erro fetch: banner retry"
+          "Offline: lista do cache"
         ]
       },
-      "expected": "Banner e retry.",
+      "expected": "Lista e banner Modo offline; sem erro se já sincronizou antes.",
       "warnings": [
-        "Simule offline."
+        "Favorite online antes; DevTools → Offline."
       ]
     },
     {
       "id": "h-05",
+      "sectionId": "H",
+      "title": "Offline: detalhe favorito",
+      "route": "/favoritos/lugar/[id]",
+      "roles": [
+        "user"
+      ],
+      "tags": [
+        "favoritos",
+        "offline"
+      ],
+      "steps": {
+        "mobile": [
+          "Abra o app no celular (~390px).",
+          "Offline: detalhe favorito"
+        ],
+        "desktop": [
+          "No desktop, use janela ~390px ou DevTools iPhone.",
+          "Offline: detalhe favorito"
+        ],
+        "tablet": [
+          "No tablet (~768px) ou iPad; layout mobile centralizado.",
+          "Offline: detalhe favorito"
+        ]
+      },
+      "expected": "Detalhe abre com badge Modo offline.",
+      "warnings": [
+        "Simule offline após favoritar."
+      ]
+    },
+    {
+      "id": "h-06",
+      "sectionId": "H",
+      "title": "Toast ao favoritar",
+      "route": "/lugares/[id]",
+      "roles": [
+        "user"
+      ],
+      "tags": [
+        "favoritos",
+        "offline"
+      ],
+      "steps": {
+        "mobile": [
+          "Abra o app no celular (~390px).",
+          "Toast ao favoritar"
+        ],
+        "desktop": [
+          "No desktop, use janela ~390px ou DevTools iPhone.",
+          "Toast ao favoritar"
+        ],
+        "tablet": [
+          "No tablet (~768px) ou iPad; layout mobile centralizado.",
+          "Toast ao favoritar"
+        ]
+      },
+      "expected": "Toast offline após salvar favorito.",
+      "warnings": []
+    },
+    {
+      "id": "h-07",
       "sectionId": "H",
       "title": "Lugar desativado some da lista",
       "route": "/favoritos",

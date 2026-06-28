@@ -349,7 +349,7 @@ export default function Onboarding({ isLoggedIn = false, onComplete }) {
               <p className="mt-2 text-center text-[11px] leading-snug text-white/50">
                 {loggedIn
                   ? "Você já está conectado — continue explorando"
-                  : "Entrar no guia abre login com Google ou SMS"}
+                  : "Entrar no guia abre login com Google ou SMS — favoritos ficam offline no celular"}
               </p>
             </>
           ) : (

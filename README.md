@@ -316,7 +316,7 @@ Report security concerns via [GitHub Issues](https://github.com/BrunoDislilerDev
 | Phase | Theme | Highlights |
 |-------|-------|------------|
 | **Q1** | Monetization | Recurring billing (Asaas), establishment self-service portal |
-| **Q2** | Growth | Push notifications, voice search, PWA / offline baseline |
+| **Q2** | Growth | Push notifications, voice search, PWA / offline fase 2 (service worker) |
 | **Q3** | Platform | Public-venue metadata in admin, local events, check-in feature |
 | **Q4** | Enterprise | Municipal partnerships, Apple / WhatsApp auth, dark mode |
 
@@ -390,7 +390,8 @@ historiadores locais.
 ### Outras features planejadas
 - [ ] Notificações Push
 - [ ] Busca por voz (Web Speech API + Claude API)
-- [ ] Modo offline básico (PWA com service worker)
+- [x] Favoritos offline automáticos (IndexedDB — lugares e atrativos favoritos)
+- [ ] Modo offline ampliado (PWA service worker, catálogo regional)
 - [ ] QR Code do estabelecimento
 - [ ] Check-in "Estou aqui agora" com contagem em tempo real
 - [ ] Eventos locais (shows, feiras, festivais)

@@ -9,6 +9,7 @@ import AuthFlow from "@/components/AuthFlow";
 import Logo from "@/components/Logo";
 import LegalConsentLine from "@/components/legal/LegalConsentLine";
 import { LOGIN_HERO_IMAGE, LOGIN_VALUE_PILLS } from "@/lib/authImagery";
+import { FAVORITO_OFFLINE_BENEFIT_BODY } from "@/lib/favoritosOffline";
 import { safeRedirectPath } from "@/lib/safeRedirectPath";
 import { createClient } from "@/lib/supabase";
 
@@ -144,6 +145,9 @@ function LoginPageContent() {
           </h1>
           <p className="mt-3 max-w-[18rem] text-sm leading-relaxed text-white/80">
             O guia que une praias, trilhas, gastronomia e atrativos — com mapa, clima e busca em português.
+          </p>
+          <p className="mt-2 max-w-[20rem] text-xs leading-relaxed text-[#b8e6d4]/90">
+            {FAVORITO_OFFLINE_BENEFIT_BODY}
           </p>
           <div className="mt-5">
             <LoginValueCarousel />

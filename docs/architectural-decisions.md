@@ -173,12 +173,24 @@ Registro das decisões técnicas principais do **Guia de Bolso** (formato ADR si
 
 ---
 
+## ADR-010 — Favoritos offline automáticos (fase 1)
+
+| Campo | Valor |
+|-------|--------|
+| **Data** | 2026-06-27 |
+| **Status** | Aceito (fase 1 entregue) |
+| **Contexto** | Trilhas e praias podem ficar sem sinal; favoritar já expressa intenção do usuário. |
+| **Decisão** | Ao favoritar lugar ou atrativo, cache local automático (IndexedDB + fotos essenciais). Lista e detalhe em rotas client-only `/favoritos/lugar/[id]` e `/favoritos/atrativo/[id]`. Sem botão “baixar” na v1. |
+| **Consequências** | Escopo limitado a favoritos logados; IA/clima/reviews continuam online. Capacitor com URL remota não garante cold start offline. Fase 2: service worker / bundle local (P-002). |
+
+---
+
 ## Decisões propostas (roadmap)
 
 | ID | Tema | Notas |
 |----|------|-------|
 | P-001 | Cobrança Asaas | Portal estabelecimento + `premium_ativo` automatizado |
-| P-002 | PWA / offline | Service worker para catálogo mínimo |
+| P-002 | PWA / offline | **Fase 1:** favoritos offline (ADR-010). **Fase 2:** service worker + catálogo regional ou bundle Capacitor |
 | P-003 | Schema baseline export | `supabase/schema_baseline.sql` do projeto produção |
 | P-004 | Rate limit distribuído | Vercel KV ou Redis para IA e feedback |
 | P-005 | Role `estabelecimento` | Painel self-service separado do admin municipal |

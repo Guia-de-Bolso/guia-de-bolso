@@ -447,14 +447,27 @@ const items = [
     tags: ["favoritos"],
   }),
   mk("h-03", "H", "Logado vazio: empty state", { route: "/favoritos", roles: ["user"], expected: "Estado vazio amigável.", tags: ["favoritos"] }),
-  mk("h-04", "H", "Erro fetch: banner retry", {
+  mk("h-04", "H", "Offline: lista do cache", {
     route: "/favoritos",
     roles: ["user"],
-    expected: "Banner e retry.",
-    warnings: ["Simule offline."],
-    tags: ["favoritos"],
+    expected: "Lista e banner Modo offline; sem erro se já sincronizou antes.",
+    warnings: ["Favorite online antes; DevTools → Offline."],
+    tags: ["favoritos", "offline"],
   }),
-  mk("h-05", "H", "Lugar desativado some da lista", {
+  mk("h-05", "H", "Offline: detalhe favorito", {
+    route: "/favoritos/lugar/[id]",
+    roles: ["user"],
+    expected: "Detalhe abre com badge Modo offline.",
+    warnings: ["Simule offline após favoritar."],
+    tags: ["favoritos", "offline"],
+  }),
+  mk("h-06", "H", "Toast ao favoritar", {
+    route: "/lugares/[id]",
+    roles: ["user"],
+    expected: "Toast offline após salvar favorito.",
+    tags: ["favoritos", "offline"],
+  }),
+  mk("h-07", "H", "Lugar desativado some da lista", {
     route: "/favoritos",
     roles: ["admin", "user"],
     expected: "Favorito de lugar inativo não listado.",

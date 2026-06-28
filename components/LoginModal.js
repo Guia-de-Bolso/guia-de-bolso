@@ -2,9 +2,10 @@
 
 import AuthFlow from "@/components/AuthFlow";
 import BottomSheetShell from "@/components/BottomSheetShell";
+import { FAVORITO_OFFLINE_BENEFIT_BODY } from "@/lib/favoritosOffline";
 
 const subtitles = {
-  favoritar: "Salve seus lugares favoritos para acessar quando quiser",
+  favoritar: FAVORITO_OFFLINE_BENEFIT_BODY,
   avaliar: "Compartilhe sua experiência e ajude outros viajantes",
   rotas: "Acesse atrativos detalhados com dicas exclusivas para chegar lá",
   atrativos: "Acesse atrativos detalhados com dicas exclusivas para chegar lá",

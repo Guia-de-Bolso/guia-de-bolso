@@ -238,7 +238,7 @@ User bookmarks for **curated routes** (`rotas`), not `roteiros` (IA). Migration:
 | `rota_id` | `uuid` FK | → `rotas` |
 | `created_at` | `timestamptz` | |
 
-Unique `(user_id, rota_id)`. RLS: authenticated users CRUD own rows. Listing in `/favoritos` is not implemented yet.
+Unique `(user_id, rota_id)`. RLS: authenticated users CRUD own rows. Listed in `/favoritos` (seção Atrativos) with offline cache via `lib/favoritosOfflineFetch.js`.
 
 ---
 
@@ -711,10 +711,13 @@ Quick summary for existing projects that already have base tables:
 
 ### Consumer — favorites (`app/favoritos/page.js`)
 
-| Use case | Query |
-|----------|--------|
-| List with places | `favoritos` `.select("id,lugar_id,lugares!inner(*)")` or separate `lugares` `.in("id", ids)` |
-| Remove | `favoritos` `.delete()` `.eq("user_id")` `.eq("lugar_id")` |
+| Use case | Query / local |
+|----------|----------------|
+| List (online) | `syncAllFavoritosOffline` — `favoritos` join + `fetchRotasFavoritas`; writes IndexedDB |
+| List (offline) | `listOfflineFavoritos(userId)` — IndexedDB only |
+| Detail offline | `/favoritos/lugar/[id]`, `/favoritos/atrativo/[id]` — read cache; refresh if online |
+| Add favorite | insert + `cacheLugarFavoritoFromServer` / `cacheAtrativoFavoritoFromServer` |
+| Remove | `favoritos` or `rotas_favoritas` `.delete()` + `purgeOfflineFavorito` |
 
 ### Consumer — categories
 

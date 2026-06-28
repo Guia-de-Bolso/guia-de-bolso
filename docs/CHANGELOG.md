@@ -25,6 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- **Favoritos offline (fase 1)** — cache automático ao favoritar lugar ou atrativo (`lib/favoritosOffline.js`, `lib/favoritosOfflineFetch.js`, IndexedDB + Cache API); sync na abertura de `/favoritos`; rotas offline `/favoritos/lugar/[id]` e `/favoritos/atrativo/[id]`; banners e badge “Modo offline”; testes `favoritosOffline.test.js`, `networkStatus.test.js`; copy em onboarding, login, landing e `LoginModal`.
 - **Automated QA pipeline** — ~40 unit test files in `lib/*.test.js` (`npm test`); Playwright smoke in `e2e/smoke.spec.js` (10 cases: health, home, login, explorar, atrativos, favoritos, perfil, admin redirect, bottom nav); GitHub Actions runs lint → unit tests → build → Playwright (Chromium) on PRs and pushes to `main`.
 
 ### Fixed

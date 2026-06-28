@@ -40,7 +40,9 @@ guia-de-bolso/
 | `app/lugares/[id]/page.js` | Page | Detalhe do lugar |
 | `app/categorias/page.js` | Page | Explorar categorias |
 | `app/categoria/[slug]/page.js` | Page | Listagem filtrada |
-| `app/favoritos/page.js` | Page | Favoritos (auth) |
+| `app/favoritos/page.js` | Page | Favoritos (auth + offline sync) |
+| `app/favoritos/lugar/[id]/page.js` | Page | Detalhe offline-capable de lugar favorito |
+| `app/favoritos/atrativo/[id]/page.js` | Page | Detalhe offline-capable de atrativo favorito |
 | `app/rotas/page.js`, `app/rotas/[id]/page.js` | Page | Rotas curadas + roteiro IA |
 | `app/perfil/`, `app/perfil/editar/` | Page | Perfil e edição |
 | `app/admin/**` | Pages + `layout.js` | CMS — **guard server** em `admin/layout.js` |
@@ -81,6 +83,7 @@ Organização **por domínio**, não por tipo atômico (Button/, Card/).
 | `perfil/` | Hero, estatísticas, configurações |
 | `admin/` | `AdminShell`, sidebar, drawer, formulários CMS |
 | `shared/` | Galeria, headers reutilizáveis |
+| `favoritos/` | Banner/badge offline, shell de detalhe offline |
 | `legal/` | Blocos de termos/privacidade |
 | Raiz | `BottomNav`, `LoginModal`, `Onboarding`, `AuthFlow`, etc. |
 
@@ -110,6 +113,7 @@ Organização **por domínio**, não por tipo atômico (Button/, Card/).
 | **Rotas / roteiro** | `roteiroParse.js`, `roteiroLugares.js`, `rotas.js` |
 | **Admin** | `adminRoles.js`, `adminDashboard.js`, `adminLogs.js`, `adminTaxonomia.js` |
 | **UX / segurança** | `userMessages.js`, `safeRedirectPath.js`, `observability.js` |
+| **Offline** | `favoritosOffline.js`, `favoritosOfflineFetch.js`, `networkStatus.js` |
 | **Dados** | `data/lugarDetalheQueries.js` — queries Supabase extraídas de páginas grandes |
 
 Testes unitários: `lib/*.test.js` (executados com `npm test`).
