@@ -14,7 +14,7 @@ import {
   DESTAQUE_CHIP_PREMIUM_CLASS,
   DETALHE_CARD_OVERLAP_CLASS,
 } from "@/components/lugar/airbnb/lugarAirbnbTokens";
-import { toggleRotasFavorita, createFavoritosSyncGuard } from "@/lib/rotasFavoritas";
+import { toggleRotasFavorita, createFavoritosSyncGuard, FAVORITO_OFFLINE_SAVED_MESSAGE } from "@/lib/rotasFavoritas";
 import { isMissingTableError } from "@/lib/supabaseErrors";
 import { createClient } from "@/lib/supabase";
 
@@ -45,6 +45,7 @@ export default function AtrativoDetalhePremium({
   infoCards,
   pontos,
   dicas,
+  backHref = "/atrativos",
 }) {
   const [user, setUser] = useState(null);
   const [isFavorito, setIsFavorito] = useState(false);
@@ -106,10 +107,16 @@ export default function AtrativoDetalhePremium({
     if (!supabase) return;
 
     favoritoSyncGuardRef.current.bump();
+    const wasFavorito = isFavorito;
     const ok = await toggleRotasFavorita(supabase, user, rotaId, nome, setIsFavorito);
     if (ok === false) {
       setToast("Não foi possível salvar o favorito. Tente novamente em instantes.");
       setTimeout(() => setToast(""), 3000);
+      return;
+    }
+    if (ok && !wasFavorito) {
+      setToast(FAVORITO_OFFLINE_SAVED_MESSAGE);
+      setTimeout(() => setToast(""), 3500);
     }
   }
 
@@ -144,7 +151,7 @@ export default function AtrativoDetalhePremium({
 
       <DetalheStickyHeader
         title={nome}
-        backHref="/atrativos"
+        backHref={backHref}
         isFavorito={isFavorito}
         onFavoritar={handleFavoritar}
         onShare={handleShare}
@@ -155,7 +162,7 @@ export default function AtrativoDetalhePremium({
           <GalleryHeroAirbnb
             nome={nome}
             imagens={fotos}
-            backHref="/atrativos"
+            backHref={backHref}
             isFavorito={isFavorito}
             onFavoritar={handleFavoritar}
             onShare={handleShare}

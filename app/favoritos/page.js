@@ -10,10 +10,20 @@ import PlaceCard from "@/components/PlaceCard";
 import PlaceCardSkeleton from "@/components/home/PlaceCardSkeleton";
 import AtrativoFavoritoCard from "@/components/atrativos/AtrativoFavoritoCard";
 import UserErrorAlert from "@/components/UserErrorAlert";
+import OfflineFavoritosBanner from "@/components/favoritos/OfflineFavoritosBanner";
 import { buildReportContext } from "@/lib/reportContext";
+import {
+  formatOfflineSavedAt,
+  listOfflineFavoritos,
+  FAVORITO_OFFLINE_TYPES,
+} from "@/lib/favoritosOffline";
+import {
+  purgeOfflineFavorito,
+  syncAllFavoritosOffline,
+} from "@/lib/favoritosOfflineFetch";
+import { isBrowserOnline } from "@/lib/networkStatus";
 import { createClient } from "@/lib/supabase";
 import { registrarLog } from "@/lib/logs";
-import { fetchRotasFavoritas } from "@/lib/rotasFavoritas";
 
 /**
  * Empty-state illustration for the favorites page.
@@ -33,17 +43,6 @@ function EmptyIllustration() {
 }
 
 /**
- * Extracts the nested lugar record from a favoritos join row.
- * @param {object} favorito - Favorito row with `lugares` or `lugar` relation.
- * @returns {object|undefined} Place object or undefined.
- */
-function normalizeLugarFromFavorito(favorito) {
-  const nested = favorito.lugares || favorito.lugar;
-  if (Array.isArray(nested)) return nested[0];
-  return nested;
-}
-
-/**
  * User favorites list with login gate and optimistic remove.
  * @returns {import("react").ReactElement}
  */
@@ -57,6 +56,8 @@ export default function FavoritosPage() {
   const [fetchError, setFetchError] = useState(false);
   const [fetchAtrativosError, setFetchAtrativosError] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isOffline, setIsOffline] = useState(false);
+  const [lastSyncedLabel, setLastSyncedLabel] = useState(null);
 
   useEffect(() => {
     const supabase = createClient();
@@ -85,6 +86,23 @@ export default function FavoritosPage() {
   }, []);
 
   useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+
+    function updateOnlineState() {
+      setIsOffline(!isBrowserOnline());
+    }
+
+    updateOnlineState();
+    window.addEventListener("online", updateOnlineState);
+    window.addEventListener("offline", updateOnlineState);
+
+    return () => {
+      window.removeEventListener("online", updateOnlineState);
+      window.removeEventListener("offline", updateOnlineState);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!user) return;
 
     let cancelled = false;
@@ -93,66 +111,47 @@ export default function FavoritosPage() {
       if (!cancelled) setLoadingFavoritos(true);
     }, 0);
 
-    supabase
-      .from("favoritos")
-      .select("id,lugar_id,lugares!inner(*)")
-      .eq("user_id", user.id)
-      .eq("lugares.status", "ativo")
-      .then(async ({ data, error }) => {
+    async function loadFromOfflineCache() {
+      const cached = await listOfflineFavoritos(user.id);
+      if (cancelled) return;
+      setLugares(cached.lugares);
+      setAtrativos(cached.atrativos);
+      setLastSyncedLabel(formatOfflineSavedAt(cached.lastSyncedAt));
+      setFetchError(false);
+      setFetchAtrativosError(false);
+      setLoadingFavoritos(false);
+    }
+
+    async function loadFavoritos() {
+      if (!isBrowserOnline()) {
+        await loadFromOfflineCache();
+        return;
+      }
+
+      try {
+        const synced = await syncAllFavoritosOffline(supabase, user.id);
         if (cancelled) return;
 
-        if (!error) {
-          setFetchError(false);
-          setLugares((data ?? []).map(normalizeLugarFromFavorito).filter(Boolean));
-        } else {
-          const { data: favoritos, error: favoritosError } = await supabase
-            .from("favoritos")
-            .select("lugar_id")
-            .eq("user_id", user.id);
-
-          if (favoritosError) {
-            setFetchError(true);
-            setLugares([]);
-          } else {
-            const ids = (favoritos ?? []).map((favorito) => favorito.lugar_id);
-
-            if (ids.length === 0) {
-              setFetchError(false);
-              setLugares([]);
-            } else {
-              const { data: lugaresData, error: lugaresError } = await supabase
-                .from("lugares")
-                .select("*")
-                .in("id", ids)
-                .eq("status", "ativo");
-
-              if (lugaresError) {
-                setFetchError(true);
-                setLugares([]);
-              } else {
-                setFetchError(false);
-                setLugares(lugaresData ?? []);
-              }
-            }
-          }
-        }
-
-        const { rotas, error: rotasError, tableMissing } = await fetchRotasFavoritas(
-          supabase,
-          user.id
-        );
+        setLugares(synced.lugares);
+        setAtrativos(synced.atrativos);
+        setLastSyncedLabel(formatOfflineSavedAt(synced.syncedAt));
+        setFetchError(false);
+        setFetchAtrativosError(false);
+      } catch {
         if (cancelled) return;
+        await loadFromOfflineCache();
+      } finally {
+        if (!cancelled) setLoadingFavoritos(false);
+      }
+    }
 
-        setFetchAtrativosError(Boolean(rotasError) && !tableMissing);
-        setAtrativos(rotas);
-        setLoadingFavoritos(false);
-      });
+    loadFavoritos();
 
     return () => {
       cancelled = true;
       clearTimeout(loadingTimer);
     };
-  }, [user]);
+  }, [user, isOffline]);
 
   /**
    * Removes a place from the user's favorites with optimistic UI update.
@@ -181,6 +180,7 @@ export default function FavoritosPage() {
     if (error) {
       setLugares(anteriores);
     } else {
+      await purgeOfflineFavorito(user.id, FAVORITO_OFFLINE_TYPES.LUGAR, String(lugar.id));
       await registrarLog(supabase, user, "desfavoritou", {
         lugar_id: lugar.id,
         lugar_nome: lugar.nome,
@@ -214,6 +214,8 @@ export default function FavoritosPage() {
       return;
     }
 
+    await purgeOfflineFavorito(user.id, FAVORITO_OFFLINE_TYPES.ATIVO, String(rota.id));
+
     await registrarLog(supabase, user, "desfavoritou", {
       rota_id: rota.id,
       rota_nome: nome,
@@ -236,7 +238,7 @@ export default function FavoritosPage() {
               Favoritos
             </h1>
             <p className="mt-1 text-sm leading-relaxed text-[#5a6b66]">
-              Seus lugares e atrativos salvos para visitar quando quiser.
+              Seus lugares e atrativos salvos — disponíveis offline automaticamente.
             </p>
           </div>
           {showCount && (
@@ -248,6 +250,13 @@ export default function FavoritosPage() {
             </span>
           )}
         </header>
+
+        {user && !authLoading && !loadingFavoritos && (isOffline || lastSyncedLabel) ? (
+          <OfflineFavoritosBanner
+            isOffline={isOffline}
+            lastSyncedLabel={lastSyncedLabel}
+          />
+        ) : null}
 
         {fetchAtrativosError && user && !loadingFavoritos && (
           <UserErrorAlert
@@ -294,7 +303,7 @@ export default function FavoritosPage() {
               Faça login para ver seus favoritos
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-[#5a6b66]">
-              Salve lugares especiais e acesse tudo depois com facilidade.
+              Salve lugares especiais e acesse tudo depois — inclusive sem sinal de celular.
             </p>
             <button
               type="button"
@@ -350,6 +359,7 @@ export default function FavoritosPage() {
                         <PlaceCard
                           lugar={lugar}
                           isFavorito
+                          hrefOverride={`/favoritos/lugar/${lugar.id}`}
                           onFavoritar={handleRemoverFavorito}
                         />
                       </div>

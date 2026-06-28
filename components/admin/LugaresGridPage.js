@@ -404,7 +404,7 @@ export default function LugaresGridPage() {
         <StatCard
           label="Parceiros"
           value={stats.parceiros}
-          hint="plano R$ 199"
+          hint="plano R$ 299"
           accent="text-amber-700"
         />
         <StatCard

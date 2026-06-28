@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guia de Bolso — Apresentação Parceiro (A4)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green: #1a4a3a;
+      --green-dark: #123528;
+      --green-light: #d4ede8;
+      --bg: #f0f4f3;
+      --text: #1a2e28;
+      --muted: #5a6f68;
+      --white: #ffffff;
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Inter", system-ui, sans-serif;
+      color: var(--text);
+      background: #dde5e2;
+      line-height: 1.45;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .screen-hint {
+      max-width: 210mm;
+      margin: 16px auto;
+      padding: 14px 18px;
+      background: #fff8e6;
+      border: 1px solid #e8d49a;
+      border-radius: 10px;
+      font-size: 13px;
+      color: #5c4a12;
+    }
+
+    .screen-hint strong { display: block; margin-bottom: 6px; }
+    .screen-hint ol { margin: 8px 0 0 18px; }
+    .screen-hint li { margin-bottom: 4px; }
+
+    @media print {
+      .screen-hint { display: none !important; }
+      body { background: white; }
+    }
+
+    @page { size: A4 portrait; margin: 0; }
+
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto 20px;
+      background: var(--bg);
+      position: relative;
+      overflow: hidden;
+      page-break-after: always;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    }
+
+    @media print {
+      .page { margin: 0; box-shadow: none; }
+    }
+
+    .display { font-family: "Plus Jakarta Sans", system-ui, sans-serif; }
+
+    /* ─── FRENTE ─── */
+    .page-front {
+      display: flex;
+      flex-direction: column;
+      min-height: 297mm;
+      padding: 14mm 18mm 12mm;
+    }
+
+    .front-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10mm;
+    }
+
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .logo-wrap img {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+    }
+
+    .brand-name {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-weight: 800;
+      font-size: 14px;
+      color: var(--green);
+      letter-spacing: -0.02em;
+    }
+
+    .brand-url { font-size: 8.5px; color: var(--muted); font-weight: 500; }
+
+    .meta-box {
+      text-align: right;
+      font-size: 8px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .meta-box .field {
+      display: inline-block;
+      min-width: 88px;
+      border-bottom: 1px solid #b8c9c3;
+      margin-left: 3px;
+      color: var(--text);
+    }
+
+    .hero-block {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 4mm 0 8mm;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      font-size: 7.5px;
+      font-weight: 700;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 10px;
+    }
+
+    .hero-title {
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1.12;
+      letter-spacing: -0.032em;
+      color: var(--green);
+      margin-bottom: 14px;
+      max-width: 19em;
+    }
+
+    .hero-sub {
+      font-size: 11px;
+      color: var(--muted);
+      max-width: 36em;
+      line-height: 1.58;
+      margin-bottom: 11mm;
+    }
+
+    .curadoria-pills {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 8mm;
+    }
+
+    .curadoria-pills span {
+      background: white;
+      border: 1px solid #d5e0dc;
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 8px;
+      color: var(--green);
+      font-weight: 600;
+    }
+
+    .benefits-list {
+      list-style: none;
+      display: grid;
+      gap: 0;
+      max-width: 34em;
+    }
+
+    .benefits-list li {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #d5e0dc;
+      font-size: 10.5px;
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: -0.012em;
+      line-height: 1.4;
+    }
+
+    .benefits-list li:first-child {
+      border-top: 1px solid #d5e0dc;
+    }
+
+    .benefits-list li::before {
+      content: "";
+      flex-shrink: 0;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      margin-top: 2px;
+    }
+
+    .front-footer {
+      border-top: 1px solid #d0ddd8;
+      padding-top: 10px;
+      margin-top: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 18px;
+    }
+
+    .cred-block {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      max-width: 58%;
+    }
+
+    .cred-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 16px;
+      font-size: 7px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .cred-grid span::before {
+      content: "";
+      display: inline-block;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--green);
+      margin-right: 5px;
+      vertical-align: middle;
+      opacity: 0.5;
+    }
+
+    .cred-domain {
+      font-size: 7px;
+      color: var(--muted);
+      letter-spacing: 0.01em;
+    }
+
+    .cred-domain strong {
+      font-weight: 600;
+      color: var(--green);
+    }
+
+    .proof-stats {
+      display: flex;
+      gap: 14px;
+      flex-shrink: 0;
+    }
+
+    .stat {
+      text-align: right;
+      padding-left: 14px;
+      border-left: 1px solid #d0ddd8;
+    }
+
+    .stat:first-child { border-left: none; padding-left: 0; }
+
+    .stat strong {
+      display: block;
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--green);
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+
+    .stat span {
+      display: block;
+      font-size: 6.5px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      margin-top: 2px;
+      line-height: 1.3;
+    }
+
+    .stat--institutional strong {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    /* ─── VERSO ─── */
+    .page-back {
+      display: flex;
+      flex-direction: column;
+      min-height: 297mm;
+      padding: 14mm 18mm 11mm;
+    }
+
+    .back-header {
+      margin-bottom: 9mm;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #c5dbd4;
+    }
+
+    .back-header h2 {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--green);
+      letter-spacing: -0.028em;
+      line-height: 1.22;
+      max-width: 20em;
+    }
+
+    .back-header .estab {
+      font-size: 8px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    .back-header .estab .field {
+      display: inline-block;
+      min-width: 160px;
+      border-bottom: 1px solid #b8c9c3;
+      color: var(--text);
+      font-weight: 500;
+      margin-left: 4px;
+    }
+
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 9mm;
+    }
+
+    .compare-col {
+      border-radius: 12px;
+      padding: 13px 14px;
+      font-size: 8.5px;
+      line-height: 1.5;
+    }
+
+    .compare-col.weak {
+      background: white;
+      color: var(--muted);
+      border: 1px solid #d8e4df;
+    }
+
+    .compare-col.strong {
+      background: var(--green);
+      color: rgba(255, 255, 255, 0.93);
+    }
+
+    .compare-col h3 {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 9.5px;
+      font-weight: 700;
+      margin-bottom: 7px;
+      letter-spacing: -0.01em;
+    }
+
+    .compare-col.weak h3 { color: #6a8078; }
+    .compare-col.strong h3 { color: white; }
+
+    .compare-col ul { list-style: none; }
+
+    .compare-col li {
+      padding-left: 11px;
+      position: relative;
+      margin-bottom: 4px;
+    }
+
+    .compare-col li:last-child { margin-bottom: 0; }
+
+    .compare-col.weak li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #b0c4bc;
+    }
+
+    .compare-col.strong li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      font-weight: 700;
+      color: var(--green-light);
+    }
+
+    .flow {
+      background: transparent;
+      border-radius: 0;
+      border: none;
+      border-top: 1px solid #d5e0dc;
+      border-bottom: 1px solid #d5e0dc;
+      padding: 10mm 8mm;
+      margin-bottom: 9mm;
+    }
+
+    .flow-label {
+      font-size: 7px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .flow-steps {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    .flow-steps p {
+      font-size: 9px;
+      font-weight: 500;
+      color: var(--muted);
+      text-align: center;
+      padding: 3px 0;
+      letter-spacing: -0.01em;
+      margin: 0;
+    }
+
+    .flow-steps p.highlight {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-weight: 700;
+      color: var(--green);
+      font-size: 9.5px;
+    }
+
+    .flow-arrow {
+      color: #c5d5cf;
+      font-size: 9px;
+      line-height: 1;
+      padding: 2px 0;
+    }
+
+    .bottom-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 6mm;
+      align-items: stretch;
+    }
+
+    .price-cta {
+      background: var(--green);
+      color: white;
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .price-cta .amount {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 5px;
+    }
+
+    .price-cta .amount small { font-size: 14px; font-weight: 600; }
+
+    .price-cta .per-day {
+      font-size: 10px;
+      opacity: 0.92;
+      margin-bottom: 8px;
+    }
+
+    .price-cta .price-lines {
+      font-size: 7.5px;
+      opacity: 0.92;
+      line-height: 1.7;
+      padding-top: 9px;
+      border-top: 1px solid rgba(255, 255, 255, 0.16);
+      text-align: left;
+    }
+
+    .price-cta .price-lines li {
+      padding-left: 10px;
+      position: relative;
+      margin-bottom: 2px;
+      list-style: none;
+    }
+
+    .price-cta .price-lines li::before {
+      content: "·";
+      position: absolute;
+      left: 0;
+      opacity: 0.7;
+    }
+
+    .price-cta .price-lines li:last-child { margin-bottom: 0; }
+
+    .close-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .close-checklist {
+      background: white;
+      border-radius: 10px;
+      padding: 11px 13px;
+      border: 1px solid #d8e4df;
+      flex: 1;
+    }
+
+    .close-checklist h3 {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 8.5px;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 7px;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 8px;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .check-item:last-child { margin-bottom: 0; }
+
+    .check-box {
+      width: 11px;
+      height: 11px;
+      border: 1.5px solid #a8bdb5;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .cta-box {
+      background: white;
+      border-radius: 10px;
+      padding: 11px 13px;
+      border: 1px solid #d8e4df;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .cta-box .cta-headline {
+      font-family: "Plus Jakarta Sans", sans-serif;
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+    }
+
+    .cta-box .cta-body {
+      font-size: 7.5px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .cta-box .contact {
+      font-size: 8px;
+      color: var(--text);
+      line-height: 1.5;
+      padding-top: 2px;
+    }
+
+    .cta-box .contact strong { color: var(--green); font-weight: 600; }
+
+    .cta-qr-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-top: 6px;
+      border-top: 1px solid #e8eeeb;
+    }
+
+    .cta-box img.qr {
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+      opacity: 0.92;
+    }
+
+    .cta-qr-note {
+      font-size: 6.5px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .back-footer {
+      margin-top: auto;
+      padding-top: 6px;
+      border-top: 1px solid #d0ddd8;
+      font-size: 7px;
+      color: var(--muted);
+      line-height: 1.45;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 10px;
+    }
+
+    .back-footer .site-qr img { width: 38px; height: 38px; display: block; }
+    .back-footer .site-qr span { display: block; text-align: center; font-size: 6px; margin-top: 2px; }
+  </style>
+</head>
+<body>
+
+  <div class="screen-hint">
+    <strong>Como imprimir (frente e verso em 1 folha A4)</strong>
+    <ol>
+      <li>Material de apoio à visita presencial — o app é demonstrado ao vivo no celular.</li>
+      <li>Preencha proposta nº, data e nome do estabelecimento antes da visita.</li>
+      <li><strong>Arquivo → Imprimir</strong> · A4 · Margens: <strong>Nenhuma</strong> · Escala: <strong>100%</strong>.</li>
+      <li><strong>Frente e verso</strong> · Virar pela <strong>borda longa</strong> · Papel couché 150g.</li>
+    </ol>
+  </div>
+
+  <!-- ═══════════════ FRENTE ═══════════════ -->
+  <section class="page page-front" aria-label="Frente">
+
+    <header class="front-header">
+      <div class="logo-wrap">
+        <img src="logo.png" alt="Guia de Bolso" width="34" height="34" />
+        <div>
+          <div class="brand-name">Guia de Bolso</div>
+          <div class="brand-url">guiadebolso.app</div>
+        </div>
+      </div>
+      <div class="meta-box">
+        Proposta nº <span class="field">&nbsp;&nbsp;&nbsp;&nbsp;/2026</span><br />
+        Data <span class="field">&nbsp;/&nbsp;/&nbsp;&nbsp;&nbsp;</span>
+      </div>
+    </header>
+
+    <div class="hero-block">
+      <span class="eyebrow">Guia turístico · Imbituba e região</span>
+      <h1 class="hero-title display">Se o turista pergunta “onde ir?”, seu negócio deveria ser uma das respostas.</h1>
+      <p class="hero-sub">
+        Quando um turista procura onde comer, se hospedar, fazer compras ou passear,
+        o Guia de Bolso apresenta seu estabelecimento exatamente no momento da decisão.
+      </p>
+
+      <div class="curadoria-pills">
+        <span>🏖 11 praias</span>
+        <span>🌊 5 lagoas</span>
+        <span>💧 2 piscinas naturais</span>
+        <span>🗻 3 mirantes</span>
+      </div>
+
+      <ul class="benefits-list">
+        <li>Alcance quem está visitando Imbituba neste momento</li>
+        <li>Leve o turista direto até seu estabelecimento</li>
+        <li>WhatsApp, rota e Instagram em um único toque</li>
+        <li>Esteja presente exatamente quando a decisão acontece</li>
+      </ul>
+    </div>
+
+    <footer class="front-footer">
+      <div class="cred-block">
+        <div class="cred-grid">
+          <span>Desenvolvido em Imbituba</span>
+          <span>Gratuito para turistas</span>
+          <span>Apoio ao turismo local</span>
+          <span>CNPJ 40.534.524/0001-87</span>
+        </div>
+        <p class="cred-domain"><strong>guiadebolso.app</strong></p>
+      </div>
+      <div class="proof-stats">
+        <div class="stat">
+          <strong>10</strong>
+          <span>parceiros locais</span>
+        </div>
+        <div class="stat">
+          <strong>26+</strong>
+          <span>locais verificados</span>
+        </div>
+        <div class="stat stat--institutional">
+          <strong>Prefeitura</strong>
+          <span>de Imbituba</span>
+        </div>
+      </div>
+    </footer>
+  </section>
+
+  <!-- ═══════════════ VERSO ═══════════════ -->
+  <section class="page page-back" aria-label="Verso">
+
+    <header class="back-header">
+      <h2 class="display">Por que fazer parte do Guia de Bolso?</h2>
+      <div class="estab">
+        Estabelecimento:<span class="field">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      </div>
+    </header>
+
+    <div class="compare">
+      <div class="compare-col weak">
+        <h3>Apenas Instagram</h3>
+        <ul>
+          <li>O turista precisa já conhecer seu perfil</li>
+          <li>Compete com milhares de posts</li>
+          <li>Pouca intenção de visita imediata</li>
+          <li>Retorno difícil de medir</li>
+        </ul>
+      </div>
+      <div class="compare-col strong">
+        <h3>Parceiro do Guia</h3>
+        <ul>
+          <li>Encontrado enquanto procura onde ir</li>
+          <li>Rota, WhatsApp ou Instagram em um toque</li>
+          <li>Presente na hora da escolha</li>
+          <li>Relatório mensal de desempenho</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="flow">
+      <div class="flow-label">Do celular à sua porta</div>
+      <div class="flow-steps">
+        <p>Turista chega em Imbituba</p>
+        <span class="flow-arrow" aria-hidden="true">↓</span>
+        <p>Procura onde comer, ficar ou passear</p>
+        <span class="flow-arrow" aria-hidden="true">↓</span>
+        <p class="highlight">Encontra seu estabelecimento</p>
+        <span class="flow-arrow" aria-hidden="true">↓</span>
+        <p>Traça a rota</p>
+        <span class="flow-arrow" aria-hidden="true">↓</span>
+        <p class="highlight">Chega até você</p>
+      </div>
+    </div>
+
+    <div class="bottom-section">
+      <div class="price-cta">
+        <div class="amount">R$ 299<small>/mês</small></div>
+        <div class="per-day">≈ R$ 9,97 por dia</div>
+        <ul class="price-lines">
+          <li>Sem taxa de adesão</li>
+          <li>Perfil publicado em até 7 dias úteis</li>
+          <li>Cadastro feito pela equipe local</li>
+          <li>Pagamento via PIX, boleto ou cartão</li>
+        </ul>
+      </div>
+
+      <div class="close-panel">
+        <div class="close-checklist">
+          <h3>Para iniciar a parceria:</h3>
+          <div class="check-item"><span class="check-box"></span> Nome do estabelecimento</div>
+          <div class="check-item"><span class="check-box"></span> Fotos</div>
+          <div class="check-item"><span class="check-box"></span> Horários</div>
+          <div class="check-item"><span class="check-box"></span> Instagram / Site / Cardápio</div>
+          <div class="check-item"><span class="check-box"></span> Assinatura do contrato</div>
+        </div>
+
+        <div class="cta-box">
+          <div class="cta-headline">Vamos começar sua parceria?</div>
+          <p class="cta-body">Preencha o checklist ao lado. Estou aqui para concluir com você agora.</p>
+          <div class="contact">
+            <strong>(48) 9 9122-3308</strong><br />
+            contato@guiadebolso.app
+          </div>
+          <div class="cta-qr-row">
+            <img class="qr" src="qr-whatsapp.svg" alt="QR Code WhatsApp" width="44" height="44" />
+            <span class="cta-qr-note">Prefere depois? Escaneie e diga:<br />“Quero ativar meu perfil hoje.”</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="back-footer">
+      <div class="legal">
+        Proposta válida por 30 dias · Imbituba e região.
+        <em>Não somos o app de finanças Guiabolso.</em>
+      </div>
+      <div class="site-qr">
+        <img src="qr-site.svg" alt="QR Code" width="38" height="38" />
+        <span>para-negocios</span>
+      </div>
+    </footer>
+  </section>
+
+</body>
+</html>

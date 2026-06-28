@@ -651,7 +651,7 @@ export default function UsuariosGridPage() {
               </dl>
 
               <p className="mt-2 text-[11px] leading-relaxed text-[#9aa8a3]">
-                Parceiro do Guia (R$ 199) é o toggle &quot;Parceiro do Guia&quot; em Admin →
+                Parceiro do Guia (R$ 299) é o toggle &quot;Parceiro do Guia&quot; em Admin →
                 Locais, não neste Premium.
               </p>
 

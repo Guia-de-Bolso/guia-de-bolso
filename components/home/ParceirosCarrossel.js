@@ -9,7 +9,7 @@ import HomeSectionHeader from "@/components/home/HomeSectionHeader";
 import { HOME_CAROUSEL_TRACK_CLASS } from "@/components/home/homeTokens";
 
 /**
- * Carrossel de estabelecimentos no plano Parceiro do Guia (R$ 199).
+ * Carrossel de estabelecimentos no plano Parceiro do Guia (R$ 299).
  */
 export default function ParceirosCarrossel({ lugares = [] }) {
   if (!lugares.length) return null;

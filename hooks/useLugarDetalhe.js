@@ -40,7 +40,12 @@ import {
   getTextoSobre,
   getVisibilidadePerfil,
 } from "@/lib/lugarVisibilidade";
-import { createFavoritosSyncGuard, toggleFavoritoLugarBoolean } from "@/lib/favoritos";
+import { createFavoritosSyncGuard, toggleFavoritoLugarBoolean, FAVORITO_OFFLINE_SAVED_MESSAGE } from "@/lib/favoritos";
+import {
+  FAVORITO_OFFLINE_TYPES,
+  getOfflineFavorito,
+} from "@/lib/favoritosOffline";
+import { isBrowserOnline } from "@/lib/networkStatus";
 import { saveLugarVisitado } from "@/lib/lugaresVisitados";
 import { getDistanciaLugar } from "@/lib/localizacao";
 import { registrarLog } from "@/lib/logs";
@@ -52,17 +57,19 @@ import { getReturnPathFromSearch } from "@/lib/navigationReturn";
 /**
  * Estado e ações compartilhados entre layout legado e redesign Airbnb.
  * @param {string} [lugarIdFromServer] - UUID resolvido no servidor (rota por slug).
+ * @param {{ offlinePreferred?: boolean }} [options]
  * @returns {object}
  */
-export function useLugarDetalhe(lugarIdFromServer) {
+export function useLugarDetalhe(lugarIdFromServer, options = {}) {
+  const offlinePreferred = Boolean(options.offlinePreferred);
   const params = useParams();
   const routeParam = params.slug ?? params.id;
   const id = lugarIdFromServer ?? routeParam;
   const router = useRouter();
   const searchParams = useSearchParams();
   const backHref = useMemo(
-    () => getReturnPathFromSearch(searchParams, "/"),
-    [searchParams]
+    () => (offlinePreferred ? "/favoritos" : getReturnPathFromSearch(searchParams, "/")),
+    [offlinePreferred, searchParams]
   );
   const supabase = useMemo(() => createClient(), []);
   const [lugar, setLugar] = useState(null);
@@ -90,6 +97,8 @@ export function useLugarDetalhe(lugarIdFromServer) {
   const [tags, setTags] = useState([]);
   const { userPosition } = useUserPosition();
   const [showQrBanner, setShowQrBanner] = useState(false);
+  const [isOfflineView, setIsOfflineView] = useState(false);
+  const [offlineSavedAt, setOfflineSavedAt] = useState(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user: currentUser } }) => {
@@ -116,19 +125,56 @@ export function useLugarDetalhe(lugarIdFromServer) {
   useEffect(() => {
     if (!id) return;
 
-    fetchLugarAtivo(supabase, id).then(({ data, error }) => {
-        if (error) {
+    let cancelled = false;
+
+    async function applyOfflineBundle(userId) {
+      if (!userId) return false;
+      const cached = await getOfflineFavorito(userId, FAVORITO_OFFLINE_TYPES.LUGAR, String(id));
+      if (!cached?.payload?.lugar || cancelled) return false;
+
+      setLugar(cached.payload.lugar);
+      setLocalizacao(cached.payload.localizacao ?? null);
+      setTags(cached.payload.tags ?? []);
+      setFotos(cached.payload.fotos ?? getFotosFromLugar(cached.payload.lugar));
+      setFetchError(false);
+      setIsOfflineView(true);
+      setOfflineSavedAt(cached.savedAt);
+      return true;
+    }
+
+    async function load() {
+      setLoading(true);
+
+      const hadOffline = user?.id ? await applyOfflineBundle(user.id) : false;
+      if (hadOffline) setLoading(false);
+
+      if (!isBrowserOnline()) {
+        if (!hadOffline) {
           setFetchError(true);
           setLugar(null);
+        }
+        setLoading(false);
+        return;
+      }
+
+      fetchLugarAtivo(supabase, id).then(async ({ data, error }) => {
+        if (cancelled) return;
+
+        if (error || !data) {
+          const applied = await applyOfflineBundle(user?.id);
+          if (!applied) {
+            setFetchError(true);
+            setLugar(null);
+          }
           setLoading(false);
           return;
         }
 
         setFetchError(false);
         setLugar(data);
-        if (data) {
-          saveLugarVisitado(data, getCapaFromLugar(data));
-        }
+        setIsOfflineView(false);
+        setOfflineSavedAt(null);
+        saveLugarVisitado(data, getCapaFromLugar(data));
         const fotosJson = getFotosFromLugar(data);
         if (fotosJson.length > 0) {
           setFotos(fotosJson);
@@ -136,7 +182,8 @@ export function useLugarDetalhe(lugarIdFromServer) {
         setLoading(false);
       });
 
-    fetchFotosLugarLegado(supabase, id).then(({ data }) => {
+      fetchFotosLugarLegado(supabase, id).then(({ data }) => {
+        if (cancelled) return;
         setFotos((current) => {
           if (current.length > 0) return current;
           return (data ?? [])
@@ -145,13 +192,23 @@ export function useLugarDetalhe(lugarIdFromServer) {
         });
       });
 
-    fetchLocalizacaoLugar(supabase, id).then(({ data }) => setLocalizacao(data));
-
-    fetchTagsLugar(supabase, id).then(({ data }) => {
-        setTags((data ?? []).map((item) => item.tags).filter(Boolean));
+      fetchLocalizacaoLugar(supabase, id).then(({ data }) => {
+        if (!cancelled) setLocalizacao(data);
       });
 
-  }, [id, supabase]);
+      fetchTagsLugar(supabase, id).then(({ data }) => {
+        if (!cancelled) {
+          setTags((data ?? []).map((item) => item.tags).filter(Boolean));
+        }
+      });
+    }
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id, supabase, user?.id, offlinePreferred]);
 
   useEffect(() => {
     viewLoggedRef.current = false;
@@ -255,7 +312,11 @@ export function useLugarDetalhe(lugarIdFromServer) {
     }
 
     favoritoSyncGuardRef.current.bump();
-    await toggleFavoritoLugarBoolean(supabase, user, lugar, setIsFavorito);
+    const result = await toggleFavoritoLugarBoolean(supabase, user, lugar, setIsFavorito);
+    if (result === "added") {
+      setToast(FAVORITO_OFFLINE_SAVED_MESSAGE);
+      setTimeout(() => setToast(""), 3500);
+    }
   }
 
   async function handleOpenAvaliacao() {
@@ -481,5 +542,7 @@ export function useLugarDetalhe(lugarIdFromServer) {
     handleAvaliacaoEnviada,
     launchNavigationApp,
     openRoute,
+    isOfflineView,
+    offlineSavedAt,
   };
 }

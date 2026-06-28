@@ -1,4 +1,4 @@
--- Parceiro (plano R$ 199) e Curadoria do Guia (conteúdo autoral) em lugares.
+-- Parceiro (plano R$ 299) e Curadoria do Guia (conteúdo autoral) em lugares.
 -- Substitui uso de `destaques` no app (tabela legada mantida no banco).
 
 ALTER TABLE lugares ADD COLUMN IF NOT EXISTS eh_parceiro boolean NOT NULL DEFAULT false;

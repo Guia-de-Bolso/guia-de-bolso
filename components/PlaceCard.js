@@ -54,6 +54,7 @@ export default function PlaceCard({
   onFavoritar,
   priority = false,
   variant = "default",
+  hrefOverride,
 }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const status = getStatusFuncionamento(lugar.horarios, lugar.mostrar_horarios);
@@ -61,6 +62,7 @@ export default function PlaceCard({
   const tags = getTagsFromLugar(lugar).slice(0, 2);
   const rating = getRatingMedio(lugar);
   const imagemUrl = getCapaFromLugar(lugar);
+  const detailHref = hrefOverride || getLugarPublicPath(lugar);
   const immersive = variant === "immersive";
 
   return (
@@ -133,7 +135,7 @@ export default function PlaceCard({
       )}
 
       <Link
-        href={getLugarPublicPath(lugar)}
+        href={detailHref}
         className={`absolute inset-0 flex flex-col justify-end ${immersive ? "p-5 pr-16" : "p-4 pr-16"}`}
       >
         <div>

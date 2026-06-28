@@ -278,7 +278,7 @@ const FASE1 = {
           onde: "Admin → /admin/destaques + flags eh_parceiro em lugares",
           tempo: "2–4 horas",
           dificuldade: "Fácil",
-          obs: "Plano comercial atual: R$ 199/mês (lib/planoComercial.js). Carrossel: components/home/ParceirosCarrossel.js.",
+          obs: "Plano comercial atual: R$ 299/mês (lib/planoComercial.js). Carrossel: components/home/ParceirosCarrossel.js.",
         },
         {
           title: "Revisar taxonomia (categorias, subcategorias e tags)",
@@ -1248,7 +1248,7 @@ const FASE7 = {
           onde: "WhatsApp, e-mail, visita presencial",
           tempo: "2–3 dias",
           dificuldade: "Médio",
-          obs: "Meta comercial: 36 parceiros. Plano Parceiro R$ 199/mês.",
+          obs: "Meta comercial: 36 parceiros. Plano Parceiro R$ 299/mês.",
         },
         {
           title: "Enviar kit de boas-vindas (QR Code, adesivo, artes)",

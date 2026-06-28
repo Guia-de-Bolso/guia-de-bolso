@@ -150,7 +150,7 @@ Stable order by route `id`; index = `daysSinceEpoch(dailySeed) % pool.length`. N
 ## 7. Home — Parceiros do Guia
 
 **Description**  
-Horizontal carousel of places with `lugares.eh_parceiro = true` (plano único R$ 199). Shown between the hero and “Em alta hoje”. **One partner per category** per week, chosen deterministically (`weeklySeed`, `lib/homeSelection.js`). Table `destaques` is legacy and not used by the app.
+Horizontal carousel of places with `lugares.eh_parceiro = true` (plano único R$ 299). Shown between the hero and “Em alta hoje”. **One partner per category** per week, chosen deterministically (`weeklySeed`, `lib/homeSelection.js`). Table `destaques` is legacy and not used by the app.
 
 **User goal**  
 Discover official partner businesses in the guide.

@@ -589,7 +589,7 @@ export default function LocalForm({
           <span>
             <strong>Parceiro do Guia</strong>
             <span className="mt-0.5 block text-xs font-normal text-[#5a6b66]">
-              Estabelecimento no plano R$ 199/mês — carrossel Parceiros do Guia e badge no app.
+              Estabelecimento no plano R$ 299/mês — carrossel Parceiros do Guia e badge no app.
             </span>
           </span>
         </label>
