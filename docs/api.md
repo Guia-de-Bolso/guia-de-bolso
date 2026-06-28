@@ -22,7 +22,7 @@ Unauthenticated requests to AI routes return `401` with `{ code: "LOGIN_REQUIRED
 
 ### `GET /api/health`
 
-Deploy and uptime smoke check. No authentication.
+Deploy and uptime smoke check. No authentication. Covered by Playwright smoke (`e2e/smoke.spec.js`) and CI after each build.
 
 **Success (200):**
 

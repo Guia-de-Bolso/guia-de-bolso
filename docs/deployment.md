@@ -213,7 +213,14 @@ flowchart LR
 
 ### GitHub Actions (quality gate)
 
-The repository ships [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — lint, unit tests, and build on PRs and pushes to `main`. Vercel still performs the deploy.
+The repository ships [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — on PRs and pushes to `main`:
+
+1. ESLint (`npm run lint`)
+2. Unit tests (`npm test` — all `lib/*.test.js`)
+3. Production build (`npm run build`)
+4. Playwright smoke (`npm run test:e2e` — Chromium, server via `npm run start`)
+
+Vercel still performs the deploy; Actions validates lint, logic, compile, and critical web routes.
 
 To replicate locally or customize the workflow, reference:
 
@@ -227,30 +234,34 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  quality:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: npm
-
       - run: npm ci
-
       - run: npm run lint
-
+      - run: npm test
       - run: npm run build
         env:
-          # Build needs public env; secrets optional for compile-only check
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          ANTHROPIC_MODEL: ${{ secrets.ANTHROPIC_MODEL || 'claude-sonnet-4-5' }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY || 'sk-placeholder' }}
+          ANTHROPIC_MODEL: claude-sonnet-4-5
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+        env:
+          CI: true
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY || 'sk-placeholder' }}
+          ANTHROPIC_MODEL: claude-sonnet-4-5
 ```
 
-Add the same secrets in **GitHub → Repository → Settings → Secrets and variables → Actions**. Vercel still performs the actual deploy; Actions only validates the build.
+Add the same secrets in **GitHub → Repository → Settings → Secrets and variables → Actions** (optional — CI uses placeholders when empty). Vercel still performs the actual deploy; Actions validates the build and smoke routes.
 
 ### Deployment commands (manual)
 

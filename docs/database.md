@@ -116,11 +116,11 @@ Core content: beaches, restaurants, trails, services, etc.
 | `imagem_url` | `text` | Legacy cover; first photo synced here on save |
 | `fotos` | `jsonb` | Array of public image URLs *(migration: `fotos_migration.sql`)* |
 | `destaque` | `boolean` | Legacy highlight flag on row (unused in app) |
-| `eh_parceiro` | `boolean` NOT NULL DEFAULT false | Plano Parceiro do Guia (R$ 199) — carrossel e badge *(migration: `lugares_parceiro_curadoria.sql`)* |
+| `eh_parceiro` | `boolean` NOT NULL DEFAULT false | Plano Parceiro do Guia (R$ 299) — carrossel e badge *(migration: `lugares_parceiro_curadoria.sql`)* |
 | `conteudo_curadoria` | `boolean` NOT NULL DEFAULT false | Conteúdo autoral curado pela equipe — hero e Em alta *(migration)* |
 | `distancia` | `text` | Legacy static label; app prefers `localizacoes` + GPS (`distancia_calculada`) |
-| `rating_medio` | `numeric` | *(optional, not in repo migrations)* — if present, `PlaceCard` / `EmAltaCard` show stars without extra queries |
-| `media_avaliacoes` | `numeric` | *(optional alias)* — same client read path as `rating_medio` |
+| `rating_medio` | `numeric` | *(optional, not in repo migrations)* — if present on the row, `PlaceCard` / `EmAltaCard` show stars without extra queries; **not** in `LUGAR_SELECT_LIST` until added via migration |
+| `media_avaliacoes` | `numeric` | *(optional alias)* — same client read path as `rating_medio`; omitted from `LUGAR_SELECT_LIST` for the same reason |
 | `created_at` | `timestamptz` | |
 | `slug` | `text` | Unique short URL segment for `/q/{slug}` (eligible establishments only; null for Natureza/Aventura) *(migration: `lugares_qr_slug.sql`)* |
 | `video_url` | `text` | Public URL of one optional place video in Storage `lugares-fotos/{id}/videos/` *(migration: `lugares_video.sql`)* |
@@ -419,7 +419,7 @@ Commercial highlight **pricing tiers** (Básico, Padrão, Premium).
 | Column | Type | Description |
 |--------|------|-------------|
 | `id` | (serial) | PK — app uses numeric ids in admin forms |
-| `nome` | `text` | Plan name — app V1 uses single row **Parceiro** (R$ 199/mês) via `lib/planoComercial.js` |
+| `nome` | `text` | Plan name — app V1 uses single row **Parceiro** (R$ 299/mês) via `lib/planoComercial.js` |
 | `frequencia` | `text` | e.g. `mensal` |
 | `preco` | `numeric` | BRL |
 
@@ -576,13 +576,19 @@ RLS policies for **`rotas`** and related tables are in [`rotas_policies.sql`](..
 
 | Object | Policy | File | Effect |
 |--------|--------|------|--------|
-| `perfis` | `perfis_select_own` | `perfis_premium_policies.sql` | `SELECT` where `auth.uid() = id` |
-| `perfis` | `perfis_insert_own` | same | `INSERT` own row |
-| `perfis` | `perfis_update_own` | same | `UPDATE` own row |
+| `perfis` | `perfis_select_own` | `perfis_premium_policies.sql` / `perfis_rls_fix.sql` | `SELECT` where `auth.uid() = id` |
+| `perfis` | `perfis_select_admin` | `perfis_rls_fix.sql` | Admin `SELECT` all |
+| `perfis` | `perfis_insert_own` | `perfis_premium_policies.sql` | `INSERT` own row |
+| `perfis` | `perfis_update_own_usage` | `perfis_premium_policies.sql` | `UPDATE` own row (nome, foto; trigger bloqueia IA/role/premium) |
+| `perfis` | `perfis_update_admin` | `perfis_admin_policies.sql` | Admin `UPDATE` any row (role, etc.) |
+| `favoritos` | Own + admin read | `favoritos_policies.sql` | User CRUD own; admin `SELECT` all |
+| `planos` | Public read / admin write | `destaques_planos_policies.sql` | Legado comercial |
+| `destaques` | Admin only | `destaques_planos_policies.sql` | Legado; app usa `lugares.eh_parceiro` |
 | `logs` | `Admin lê logs` | `logs_policies.sql` | `SELECT` for `admin`/`dev` via `is_admin_or_dev()` |
 | `lugares` | Public read active + admin write | `lugares_public_read.sql`, `lugares_admin_write.sql` | Active places for anon; admin CRUD |
 | `localizacoes`, `tags`, `lugares_tags` | Public read | `lugares_related_public_read.sql` | Joined to active `lugares` |
 | `avaliacoes` | Insert/select/update IA | `avaliacoes_moderacao.sql` | Approved public; own pending |
+| `avaliacoes` | Admin moderação | `avaliacoes_admin_policies.sql` | Admin `SELECT`/`UPDATE` all |
 | `feedback` | User insert / admin read | `feedback.sql` | Support tickets |
 | `roteiros` | Users CRUD own rows | `roteiros_policies.sql` | AI saved trips |
 | `rotas` + children | Public read / admin write | `rotas_policies.sql` | Re-run after `rota_dicas.sql` / `rotas_taxonomia.sql` |
@@ -599,17 +605,17 @@ RLS policies for **`rotas`** and related tables are in [`rotas_policies.sql`](..
 | `lugares` | `SELECT` where `status = 'ativo'` | Same | `INSERT`/`UPDATE`/`DELETE` all statuses |
 | `localizacoes`, `fotos_lugar`, `tags`, `subcategorias` | `SELECT` | `SELECT` | Full write |
 | `lugares_tags`, `rotas_tags` | `SELECT` | `SELECT` | Write via admin session |
-| `favoritos` | — | `SELECT`/`INSERT`/`DELETE` own `user_id` | — |
+| `favoritos` | — | `SELECT`/`INSERT`/`DELETE` own `user_id` | `SELECT` all (relatórios) |
 | `avaliacoes` | `SELECT` where `status = 'aprovada'` | `INSERT` own; `SELECT` own pending | `SELECT` all; `UPDATE` status |
 | `roteiros` | — | CRUD own `user_id` | — |
 | `rotas`, `rota_pontos`, `rota_dicas` | `SELECT` active/public | `SELECT` | Full write |
-| `destaques`, `planos` | `SELECT` active (if exposed) | — | Full write |
-| `perfis` | — | Own row; admin may need broader `SELECT` for `/admin/usuarios` | Update any `role` |
+| `destaques`, `planos` | `planos` SELECT | — | `destaques` admin only; `planos` write |
+| `perfis` | — | Own row; admin `SELECT` all | `UPDATE` any `role` via `perfis_update_admin` |
 | `logs` | — | `INSERT` (app) | `SELECT` (dashboard) |
 
 **Admin access:** The app checks `perfis.role` in the client (`useAdminAuth`). RLS must still allow admin writes on content tables; otherwise admin CRUD fails even with UI access.
 
-**Premium counters:** Reserva atômica via **`increment_busca_ia`** / **`increment_roteiro_ia`** antes da Claude; estorno em falha via **`decrement_busca_ia`** / **`decrement_roteiro_ia`**. Fallback: update direto em `perfis` em `lib/premiumServer.js` quando RPC ausente.
+**Premium counters:** Reserva atômica via **`increment_busca_ia`** / **`increment_roteiro_ia`**; estorno via **`decrement_*_ia`**. Contadores protegidos pelo trigger em `perfis_privileged_guard.sql` (sem UPDATE client).
 
 ---
 

@@ -125,7 +125,7 @@ Categories are **not** FK-linked: the app uses fixed category names in UI code. 
 | `uso_ia_mes` column name | Misleading (stores daily `YYYY-MM-DD`) | Rename in Phase 2 migration |
 | `avaliacoes.status` `aprovada` vs `aprovado` | RLS/filter drift | Normalize values + single app constant |
 | `is_admin_user()` vs `is_admin_or_dev()` | Inconsistent policy helpers | Consolidate to one function |
-| RLS not in repo for `favoritos`, `destaques` | Production/dashboard drift | Version policies in `supabase/` |
+| RLS not in repo for `favoritos`, `destaques` | Production/dashboard drift | **Mitigado:** `favoritos_policies.sql`, `destaques_planos_policies.sql` |
 
 ---
 
@@ -191,7 +191,7 @@ Categories are **not** FK-linked: the app uses fixed category names in UI code. 
 
 ### RLS gaps (action: version in repo)
 
-Policies expected in production but **not** fully versioned: `favoritos`, `destaques`, admin `UPDATE` on `avaliacoes`, admin writes on `localizacoes` / `lugares_tags`. Compare Dashboard with [`security-rls.md`](./security-rls.md) after each deploy.
+Policies versionadas em `supabase/`: ver manifest em [`security-rls.md`](./security-rls.md). Pendente: admin writes explícitos em `localizacoes` / `lugares_tags` (hoje via joins admin em `lugares`).
 
 **Policy ordering:** Early files (`rota_dicas.sql`, `rotas_taxonomia.sql`) may create permissive write policies. Always run `rotas_policies.sql` afterward to tighten admin-only writes.
 
@@ -295,7 +295,7 @@ Taxonomy joins, destaques by place, review moderation, route steps, GIN on `logs
 
 - [ ] Apply `lugares_populares_rpc_fix.sql` in production
 - [ ] Single migration manifest in [`migrations.md`](./migrations.md)
-- [ ] Export/compare RLS for `favoritos`, `destaques` vs repo
+- [x] Export/compare RLS for `favoritos`, `destaques`, `planos`, `perfis` admin vs repo (`security-rls.md`)
 - [ ] Fix docs/types: all `lugar_id` as `bigint`
 
 ### Phase 1 — Current performance (1–2 sprints)
@@ -325,7 +325,7 @@ Taxonomy joins, destaques by place, review moderation, route steps, GIN on `logs
 
 - [ ] `supabase/schema_baseline.sql` from production export
 - [ ] Timestamped files under `supabase/migrations/` + `supabase db push` on staging
-- [ ] CI smoke: RLS tests + `EXPLAIN` on critical queries
+- [ ] CI smoke: unit tests (`npm test`) + Playwright (`e2e/smoke.spec.js`) + RLS manual tests + `EXPLAIN` on critical queries
 
 ---
 

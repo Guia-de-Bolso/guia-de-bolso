@@ -1,6 +1,37 @@
 # Guia de Bolso — Checklist de testes manuais
 
-Checklist para QA manual (celular ~390px, tablet e desktop). Complementa [Features](./features.md).
+Checklist para QA manual (celular ~390px, tablet e desktop). Complementa [Features](./features.md) e os **testes automatizados** abaixo.
+
+## Testes automatizados (CI e local)
+
+Pirâmide de QA do projeto:
+
+| Camada | Comando | Onde | CI |
+|--------|---------|------|-----|
+| Unitário | `npm test` | `lib/*.test.js` (~40 arquivos, `node --test`) | Sim, antes do build |
+| E2E smoke | `npm run test:e2e` | `e2e/smoke.spec.js` (10 casos, Playwright + Chromium) | Sim, após `npm run build` |
+| Manual | checklist abaixo | Capacitor, IAP, premium, admin logado, visual | Não |
+
+**Primeira vez local (E2E):** `npx playwright install chromium`
+
+**CI:** [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — `lint` → `npm test` → `build` → `playwright install` → `test:e2e` (servidor `npm run start`).
+
+### Casos cobertos pelo smoke E2E
+
+| # | Caso | Esperado |
+|---|------|----------|
+| 1 | `GET /api/health` | `{ ok: true, service: "guia-de-bolso" }` |
+| 2 | Home (onboarding pulado via `localStorage`) | Busca IA + bottom nav |
+| 3 | `/login` | Hero + Google + “Continuar sem login” |
+| 4 | `/categorias` | Heading Explorar + categoria Natureza |
+| 5 | `/atrativos` | Header da página |
+| 6 | `/favoritos` (guest) | Gate “Faça login para ver seus favoritos” |
+| 7 | Favoritos → Fazer login | Modal com auth (Google) |
+| 8 | `/perfil` (guest) | Benefícios + Google |
+| 9 | `/admin` (guest) | Redirect para `/login` |
+| 10 | Bottom nav Início → Explorar | Navega para `/categorias` |
+
+Regras de código e quando adicionar testes: [`CODING_STANDARDS.md`](../CODING_STANDARDS.md) §10, [`conventions.md`](./conventions.md).
 
 ## Checklist interativo (recomendado)
 

@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Security
+
+- **P0 — contadores IA em `perfis`** — trigger estende proteção a `buscas_ia`, `roteiros_ia`, `uso_ia_mes`; só RPCs alteram contadores; removido fallback client-side em `lib/premiumServer.js`.
+- **P0 — RLS versionado** — `favoritos_policies.sql`, `destaques_planos_policies.sql`, `perfis_admin_policies.sql`, `avaliacoes_admin_policies.sql`; manifest de auditoria em `docs/security-rls.md`.
+
+### Added
+
+- **Automated QA pipeline** — ~40 unit test files in `lib/*.test.js` (`npm test`); Playwright smoke in `e2e/smoke.spec.js` (10 cases: health, home, login, explorar, atrativos, favoritos, perfil, admin redirect, bottom nav); GitHub Actions runs lint → unit tests → build → Playwright (Chromium) on PRs and pushes to `main`.
+
+### Fixed
+
+- **`LUGAR_SELECT_LIST`** — removed optional columns `rating_medio` / `media_avaliacoes` not present in the production DB (stops `[lugares] select enxuto falhou` fallback on every home load).
+- **`next/image` qualities** — `images.qualities: [60, 75]` in `next.config.mjs` for list cards using `quality={60}`.
+- **`adminDeleteUsuario.test.js`** — mock `logs.update()` for `deleteUserAccount` log anonymization.
+
 ### Added
 
 - **SEO P0** — canonical place URLs `/lugares/{slug}` (301 from UUID), `generateMetadata` on place and route detail, dynamic `sitemap.xml` and `robots.txt` (`lib/seo.js`, `lib/lugarPublicPath.js`).
@@ -76,7 +91,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
-- **Destaques comerciais** — admin and consumer flows use one plan (**Parceiro**, R$ 199/mês); legacy multi-tier UI removed; AI search and roteiro catalog prioritize active partners.
+- **Destaques comerciais** — admin and consumer flows use one plan (**Parceiro**, R$ 299/mês); legacy multi-tier UI removed; AI search and roteiro catalog prioritize active partners.
 - **Admin `RotaForm`** — route type, tags (max 3), optional place per step, map location via `EnderecoAutocomplete`.
 - **`/rotas/[id]`** — category icon, tag chips, ordered descriptions and tips per step, “Ver no guia” when `lugar_id` is set.
 - **Daily AI limits** — `isSameUsageDay()` matches exact `YYYY-MM-DD` only; `usePremiumUsage` refreshes at SP midnight and on tab focus after day change (`supabase/premium_uso_dia_fix.sql`).

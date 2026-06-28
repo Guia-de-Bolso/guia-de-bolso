@@ -122,12 +122,16 @@ Checklist: [`../SECURITY_CHECKLIST.md`](../SECURITY_CHECKLIST.md).
 ## Testes
 
 ```bash
-npm test              # lib/*.test.js
-npm run test:e2e      # Playwright
+npm test              # lib/*.test.js (node --test)
+npm run test:e2e      # Playwright smoke — e2e/smoke.spec.js (10 casos)
 ```
 
+**E2E local (primeira vez):** `npx playwright install chromium`  
+**CI:** lint → `npm test` → build → Playwright (ver [`deployment.md`](./deployment.md)).
+
 Alterou `lib/horarios.js` → rodar `lib/horarios.test.js`.  
-Alterou `safeRedirectPath`, `premium`, `buscaRetrieval` → rodar testes correspondentes.
+Alterou `safeRedirectPath`, `premium`, `buscaRetrieval` → rodar testes correspondentes.  
+Checklist manual (Capacitor, premium, admin): [`TESTING-CHECKLIST.md`](./TESTING-CHECKLIST.md).
 
 ---
 

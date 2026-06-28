@@ -150,8 +150,9 @@ Ordem de aplicação: [`migrations.md`](./migrations.md#manifest).
 
 ## `e2e/`
 
-- `smoke.spec.js` — smoke Playwright
-- Config: `playwright.config.js` na raiz
+- `smoke.spec.js` — 10 smoke tests Playwright (health, home, login, explorar, atrativos, favoritos, perfil, admin redirect, bottom nav)
+- Config: `playwright.config.js` na raiz (Chromium; CI usa `npm run start` após build; local sobe `npm run dev`)
+- Helper `skipOnboarding()` no spec define `localStorage.onboarding_visto` para não bloquear a home
 
 ---
 
@@ -160,7 +161,7 @@ Ordem de aplicação: [`migrations.md`](./migrations.md#manifest).
 | Arquivo | Função |
 |---------|--------|
 | `middleware.js` | Refresh cookie Supabase em quase todas as rotas |
-| `next.config.mjs` | `images.remotePatterns`, validação de env no build |
+| `next.config.mjs` | `images.remotePatterns`, `images.qualities` (`[60, 75]`), validação de env no build |
 | `eslint.config.mjs` | Lint |
 | `vercel.json` | Headers de segurança (frame, MIME, referrer, geolocation) |
 | `playwright.config.js` | E2E |

@@ -331,7 +331,9 @@ guia-de-bolso/
 - [x] Entrega híbrida de imagens — `RemotePhoto` (CDN direto) + `next/image` em cards de lista; `minimumCacheTTL` em `next.config.mjs`
 - [x] Sistema de avaliações com moderação
 - [x] Editor de horários com time picker (Fechado/24h, **dois turnos por dia**, fechamento após meia-noite, copiar entre dias — `HorarioEditor`, `lib/horarios.js`)
-- [x] Testes unitários de horários (`lib/horarios.test.js`) e premium (`lib/premium.test.js`)
+- [x] Testes unitários em `lib/*.test.js` (`npm test`, ~40 módulos — horários, premium, visibilidade, busca, roteiro, etc.)
+- [x] Smoke E2E Playwright (`e2e/smoke.spec.js`, 10 casos; CI após build)
+- [x] Checklist manual interativo (`docs/TESTING-CHECKLIST.md`, 153 casos)
 - [x] Carrossel de fotos menos sensível a swipes acidentais (`lib/horizontalCarousel.js`, `LugarHero`, `RotaGaleria`)
 - [x] Exclusão persistente de roteiros salvos (`DELETE /api/roteiro/[id]`, `supabase/roteiros_policies.sql`)
 - [x] Tags admin: até **5** por local e rota (antes 3)

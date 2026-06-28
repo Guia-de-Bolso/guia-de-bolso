@@ -110,13 +110,25 @@ npm run lint    # ESLint
 ## Tests e CI
 
 ```bash
-npm test          # todos os lib/*.test.js
+npm test              # unitários lib/*.test.js (~1s)
 npm run lint
 npm run build
-npm run test:e2e  # Playwright (app rodando ou PLAYWRIGHT_BASE_URL)
+npm run test:e2e      # Playwright smoke (sobe dev localmente ou start no CI)
 ```
 
-GitHub Actions (`.github/workflows/ci.yml`) roda lint, test e build em PRs para `main`. Configure os secrets do Supabase/Anthropic no repositório para o build passar.
+**Primeira vez (E2E):** `npx playwright install chromium`
+
+GitHub Actions ([`.github/workflows/ci.yml`](../.github/workflows/ci.yml)) em PRs e pushes para `main`:
+
+1. `npm run lint`
+2. `npm test`
+3. `npm run build` (placeholders de env se secrets não estiverem no GitHub)
+4. `npx playwright install --with-deps chromium`
+5. `npm run test:e2e` (10 smoke tests em `e2e/smoke.spec.js`)
+
+Vercel faz o deploy; Actions valida qualidade. Secrets opcionais no GitHub — fallbacks permitem compilar sem Supabase real.
+
+Checklist manual (153 casos): [`TESTING-CHECKLIST.md`](./TESTING-CHECKLIST.md).
 
 ---
 

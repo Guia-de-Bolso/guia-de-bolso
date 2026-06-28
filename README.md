@@ -199,6 +199,8 @@ Apply SQL scripts in the Supabase **SQL Editor** using the ordered manifest in [
 | `npm run build` | Production build |
 | `npm run start` | Run production build locally |
 | `npm run lint` | ESLint |
+| `npm test` | Unit tests (`lib/*.test.js`) |
+| `npm run test:e2e` | Playwright smoke (`e2e/smoke.spec.js`; first run: `npx playwright install chromium`) |
 
 ---
 
@@ -253,7 +255,7 @@ Detailed runbook: [`docs/deployment.md`](./docs/deployment.md).
 ### Release pipeline
 
 ```text
-git push → Vercel build → Production
+git push / PR → GitHub Actions (lint, test, build, Playwright smoke) → merge main → Vercel production
 ```
 
 ---

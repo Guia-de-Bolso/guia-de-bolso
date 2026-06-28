@@ -14,7 +14,7 @@ Porta de entrada do repositório: [README.md](../README.md) (visão executiva). 
 | **DevOps / release** | [Deploy](./deployment.md) → [Variáveis de ambiente](./environment.md) → [Migrations](./migrations.md) |
 | **Backend / dados** | [Banco de dados](./database.md) → [Arquitetura do banco](./DATABASE_ARCHITECTURE.md) → [Fluxo de dados](./data-flows.md) → [RLS](./security-rls.md) |
 | **API / integrações** | [APIs HTTP](./api.md) → [Autenticação](./authentication.md) → [Decisões arquiteturais](./architectural-decisions.md) |
-| **Produto / QA** | [Features](./features.md) → [Checklist de testes](./TESTING-CHECKLIST.md) |
+| **Produto / QA** | [Features](./features.md) → [Checklist e testes](./TESTING-CHECKLIST.md) |
 
 ---
 
@@ -59,7 +59,7 @@ Porta de entrada do repositório: [README.md](../README.md) (visão executiva). 
 | [**Taxonomia de lugares**](./taxonomia-lugares.md) | Subcategorias vs tags |
 | [**Custos**](./CUSTOS.md) | Projeções e planilha |
 | [**Changelog**](./CHANGELOG.md) | Histórico de releases |
-| [**Testes (checklist)**](./TESTING-CHECKLIST.md) | QA manual |
+| [**Testes (checklist)**](./TESTING-CHECKLIST.md) | QA manual + smoke automatizado (unit + Playwright) |
 | [**Legal (rascunho)**](./legal/) | Termos e privacidade |
 
 ### Segurança (raiz do repo)

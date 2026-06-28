@@ -158,7 +158,7 @@ Registro das decisões técnicas principais do **Guia de Bolso** (formato ADR si
 | | |
 |---|---|
 | **Status** | Aceito |
-| **Decisão** | PR: lint + test + build; merge `main` → deploy Vercel |
+| **Decisão** | PR: lint + unit tests + build + Playwright smoke; merge `main` → deploy Vercel |
 | **Consequências** | Secrets duplicados GitHub + Vercel para build passar |
 
 ---

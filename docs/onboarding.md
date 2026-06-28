@@ -93,10 +93,10 @@ Checklist manual completo: [`TESTING-CHECKLIST.md`](./TESTING-CHECKLIST.md) e [`
 | `npm run dev` | Servidor local |
 | `npm run build` | Obrigatório antes de PR |
 | `npm run lint` | ESLint |
-| `npm test` | Testes unitários `lib/*.test.js` |
-| `npm run test:e2e` | Playwright (`e2e/smoke.spec.js`) |
+| `npm test` | Testes unitários `lib/*.test.js` (~40 arquivos) |
+| `npm run test:e2e` | Playwright smoke — `e2e/smoke.spec.js` (10 casos; `npx playwright install chromium` na 1ª vez) |
 
-CI no GitHub: `.github/workflows/ci.yml` (lint, test, build em PRs para `main`).
+CI no GitHub: `.github/workflows/ci.yml` — lint → `npm test` → build → Playwright em PRs/push para `main`.
 
 ---
 

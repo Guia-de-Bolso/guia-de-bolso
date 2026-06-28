@@ -19,4 +19,6 @@ Defina `NEXT_PUBLIC_SITE_URL` na Vercel Preview (URL do deployment preview) para
 
 ## Smoke
 
-Após deploy preview: `GET /api/health`, login, listagem home, uma busca IA com usuário de teste.
+**Automatizado (CI):** `npm run test:e2e` após build — ver casos em [`TESTING-CHECKLIST.md`](./TESTING-CHECKLIST.md#testes-automatizados-ci-e-local).
+
+**Manual (preview/staging):** `GET /api/health`, login, listagem home, uma busca IA com usuário de teste.

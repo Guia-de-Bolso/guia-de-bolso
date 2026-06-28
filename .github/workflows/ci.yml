@@ -30,3 +30,13 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY != '' && secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY != '' && secrets.ANTHROPIC_API_KEY || 'sk-placeholder' }}
           ANTHROPIC_MODEL: claude-sonnet-4-5
+
+      - run: npx playwright install --with-deps chromium
+
+      - run: npm run test:e2e
+        env:
+          CI: true
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL != '' && secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY != '' && secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY != '' && secrets.ANTHROPIC_API_KEY || 'sk-placeholder' }}
+          ANTHROPIC_MODEL: claude-sonnet-4-5
