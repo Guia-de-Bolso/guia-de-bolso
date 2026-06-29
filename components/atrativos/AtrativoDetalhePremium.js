@@ -109,14 +109,13 @@ export default function AtrativoDetalhePremium({
     if (!supabase) return;
 
     favoritoSyncGuardRef.current.bump();
-    const wasFavorito = isFavorito;
-    const ok = await toggleRotasFavorita(supabase, user, rotaId, nome, setIsFavorito);
-    if (ok === false) {
+    const result = await toggleRotasFavorita(supabase, user, rotaId, nome, setIsFavorito);
+    if (result === "failed") {
       setToast("Não foi possível salvar o favorito. Tente novamente em instantes.");
       setTimeout(() => setToast(""), 3000);
       return;
     }
-    if (ok && !wasFavorito) {
+    if (result === "added") {
       setToast(FAVORITO_OFFLINE_SAVED_MESSAGE);
       setTimeout(() => setToast(""), 3500);
     }

@@ -22,6 +22,8 @@ import {
   purgeOfflineFavorito,
   syncAllFavoritosOffline,
 } from "@/lib/favoritosOfflineFetch";
+import { buildFavoritosPrecachePaths } from "@/lib/serviceWorkerPaths";
+import { precacheFavoritosShell } from "@/lib/serviceWorker";
 import { createClient } from "@/lib/supabase";
 import { registrarLog } from "@/lib/logs";
 
@@ -121,6 +123,9 @@ export default function FavoritosPage() {
         setLastSyncedLabel(formatOfflineSavedAt(synced.syncedAt));
         setFetchError(false);
         setFetchAtrativosError(false);
+        await precacheFavoritosShell(
+          buildFavoritosPrecachePaths(synced.lugares, synced.atrativos)
+        );
       } catch {
         if (cancelled) return;
         await loadFromOfflineCache();

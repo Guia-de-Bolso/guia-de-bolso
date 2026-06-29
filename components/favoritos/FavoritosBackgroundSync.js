@@ -5,6 +5,8 @@ import { Capacitor } from "@capacitor/core";
 import { useEffect } from "react";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { runFavoritosBackgroundSync } from "@/lib/favoritosBackgroundSync";
+import { listOfflineFavoritos } from "@/lib/favoritosOffline";
+import { buildFavoritosPrecachePaths } from "@/lib/serviceWorkerPaths";
 import { precacheFavoritosShell } from "@/lib/serviceWorker";
 import { createClient } from "@/lib/supabase";
 
@@ -29,7 +31,16 @@ export default function FavoritosBackgroundSync() {
 
       await runFavoritosBackgroundSync(supabase, user.id);
       if (!cancelled) {
-        await precacheFavoritosShell(["/favoritos"]);
+        const {
+          data: { user: currentUser },
+        } = await supabase.auth.getUser();
+        if (currentUser?.id) {
+          const cached = await listOfflineFavoritos(currentUser.id);
+          const paths = buildFavoritosPrecachePaths(cached.lugares, cached.atrativos);
+          await precacheFavoritosShell(paths);
+        } else {
+          await precacheFavoritosShell(["/favoritos"]);
+        }
       }
     }
 

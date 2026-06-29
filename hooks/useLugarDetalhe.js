@@ -13,6 +13,7 @@ import {
   fetchTagsLugar,
 } from "@/lib/data/lugarDetalheQueries";
 import { useUserPosition } from "@/hooks/useUserPosition";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { AVALIACAO_STATUS_APROVADOS } from "@/lib/avaliacoes";
 import { getCapaFromLugar, getFotosFromLugar } from "@/lib/fotos";
 import {
@@ -51,7 +52,6 @@ import {
   FAVORITO_OFFLINE_TYPES,
   getOfflineFavorito,
 } from "@/lib/favoritosOffline";
-import { isBrowserOnline } from "@/lib/networkStatus";
 import { saveLugarVisitado } from "@/lib/lugaresVisitados";
 import { getDistanciaLugar } from "@/lib/localizacao";
 import { registrarLog } from "@/lib/logs";
@@ -102,6 +102,7 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
   const [subcategoria, setSubcategoria] = useState(null);
   const [tags, setTags] = useState([]);
   const { userPosition } = useUserPosition();
+  const { isOnline, ready: networkReady } = useNetworkStatus();
   const [showQrBanner, setShowQrBanner] = useState(false);
   const [isOfflineView, setIsOfflineView] = useState(false);
   const [offlineSavedAt, setOfflineSavedAt] = useState(null);
@@ -147,6 +148,7 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
       setFotos(cached.payload.fotos ?? getFotosFromLugar(cached.payload.lugar));
       setFetchError(false);
       setIsOfflineView(true);
+      setIsFavorito(true);
       setOfflineSavedAt(cached.savedAt);
       return true;
     }
@@ -154,14 +156,23 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
     async function load() {
       setLoading(true);
 
-      const hadOffline = user?.id ? await applyOfflineBundle(user.id) : false;
-      if (hadOffline) setLoading(false);
+      const offlineNow = networkReady && !isOnline;
 
-      if (!isBrowserOnline()) {
-        if (!hadOffline) {
+      if (user?.id && (offlinePreferred || offlineNow)) {
+        const hadOffline = await applyOfflineBundle(user.id);
+        if (hadOffline && offlineNow) {
+          setLoading(false);
+          return;
+        }
+        if (!hadOffline && offlineNow) {
           setFetchError(true);
           setLugar(null);
+          setLoading(false);
+          return;
         }
+      } else if (offlineNow) {
+        setFetchError(true);
+        setLugar(null);
         setLoading(false);
         return;
       }
@@ -217,7 +228,7 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
     return () => {
       cancelled = true;
     };
-  }, [id, supabase, user?.id, offlinePreferred]);
+  }, [id, supabase, user?.id, offlinePreferred, isOnline, networkReady]);
 
   useEffect(() => {
     viewLoggedRef.current = false;
@@ -270,6 +281,20 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
       return undefined;
     }
 
+    if (offlinePreferred || isOfflineView) {
+      setIsFavorito(true);
+      return undefined;
+    }
+
+    if (networkReady && !isOnline) {
+      getOfflineFavorito(user.id, FAVORITO_OFFLINE_TYPES.LUGAR, String(lugar.id)).then(
+        (cached) => {
+          setIsFavorito(Boolean(cached?.payload?.lugar));
+        }
+      );
+      return undefined;
+    }
+
     const userId = user.id;
     const lugarId = lugar.id;
     const favoritoFetchGen = favoritoSyncGuardRef.current.bump();
@@ -286,7 +311,7 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
     });
 
     return undefined;
-  }, [user?.id, lugar?.id, supabase]);
+  }, [user?.id, lugar?.id, supabase, offlinePreferred, isOfflineView, isOnline, networkReady]);
 
   useEffect(() => {
     const stored = localStorage.getItem(MAP_PREFERENCE_STORAGE_KEY);

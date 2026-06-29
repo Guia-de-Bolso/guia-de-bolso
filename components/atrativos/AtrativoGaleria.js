@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import GalleryHeroAirbnb from "@/components/shared/GalleryHeroAirbnb";
 import LoginModal from "@/components/LoginModal";
-import { toggleRotasFavorita, createFavoritosSyncGuard } from "@/lib/rotasFavoritas";
+import { toggleRotasFavorita, createFavoritosSyncGuard, FAVORITO_OFFLINE_SAVED_MESSAGE } from "@/lib/rotasFavoritas";
 import { isMissingTableError } from "@/lib/supabaseErrors";
 import { createClient } from "@/lib/supabase";
 
@@ -84,10 +84,13 @@ export default function AtrativoGaleria({
     if (!supabase) return;
 
     favoritoSyncGuardRef.current.bump();
-    const ok = await toggleRotasFavorita(supabase, user, rotaId, nome, setIsFavorito);
-    if (ok === false) {
+    const result = await toggleRotasFavorita(supabase, user, rotaId, nome, setIsFavorito);
+    if (result === "failed") {
       setToast("Não foi possível salvar o favorito. Tente novamente em instantes.");
       setTimeout(() => setToast(""), 3000);
+    } else if (result === "added") {
+      setToast(FAVORITO_OFFLINE_SAVED_MESSAGE);
+      setTimeout(() => setToast(""), 3500);
     }
   }
 
