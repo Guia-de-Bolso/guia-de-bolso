@@ -2,6 +2,7 @@
 
 import CapacitorShell from "@/components/CapacitorShell";
 import FeedbackProvider from "@/components/FeedbackProvider";
+import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 
 /**
  * Providers client-side do app.
@@ -12,6 +13,7 @@ import FeedbackProvider from "@/components/FeedbackProvider";
 export default function ClientProviders({ children }) {
   return (
     <FeedbackProvider>
+      <ServiceWorkerRegister />
       <CapacitorShell />
       {children}
     </FeedbackProvider>

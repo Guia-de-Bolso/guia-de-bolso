@@ -180,8 +180,8 @@ Registro das decisões técnicas principais do **Guia de Bolso** (formato ADR si
 | **Data** | 2026-06-27 |
 | **Status** | Aceito (fase 1 entregue) |
 | **Contexto** | Trilhas e praias podem ficar sem sinal; favoritar já expressa intenção do usuário. |
-| **Decisão** | Ao favoritar lugar ou atrativo, cache local automático (IndexedDB + fotos essenciais). Lista e detalhe em rotas client-only `/favoritos/lugar/[id]` e `/favoritos/atrativo/[id]`. Sem botão “baixar” na v1. |
-| **Consequências** | Escopo limitado a favoritos logados; IA/clima/reviews continuam online. Capacitor com URL remota não garante cold start offline. Fase 2: service worker / bundle local (P-002). |
+| **Decisão** | Ao favoritar lugar ou atrativo, cache local automático (IndexedDB + fotos essenciais). Lista e detalhe em rotas client-only `/favoritos/lugar/[id]` e `/favoritos/atrativo/[id]`. **Fase 2:** `public/sw.js` cacheia shell HTML/JS de `/favoritos*` + `/_next/static` visitado; `start_url` PWA → `/favoritos`. |
+| **Consequências** | Escopo limitado a favoritos logados; IA/clima/reviews continuam online. Home e demais rotas sem SW. SW só registra em produção (`NODE_ENV !== development`). |
 
 ---
 
@@ -190,7 +190,7 @@ Registro das decisões técnicas principais do **Guia de Bolso** (formato ADR si
 | ID | Tema | Notas |
 |----|------|-------|
 | P-001 | Cobrança Asaas | Portal estabelecimento + `premium_ativo` automatizado |
-| P-002 | PWA / offline | **Fase 1:** favoritos offline (ADR-010). **Fase 2:** service worker + catálogo regional ou bundle Capacitor |
+| P-002 | PWA / offline | **Entregue (favoritos):** IndexedDB + SW `/favoritos*`. **Futuro:** catálogo regional ou bundle Capacitor local |
 | P-003 | Schema baseline export | `supabase/schema_baseline.sql` do projeto produção |
 | P-004 | Rate limit distribuído | Vercel KV ou Redis para IA e feedback |
 | P-005 | Role `estabelecimento` | Painel self-service separado do admin municipal |
