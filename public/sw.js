@@ -4,7 +4,7 @@
  * Dados dos favoritos: IndexedDB (lib/favoritosOffline.js).
  */
 
-const SW_VERSION = "guia-favoritos-shell-v2";
+const SW_VERSION = "guia-favoritos-shell-v3";
 const CACHE_STATIC = `${SW_VERSION}-static`;
 const CACHE_PAGES = `${SW_VERSION}-pages`;
 const OFFLINE_URL = "/offline.html";
@@ -131,7 +131,17 @@ async function networkFirstPage(request) {
     if (cached) return cached;
 
     const url = new URL(request.url);
-    if (isFavoritosPath(url.pathname)) {
+    const normalizedPath = url.pathname.split("?")[0].replace(/\/$/, "") || "/";
+
+    if (normalizedPath.startsWith("/favoritos/")) {
+      const detailCached = await cache.match(
+        new URL(normalizedPath, self.location.origin).href,
+        { ignoreSearch: true }
+      );
+      if (detailCached) return detailCached;
+    }
+
+    if (isFavoritosListPath(url.pathname)) {
       const listCached = await cache.match(new URL("/favoritos", self.location.origin).href);
       if (listCached) return listCached;
     }
@@ -222,6 +232,10 @@ self.addEventListener("fetch", (event) => {
 
   if (isStaticAsset(url)) {
     event.respondWith(cacheFirstStatic(request));
+    return;
+  }
+
+  if (isNextRouterDataRequest(request)) {
     return;
   }
 

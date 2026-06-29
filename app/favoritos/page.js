@@ -360,6 +360,7 @@ export default function FavoritosPage() {
                           lugar={lugar}
                           isFavorito
                           hrefOverride={`/favoritos/lugar/${lugar.id}`}
+                          preferDocumentNavWhenOffline
                           onFavoritar={handleRemoverFavorito}
                         />
                       </div>

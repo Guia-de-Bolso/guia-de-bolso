@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import FavoritoDetailLink from "@/components/favoritos/FavoritoDetailLink";
 import { getStatusFuncionamento } from "@/lib/horarios";
 import { getCapaFromLugar } from "@/lib/fotos";
 import { getLugarPublicPath } from "@/lib/lugarPublicPath";
@@ -55,6 +56,7 @@ export default function PlaceCard({
   priority = false,
   variant = "default",
   hrefOverride,
+  preferDocumentNavWhenOffline = false,
 }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const status = getStatusFuncionamento(lugar.horarios, lugar.mostrar_horarios);
@@ -64,6 +66,10 @@ export default function PlaceCard({
   const imagemUrl = getCapaFromLugar(lugar);
   const detailHref = hrefOverride || getLugarPublicPath(lugar);
   const immersive = variant === "immersive";
+  const DetailLink = preferDocumentNavWhenOffline ? FavoritoDetailLink : Link;
+  const detailLinkProps = preferDocumentNavWhenOffline
+    ? { preferDocumentNav: true }
+    : {};
 
   return (
     <article
@@ -134,8 +140,9 @@ export default function PlaceCard({
         </span>
       )}
 
-      <Link
+      <DetailLink
         href={detailHref}
+        {...detailLinkProps}
         className={`absolute inset-0 flex flex-col justify-end ${immersive ? "p-5 pr-16" : "p-4 pr-16"}`}
       >
         <div>
@@ -173,7 +180,7 @@ export default function PlaceCard({
             </p>
           )}
         </div>
-      </Link>
+      </DetailLink>
 
       {onFavoritar && (
         <button

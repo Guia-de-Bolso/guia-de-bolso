@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import FavoritoDetailLink from "@/components/favoritos/FavoritoDetailLink";
 import RemotePhoto from "@/components/shared/RemotePhoto";
 import { getCapaFromAtrativo } from "@/lib/fotos";
 import { getCategoriaAtrativoMeta } from "@/lib/atrativos";
@@ -38,8 +38,9 @@ export default function AtrativoFavoritoCard({ rota, onRemover }) {
 
   return (
     <article className="relative box-border w-full min-w-0 max-w-full overflow-hidden rounded-2xl bg-white shadow-[0_2px_14px_-4px_rgba(26,46,40,0.08)] ring-1 ring-[#e8eeee]">
-      <Link
+      <FavoritoDetailLink
         href={`/favoritos/atrativo/${rota.id}`}
+        preferDocumentNav
         className="box-border flex w-full min-w-0 gap-3 overflow-hidden p-3 pr-14"
       >
         <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54]">
@@ -58,7 +59,7 @@ export default function AtrativoFavoritoCard({ rota, onRemover }) {
             </p>
           ) : null}
         </div>
-      </Link>
+      </FavoritoDetailLink>
 
       <button
         type="button"
