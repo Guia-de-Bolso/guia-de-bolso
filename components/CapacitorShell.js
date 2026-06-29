@@ -1,9 +1,11 @@
 "use client";
 
 import { Capacitor } from "@capacitor/core";
+import { Network } from "@capacitor/network";
 import { SplashScreen } from "@capacitor/splash-screen";
 import { StatusBar, Style } from "@capacitor/status-bar";
 import { useEffect } from "react";
+import { FAVORITOS_OFFLINE_NAV_HREF, isFavoritosOfflineAllowedPath } from "@/lib/offlineNavigation";
 import { initNativeSafeAreaInsets } from "@/lib/nativeSafeArea";
 
 /**
@@ -21,6 +23,17 @@ export default function CapacitorShell() {
     };
 
     (async () => {
+      try {
+        const status = await Network.getStatus();
+        const path = window.location.pathname || "/";
+        if (!status.connected && !isFavoritosOfflineAllowedPath(path)) {
+          window.location.replace(FAVORITOS_OFFLINE_NAV_HREF);
+          return;
+        }
+      } catch {
+        /* Network plugin indisponível */
+      }
+
       try {
         await SplashScreen.hide();
       } catch {

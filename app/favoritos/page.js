@@ -11,6 +11,7 @@ import PlaceCardSkeleton from "@/components/home/PlaceCardSkeleton";
 import AtrativoFavoritoCard from "@/components/atrativos/AtrativoFavoritoCard";
 import UserErrorAlert from "@/components/UserErrorAlert";
 import OfflineFavoritosBanner from "@/components/favoritos/OfflineFavoritosBanner";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { buildReportContext } from "@/lib/reportContext";
 import {
   formatOfflineSavedAt,
@@ -21,7 +22,6 @@ import {
   purgeOfflineFavorito,
   syncAllFavoritosOffline,
 } from "@/lib/favoritosOfflineFetch";
-import { isBrowserOnline } from "@/lib/networkStatus";
 import { createClient } from "@/lib/supabase";
 import { registrarLog } from "@/lib/logs";
 
@@ -48,6 +48,8 @@ function EmptyIllustration() {
  */
 export default function FavoritosPage() {
   const router = useRouter();
+  const { isOnline, ready: networkReady } = useNetworkStatus();
+  const isOffline = networkReady && !isOnline;
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [lugares, setLugares] = useState([]);
@@ -56,7 +58,6 @@ export default function FavoritosPage() {
   const [fetchError, setFetchError] = useState(false);
   const [fetchAtrativosError, setFetchAtrativosError] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isOffline, setIsOffline] = useState(false);
   const [lastSyncedLabel, setLastSyncedLabel] = useState(null);
 
   useEffect(() => {
@@ -86,24 +87,7 @@ export default function FavoritosPage() {
   }, []);
 
   useEffect(() => {
-    if (typeof window === "undefined") return undefined;
-
-    function updateOnlineState() {
-      setIsOffline(!isBrowserOnline());
-    }
-
-    updateOnlineState();
-    window.addEventListener("online", updateOnlineState);
-    window.addEventListener("offline", updateOnlineState);
-
-    return () => {
-      window.removeEventListener("online", updateOnlineState);
-      window.removeEventListener("offline", updateOnlineState);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!user) return;
+    if (!user || !networkReady) return;
 
     let cancelled = false;
     const supabase = createClient();
@@ -123,7 +107,7 @@ export default function FavoritosPage() {
     }
 
     async function loadFavoritos() {
-      if (!isBrowserOnline()) {
+      if (!isOnline) {
         await loadFromOfflineCache();
         return;
       }
@@ -151,7 +135,7 @@ export default function FavoritosPage() {
       cancelled = true;
       clearTimeout(loadingTimer);
     };
-  }, [user, isOffline]);
+  }, [user, isOnline, networkReady]);
 
   /**
    * Removes a place from the user's favorites with optimistic UI update.

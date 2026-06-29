@@ -1,5 +1,6 @@
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import ClientProviders from "@/components/ClientProviders";
+import { NATIVE_OFFLINE_BOOT_SCRIPT } from "@/lib/nativeOfflineBoot";
 import { DEFAULT_SITE_METADATA, getMetadataBase } from "@/lib/seo";
 import "./globals.css";
 
@@ -37,6 +38,7 @@ export default function RootLayout({ children }) {
       className={`${inter.variable} ${plusJakarta.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <script dangerouslySetInnerHTML={{ __html: NATIVE_OFFLINE_BOOT_SCRIPT }} />
         <ClientProviders>{children}</ClientProviders>
       </body>
     </html>

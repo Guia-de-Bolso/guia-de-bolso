@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { registerServiceWorker } from "@/lib/serviceWorker";
+import { registerServiceWorker, precacheFavoritosShell } from "@/lib/serviceWorker";
 
 /**
  * Registra service worker para shell offline de favoritos (produção).
@@ -9,11 +9,19 @@ import { registerServiceWorker } from "@/lib/serviceWorker";
  */
 export default function ServiceWorkerRegister() {
   useEffect(() => {
-    registerServiceWorker();
+    registerServiceWorker().then(() => {
+      if (typeof navigator !== "undefined" && navigator.onLine !== false) {
+        void precacheFavoritosShell(["/favoritos"]);
+      }
+    });
 
     function onVisible() {
       if (document.visibilityState === "visible") {
-        registerServiceWorker();
+        registerServiceWorker().then(() => {
+          if (navigator.onLine !== false) {
+            void precacheFavoritosShell(["/favoritos"]);
+          }
+        });
       }
     }
 

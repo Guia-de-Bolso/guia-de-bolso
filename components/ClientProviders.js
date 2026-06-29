@@ -2,6 +2,7 @@
 
 import CapacitorShell from "@/components/CapacitorShell";
 import FeedbackProvider from "@/components/FeedbackProvider";
+import FavoritosBackgroundSync from "@/components/favoritos/FavoritosBackgroundSync";
 import OfflineModeProvider from "@/components/OfflineModeProvider";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 
@@ -16,6 +17,7 @@ export default function ClientProviders({ children }) {
     <FeedbackProvider>
       <OfflineModeProvider>
         <ServiceWorkerRegister />
+        <FavoritosBackgroundSync />
         <CapacitorShell />
         {children}
       </OfflineModeProvider>

@@ -1,0 +1,64 @@
+"use client";
+
+import { App } from "@capacitor/app";
+import { Capacitor } from "@capacitor/core";
+import { useEffect } from "react";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { runFavoritosBackgroundSync } from "@/lib/favoritosBackgroundSync";
+import { precacheFavoritosShell } from "@/lib/serviceWorker";
+import { createClient } from "@/lib/supabase";
+
+/**
+ * Mantém cache offline de favoritos atualizado quando o app está online.
+ * @returns {null}
+ */
+export default function FavoritosBackgroundSync() {
+  const { isOnline, ready } = useNetworkStatus();
+
+  useEffect(() => {
+    if (!ready || !isOnline) return undefined;
+
+    let cancelled = false;
+
+    async function syncNow() {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (cancelled || !user?.id) return;
+
+      await runFavoritosBackgroundSync(supabase, user.id);
+      if (!cancelled) {
+        await precacheFavoritosShell(["/favoritos"]);
+      }
+    }
+
+    syncNow();
+
+    function onVisible() {
+      if (document.visibilityState === "visible") {
+        syncNow();
+      }
+    }
+
+    document.addEventListener("visibilitychange", onVisible);
+
+    let appListener;
+
+    if (Capacitor.isNativePlatform()) {
+      App.addListener("appStateChange", ({ isActive }) => {
+        if (isActive) syncNow();
+      }).then((handle) => {
+        appListener = handle;
+      });
+    }
+
+    return () => {
+      cancelled = true;
+      document.removeEventListener("visibilitychange", onVisible);
+      appListener?.remove();
+    };
+  }, [ready, isOnline]);
+
+  return null;
+}

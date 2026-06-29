@@ -4,7 +4,7 @@
  * Dados dos favoritos: IndexedDB (lib/favoritosOffline.js).
  */
 
-const SW_VERSION = "guia-favoritos-shell-v3";
+const SW_VERSION = "guia-favoritos-shell-v4";
 const CACHE_STATIC = `${SW_VERSION}-static`;
 const CACHE_PAGES = `${SW_VERSION}-pages`;
 const OFFLINE_URL = "/offline.html";
@@ -21,10 +21,27 @@ function isSameOrigin(url) {
 
 /**
  * @param {string} pathname
+ * @returns {string}
+ */
+function normalizePathname(pathname) {
+  if (!pathname || typeof pathname !== "string") return "/";
+  return pathname.split("?")[0].replace(/\/$/, "") || "/";
+}
+
+/**
+ * @param {string} pathname
+ * @returns {boolean}
+ */
+function isFavoritosListPath(pathname) {
+  return normalizePathname(pathname) === "/favoritos";
+}
+
+/**
+ * @param {string} pathname
  * @returns {boolean}
  */
 function isFavoritosPath(pathname) {
-  const path = pathname.split("?")[0].replace(/\/$/, "") || "/";
+  const path = normalizePathname(pathname);
   return path === "/favoritos" || path.startsWith("/favoritos/");
 }
 
@@ -33,8 +50,20 @@ function isFavoritosPath(pathname) {
  * @returns {boolean}
  */
 function isAppHomePath(pathname) {
-  const path = pathname.split("?")[0].replace(/\/$/, "") || "/";
+  const path = normalizePathname(pathname);
   return path === "/" || path === "/home";
+}
+
+/**
+ * @param {Request} request
+ * @returns {boolean}
+ */
+function isNextRouterDataRequest(request) {
+  if (request.mode === "navigate") return false;
+  if (request.headers.get("rsc") === "1") return true;
+  if (request.headers.get("Next-Router-Prefetch") === "1") return true;
+  const accept = request.headers.get("accept") || "";
+  return accept.includes("text/x-component");
 }
 
 /**
@@ -79,6 +108,34 @@ async function precachePaths(paths) {
       }
     })
   );
+}
+
+/**
+ * @param {Request} request
+ * @returns {Promise<Response|undefined>}
+ */
+async function matchCachedAsset(request) {
+  const url = new URL(request.url);
+  const pathHref = new URL(url.pathname, self.location.origin).href;
+
+  const cacheNames = [CACHE_STATIC, CACHE_PAGES];
+  const allKeys = await caches.keys();
+  for (const key of allKeys) {
+    if (key.startsWith(SW_VERSION) && !cacheNames.includes(key)) {
+      cacheNames.push(key);
+    }
+  }
+
+  for (const cacheName of cacheNames) {
+    const cache = await caches.open(cacheName);
+    const exact = await cache.match(request);
+    if (exact) return exact;
+
+    const byPath = await cache.match(pathHref, { ignoreSearch: true });
+    if (byPath) return byPath;
+  }
+
+  return undefined;
 }
 
 /**
@@ -131,7 +188,7 @@ async function networkFirstPage(request) {
     if (cached) return cached;
 
     const url = new URL(request.url);
-    const normalizedPath = url.pathname.split("?")[0].replace(/\/$/, "") || "/";
+    const normalizedPath = normalizePathname(url.pathname);
 
     if (normalizedPath.startsWith("/favoritos/")) {
       const detailCached = await cache.match(
@@ -162,7 +219,7 @@ async function networkFirstPage(request) {
  * @returns {Promise<Response>}
  */
 async function cacheFirstStatic(request) {
-  const cached = await caches.match(request);
+  const cached = await matchCachedAsset(request);
   if (cached) {
     fetch(request)
       .then((response) => {
@@ -182,7 +239,14 @@ async function cacheFirstStatic(request) {
     }
     return response;
   } catch {
-    return new Response("", { status: 408, statusText: "Offline" });
+    const fallback = await matchCachedAsset(request);
+    if (fallback) return fallback;
+
+    return new Response("console.error('Guia de Bolso: asset offline não encontrado');", {
+      status: 200,
+      statusText: "Offline",
+      headers: { "Content-Type": "application/javascript; charset=utf-8" },
+    });
   }
 }
 
