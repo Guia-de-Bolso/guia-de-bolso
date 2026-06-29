@@ -80,6 +80,8 @@ export default async function AtrativoDetalhePage({ params }) {
       <AtrativoSeoStatic nome={nome} descricao={rota.descricao || ""} categoria={categoria.nome} />
       <AtrativoDetalhePremium
       rotaId={id}
+      rota={rota}
+      localizacao={localizacao}
       nome={nome}
       descricao={rota.descricao || ""}
       fotos={fotos}

@@ -120,6 +120,8 @@ export default function FavoritoAtrativoPage() {
       {rota ? (
         <AtrativoDetalhePremium
           rotaId={rotaId}
+          rota={rota}
+          localizacao={bundle?.localizacao}
           nome={nome}
           descricao={rota.descricao || ""}
           fotos={fotos}

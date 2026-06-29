@@ -329,6 +329,7 @@ Build a personal shortlist for the trip — including trails and beaches usable 
 - Unfavoriting removes IndexedDB row; desfavoritar atrativo idem.
 - **Not offline:** IA search, live weather, new reviews, admin — require network.
 - **Capacitor** remote URL: online abre em `/` (Início); offline redireciona para `/favoritos` (`OfflineModeProvider` + `@capacitor/network`); bottom nav bloqueia outras abas com mensagem.
+- **Mapas offline:** online, banner preventivo em favoritos/atrativos e lugares Natureza/Aventura (`OfflineMapsPrepareBanner`); offline, IR AGORA / Navegar no Maps abre `OfflineMapsSheet` com opção de abrir Google/Apple/Waze (se mapa baixado), copiar coordenadas e dicas de download (`lib/offlineMaps.js`, `lib/mapsCoordinates.js`).
 - Favorite state on home resets when session ends.
 - Place list rendered as semantic `<ul>` / `<li>`.
 

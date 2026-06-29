@@ -32,6 +32,8 @@ function VerifiedIcon() {
  */
 export default function AtrativoDetalhePremium({
   rotaId,
+  rota,
+  localizacao,
   nome,
   descricao,
   fotos,
@@ -202,7 +204,12 @@ export default function AtrativoDetalhePremium({
 
           <AtrativoMetrics duracao={duracao} distancia={distancia} dificuldade={dificuldade} />
 
-          <AtrativoMapsCta href={mapsHref} subtitulo={mapsSubtitulo} />
+          <AtrativoMapsCta
+            href={mapsHref}
+            subtitulo={mapsSubtitulo}
+            rota={rota}
+            localizacao={localizacao}
+          />
 
           <AtrativoSobreSection descricao={descricao} infoCards={infoCards} />
 

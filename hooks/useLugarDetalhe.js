@@ -33,6 +33,11 @@ import {
   instagramUrl,
   wazeUrl,
 } from "@/lib/lugarDetalheMaps";
+import {
+  buildMapsUrlsForLugar,
+  getMapAddressLabel,
+  parseMapCoordinates,
+} from "@/lib/mapsCoordinates";
 import { isConteudoCuradoria, isParceiro } from "@/lib/lugarBadges";
 import {
   getFotosParaExibicao,
@@ -41,6 +46,7 @@ import {
   getVisibilidadePerfil,
 } from "@/lib/lugarVisibilidade";
 import { createFavoritosSyncGuard, toggleFavoritoLugarBoolean, FAVORITO_OFFLINE_SAVED_MESSAGE } from "@/lib/favoritos";
+import { useOfflineMode } from "@/components/OfflineModeProvider";
 import {
   FAVORITO_OFFLINE_TYPES,
   getOfflineFavorito,
@@ -99,6 +105,9 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
   const [showQrBanner, setShowQrBanner] = useState(false);
   const [isOfflineView, setIsOfflineView] = useState(false);
   const [offlineSavedAt, setOfflineSavedAt] = useState(null);
+  const [showOfflineMapsSheet, setShowOfflineMapsSheet] = useState(false);
+  const [offlineMapsToast, setOfflineMapsToast] = useState("");
+  const { offlineLimited } = useOfflineMode();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user: currentUser } }) => {
@@ -374,6 +383,11 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
   }
 
   function openRoute(preference) {
+    if (offlineLimited) {
+      setShowOfflineMapsSheet(true);
+      return;
+    }
+
     const selected =
       preference || localStorage.getItem(MAP_PREFERENCE_STORAGE_KEY);
 
@@ -483,6 +497,10 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
     ? CATEGORIA_STYLES[lugar.categoria] ?? "bg-white text-[#1a4a3a]"
     : "";
 
+  const mapCoordinates = parseMapCoordinates(localizacao);
+  const offlineMapsUrls = lugar ? buildMapsUrlsForLugar(lugar, localizacao) : null;
+  const mapAddressLabel = getMapAddressLabel(localizacao);
+
   return {
     id,
     router,
@@ -544,5 +562,13 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
     openRoute,
     isOfflineView,
     offlineSavedAt,
+    showOfflineMapsSheet,
+    setShowOfflineMapsSheet,
+    offlineMapsToast,
+    setOfflineMapsToast,
+    mapCoordinates,
+    offlineMapsUrls,
+    mapAddressLabel,
+    offlineLimited,
   };
 }
