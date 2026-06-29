@@ -328,7 +328,7 @@ Build a personal shortlist for the trip — including trails and beaches usable 
 - Deactivated place drops from list (`status=ativo` filter on sync).
 - Unfavoriting removes IndexedDB row; desfavoritar atrativo idem.
 - **Not offline:** IA search, live weather, new reviews, admin — require network.
-- **Capacitor** remote URL: cold start melhorado com **service worker** (`public/sw.js`) em rotas `/favoritos*`; home e busca IA ainda exigem rede.
+- **Capacitor** remote URL: online abre em `/` (Início); offline redireciona para `/favoritos` (`OfflineModeProvider` + `@capacitor/network`); bottom nav bloqueia outras abas com mensagem.
 - Favorite state on home resets when session ends.
 - Place list rendered as semantic `<ul>` / `<li>`.
 

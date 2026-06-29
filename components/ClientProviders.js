@@ -2,6 +2,7 @@
 
 import CapacitorShell from "@/components/CapacitorShell";
 import FeedbackProvider from "@/components/FeedbackProvider";
+import OfflineModeProvider from "@/components/OfflineModeProvider";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 
 /**
@@ -13,9 +14,11 @@ import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 export default function ClientProviders({ children }) {
   return (
     <FeedbackProvider>
-      <ServiceWorkerRegister />
-      <CapacitorShell />
-      {children}
+      <OfflineModeProvider>
+        <ServiceWorkerRegister />
+        <CapacitorShell />
+        {children}
+      </OfflineModeProvider>
     </FeedbackProvider>
   );
 }

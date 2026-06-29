@@ -2,6 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { useOfflineMode } from "@/components/OfflineModeProvider";
+import {
+  OFFLINE_NAV_BLOCKED_MESSAGE,
+  isOfflineNavHrefAllowed,
+} from "@/lib/offlineNavigation";
 
 function IconHome({ className = "h-[22px] w-[22px]", active = false }) {
   return (
@@ -88,59 +94,105 @@ const items = [
   { href: "/perfil", label: "Perfil", Icon: IconPerson },
 ];
 
+const navItemClass = (active, blocked) =>
+  `group relative flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[20px] px-1 py-1.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a4a3a]/55 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
+    blocked
+      ? "cursor-not-allowed text-[#9aaba5] opacity-55"
+      : active
+        ? "text-[#1a4a3a] active:scale-[0.98]"
+        : "text-[#6f837d] hover:bg-white/60 hover:text-[#4f635d] active:scale-[0.98] active:bg-white/80"
+  }`;
+
+const iconWrapClass = (active, blocked) =>
+  `flex h-9 w-9 items-center justify-center rounded-full border transition-all duration-200 ${
+    blocked
+      ? "border-[#e2ebe8] bg-[#f4f7f6] text-[#9aaba5]"
+      : active
+        ? "border-[#cfe5dd] bg-[#ddf0ea] text-[#1a4a3a] shadow-[0_1px_0_rgba(255,255,255,0.85),inset_0_0_0_1px_rgba(26,74,58,0.04)]"
+        : "border-[#d7e3de] bg-white/72 text-[#6f837d] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.7)] group-hover:border-[#c6d8d1] group-hover:bg-white"
+  }`;
+
 /**
  * BottomNav - Floating bottom navigation bar with primary app routes.
  */
 export default function BottomNav() {
   const pathname = usePathname();
+  const { offlineLimited } = useOfflineMode();
+  const [offlineToast, setOfflineToast] = useState("");
+
+  function showOfflineMessage() {
+    setOfflineToast(OFFLINE_NAV_BLOCKED_MESSAGE);
+    window.setTimeout(() => setOfflineToast(""), 4500);
+  }
 
   return (
-    <nav
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-5 pb-[max(0.85rem,env(safe-area-inset-bottom))]"
-      aria-label="Navegação principal"
-    >
-      <div className="pointer-events-auto flex w-full max-w-md items-center justify-between gap-1 rounded-[32px] border border-[#dce8e3]/90 bg-white/84 px-2 py-2 shadow-[0_-1px_0_rgba(255,255,255,0.92),0_10px_30px_rgba(12,30,25,0.11),0_2px_10px_rgba(12,30,25,0.06)] backdrop-blur-2xl backdrop-saturate-150">
-        {items.map(({ href, label, Icon }) => {
-          const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+    <>
+      {offlineToast ? (
+        <div
+          className="pointer-events-none fixed inset-x-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-50 mx-auto max-w-md rounded-2xl border border-[#1a4a3a]/15 bg-[#1a4a3a] px-4 py-3 text-center text-sm font-medium leading-snug text-white shadow-lg"
+          role="status"
+          aria-live="polite"
+        >
+          {offlineToast}
+        </div>
+      ) : null}
 
-          return (
-            <Link
-              key={href}
-              href={href}
-              aria-label={label}
-              className={`group relative flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[20px] px-1 py-1.5 transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a4a3a]/55 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
-                active
-                  ? "text-[#1a4a3a]"
-                  : "text-[#6f837d] hover:bg-white/60 hover:text-[#4f635d] active:bg-white/80"
-              }`}
-              aria-current={active ? "page" : undefined}
-            >
-              <span
-                className={`flex h-9 w-9 items-center justify-center rounded-full border transition-all duration-200 ${
-                  active
-                    ? "border-[#cfe5dd] bg-[#ddf0ea] text-[#1a4a3a] shadow-[0_1px_0_rgba(255,255,255,0.85),inset_0_0_0_1px_rgba(26,74,58,0.04)]"
-                    : "border-[#d7e3de] bg-white/72 text-[#6f837d] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.7)] group-hover:border-[#c6d8d1] group-hover:bg-white"
-                }`}
+      <nav
+        className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-5 pb-[max(0.85rem,env(safe-area-inset-bottom))]"
+        aria-label="Navegação principal"
+      >
+        <div className="pointer-events-auto flex w-full max-w-md items-center justify-between gap-1 rounded-[32px] border border-[#dce8e3]/90 bg-white/84 px-2 py-2 shadow-[0_-1px_0_rgba(255,255,255,0.92),0_10px_30px_rgba(12,30,25,0.11),0_2px_10px_rgba(12,30,25,0.06)] backdrop-blur-2xl backdrop-saturate-150">
+          {items.map(({ href, label, Icon }) => {
+            const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+            const blocked = offlineLimited && !isOfflineNavHrefAllowed(href);
+
+            if (blocked) {
+              return (
+                <button
+                  key={href}
+                  type="button"
+                  onClick={showOfflineMessage}
+                  aria-label={`${label} — indisponível offline`}
+                  aria-disabled="true"
+                  className={navItemClass(active, true)}
+                >
+                  <span className={iconWrapClass(active, true)}>
+                    <Icon active={active} />
+                  </span>
+                  <span className="text-[12px] font-semibold leading-tight">{label}</span>
+                </button>
+              );
+            }
+
+            return (
+              <Link
+                key={href}
+                href={href}
+                aria-label={label}
+                className={navItemClass(active, false)}
+                aria-current={active ? "page" : undefined}
               >
-                <Icon active={active} />
-              </span>
-              <span
-                className={`text-[12px] font-semibold leading-tight transition-colors ${
-                  active ? "text-[#1a4a3a]" : "text-[#6f837d]"
-                }`}
-              >
-                {label}
-              </span>
-              <span
-                aria-hidden
-                className={`h-0.5 rounded-full bg-[#1a4a3a] transition-all duration-200 ${
-                  active ? "w-6 opacity-80" : "w-2 opacity-0"
-                }`}
-              />
-            </Link>
-          );
-        })}
-      </div>
-    </nav>
+                <span className={iconWrapClass(active, false)}>
+                  <Icon active={active} />
+                </span>
+                <span
+                  className={`text-[12px] font-semibold leading-tight transition-colors ${
+                    active ? "text-[#1a4a3a]" : "text-[#6f837d]"
+                  }`}
+                >
+                  {label}
+                </span>
+                <span
+                  aria-hidden
+                  className={`h-0.5 rounded-full bg-[#1a4a3a] transition-all duration-200 ${
+                    active ? "w-6 opacity-80" : "w-2 opacity-0"
+                  }`}
+                />
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+    </>
   );
 }

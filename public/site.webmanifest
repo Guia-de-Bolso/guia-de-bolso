@@ -2,7 +2,7 @@
   "name": "Guia de Bolso",
   "short_name": "Guia de Bolso",
   "description": "Guia turístico de Imbituba, SC — praias, gastronomia e rotas.",
-  "start_url": "/favoritos",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#f7f8f7",

@@ -4,7 +4,7 @@
  * Dados dos favoritos: IndexedDB (lib/favoritosOffline.js).
  */
 
-const SW_VERSION = "guia-favoritos-shell-v1";
+const SW_VERSION = "guia-favoritos-shell-v2";
 const CACHE_STATIC = `${SW_VERSION}-static`;
 const CACHE_PAGES = `${SW_VERSION}-pages`;
 const OFFLINE_URL = "/offline.html";
@@ -26,6 +26,15 @@ function isSameOrigin(url) {
 function isFavoritosPath(pathname) {
   const path = pathname.split("?")[0].replace(/\/$/, "") || "/";
   return path === "/favoritos" || path.startsWith("/favoritos/");
+}
+
+/**
+ * @param {string} pathname
+ * @returns {boolean}
+ */
+function isAppHomePath(pathname) {
+  const path = pathname.split("?")[0].replace(/\/$/, "") || "/";
+  return path === "/" || path === "/home";
 }
 
 /**
@@ -70,6 +79,38 @@ async function precachePaths(paths) {
       }
     })
   );
+}
+
+/**
+ * @param {Request} request
+ * @returns {Promise<Response>}
+ */
+async function handleHomeOffline(request) {
+  const cache = await caches.open(CACHE_PAGES);
+  const favoritosUrl = new URL("/favoritos", self.location.origin).href;
+
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      await cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    const favoritosCached = await cache.match(favoritosUrl);
+    if (favoritosCached) return favoritosCached;
+
+    const cached = await cache.match(request);
+    if (cached) return cached;
+
+    const offline = await cache.match(new URL(OFFLINE_URL, self.location.origin).href);
+    if (offline) return offline;
+
+    return new Response("Sem conexão", {
+      status: 503,
+      statusText: "Offline",
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    });
+  }
 }
 
 /**
@@ -186,6 +227,11 @@ self.addEventListener("fetch", (event) => {
 
   if (isFavoritosPath(url.pathname)) {
     event.respondWith(networkFirstPage(request));
+    return;
+  }
+
+  if (isAppHomePath(url.pathname)) {
+    event.respondWith(handleHomeOffline(request));
     return;
   }
 
