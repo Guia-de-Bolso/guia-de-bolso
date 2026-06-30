@@ -31,7 +31,7 @@
     }
 
     @media print {
-      body { background: white; }
+      body { background: #e8eeeb; }
     }
 
     @page { size: A4 portrait; margin: 0; }
@@ -45,10 +45,62 @@
       overflow: hidden;
       page-break-after: always;
       box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      isolation: isolate;
+    }
+
+    /* Papel timbrado — logo canto + marca d'água (como pasta institucional) */
+    .page::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: -10%;
+      transform: translateY(-50%);
+      width: 108mm;
+      height: 108mm;
+      background: url("logo.png") center / contain no-repeat;
+      opacity: 0.055;
+      filter: grayscale(1) brightness(0.35);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page::after {
+      content: "";
+      position: absolute;
+      top: 14mm;
+      left: 18mm;
+      width: 11mm;
+      height: 11mm;
+      background: url("logo.png") center / contain no-repeat;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Frente e verso exibem logo no header — evita duplicar no canto */
+    .page-front::after,
+    .page-back::after {
+      display: none;
+    }
+
+    .page > * {
+      position: relative;
+      z-index: 1;
     }
 
     @media print {
-      .page { margin: 0; box-shadow: none; }
+      .page {
+        margin: 0;
+        box-shadow: none;
+        background: var(--bg) !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .page::before,
+      .page::after {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
     }
 
     .display { font-family: "Plus Jakarta Sans", system-ui, sans-serif; }
@@ -297,20 +349,28 @@
       border-bottom: 1px solid #c5dbd4;
     }
 
-    .back-header h2 {
+    .logo-wrap--back {
+      align-items: flex-start;
+      gap: 10px;
+      max-width: 100%;
+    }
+
+    .back-title {
       font-family: "Plus Jakarta Sans", sans-serif;
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 800;
       color: var(--green);
       letter-spacing: -0.028em;
       line-height: 1.22;
-      max-width: 20em;
+      flex: 1;
+      min-width: 0;
+      padding-top: 2px;
     }
 
     .back-header .estab {
       font-size: 8px;
       color: var(--muted);
-      margin-top: 8px;
+      margin-top: 10px;
     }
 
     .back-header .estab .field {
@@ -681,7 +741,10 @@
   <section class="page page-back" aria-label="Verso">
 
     <header class="back-header">
-      <h2 class="display">Por que fazer parte do Guia de Bolso?</h2>
+      <div class="logo-wrap logo-wrap--back">
+        <img src="logo.png" alt="Guia de Bolso" width="34" height="34" />
+        <h2 class="back-title display">Por que fazer parte do Guia de Bolso?</h2>
+      </div>
       <div class="estab">
         Estabelecimento:<span class="field">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
       </div>

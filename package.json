@@ -25,6 +25,8 @@
     "@capacitor/status-bar": "^8.0.2",
     "@capgo/capacitor-social-login": "^8.3.22",
     "@capgo/native-purchases": "^8.4.4",
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.105.4",
     "@upstash/ratelimit": "^2.0.8",

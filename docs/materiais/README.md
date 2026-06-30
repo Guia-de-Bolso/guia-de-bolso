@@ -34,16 +34,24 @@ Folha resumida para colocar **dentro da pasta personalizada** na visita presenci
 
 ### Como imprimir
 
-1. Abra `APRESENTACAO-PARCEIRO-A4.html` no Chrome ou Safari (duplo clique no arquivo).
+1. Abra `APRESENTACAO-PARCEIRO-A4.html` no Chrome ou Safari (duplo clique no arquivo), **ou** use o PDF pronto: [`APRESENTACAO-PARCEIRO-A4.pdf`](./APRESENTACAO-PARCEIRO-A4.pdf).
 2. Preencha à mão os campos sublinhados (proposta nº, data, nome do estabelecimento) **ou** edite o HTML antes de imprimir.
 3. **Arquivo → Imprimir** (ou `Cmd+P` / `Ctrl+P`).
 4. Configurações:
    - Papel: **A4**
    - Margens: **Nenhuma**
    - Escala: **100%**
-   - **Gráficos de segundo plano**: ativado (para cores e mockups)
+   - **Gráficos de segundo plano**: ativado (marca d'água e fundo timbrado)
    - **Frente e verso**: sim · virar pela **borda longa**
 5. Papel recomendado: couché fosco ou offset **150g**.
+
+**Regenerar o PDF** (após editar o HTML):
+
+```bash
+node scripts/export-apresentacao-parceiro-pdf.mjs
+```
+
+O layout usa **papel timbrado**: fundo `#f0f4f3`, logo no canto (verso) e marca d'água central à direita.
 
 ### Organização da pasta na visita
 

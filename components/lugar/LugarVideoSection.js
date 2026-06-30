@@ -1,6 +1,7 @@
 "use client";
 
 import LugarSectionAirbnb, { LugarCardAirbnb } from "@/components/lugar/airbnb/LugarSectionAirbnb";
+import VideoPlayer from "@/components/VideoPlayer";
 
 /**
  * Player nativo do vídeo do lugar — seção "Veja o lugar", abaixo da galeria de fotos.
@@ -13,14 +14,11 @@ export default function LugarVideoSection({ videoUrl, posterUrl = null, nome }) 
   return (
     <LugarSectionAirbnb title="Veja o lugar">
       <LugarCardAirbnb className="overflow-hidden p-0">
-        <video
+        <VideoPlayer
           src={videoUrl}
-          controls
-          playsInline
-          preload="metadata"
           poster={posterUrl || undefined}
-          className="aspect-video w-full bg-black object-contain"
-          aria-label={`Vídeo de ${nome}`}
+          ariaLabel={`Vídeo de ${nome}`}
+          className="overflow-hidden rounded-xl"
         />
       </LugarCardAirbnb>
     </LugarSectionAirbnb>
