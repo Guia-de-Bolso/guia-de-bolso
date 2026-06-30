@@ -158,6 +158,53 @@ body {
 :root {
   --app-safe-top: 0px;
   --app-safe-bottom: 0px;
+  --app-viewport-max: 28rem;
+  --app-viewport-outer-bg: var(--color-background);
+}
+
+/*
+ * iPad / tablet: coluna mobile centralizada com fundo intencional nas laterais.
+ * Fixed elements (bottom nav, sheets) já usam max-w-md + mx-auto e permanecem alinhados.
+ */
+@media (min-width: 768px) {
+  body:has(.app-viewport-shell) {
+    background: var(--app-viewport-outer-bg);
+  }
+
+  .app-viewport-shell {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    min-height: 100dvh;
+    background: var(--app-viewport-outer-bg);
+  }
+
+  .app-viewport-shell::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 42% 48% at 12% 18%, rgba(127, 212, 174, 0.1), transparent 72%),
+      radial-gradient(ellipse 38% 42% at 88% 82%, rgba(26, 74, 58, 0.06), transparent 70%),
+      linear-gradient(180deg, #e8efed 0%, var(--app-viewport-outer-bg) 45%, #e6ecea 100%);
+  }
+
+  .app-viewport-column {
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+    width: 100%;
+    max-width: var(--app-viewport-max);
+    min-height: 100dvh;
+    background: var(--app-viewport-outer-bg);
+    box-shadow:
+      0 0 0 1px rgba(26, 46, 40, 0.06),
+      0 16px 56px rgba(12, 30, 25, 0.08);
+  }
 }
 
 .pt-safe-top {
