@@ -48,6 +48,7 @@ guia-de-bolso/
 | `app/admin/**` | Pages + `layout.js` | CMS — **guard server** em `admin/layout.js` |
 | `app/api/**` | Route Handlers | IA, premium, catálogo cacheável, health |
 | `app/q/[slug]/route.js` | Route Handler | QR → redirect lugar + log |
+| `app/baixar/page.js` | Page | Download do app (App Store / Play + redirect por UA) |
 | `app/error.js`, `app/global-error.js` | Boundaries | Erros de UI |
 | `app/privacidade/`, `app/termos/` | Page | Legal (conteúdo em `lib/legalContent.js`) |
 
@@ -84,6 +85,7 @@ Organização **por domínio**, não por tipo atômico (Button/, Card/).
 | `admin/` | `AdminShell`, sidebar, drawer, formulários CMS |
 | `shared/` | Galeria, headers reutilizáveis |
 | `favoritos/` | Banner/badge offline, shell de detalhe offline |
+| `baixar/` | Landing de download (`BaixarAppClient`) |
 | `legal/` | Blocos de termos/privacidade |
 | Raiz | `BottomNav`, `LoginModal`, `Onboarding`, `AuthFlow`, etc. |
 
@@ -114,6 +116,7 @@ Organização **por domínio**, não por tipo atômico (Button/, Card/).
 | **Admin** | `adminRoles.js`, `adminDashboard.js`, `adminLogs.js`, `adminTaxonomia.js` |
 | **UX / segurança** | `userMessages.js`, `safeRedirectPath.js`, `observability.js` |
 | **Offline** | `favoritosOffline.js`, `favoritosOfflineFetch.js`, `networkStatus.js` |
+| **Marketing / lojas** | `appStoreLinks.js`, `marketingHost.js`, `institutionalSupport.js` |
 | **Dados** | `data/lugarDetalheQueries.js` — queries Supabase extraídas de páginas grandes |
 
 Testes unitários: `lib/*.test.js` (executados com `npm test`).

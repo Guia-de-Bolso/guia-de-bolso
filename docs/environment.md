@@ -15,6 +15,8 @@ Referência única para configuração local, Vercel e CI. Template versionado: 
 | `ANTHROPIC_API_KEY` | Sim* | Runtime server | Vercel, `.env.local` |
 | `ANTHROPIC_MODEL` | Recomendado | Runtime server | Default no código: `claude-sonnet-4-5` |
 | `NEXT_PUBLIC_SITE_URL` | Opcional | Build | URL canônica (QR, links absolutos) |
+| `NEXT_PUBLIC_APP_STORE_URL` | Opcional | Build | Link App Store — redirect em `/baixar` (iOS) |
+| `NEXT_PUBLIC_PLAY_STORE_URL` | Opcional | Build | Link Google Play — redirect em `/baixar` (Android) |
 | `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Opcional | Build | Admin Places + mapa estático no detalhe |
 | `NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID` | App nativo | Build | Google Sign-In Android/iOS + Supabase |
 | `NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID` | App iOS | Build | Google Sign-In iOS (`lib/nativeSocialLoginInit.js`) |
@@ -67,6 +69,14 @@ O projeto valida presença de `NEXT_PUBLIC_SUPABASE_*` no build (`next.config.mj
 - Base para URLs em PDF/QR quando request não traz `origin`
 - Local: `http://localhost:3000`
 - Produção: `https://guiadebolso.app`
+
+### `NEXT_PUBLIC_APP_STORE_URL` e `NEXT_PUBLIC_PLAY_STORE_URL`
+
+- URLs completas das lojas (ex.: `https://apps.apple.com/app/id…`, `https://play.google.com/store/apps/details?id=…`)
+- Usadas em [`app/baixar/page.js`](../app/baixar/page.js) + [`lib/appStoreLinks.js`](../lib/appStoreLinks.js)
+- **Cartazes e adesivos de download:** use um único QR apontando para `https://guiadebolso.app/baixar` (não codifique as lojas separadamente). A página detecta iPhone/Android e redireciona automaticamente quando os links estão preenchidos.
+- Vazio ou inválido: botões mostram “Em breve”; a página continua acessível
+- Alterar na Vercel exige **redeploy** (`NEXT_PUBLIC_*`)
 
 ### `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`
 

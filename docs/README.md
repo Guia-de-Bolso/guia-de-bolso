@@ -60,6 +60,7 @@ Porta de entrada do repositório: [README.md](../README.md) (visão executiva). 
 | [**Custos**](./CUSTOS.md) | Projeções e planilha |
 | [**Changelog**](./CHANGELOG.md) | Histórico de releases |
 | [**Testes (checklist)**](./TESTING-CHECKLIST.md) | QA manual + smoke automatizado (unit + Playwright) |
+| [**Materiais impressos**](./materiais/README.md) | Apresentação parceiro A4, QR `/baixar`, adesivos |
 | [**Legal (rascunho)**](./legal/) | Termos e privacidade |
 
 ### Segurança (raiz do repo)

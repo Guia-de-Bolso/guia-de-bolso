@@ -120,6 +120,16 @@ Use a ferramenta com **155 casos de teste**, passo a passo por dispositivo, resu
 | L-QR-5 | Natureza | Editar praia | Sem seção QR |
 | L-QR-6 | Inativo | `status=desativado` → `/q/{slug}` | 404 |
 
+## L-BAIXAR — Download do app (manual)
+
+| ID | Cenário | Passos | Esperado |
+|----|---------|--------|----------|
+| L-BAIXAR-1 | Página | Abrir `/baixar` (guest) | Título, copy Imbituba, linha prefeitura, botões lojas; **sem** bloco “Para cartazes” |
+| L-BAIXAR-2 | iOS | Safari iPhone com `NEXT_PUBLIC_APP_STORE_URL` | Redirect automático ou botão App Store ativo |
+| L-BAIXAR-3 | Android | Chrome Android com `NEXT_PUBLIC_PLAY_STORE_URL` | Redirect automático ou botão Play ativo |
+| L-BAIXAR-4 | Sem env | URLs das lojas vazias | Botões “Em breve”; página não quebra |
+| L-BAIXAR-5 | QR material | Scan de QR → `/baixar` | Mesma experiência que L-BAIXAR-1/2/3 |
+
 ---
 
 ## N — Feedback e erros (manual)

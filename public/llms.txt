@@ -11,7 +11,7 @@
 
 ## O que é
 
-Guia turístico digital com lugares curados (praias, restaurantes, trilhas, hospedagem),
+Guia turístico digital com lugares curados (praias, restaurantes, trilhas, serviços),
 rotas, busca com IA, avaliações moderadas e mapas. Foco: Imbituba e litoral sul de SC
 (Praia do Rosa, Ibiraquera, Praia da Vila).
 
@@ -25,6 +25,7 @@ rotas, busca com IA, avaliações moderadas e mapas. Foco: Imbituba e litoral su
 - /categorias — explorar por categoria
 - /lugares/{slug} — detalhe de cada lugar
 - /para-negocios — cadastro de estabelecimentos
+- /baixar — download do app (QR único em adesivos/cartazes; redirect App Store / Play)
 
 ## Redes
 

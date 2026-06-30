@@ -728,7 +728,30 @@ Establishment displays QR at counter/table; tourist scans and lands on the offic
 
 ---
 
-## 31. IA observability e custos (admin)
+## 31. App download landing (`/baixar`)
+
+**Description**  
+Public page for a **single smart link** used on posters, round stickers, and folder backs. Detects iOS/Android from User-Agent and redirects to App Store or Google Play when `NEXT_PUBLIC_APP_STORE_URL` / `NEXT_PUBLIC_PLAY_STORE_URL` are configured.
+
+**User goal**  
+Tourist or resident scans one QR in a public place → lands on a simple download screen → store opens automatically (or manual store buttons as fallback).
+
+**Main flows**
+1. Marketing material QR → `https://guiadebolso.app/baixar`.
+2. `BaixarAppClient` detects platform → `window.location.replace` to the right store (400 ms delay).
+3. If store URLs missing: buttons show “Em breve”; page still explains the app and links to `/` and `/sobre`.
+
+**Copy on page (user-facing only)**  
+Title, short description, prefeitura support line (`PREFETURA_SUPPORT_LINE`), store CTAs — **no** internal “for posters / QR” instructions (those live in `docs/materiais/README.md` and `docs/environment.md`).
+
+**Edge cases**
+- Desktop / unknown UA: no auto-redirect; both store buttons visible.
+- Invalid env URL (`#`, empty): treated as not configured (`lib/appStoreLinks.js`).
+- Route is on marketing host allowlist (`lib/marketingHost.js`); no app viewport shell.
+
+---
+
+## 32. IA observability e custos (admin)
 
 **Description**  
 Página operacional em `/admin/ia` para monitorar custo, tokens, latência e erros das chamadas Anthropic (`busca`, `roteiro`, `moderacao`), incluindo efeitos de prompt caching.
@@ -772,6 +795,7 @@ Entender gasto atual, eficiência de cache e risco de escala antes de aumentar b
 | Categories | `/categorias`, `/categoria/[slug]` |
 | Place detail | `/lugares/[id]` |
 | QR short link | `/q/[slug]` → `/lugares/[id]?ref=qr` |
+| App download (marketing QR) | `/baixar` → App Store / Play (env) |
 | Favorites | `/favoritos` |
 | Curated atrativos | `/atrativos`, `/atrativos/[id]` (`/rotas` → 301) |
 | AI roteiro | `/atrativos` (sheet) |

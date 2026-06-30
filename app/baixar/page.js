@@ -4,7 +4,6 @@ import { getAppStoreLinks } from "@/lib/appStoreLinks";
 import { PREFETURA_SUPPORT_LINE } from "@/lib/institutionalSupport";
 import { buildPageMetadata } from "@/lib/seo";
 import { SITE_BRAND_NAME, SITE_NAME_SHORT } from "@/lib/seoBrand";
-import { SITE_PUBLIC_URL } from "@/lib/siteContact";
 
 export const metadata = buildPageMetadata({
   title: "Baixar o app",
@@ -19,7 +18,6 @@ export const metadata = buildPageMetadata({
  */
 export default function BaixarPage() {
   const links = getAppStoreLinks();
-  const qrUrl = `${SITE_PUBLIC_URL}/baixar`;
 
   return (
     <div className="min-h-screen bg-[#f0f4f3] text-[#1a2e28]">
@@ -39,21 +37,6 @@ export default function BaixarPage() {
         </div>
 
         <BaixarAppClient links={links} />
-
-        <section className="mt-10 rounded-2xl bg-white p-5 ring-1 ring-[#e8eeee]">
-          <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#1a4a3a]">
-            Para cartazes e QR Code
-          </p>
-          <p className="mt-2 text-sm leading-relaxed text-[#5a6b66]">
-            Use um único QR apontando para:
-          </p>
-          <p className="mt-2 break-all rounded-lg bg-[#f0f4f3] px-3 py-2 font-mono text-sm text-[#1a4a3a]">
-            {qrUrl}
-          </p>
-          <p className="mt-3 text-xs leading-relaxed text-[#5a6b66]">
-            No celular, detectamos iPhone ou Android e abrimos a loja certa automaticamente.
-          </p>
-        </section>
 
         <p className="mt-auto pt-10 text-center text-sm text-[#5a6b66]">
           <Link href="/" className="text-[#1a4a3a] font-semibold hover:underline">

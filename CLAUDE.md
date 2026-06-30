@@ -327,6 +327,7 @@ guia-de-bolso/
 - [x] Sistema de logs (login, logout, favoritos, IR AGORA, visualizou_lugar, acesso ao app)
 - [x] Relatórios por estabelecimento no admin (`/admin/relatorios`) com PDF e WhatsApp
 - [x] QR Code por estabelecimento — URL curta `/q/{slug}`, PDF no admin, contagem de scans nos relatórios
+- [x] Página `/baixar` — smart link para App Store / Play (`lib/appStoreLinks.js`); QR único em adesivos/cartazes (`docs/materiais/README.md`)
 - [x] Roteiro IA com timeline (`lib/roteiroParse.js`, `RoteiroItineraryView`)
 - [x] Compressão de imagem no cliente (`lib/imageCompress.js`) para avatar e fotos admin
 - [x] Entrega híbrida de imagens — `RemotePhoto` (CDN direto) + `next/image` em cards de lista; `minimumCacheTTL` em `next.config.mjs`
