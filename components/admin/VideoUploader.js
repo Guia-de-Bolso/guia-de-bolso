@@ -9,7 +9,7 @@ import {
   formatVideoFileSize,
   isAcceptedVideoFile,
   validateVideoInputFile,
-  validateVideoOutputFile,
+  validateVideoForStorage,
 } from "@/lib/videoUpload";
 
 const ACCEPT = "video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov,.m4v";
@@ -62,7 +62,7 @@ export default function VideoUploader({
         metadata,
         onProgress: setProgress,
       });
-      const outputMeta = await validateVideoOutputFile(optimized);
+      const outputMeta = await validateVideoForStorage(optimized);
       const preview = URL.createObjectURL(optimized);
       onPendingChange({
         file: optimized,
@@ -86,9 +86,10 @@ export default function VideoUploader({
         <div>
           <p className="text-sm font-semibold text-[#1a2e28]">Vídeo do lugar</p>
           <p className="mt-0.5 text-xs text-[#5a6b66]">
-            Até {LUGAR_VIDEO_LIMITS.maxDurationSeconds}s · envie em alta qualidade (até{" "}
-            {formatVideoFileSize(LUGAR_VIDEO_LIMITS.maxInputBytes)}) — o app otimiza
-            automaticamente para web.
+            Até {LUGAR_VIDEO_LIMITS.maxDurationSeconds}s · até{" "}
+            {formatVideoFileSize(LUGAR_VIDEO_LIMITS.maxInputBytes)} · MP4, MOV ou WebM.
+            Arquivos acima de {formatVideoFileSize(LUGAR_VIDEO_LIMITS.maxOutputBytes)} são
+            otimizados automaticamente quando possível.
           </p>
         </div>
         {!hasVideo && (
