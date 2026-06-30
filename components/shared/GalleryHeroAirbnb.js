@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import RemotePhoto from "@/components/shared/RemotePhoto";
 import NavigationBackLink from "@/components/NavigationBackLink";
+import OfflineMapsInfoButton from "@/components/maps/OfflineMapsInfoButton";
 import GalleryPhotoCounter from "@/components/shared/GalleryPhotoCounter";
 import {
   GALLERY_FAVORITO_ATIVO_BTN_CLASS,
@@ -68,6 +69,7 @@ export default function GalleryHeroAirbnb({
   curadoriaBadgeLabel = null,
   showFavorite = true,
   immersiveScroll = false,
+  mapsTipCategoria,
 }) {
   const carouselRef = useRef(null);
   const fotos = imagens?.length ? imagens : [];
@@ -152,6 +154,7 @@ export default function GalleryHeroAirbnb({
           />
 
           <div className="flex gap-2.5">
+            <OfflineMapsInfoButton categoria={mapsTipCategoria} />
             <button
               type="button"
               onClick={onShare}

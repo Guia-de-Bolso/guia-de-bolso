@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AdminShell, { useAdminAuth } from "@/components/admin/AdminShell";
-import { CATEGORIAS_EXPLORE } from "@/lib/categorias";
+import { getCategoriasVisiveis } from "@/lib/categorias";
 import {
   CATEGORIAS_TAXONOMIA,
   countLugaresComSubcategoria,
@@ -510,7 +510,7 @@ export default function TaxonomiaPage() {
               >
                 Todas
               </FilterChip>
-              {CATEGORIAS_EXPLORE.map((cat) => (
+              {getCategoriasVisiveis().map((cat) => (
                 <FilterChip
                   key={cat.nome}
                   active={filtroCategoriaSub === cat.nome}
@@ -626,7 +626,7 @@ export default function TaxonomiaPage() {
               >
                 🗺️ Atrativos
               </FilterChip>
-              {CATEGORIAS_EXPLORE.map((cat) => (
+              {getCategoriasVisiveis().map((cat) => (
                 <FilterChip
                   key={cat.nome}
                   active={filtroCategoriaTag === cat.nome}
@@ -856,7 +856,7 @@ export default function TaxonomiaPage() {
               subcategoria).
             </p>
             <div className="mt-3 max-h-56 space-y-3 overflow-y-auto rounded-xl bg-[#f7faf9] p-3">
-              {CATEGORIAS_EXPLORE.map((cat) => {
+              {getCategoriasVisiveis().map((cat) => {
                 const subs = subcategorias.filter((item) => item.categoria === cat.nome);
                 if (subs.length === 0) return null;
 

@@ -27,7 +27,7 @@ export default function LandingBusinessTestimonials({
       <LandingSectionHeader
         eyebrow="Quem anuncia"
         title="Estabelecimentos que já confiam."
-        subtitle="Restaurantes, hospedagem e comércio usando o guia para chegar ao turista certo."
+        subtitle="Restaurantes, comércio e serviços usando o guia para chegar ao turista certo."
         center
       />
 

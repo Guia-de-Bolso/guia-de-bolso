@@ -17,6 +17,7 @@ export default function LugarGalleryAirbnb({
   parceiroBadgeLabel = null,
   curadoriaBadgeLabel = null,
   immersiveScroll = true,
+  mapsTipCategoria,
 }) {
   return (
     <GalleryHeroAirbnb
@@ -29,6 +30,7 @@ export default function LugarGalleryAirbnb({
       parceiroBadgeLabel={parceiroBadgeLabel}
       curadoriaBadgeLabel={curadoriaBadgeLabel}
       immersiveScroll={immersiveScroll}
+      mapsTipCategoria={mapsTipCategoria}
     />
   );
 }

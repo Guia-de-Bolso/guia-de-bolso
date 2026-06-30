@@ -11,7 +11,7 @@ import ExplorarSkeleton from "@/components/explorar/ExplorarSkeleton";
 import HomeSectionHeader from "@/components/home/HomeSectionHeader";
 import SupabaseConfigAlert from "@/components/SupabaseConfigAlert";
 import { isSupabasePublicConfigured } from "@/lib/supabase/publicEnv";
-import { CATEGORIAS_EXPLORE, sortCategoriasPorContagem } from "@/lib/categorias";
+import { getCategoriasVisiveis, sortCategoriasPorContagem } from "@/lib/categorias";
 import { fetchExplorarFromApi } from "@/lib/fetchExplorarApi";
 
 /**
@@ -50,12 +50,12 @@ export default function CategoriasExplorarClient({ initialData = null }) {
 
   const totalLugares = useMemo(
     () =>
-      CATEGORIAS_EXPLORE.reduce((acc, item) => acc + (counts[item.nome] || 0), 0),
+      getCategoriasVisiveis().reduce((acc, item) => acc + (counts[item.nome] || 0), 0),
     [counts]
   );
 
   const categoriasOrdenadas = useMemo(
-    () => sortCategoriasPorContagem(CATEGORIAS_EXPLORE, counts),
+    () => sortCategoriasPorContagem(getCategoriasVisiveis(), counts),
     [counts]
   );
 

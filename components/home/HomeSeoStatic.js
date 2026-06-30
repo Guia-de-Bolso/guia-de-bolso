@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CATEGORIAS_EXPLORE, getCategoriaHref } from "@/lib/categorias";
+import { getCategoriasVisiveis, getCategoriaHref } from "@/lib/categorias";
 
 /**
  * Bloco indexável da home (h1 + links para categorias) — complementa o feed client.
@@ -8,7 +8,7 @@ import { CATEGORIAS_EXPLORE, getCategoriaHref } from "@/lib/categorias";
  * @returns {import('react').JSX.Element}
  */
 export default function HomeSeoStatic({ lugaresCount = 0 }) {
-  const categoriasComLugares = CATEGORIAS_EXPLORE.slice(0, 8);
+  const categoriasComLugares = getCategoriasVisiveis().slice(0, 8);
 
   return (
     <section className="sr-only" aria-label="Guia de Bolso — Imbituba">

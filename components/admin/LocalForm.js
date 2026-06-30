@@ -31,6 +31,7 @@ import {
 } from "@/lib/tags";
 import { isLugarElegivelQr } from "@/lib/lugarQr";
 import { getEffectiveCategoria } from "@/lib/lugarTaxonomia";
+import { getCategoriasVisiveis } from "@/lib/categorias";
 import {
   fetchTakenSlugs,
   isMissingSlugColumnError,
@@ -71,17 +72,7 @@ export const emptyLocalForm = {
   video_url: null,
 };
 
-const categorias = [
-  "Natureza",
-  "Gastronomia",
-  "Noite",
-  "Serviços",
-  "Hospedagem",
-  "Cultura",
-  "Aventura",
-  "Bem-estar",
-  "Compras",
-];
+const categorias = getCategoriasVisiveis().map((item) => item.nome);
 
 const MAX_TAGS = 5;
 

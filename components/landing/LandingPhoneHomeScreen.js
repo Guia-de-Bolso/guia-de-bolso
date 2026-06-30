@@ -2,7 +2,7 @@
 
 import RemotePhoto from "@/components/shared/RemotePhoto";
 import { HOME_CAROUSEL_TRACK_CLASS } from "@/components/home/homeTokens";
-import { CATEGORIAS_EXPLORE } from "@/lib/categorias";
+import { getCategoriasVisiveis } from "@/lib/categorias";
 
 /**
  * Card “Em alta” em escala reduzida (fiel ao EmAltaCard).
@@ -57,7 +57,7 @@ function MockParceiroCardGeneric() {
         <p className="line-clamp-2 text-[14px] font-bold leading-tight text-white drop-shadow-sm">
           Estabelecimento parceiro
         </p>
-        <p className="mt-0.5 text-[10px] font-medium text-white/85">Gastronomia · Hospedagem · mais</p>
+        <p className="mt-0.5 text-[10px] font-medium text-white/85">Gastronomia · Natureza · mais</p>
       </div>
     </div>
   );
@@ -119,7 +119,7 @@ export default function LandingPhoneHomeScreen({
   const chips =
     categorias.length > 0
       ? categorias.slice(0, 5)
-      : CATEGORIAS_EXPLORE.slice(0, 5).map((c) => ({
+      : getCategoriasVisiveis().slice(0, 5).map((c) => ({
           nome: c.nome,
           icone: c.icone,
           chipClass: c.chipClass,

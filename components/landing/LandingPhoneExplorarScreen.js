@@ -1,7 +1,7 @@
 "use client";
 
 import RemotePhoto from "@/components/shared/RemotePhoto";
-import { CATEGORIAS_EXPLORE, getCategoriasEmDestaque } from "@/lib/categorias";
+import { getCategoriasVisiveis, getCategoriasEmDestaque } from "@/lib/categorias";
 
 /**
  * Card de categoria em miniatura (grid Explorar).
@@ -77,11 +77,11 @@ export default function LandingPhoneExplorarScreen({ categorias = [], stats }) {
   const counts = Object.fromEntries(categorias.map((c) => [c.nome, c.count ?? 0]));
   const capas = Object.fromEntries(categorias.map((c) => [c.nome, c.capa ?? null]));
 
-  const destaques = getCategoriasEmDestaque(CATEGORIAS_EXPLORE, counts, 3).filter(
+  const destaques = getCategoriasEmDestaque(getCategoriasVisiveis(), counts, 3).filter(
     (c) => (counts[c.nome] || 0) > 0
   );
 
-  const gridCats = CATEGORIAS_EXPLORE.filter((c) =>
+  const gridCats = getCategoriasVisiveis().filter((c) =>
     categorias.some((row) => row.nome === c.nome)
   ).slice(0, 4);
 

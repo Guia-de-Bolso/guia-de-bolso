@@ -14,7 +14,12 @@ import {
   DESTAQUE_CHIP_PREMIUM_CLASS,
   DETALHE_CARD_OVERLAP_CLASS,
 } from "@/components/lugar/airbnb/lugarAirbnbTokens";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { toggleRotasFavorita, createFavoritosSyncGuard, FAVORITO_OFFLINE_SAVED_MESSAGE } from "@/lib/rotasFavoritas";
+import {
+  FAVORITO_OFFLINE_TYPES,
+  getOfflineFavorito,
+} from "@/lib/favoritosOffline";
 import { isMissingTableError } from "@/lib/supabaseErrors";
 import { createClient } from "@/lib/supabase";
 
@@ -48,12 +53,15 @@ export default function AtrativoDetalhePremium({
   pontos,
   dicas,
   backHref = "/atrativos",
+  offlinePreferred = false,
+  isOfflineView = false,
 }) {
   const [user, setUser] = useState(null);
   const [isFavorito, setIsFavorito] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toast, setToast] = useState("");
   const favoritoSyncGuardRef = useRef(createFavoritosSyncGuard());
+  const { isOnline, ready: networkReady } = useNetworkStatus();
 
   useEffect(() => {
     const supabase = createClient();
@@ -77,6 +85,21 @@ export default function AtrativoDetalhePremium({
       return;
     }
 
+    if (offlinePreferred || isOfflineView) {
+      setIsFavorito(true);
+      return;
+    }
+
+    const offlineNow = networkReady && !isOnline;
+    if (offlineNow) {
+      getOfflineFavorito(user.id, FAVORITO_OFFLINE_TYPES.ATIVO, String(rotaId)).then(
+        (cached) => {
+          setIsFavorito(Boolean(cached?.payload?.rota));
+        }
+      );
+      return;
+    }
+
     const supabase = createClient();
     if (!supabase) return;
 
@@ -97,7 +120,7 @@ export default function AtrativoDetalhePremium({
         }
         setIsFavorito(Boolean(data));
       });
-  }, [user, rotaId]);
+  }, [user, rotaId, offlinePreferred, isOfflineView, isOnline, networkReady]);
 
   async function handleFavoritar() {
     if (!user) {
@@ -156,6 +179,7 @@ export default function AtrativoDetalhePremium({
         isFavorito={isFavorito}
         onFavoritar={handleFavoritar}
         onShare={handleShare}
+        mapsTipCategoria={categoria?.nome}
       />
 
       <div className="mx-auto max-w-md">
@@ -168,6 +192,7 @@ export default function AtrativoDetalhePremium({
             onFavoritar={handleFavoritar}
             onShare={handleShare}
             immersiveScroll
+            mapsTipCategoria={categoria?.nome}
           />
         </div>
 

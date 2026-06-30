@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CATEGORIAS_EXPLORE, getCategoriaHref } from "@/lib/categorias";
+import { getCategoriasVisiveis, getCategoriaHref } from "@/lib/categorias";
 import { buildImbitubaMetadata } from "@/lib/seo";
 
 export const metadata = buildImbitubaMetadata();
@@ -27,7 +27,7 @@ export default function ImbitubaPage() {
 
         <h2 className="mt-8 text-lg font-bold text-[#1a2e28]">Explore por categoria</h2>
         <ul className="mt-3 space-y-2">
-          {CATEGORIAS_EXPLORE.map((cat) => (
+          {getCategoriasVisiveis().map((cat) => (
             <li key={cat.nome}>
               <Link
                 href={getCategoriaHref(cat.nome)}

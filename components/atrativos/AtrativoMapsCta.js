@@ -4,7 +4,6 @@ import { useState } from "react";
 import { ATRATIVO_MAPS_CTA_CLASS } from "@/components/atrativos/atrativoDetalheTokens";
 import { useOfflineMode } from "@/components/OfflineModeProvider";
 import OfflineCoordinatesCard from "@/components/maps/OfflineCoordinatesCard";
-import OfflineMapsPrepareBanner from "@/components/maps/OfflineMapsPrepareBanner";
 import OfflineMapsSheet from "@/components/maps/OfflineMapsSheet";
 import { getAtrativoNome } from "@/lib/atrativoDetalheDisplay";
 import {
@@ -12,8 +11,6 @@ import {
   getMapAddressLabel,
   parseMapCoordinates,
 } from "@/lib/mapsCoordinates";
-import { shouldShowOfflineMapsPrepareBanner } from "@/lib/offlineMaps";
-import { usePathname } from "next/navigation";
 
 function NavigateIcon() {
   return (
@@ -42,8 +39,7 @@ function NavigateIcon() {
  * @returns {import("react").ReactElement}
  */
 export default function AtrativoMapsCta({ href, subtitulo, rota, localizacao }) {
-  const pathname = usePathname();
-  const { isOnline, offlineLimited } = useOfflineMode();
+  const { offlineLimited } = useOfflineMode();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [toast, setToast] = useState("");
 
@@ -51,7 +47,6 @@ export default function AtrativoMapsCta({ href, subtitulo, rota, localizacao }) 
   const coordinates = parseMapCoordinates(localizacao);
   const mapsUrls = buildMapsUrlsForAtrativo(rota, localizacao);
   const address = getMapAddressLabel(localizacao);
-  const showPrepareBanner = shouldShowOfflineMapsPrepareBanner(pathname, isOnline);
 
   function openMaps() {
     if (offlineLimited) {
@@ -63,7 +58,6 @@ export default function AtrativoMapsCta({ href, subtitulo, rota, localizacao }) 
 
   return (
     <>
-      {showPrepareBanner ? <OfflineMapsPrepareBanner /> : null}
       {offlineLimited ? <OfflineCoordinatesCard coordinates={coordinates} /> : null}
 
       <button type="button" onClick={openMaps} className={`${ATRATIVO_MAPS_CTA_CLASS} w-full text-left`}>

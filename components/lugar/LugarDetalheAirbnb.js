@@ -110,6 +110,7 @@ export default function LugarDetalheAirbnb(props) {
         isFavorito={isFavorito}
         onFavoritar={handleFavoritar}
         onShare={handleShare}
+        mapsTipCategoria={lugar.categoria}
       />
 
       <div className="mx-auto max-w-md">
@@ -121,6 +122,7 @@ export default function LugarDetalheAirbnb(props) {
             isFavorito={isFavorito}
             onFavoritar={handleFavoritar}
             onShare={handleShare}
+            mapsTipCategoria={lugar.categoria}
             parceiroBadgeLabel={
               visibilidade.showBadgeParceiro
                 ? getBadgeParceiroLabel().toUpperCase()

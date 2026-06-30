@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CATEGORIAS_EXPLORE, getCategoriaHref } from "@/lib/categorias";
+import { getCategoriasVisiveis, getCategoriaHref } from "@/lib/categorias";
 
 /**
  * Bloco de texto indexável na landing (acessível, fora do hero animado).
@@ -31,7 +31,7 @@ export default function LandingSeoIntro() {
         <Link href="/para-negocios">Para anunciantes</Link>
       </p>
       <ul>
-        {CATEGORIAS_EXPLORE.slice(0, 5).map((cat) => (
+        {getCategoriasVisiveis().slice(0, 5).map((cat) => (
           <li key={cat.nome}>
             <Link href={getCategoriaHref(cat.nome)}>
               {cat.nome} em Imbituba

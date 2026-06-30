@@ -11,20 +11,14 @@ import {
   formatDiasRestantesExclusao,
   getDiasRestantesExclusao,
 } from "@/lib/lugarPurge";
+import { getCategoriasVisiveis } from "@/lib/categorias";
 import { createClient } from "@/lib/supabase";
 
 /** Categorias fixas do app (chips de filtro). */
-const CATEGORIAS_LUGAR = [
-  { nome: "Natureza", icone: "🌿" },
-  { nome: "Gastronomia", icone: "🍽️" },
-  { nome: "Noite", icone: "🌙" },
-  { nome: "Serviços", icone: "🔧" },
-  { nome: "Hospedagem", icone: "🏠" },
-  { nome: "Cultura", icone: "🏛️" },
-  { nome: "Aventura", icone: "🧗" },
-  { nome: "Bem-estar", icone: "🧘" },
-  { nome: "Compras", icone: "🛍️" },
-];
+const CATEGORIAS_LUGAR = getCategoriasVisiveis().map((item) => ({
+  nome: item.nome,
+  icone: item.icone,
+}));
 
 const categoryStyles = {
   Natureza: "bg-[#d4ede8] text-[#1a4a3a]",

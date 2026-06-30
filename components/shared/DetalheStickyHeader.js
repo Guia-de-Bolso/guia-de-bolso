@@ -1,6 +1,7 @@
 "use client";
 
 import NavigationBackLink from "@/components/NavigationBackLink";
+import OfflineMapsInfoButton from "@/components/maps/OfflineMapsInfoButton";
 import {
   GALLERY_FAVORITO_ATIVO_BTN_CLASS,
   GALLERY_FLOAT_BTN_CLASS,
@@ -53,6 +54,7 @@ export default function DetalheStickyHeader({
   onFavoritar,
   onShare,
   showFavorite = true,
+  mapsTipCategoria,
 }) {
   return (
     <header
@@ -73,6 +75,11 @@ export default function DetalheStickyHeader({
           </h2>
 
           <div className="flex shrink-0 gap-2">
+            <OfflineMapsInfoButton
+              categoria={mapsTipCategoria}
+              buttonClassName={`${GALLERY_FLOAT_BTN_CLASS} h-10 w-10`}
+              iconClassName="h-[18px] w-[18px]"
+            />
             <button
               type="button"
               onClick={onShare}

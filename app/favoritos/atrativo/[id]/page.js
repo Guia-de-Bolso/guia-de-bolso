@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import AtrativoDetalhePremium from "@/components/atrativos/AtrativoDetalhePremium";
 import OfflineFavoritoBadge from "@/components/favoritos/OfflineFavoritoBadge";
 import OfflineFavoritoDetailShell from "@/components/favoritos/OfflineFavoritoDetailShell";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import {
   formatAtrativoDistancia,
   formatAtrativoDuracao,
@@ -22,7 +23,6 @@ import {
   fetchAtrativoOfflineBundle,
 } from "@/lib/favoritosOfflineFetch";
 import { getFotosFromAtrativo } from "@/lib/fotos";
-import { isBrowserOnline } from "@/lib/networkStatus";
 import { createClient } from "@/lib/supabase";
 
 /**
@@ -32,13 +32,14 @@ import { createClient } from "@/lib/supabase";
 export default function FavoritoAtrativoPage() {
   const params = useParams();
   const rotaId = String(params.id ?? "");
+  const { isOnline, ready: networkReady } = useNetworkStatus();
   const [bundle, setBundle] = useState(null);
   const [savedAt, setSavedAt] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isOfflineView, setIsOfflineView] = useState(false);
 
   useEffect(() => {
-    if (!rotaId) return;
+    if (!rotaId || !networkReady) return;
 
     let cancelled = false;
 
@@ -46,8 +47,9 @@ export default function FavoritoAtrativoPage() {
       setLoading(true);
       const supabase = createClient();
       const {
-        data: { user },
-      } = await supabase.auth.getUser();
+        data: { session },
+      } = await supabase.auth.getSession();
+      const user = session?.user;
 
       if (!user?.id) {
         if (!cancelled) {
@@ -70,9 +72,10 @@ export default function FavoritoAtrativoPage() {
         return true;
       }
 
+      const offlineNow = !isOnline;
       const hadCache = await applyCached();
 
-      if (!isBrowserOnline()) {
+      if (offlineNow) {
         if (!cancelled) setLoading(false);
         if (!hadCache && !cancelled) setBundle(null);
         return;
@@ -85,7 +88,7 @@ export default function FavoritoAtrativoPage() {
         setBundle(fresh);
         setIsOfflineView(false);
         setSavedAt(null);
-        void cacheAtrativoFavoritoFromServer(supabase, user.id, rotaId);
+        await cacheAtrativoFavoritoFromServer(supabase, user.id, rotaId);
       } else if (!hadCache) {
         setBundle(null);
       }
@@ -98,7 +101,7 @@ export default function FavoritoAtrativoPage() {
     return () => {
       cancelled = true;
     };
-  }, [rotaId]);
+  }, [rotaId, isOnline, networkReady]);
 
   const rota = bundle?.rota;
   const nome = rota ? getAtrativoNome(rota) : "";
@@ -136,6 +139,8 @@ export default function FavoritoAtrativoPage() {
           pontos={bundle?.pontos ?? []}
           dicas={bundle?.dicas ?? []}
           backHref="/favoritos"
+          offlinePreferred
+          isOfflineView={isOfflineView}
         />
       ) : null}
     </OfflineFavoritoDetailShell>

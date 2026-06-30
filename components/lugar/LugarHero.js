@@ -1,6 +1,7 @@
 "use client";
 
 import RemotePhoto from "@/components/shared/RemotePhoto";
+import OfflineMapsInfoButton from "@/components/maps/OfflineMapsInfoButton";
 import Link from "next/link";
 import { useRef } from "react";
 import IconBack from "@/components/IconBack";
@@ -132,6 +133,11 @@ export default function LugarHero({
           <IconBack />
         </Link>
         <div className="flex gap-2">
+          <OfflineMapsInfoButton
+            categoria={categoria}
+            buttonClassName="flex h-11 w-11 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-md"
+            iconClassName="h-5 w-5"
+          />
           <button
             type="button"
             onClick={onShare}

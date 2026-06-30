@@ -6,13 +6,9 @@ import LugarDetalheLegacy, {
 } from "@/components/lugar/LugarDetalheLegacy";
 import OfflineFavoritoBadge from "@/components/favoritos/OfflineFavoritoBadge";
 import OfflineCoordinatesCard from "@/components/maps/OfflineCoordinatesCard";
-import OfflineMapsPrepareBanner from "@/components/maps/OfflineMapsPrepareBanner";
 import OfflineMapsSheet from "@/components/maps/OfflineMapsSheet";
-import { useOfflineMode } from "@/components/OfflineModeProvider";
 import { useLugarDetalhe } from "@/hooks/useLugarDetalhe";
 import { useLugarDetalheV2 } from "@/lib/lugarDetalheFeature";
-import { shouldShowOfflineMapsPrepareBanner } from "@/lib/offlineMaps";
-import { usePathname } from "next/navigation";
 
 /**
  * Detalhe do lugar (client) — `lugarId` vem do servidor após resolver slug/UUID.
@@ -20,15 +16,8 @@ import { usePathname } from "next/navigation";
  * @returns {import("react").ReactElement}
  */
 export default function LugarPageClient({ lugarId, offlinePreferred = false }) {
-  const pathname = usePathname();
-  const { isOnline } = useOfflineMode();
   const data = useLugarDetalhe(lugarId, { offlinePreferred });
   const useV2 = useLugarDetalheV2();
-  const showPrepareBanner = shouldShowOfflineMapsPrepareBanner(
-    pathname,
-    isOnline,
-    data.lugar?.categoria
-  );
 
   return (
     <LugarDetalheShell
@@ -40,14 +29,11 @@ export default function LugarPageClient({ lugarId, offlinePreferred = false }) {
       {data.isOfflineView ? <OfflineFavoritoBadge savedAt={data.offlineSavedAt} /> : null}
       {data.lugar ? (
         <>
-          {(showPrepareBanner || data.offlineLimited) && (
+          {data.offlineLimited ? (
             <div className="mx-auto max-w-md px-4">
-              {showPrepareBanner ? <OfflineMapsPrepareBanner /> : null}
-              {data.offlineLimited ? (
-                <OfflineCoordinatesCard coordinates={data.mapCoordinates} />
-              ) : null}
+              <OfflineCoordinatesCard coordinates={data.mapCoordinates} />
             </div>
-          )}
+          ) : null}
 
           {useV2 ? <LugarDetalheAirbnb {...data} /> : <LugarDetalheLegacy {...data} />}
 

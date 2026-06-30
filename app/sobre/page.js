@@ -1,6 +1,6 @@
 import Link from "next/link";
 import JsonLdScript from "@/components/seo/JsonLdScript";
-import { CATEGORIAS_EXPLORE, getCategoriaHref } from "@/lib/categorias";
+import { getCategoriasVisiveis, getCategoriaHref } from "@/lib/categorias";
 import { buildSobreMetadata } from "@/lib/seo";
 import { buildSobrePageJsonLd } from "@/lib/seoJsonLd";
 import { SITE_BRAND_NAME, SITE_NAME_SHORT } from "@/lib/seoBrand";
@@ -78,7 +78,7 @@ export default function SobrePage() {
           <h2 className="text-lg font-bold text-[#1a2e28]">O que você encontra aqui</h2>
           <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed text-[#5a6b66]">
             <li>Lugares verificados com horários, mapa e avaliações moderadas</li>
-            <li>Categorias: Natureza, Gastronomia, Noite, Hospedagem e mais</li>
+            <li>Categorias: Natureza, Gastronomia, Noite, Cultura e mais</li>
             <li>Atrativos e roteiros com IA para planejar o dia</li>
             <li>Guias editoriais para planejar viagem a Imbituba</li>
           </ul>
@@ -110,7 +110,7 @@ export default function SobrePage() {
                 Categorias e lugares
               </Link>
             </li>
-            {CATEGORIAS_EXPLORE.slice(0, 4).map((cat) => (
+            {getCategoriasVisiveis().slice(0, 4).map((cat) => (
               <li key={cat.nome}>
                 <Link
                   href={getCategoriaHref(cat.nome)}
