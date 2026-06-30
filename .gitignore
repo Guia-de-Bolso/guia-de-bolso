@@ -37,6 +37,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# FFmpeg.wasm — gerado por scripts/copy-ffmpeg-core.mjs (postinstall)
+/public/ffmpeg/ffmpeg-core.js
+/public/ffmpeg/ffmpeg-core.wasm
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

@@ -4,14 +4,16 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/copy-ffmpeg-core.mjs && next build",
     "start": "next start",
     "lint": "eslint",
     "test": "node --test lib/*.test.js",
     "icons": "node scripts/refresh-brand-icons.mjs",
     "test:e2e": "playwright test",
     "db:rotas-favoritas": "node scripts/apply-rotas-favoritas.mjs",
-    "contrato:docx": "node scripts/generate-contrato-docx.mjs"
+    "contrato:docx": "node scripts/generate-contrato-docx.mjs",
+    "postinstall": "node scripts/copy-ffmpeg-core.mjs",
+    "ffmpeg:core": "node scripts/copy-ffmpeg-core.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.0",
@@ -25,6 +27,7 @@
     "@capacitor/status-bar": "^8.0.2",
     "@capgo/capacitor-social-login": "^8.3.22",
     "@capgo/native-purchases": "^8.4.4",
+    "@ffmpeg/core": "^0.12.6",
     "@ffmpeg/ffmpeg": "^0.12.15",
     "@ffmpeg/util": "^0.12.2",
     "@supabase/ssr": "^0.10.3",
