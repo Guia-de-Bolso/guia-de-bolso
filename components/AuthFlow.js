@@ -220,7 +220,6 @@ export default function AuthFlow({
       const supabase = createClient();
       if (!supabase) {
         setOauthError("Serviço indisponível. Tente novamente.");
-        setOauthLoading(false);
         return;
       }
 
@@ -230,12 +229,11 @@ export default function AuthFlow({
         setOauthError(
           error.message || "Não foi possível iniciar o login com Google."
         );
-        setOauthLoading(false);
-        return;
       }
     } catch (error) {
       console.error("handleGoogle:", error);
       setOauthError(formatNativeGoogleError(error));
+    } finally {
       setOauthLoading(false);
     }
   }
