@@ -1,4 +1,5 @@
-// Reversed iOS OAuth Client ID (Google Cloud Console → Credentials → iOS client).
-// Ex.: com.googleusercontent.apps.123456789-abcdef
-// Deve corresponder a NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID (formato xxx.apps.googleusercontent.com).
+// iOS OAuth Client ID (Google Cloud Console → Credentials → iOS client, bundle app.guiadebolso).
+// Deve ser idêntico a NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID na Vercel.
+GOOGLE_IOS_CLIENT_ID = 1035725333859-65aol4gh1o6lmi341h72vicgrvlq1ls4.apps.googleusercontent.com
+// Reversed client ID → CFBundleURLSchemes no Info.plist.
 GOOGLE_IOS_REVERSED_CLIENT_ID = com.googleusercontent.apps.1035725333859-65aol4gh1o6lmi341h72vicgrvlq1ls4

@@ -53,6 +53,8 @@
 	<string>Usamos a câmera para você tirar sua foto de perfil.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Usamos suas fotos para atualizar sua foto de perfil.</string>
+	<key>GIDClientID</key>
+	<string>$(GOOGLE_IOS_CLIENT_ID)</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
