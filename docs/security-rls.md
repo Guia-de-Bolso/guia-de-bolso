@@ -103,6 +103,11 @@ Compare o resultado com o manifest acima.
 - `UPDATE avaliacoes SET status = 'aprovado' WHERE id = <pendente>` → ok.
 - CRUD em `lugares`, upload fotos → permitido.
 
+### Dev only (`role = dev`)
+
+- `SELECT`/`INSERT`/`UPDATE`/`DELETE` em `contratos_comerciais` e `contrato_documentos` → permitido (`is_admin_only()`).
+- Role `admin` → negado nessas tabelas e em `POST /api/admin/contratos/...`.
+
 ---
 
 ## Drift

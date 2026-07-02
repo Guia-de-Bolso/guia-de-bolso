@@ -101,7 +101,7 @@ npm run lint    # ESLint
 | RLS | Test as anonymous, user, and admin |
 | Place type detection | `isLugarPublico()` in `lib/lugarDetalhe.js` — beaches vs restaurants |
 | Geolocation | Features degrade gracefully without GPS permission |
-| Admin | Confirm `role` is `admin` or `dev`; test `/admin`, `/admin/logs`, `/admin/taxonomia` after taxonomy SQL |
+| Admin | Confirm `role` is `admin` or `dev`; test operational routes (`/admin/locais`, `/admin/relatorios`). Sensitive routes (`/admin/parceiros`, `/admin/contratos`, `/admin/logs`, `/admin/taxonomia`) require **`dev`** — run `lugares_parceiro_programa.sql` and `contratos_comerciais.sql` before testing CRM |
 | Reviews IA | `POST /api/avaliacoes/analisar` needs `ANTHROPIC_API_KEY`; run `avaliacoes_moderacao.sql` for `aspectos` / `sugestao_ia` |
 | Opening hours | Multi-shift / overnight strings — run `node lib/horarios.test.js` after changes to `lib/horarios.js` |
 

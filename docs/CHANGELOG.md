@@ -6,6 +6,42 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- **Partner program CRM** (`/admin/parceiros`) — free-period end dates, quarterly review tracking, filters and dashboard deep links (`ParceirosAdminPage`, `lib/parceiroAdmin.js`, `supabase/lugares_parceiro_programa.sql`).
+- **Commercial contracts module** (`/admin/contratos`) — `contratos_comerciais` + `contrato_documentos`, private bucket `contratos-parceiros`, document API (`app/api/admin/contratos/*`, `lib/contratoAdmin.js`, `supabase/contratos_comerciais.sql`).
+- **Premium establishment QR PDF** — print formats (mesa/A6, adesivo, display A5, A4, quadrado) via `lib/qrPdf/render.js`, `lib/qrPdf/formats.js`, `LugarQrSection`.
+
+### Changed
+
+- **Admin role split** — `admin` = operational CMS (locais, atrativos, avaliações, relatórios); `dev` = full panel including parceiros, contratos, logs, taxonomia, IA, despesas, feedback, usuários (`lib/adminRoles.js`, `AdminShell`, `requireAdminOnlyApi`).
+- **Public catalog** — consumer lists use `PUBLIC_APP_PARTNERS_ONLY` (`lib/publicCatalog.js`, `queryLugaresAtivos`) — only active `eh_parceiro` places in production app feeds.
+- **Home “Em alta hoje”** — daily shuffle over partner pool (`pickEmAltaCuradoria` + `filterLugaresPublicos`), not `conteudo_curadoria` nor `lugares_populares`.
+- **Contract DOCX generator** — print-ready output strips internal instructions; 6-month preset merges annexes II/III from paid template (`scripts/generate-contrato-docx.mjs`).
+
+### Fixed
+
+- **Admin contratos** — dropdown lists only active partners; “Novo contrato” button visibility (`lib/contratoAdmin.js`, `ContratosAdminPage.js`).
+- **Admin local edit** — removed stale `lib/slug` import crash on place save.
+
+### Documentation
+
+- Synced partner CRM, contracts, dev-only admin routes, public catalog, Em alta criteria, QR PDF formats across `features.md`, `architecture.md`, `database.md`, `api.md`, `authentication.md`, `security-rls.md`, `TESTING-CHECKLIST.md`, `docs/materiais/README.md`.
+
+### Removed
+
+- **Dead code (audit etapa 1)** — `lib/destaques.js`, `lib/requireAdminApi.js` (zero imports); ESLint ignore for `android/**`, `ios/**`.
+- **Legacy admin routes (audit etapa 3)** — `app/admin/lugares/page.js`, empty `app/admin/destaques/`; 301 redirects in `next.config.mjs` → `/admin/locais`.
+- **API stub** — `GET /api/lugares?mode=destaques` (no callers).
+- **Orphan routes** — empty `app/lugares/[id]`, `app/auth/mobile-callback`, `app/auth/native-return`, `app/guia/o-que-fazer-em-imbituba`.
+
+### Changed
+
+- **Home context (audit etapa 2)** — `lib/homeContext.js` pruned to chips, planos rápidos, distance sort; removed dead `pickHeroLugar` / hero-by-place helpers (hero uses atrativos).
+- **Deprecated exports** — removed unused `@deprecated` re-exports from `planoComercial.js`, `premiumServer.js`, `premium.js`, `seo.js`, `seoJsonLd.js`, `landingContent.js`, `negociosContent.js`, `horizontalCarousel.js`, `videoUpload.js`.
+- **Admin nav** — removed unused `destaques` case from `adminNavConfig.js`.
+- **Checklist data** — `scripts/build-checklist-data.mjs` + `public/checklist-testes.data.json` aligned with locais/parceiros admin paths.
+
 ### Security
 
 - **P0 — contadores IA em `perfis`** — trigger estende proteção a `buscas_ia`, `roteiros_ia`, `uso_ia_mes`; só RPCs alteram contadores; removido fallback client-side em `lib/premiumServer.js`.

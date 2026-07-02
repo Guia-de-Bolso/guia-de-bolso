@@ -117,7 +117,14 @@ Core content: beaches, restaurants, trails, services, etc.
 | `fotos` | `jsonb` | Array of public image URLs *(migration: `fotos_migration.sql`)* |
 | `destaque` | `boolean` | Legacy highlight flag on row (unused in app) |
 | `eh_parceiro` | `boolean` NOT NULL DEFAULT false | Plano Parceiro do Guia (R$ 299) — carrossel e badge *(migration: `lugares_parceiro_curadoria.sql`)* |
-| `conteudo_curadoria` | `boolean` NOT NULL DEFAULT false | Conteúdo autoral curado pela equipe — hero e Em alta *(migration)* |
+| `conteudo_curadoria` | `boolean` NOT NULL DEFAULT false | Editorial badge “Curadoria do Guia” — **not** the home “Em alta” filter when `PUBLIC_APP_PARTNERS_ONLY` *(migration)* |
+| `parceiro_modalidade` | `text` | `lancamento_gratis` \| `pago` *(migration: `lugares_parceiro_programa.sql`)* |
+| `parceiro_inicio_em` | `date` | Partner program start |
+| `parceiro_fim_em` | `date` | End of free launch window; null when paid |
+| `parceiro_status` | `text` | `ativo`, `renovacao_pendente`, `convertido_pago`, `encerrado` |
+| `ultima_curadoria_avaliacoes_em` | `date` | Last quarterly review of approved reviews |
+| `proxima_curadoria_avaliacoes_em` | `date` | Next quarterly review due |
+| `parceiro_notas_internas` | `text` | Internal CRM notes |
 | `distancia` | `text` | Legacy static label; app prefers `localizacoes` + GPS (`distancia_calculada`) |
 | `rating_medio` | `numeric` | *(optional, not in repo migrations)* — if present on the row, `PlaceCard` / `EmAltaCard` show stars without extra queries; **not** in `LUGAR_SELECT_LIST` until added via migration |
 | `media_avaliacoes` | `numeric` | *(optional alias)* — same client read path as `rating_medio`; omitted from `LUGAR_SELECT_LIST` for the same reason |
@@ -517,6 +524,52 @@ Migration: [`despesas_operacionais.sql`](../supabase/despesas_operacionais.sql).
 
 ---
 
+### `contratos_comerciais`
+
+Commercial partner contracts (sensitive — **dev role only** via `is_admin_only()`).
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | `uuid` | PK |
+| `lugar_id` | `bigint` FK | → `lugares` ON DELETE CASCADE |
+| `tipo` | `text` | `lancamento_6_meses_gratis`, `parceiro_pago`, `aditivo` |
+| `status` | `text` | `rascunho`, `enviado`, `assinado`, `ativo`, `encerrado`, `inadimplente` |
+| `ativo` | `boolean` | At most one `ativo = true` per `lugar_id` (trigger) |
+| `numero_proposta` | `text` | e.g. `001/2026` |
+| `valor_mensal` | `numeric` | BRL monthly fee when paid |
+| `data_proposta` / `data_assinatura` / `data_inicio` / `data_fim` | `date` | Lifecycle dates |
+| `data_conversao_pago` | `date` | Free → paid conversion |
+| `asaas_customer_id` / `asaas_subscription_id` / `asaas_link_cobranca` | `text` | Future billing integration |
+| `contato_nome` / `contato_email` / `contato_whatsapp` | `text` | Signatory contact |
+| `cnpj` / `razao_social` | `text` | Legal entity |
+| `notas_internas` | `text` | Operator notes |
+| `created_by` | `uuid` FK | → `perfis` |
+| `created_at` / `updated_at` | `timestamptz` | |
+
+Migration: [`contratos_comerciais.sql`](../supabase/contratos_comerciais.sql). App: `lib/contratoAdmin.js`, `/admin/contratos`.
+
+---
+
+### `contrato_documentos`
+
+Files attached to a commercial contract (private bucket `contratos-parceiros`).
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | `uuid` | PK |
+| `contrato_id` | `uuid` FK | → `contratos_comerciais` ON DELETE CASCADE |
+| `tipo` | `text` | `proposta`, `contrato_assinado`, `aditivo`, `comprovante`, `outro` |
+| `nome_arquivo` | `text` | Original filename |
+| `storage_path` | `text` | Path in `contratos-parceiros` |
+| `mime_type` | `text` | PDF, DOCX, or image |
+| `tamanho_bytes` | `bigint` | Max 10 MB enforced in API |
+| `uploaded_by` | `uuid` FK | → `perfis` |
+| `uploaded_at` | `timestamptz` | |
+
+Signed download: `GET /api/admin/contratos/documentos/[docId]` (1 h signed URL).
+
+---
+
 ### `despesas_lancamentos`
 
 Histórico de pagamentos reais vinculados a `despesas_operacionais`.
@@ -590,6 +643,8 @@ RLS policies for **`rotas`** and related tables are in [`rotas_policies.sql`](..
 | `avaliacoes` | Insert/select/update IA | `avaliacoes_moderacao.sql` | Approved public; own pending |
 | `avaliacoes` | Admin moderação | `avaliacoes_admin_policies.sql` | Admin `SELECT`/`UPDATE` all |
 | `feedback` | User insert / admin read | `feedback.sql` | Support tickets |
+| `contratos_comerciais`, `contrato_documentos` | Dev only | `contratos_comerciais.sql` | `is_admin_only()` (= role `dev`) |
+| `storage.objects` | `contratos-parceiros` | `contratos_comerciais.sql` | Private; signed URLs via service role |
 | `roteiros` | Users CRUD own rows | `roteiros_policies.sql` | AI saved trips |
 | `rotas` + children | Public read / admin write | `rotas_policies.sql` | Re-run after `rota_dicas.sql` / `rotas_taxonomia.sql` |
 | `rotas_favoritas` | Own rows | `rotas_favoritas.sql` | Route bookmarks |
@@ -661,6 +716,7 @@ Granted to `authenticated`. Called from `lib/premiumServer.js` via `supabase.rpc
 | `rotas-fotos` | `{rota_id}/...` | `fotos_migration.sql` | Admin route photos |
 | **Guia de Bolso - Imagens** | `avatars/{user_id}/avatar.jpg` | `storage_avatar_legacy_bucket.sql` (production) | Profile avatar upload (`POST /api/perfil/avatar`) |
 | `imagens` | `avatars/{user_id}/avatar.jpg` | `storage-policies.sql` | Profile avatars (fallback bucket name) |
+| `contratos-parceiros` | `{contrato_id}/...` | `contratos_comerciais.sql` | Private commercial docs (dev-only RLS; signed URLs via API) |
 
 Production may use only the legacy bucket above; `lib/avatarStorage.js` tries **Guia de Bolso - Imagens** first, then `imagens`.
 
@@ -674,10 +730,11 @@ Quick summary for existing projects that already have base tables:
 
 1. Premium + RPC: `premium_usuario.sql`, `increment_uso_ia.sql`
 2. Perfis RLS + guards: `perfis_rls_fix.sql`, `perfis_premium_policies.sql`, `perfis_privileged_guard.sql`, `perfis_role_check.sql`
-3. Content & taxonomy: `tags_categorias.sql`, `fotos_migration.sql`, `lugares_visibilidade.sql`, `taxonomia_lugares_cleanup.sql`, `lugares_qr_slug.sql`
+3. Content & taxonomy: `tags_categorias.sql`, `fotos_migration.sql`, `lugares_visibilidade.sql`, `taxonomia_lugares_cleanup.sql`, `lugares_qr_slug.sql`, `lugares_parceiro_curadoria.sql`, **`lugares_parceiro_programa.sql`**
 4. Routes: `rotas_taxonomia.sql`, `rota_dicas.sql`, **`rotas_policies.sql`** (re-run after route child tables), `rotas_localizacoes.sql`, `rota_ponto_detalhes.sql`, `rotas_favoritas.sql`
 5. Security P0: `lugares_public_read.sql`, `lugares_related_public_read.sql`, `lugares_admin_write.sql`, `logs_policies.sql`, `storage_admin_fotos.sql`, **`storage_avatar_legacy_bucket.sql`** (if avatars use legacy bucket)
-6. Performance: `db_indexes.sql`, `db_indexes_phase2.sql`, `lugares_populares_rpc.sql`, **`lugares_populares_rpc_fix.sql`**
+6. Commercial ops (dev): **`contratos_comerciais.sql`** (after `lugares_parceiro_programa.sql`)
+7. Performance: `db_indexes.sql`, `db_indexes_phase2.sql`, `lugares_populares_rpc.sql`, **`lugares_populares_rpc_fix.sql`**
 
 ---
 
@@ -687,9 +744,9 @@ Quick summary for existing projects that already have base tables:
 
 | Use case | Query |
 |----------|--------|
-| Active places | `GET /api/lugares` → active `lugares` with joins — `enrichLugaresFlags` (`lib/lugarBadges.js`) |
-| Hero (“Sugestão do momento”) | `GET /api/rotas` → `pickHeroRotaCiclo` (`lib/homeSelection.js`) — round-robin diário, rotas ativas com capa |
-| “Em alta hoje” | `conteudo_curadoria = true` → `pickEmAltaCuradoria` — daily deterministic shuffle (not `lugares_populares`) |
+| Active places (consumer) | `queryLugaresAtivos` → `applyPublicLugarFilters` (`status = ativo`, `eh_parceiro = true` when `PUBLIC_APP_PARTNERS_ONLY`) |
+| Hero (“O que fazer agora”) | `GET /api/rotas` → `resolveAtrativoDoDia` / `pickHeroRotaCiclo` — daily atrativo with cover |
+| “Em alta hoje” | Active partners pool → `pickEmAltaCuradoria` — daily deterministic shuffle (not `lugares_populares`, not `conteudo_curadoria` filter) |
 | Parceiros carousel | `eh_parceiro = true` → `pickParceirosPorCategoria` — one per category, `weeklySeed` |
 | “Perto de você” | Active `lugares` via API `.limit(20)`, exclude **hero id only**, `.slice(0, 6)`, sort by GPS — phase 2 |
 | Browse “Populares” (search overlay) | `fetchLugaresPopulares` (`lib/lugaresPopulares.js`) — unchanged |
@@ -758,7 +815,9 @@ Quick summary for existing projects that already have base tables:
 | Place CRUD | `lugares` insert/update; `localizacoes` upsert; `lugares_tags` replace |
 | Routes CRUD | `rotas` + `rota_pontos` + `rota_ponto_detalhes` + `rota_dicas` + `rotas_tags` + `rotas_localizacoes` |
 | Reviews moderation | `avaliacoes` `.update({ status })` |
-| Parceiro / curadoria | Toggles `eh_parceiro`, `conteudo_curadoria` on `lugares` (`LocalForm`) — table `destaques` legada |
+| Parceiro / curadoria | Toggles `eh_parceiro`, `conteudo_curadoria`; partner program dates in `ParceiroProgramaFields` — table `destaques` legada |
+| Parceiros CRM (`/admin/parceiros`) | Filter `eh_parceiro` places; curadoria + free-period actions (`lib/parceiroAdmin.js`) |
+| Contratos (`/admin/contratos`) | CRUD `contratos_comerciais`; upload docs to `contratos-parceiros` (`lib/contratoAdmin.js`) |
 | Users | `perfis` `.select("*")` `.update({ role })` |
 | Dashboard (`/admin`) | `fetchCount` / `fetchCountInPeriod` (`lib/adminDashboard.js`): active `lugares`, pending `avaliacoes`, `perfis` created in period, `logs` with `acao = ir_agora` in period, `em_analise` count; `countParceirosAtivos` (`eh_parceiro`); `countPremiumAtivos`; recent `logs` (3 rows); pending review list (5 rows) |
 | Logs admin (`/admin/logs`) | `logs` paginated/filtered via `lib/adminLogs.js` (`acao`, date range, `user_id`, text search on `user_nome` / `user_email` / `detalhes.lugar_nome`) |

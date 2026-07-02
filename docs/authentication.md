@@ -263,12 +263,14 @@ flowchart TB
 | Favoritos, avaliar | Login + RLS `auth.uid()` |
 | Busca IA, roteiro IA | Login + cotas ([`api.md`](./api.md)) |
 | Reviews públicas | Somente `status = 'aprovada'` |
-| Admin CMS | `role` ∈ `admin`, `dev` (`lib/adminRoles.js` → `canAccessAdmin`) |
+| Admin CMS | `role` ∈ `admin`, `dev` (`canAccessAdmin`) |
+| Admin sensitive (contracts, logs, taxonomia, …) | **`role = dev` only** (`canAccessDevAdmin`, `canAccessAdminSection`, `is_admin_only()` in SQL) |
 
 ### Guard admin (servidor + cliente)
 
-1. **Servidor:** `app/admin/layout.js` — sem sessão → `/login?next=/admin`; sem role admin → `/?admin=denied`.
-2. **Cliente:** `AdminShell` + `useAdminAuth` — UX e redirect rápido.
+1. **Servidor:** `app/admin/layout.js` — sem sessão → `/login?next=/admin`; sem role admin/dev → `/?admin=denied`.
+2. **Cliente:** `AdminShell` + `useAdminAuth` — `canAccessAdminSection(role, pathname)` bloqueia rotas **dev-only** (`DEV_ONLY_ADMIN_PATHS` em `lib/adminRoles.js`) para role `admin`.
+3. **API contratos:** `requireAdminOnlyApi()` — somente `dev` (403 para `admin`).
 
 **Nunca** confiar só no cliente para operações sensíveis — RLS nas tabelas de escrita.
 

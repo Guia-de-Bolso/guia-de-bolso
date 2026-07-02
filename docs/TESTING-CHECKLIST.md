@@ -74,7 +74,8 @@ Use a ferramenta com **155 casos de teste**, passo a passo por dispositivo, resu
 | Avatar | `/perfil/editar` → upload foto | Login; `POST /api/perfil/avatar` + `SUPABASE_SERVICE_ROLE_KEY` no servidor |
 | Clima | Hero home; `LugarClimaWidget` no detalhe | Sheet completo = login |
 | Perfil | `/perfil`, `/perfil/editar` | Stats só logado |
-| Admin | `/admin` + nav | `role` admin ou dev |
+| Admin operacional | `/admin`, `/admin/locais`, `/admin/relatorios` | `role` **admin** ou **dev** |
+| Admin sensível | `/admin/parceiros`, `/admin/contratos`, `/admin/logs`, `/admin/taxonomia` | **`role` dev** apenas |
 
 ---
 
@@ -94,7 +95,9 @@ Use a ferramenta com **155 casos de teste**, passo a passo por dispositivo, resu
 | J | Perfil | 9 |
 | K | Casos extremos | 8 |
 | L | Admin | 27 |
-| L-QR | QR codes (admin + scan) | 6 |
+| L-QR | QR codes (admin + scan) | 7 |
+| L-PAR | Parceiros CRM (dev) | 4 |
+| L-CTR | Contratos comerciais (dev) | 4 |
 | N | Feedback e erros PT | 5 |
 | M | Smoke pós-release | 6 |
 
@@ -114,11 +117,30 @@ Use a ferramenta com **155 casos de teste**, passo a passo por dispositivo, resu
 | ID | Caso | Passos | Esperado |
 |----|------|--------|----------|
 | L-QR-1 | Admin — restaurante | Editar local Gastronomia → seção QR | Preview, URL `/q/{slug}`, botão PDF |
-| L-QR-2 | PDF | Baixar PDF | A6 com QR, nome, CTA, URL curta |
+| L-QR-2 | PDF | Baixar PDF → escolher formato (mesa, adesivo, A5, …) | Layout premium com QR, badge parceiro se aplicável, CTA |
 | L-QR-3 | Scan | Abrir `/q/{slug}` no browser (guest) | 302 → `/lugares/{id}?ref=qr`; banner QR uma vez/sessão |
 | L-QR-4 | Relatório | `/admin/relatorios` após scan | KPI **Escaneamentos QR** incrementa |
 | L-QR-5 | Natureza | Editar praia | Sem seção QR |
 | L-QR-6 | Inativo | `status=desativado` → `/q/{slug}` | 404 |
+| L-QR-7 | Role admin | Login `admin` (não dev) → `/admin/contratos` | Redirect ou acesso negado no shell |
+
+## L-PAR — Parceiros (manual, dev)
+
+| ID | Caso | Passos | Esperado |
+|----|------|--------|----------|
+| L-PAR-1 | Lista | `/admin/parceiros` como **dev** | Só lugares `eh_parceiro`; filtros vencendo/curadoria |
+| L-PAR-2 | Curadoria | Marcar curadoria feita | `proxima_curadoria_avaliacoes_em` +3 meses |
+| L-PAR-3 | Deep link | Dashboard → card parceiros vencendo | Abre `/admin/parceiros?filtro=vencendo` |
+| L-PAR-4 | Role admin | Login `admin` → `/admin/parceiros` | Nav oculto; URL bloqueada |
+
+## L-CTR — Contratos (manual, dev)
+
+| ID | Caso | Passos | Esperado |
+|----|------|--------|----------|
+| L-CTR-1 | Novo | `/admin/contratos` → Novo contrato | Dropdown só parceiros ativos |
+| L-CTR-2 | Upload | Anexar PDF assinado | `POST /api/admin/contratos/[id]/documentos` → download assinado |
+| L-CTR-3 | Ativar | Marcar contrato ativo | Desativa outros do mesmo `lugar_id`; sync parceiro |
+| L-CTR-4 | Role admin | Login `admin` → upload doc | 403 na API |
 
 ## L-BAIXAR — Download do app (manual)
 

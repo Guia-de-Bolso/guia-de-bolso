@@ -13,7 +13,10 @@ User-facing product reference for **Guia de Bolso** (Imbituba, SC). Behavior is 
 | **Guest** | Browse places, categories, curated routes, place details; mini weather on outdoor detail; **no** AI search/roteiros; full `ClimaSheet` requires login |
 | **Logged-in user** | Favorites, reviews, AI search (5/day), AI roteiros (2/day), saved roteiros, full outdoor weather sheet on place detail |
 | **Premium** | Unlimited AI search & roteiros (weather on detail is login-gated, not premium-gated today) |
-| **Admin / Dev** | CMS at `/admin` (`canAccessAdmin`: roles `admin`, `dev` only) |
+| **Admin** | Operational CMS at `/admin` (`canAccessAdmin`: `admin` or `dev`) — locais, atrativos, avaliações, relatórios |
+| **Dev** | Same as admin **plus** sensitive areas (`canAccessDevAdmin`, `DEV_ONLY_ADMIN_PATHS` in `lib/adminRoles.js`): IA & custos, despesas, parceiros, contratos, feedback, usuários, logs, taxonomia |
+
+**Public catalog (production):** `lib/publicCatalog.js` sets `PUBLIC_APP_PARTNERS_ONLY = true` — consumer lists and home feeds only include active places with `eh_parceiro = true` (test drafts stay out of the app until flagged as partner).
 
 ---
 
@@ -168,21 +171,20 @@ Discover official partner businesses in the guide.
 ## 8. Home — “Em alta hoje”
 
 **Description**  
-Horizontal list of **curated** places (`conteudo_curadoria = true`), up to **6** cards, order shuffled daily via `dailySeed` (`pickEmAltaCuradoria`). **Not** the favorites-based `lugares_populares` ranking.
+Horizontal list of up to **6** active **partner** places (`filterLugaresPublicos` → `eh_parceiro = true` when `PUBLIC_APP_PARTNERS_ONLY`), order shuffled daily via `dailySeed` (`pickEmAltaCuradoria` in `lib/homeSelection.js`). **Not** the favorites-based `lugares_populares` ranking (that path is for the search overlay “Populares”).
 
 **User goal**  
-Discover editorial highlights (beaches, trails, churches, etc.) picked by the guide team.
+See a rotating slice of official partners highlighted by the guide.
 
 **Main flows**
-1. Active places with `conteudo_curadoria` → deterministic daily list → `EmAltaCard`.
+1. `GET /api/lugares` (partners-only pool) → `pickEmAltaCuradoria` → `EmAltaCard`.
 2. Star rating renders only when the place row includes `rating_medio` or `media_avaliacoes` (no per-card Supabase query).
 
 **Edge cases**
-- No favorites in DB → fallback to newest **active** places (`queryLugaresAtivos`).
-- Ties broken by favorite count order returned from aggregation.
-- Popular fetch failure → `SectionUnavailable` for the section title “🔥 Em alta hoje”.
+- Empty partner pool → `SectionUnavailable` for “🔥 Em alta hoje”.
 - Open/closed chip renders only when `mostrar_horarios` is true and `horarios` is non-empty (same rule as `PlaceCard`).
-- Cards link to place detail; not the same algorithm as hero pick.
+- Cards link to place detail; not the same algorithm as the hero atrativo (`pickHeroAtrativoCiclo` / `resolveAtrativoDoDia`).
+- `conteudo_curadoria` is a separate badge flag (`lib/lugarBadges.js`); it does **not** gate this section today.
 
 ---
 
@@ -677,31 +679,30 @@ Server/client inserts into `logs` for login, logout, favorites, `ir_agora`, **`v
 
 ## Admin CMS (operators only)
 
-Not for tourists. Requires `perfis.role` ∈ `admin`, `dev`.
+Not for tourists. Requires `perfis.role` ∈ `admin`, `dev` (`canAccessAdmin`). Several routes are **dev-only** (`canAccessAdminSection` / `devOnly` in `adminNavConfig.js`); role `admin` is redirected away from those paths.
 
-| Area | Description | User goal (operator) |
-|------|-------------|----------------------|
-| Dashboard (`/admin`) | Hero greeting + operational summary; KPI cards (pending reviews, active places, live partners, new users, IR AGORA in period, places in review); work queue with approve/reject; operational shortcuts; activity timeline; week/month period toggle | Monitor health and clear the moderation queue |
-| Locais (`/admin/locais`) | CRUD, photos, hours (`HorarioEditor`: 2 shifts/day, overnight, copy between days), tags (max **5**), address autocomplete, `mostrar_endereco` / `mostrar_horarios` toggles | Keep catalog accurate |
-| Rotas | CRUD, steps, featured flag; tags max **5** per route | Publish trails |
-| Avaliações | Approve/reject pending; deep links from alerts (`?tab=`) | Moderate UGC |
-| Destaques | Single commercial plan (Parceiro); vigência dates; `?status=expirando` \| `expirado` | Run paid highlights |
-| Usuários | Roles, Premium IA status, engagement sheet; link to user logs | Access control |
-| Logs (`/admin/logs`) | Filter by action, period, user (`?user_id=`); deep links to place edit | Investigate behavior |
-| IA & Custos (`/admin/ia`) | Filtros por período/feature/moeda, cards de custo/tokens/latência, gráfico diário, projeções e tabela paginada de `logs_ia` com alertas automáticos | Controlar custo, qualidade e escala do uso de IA |
-| Despesas (`/admin/despesas`) | CRUD de despesas operacionais (plataforma, periodicidade, USD/BRL), lançamentos de pagamento, visões mês/trimestre/semestre/ano, taxa de câmbio configurável, resumo por categoria + card de IA variável | Controlar custos fixos da stack e visão de custo total |
-| Relatórios (`/admin/relatorios`) | Per-establishment report: period presets (30d, this month, previous month, 3 months); KPIs with % vs previous period (views = `visualizou_lugar` + `acesso_app` with `lugar_id`, **QR scans = `escaneou_qr`**, `ir_agora`, favorite logs, approved reviews); review list; copy WhatsApp; PDF (`jspdf`) | Share performance with partners |
-| Taxonomia (`/admin/taxonomia`) | CRUD `subcategorias` (per fixed category) and `tags` (`categorias` jsonb, `aplica_em_rotas`); block delete when in use; migrate places on rename | Maintain catalog vocabulary without SQL |
+| Area | Access | Description | User goal (operator) |
+|------|--------|-------------|----------------------|
+| Dashboard (`/admin`) | admin, dev | Hero + KPIs (pending reviews, active places, live partners, new users, IR AGORA in period); moderation queue; operational sidebar (partners expiring, curadoria overdue); activity timeline; week/month period | Monitor health and clear the moderation queue |
+| Locais (`/admin/locais`) | admin, dev | CRUD, photos, video, hours (`HorarioEditor`), tags (max **5**), address autocomplete, `eh_parceiro` / `conteudo_curadoria`, partner program fields (`ParceiroProgramaFields`), QR section | Keep catalog accurate |
+| Atrativos (`/admin/atrativos`) | admin, dev | Curated route CRUD; tags max **5**; `/admin/rotas` → 301 | Publish trails |
+| Avaliações (`/admin/avaliacoes`) | admin, dev | Approve/reject/delete pending; deep links from alerts (`?tab=`) | Moderate UGC |
+| Relatórios (`/admin/relatorios`) | admin, dev | Per-establishment KPIs (views, **QR scans**, IR AGORA, favorites, reviews), WhatsApp copy, PDF | Share performance with partners |
+| Parceiros (`/admin/parceiros`) | **dev** | CRM for `eh_parceiro` places: 6-month free vs paid modality, end dates, quarterly review due dates, filters (`?filtro=vencendo`, `curadoria`, …); quick actions (`ParceirosAdminPage`, `lib/parceiroAdmin.js`) | Track launch program deadlines |
+| Contratos (`/admin/contratos`) | **dev** | Commercial contracts per place: types (6 months free, paid, addendum), status pipeline, Asaas placeholders, signed-doc upload; syncs partner flags (`ContratosAdminPage`, `lib/contratoAdmin.js`) | Store proposals and signed PDFs |
+| Usuários (`/admin/usuarios`) | **dev** | Roles, Premium IA status, engagement sheet; link to user logs | Access control |
+| Logs (`/admin/logs`) | **dev** | Filter by action, period, user (`?user_id=`); bulk cleanup actions | Investigate behavior |
+| IA & Custos (`/admin/ia`) | **dev** | `logs_ia` dashboard: cost, tokens, latency, projections | Control AI spend |
+| Despesas (`/admin/despesas`) | **dev** | Operational expenses + payment ledger | Track fixed stack costs |
+| Feedback (`/admin/feedback`) | **dev** | Support tickets from `POST /api/feedback` | Triage user reports |
+| Taxonomia (`/admin/taxonomia`) | **dev** | CRUD `subcategorias` and `tags` | Maintain vocabulary without SQL |
 
 **Edge cases**
-- Client-side gate only — misconfigured RLS could block writes.
-- Admin nav: sidebar on desktop (`lg+`), drawer on tablet/phone; bell shows cross-page alerts (not a substitute for `/admin/logs`).
-- Dashboard uses `showPageHeading={false}` — title/subtitle live in `DashboardHero`, not the shell heading block.
-- Primary CMS path is `/admin/locais`; `/admin/lugares` re-exports the same grid (legacy URL, not in nav).
-- Taxonomia requires `rotas_taxonomia.sql` for `tags.aplica_em_rotas` and `rotas_tags`; app degrades gracefully if the column is missing.
-- Address is stored in `localizacoes` only; run `lugares_visibilidade.sql` if visibility toggles fail to save.
-- `EnderecoAutocomplete` locks the search field after selection so the dropdown does not reopen on the same text.
-- Destaques form casts ids with `Number()` — must match DB id types (uuid vs serial).
+- Client + server gates (`AdminShell`, `app/admin/layout.js`); dev-only API uses `requireAdminOnlyApi()` (403 for role `admin`).
+- Admin nav: sidebar on desktop (`lg+`), drawer on tablet/phone; bell filters dev-only alerts by role.
+- Primary CMS path is `/admin/locais` (`/admin/lugares` and `/admin/destaques` redirect 301 — bookmarks legados).
+- Partner program columns require `supabase/lugares_parceiro_programa.sql`; contracts require `supabase/contratos_comerciais.sql`.
+- Table `destaques` (Supabase) is legacy — commercial visibility is `lugares.eh_parceiro` + partner program fields.
 
 ---
 
@@ -714,7 +715,7 @@ Short URL and printable QR for commercial places (all categories except Natureza
 Establishment displays QR at counter/table; tourist scans and lands on the official place profile.
 
 **Main flows**
-1. Admin edits place → **QR Code do estabelecimento** section → copy `/q/{slug}` or **Baixar PDF** (A6 table tent).
+1. Admin edits place → **QR Code do estabelecimento** (`LugarQrSection`) → copy `/q/{slug}` or **Baixar PDF** — premium print layout (`lib/qrPdf/render.js`) with format picker: mesa/A6, adesivo 8×8 cm, display A5, A4 card, quadrado (`lib/qrPdf/formats.js`).
 2. Tourist scans QR → `GET /q/{slug}` → log `escaneou_qr` → redirect `/lugares/{id}?ref=qr`.
 3. Detail shows one-time session banner: “Você abriu o guia pelo QR de {nome}”.
 4. Operator checks **Escaneamentos QR** in `/admin/relatorios` (period + % vs previous).
@@ -773,6 +774,46 @@ Entender gasto atual, eficiência de cache e risco de escala antes de aumentar b
 
 ---
 
+## 33. Partner program CRM (admin, dev only)
+
+**Description**  
+`/admin/parceiros` lists active partners with launch-program metadata on `lugares` (`parceiro_modalidade`, `parceiro_inicio_em`, `parceiro_fim_em`, `parceiro_status`, `proxima_curadoria_avaliacoes_em`). Dashboard and alert bell deep-link here for expiring free periods and overdue quarterly review of approved reviews.
+
+**User goal (operator)**  
+See which partners are in the 6-month free window, due for conversion, or overdue for curadoria — without opening each place form.
+
+**Main flows**
+1. Filter chips: all active, free launch, paid, expiring in 30 days, expired free, curadoria overdue.
+2. Row actions: open place editor, mark curadoria done (`ultima_curadoria_avaliacoes_em` + next +3 months), extend free end date.
+3. Requires migration `supabase/lugares_parceiro_programa.sql`.
+
+**Edge cases**
+- Missing columns → banner with SQL migration hint (`fetchParceiroProgramaColumnsReady`).
+- Non-dev role → nav link hidden; direct URL blocked by `AdminShell`.
+
+---
+
+## 34. Commercial contracts (admin, dev only)
+
+**Description**  
+`/admin/contratos` manages `contratos_comerciais` rows (one active contract per place) and private documents in Storage bucket `contratos-parceiros`. Dropdown lists only **active partners** (`fetchLugaresParaContrato`). Document upload/download via `POST /api/admin/contratos/[id]/documentos` and signed URL `GET /api/admin/contratos/documentos/[docId]`.
+
+**User goal (operator)**  
+Track proposal numbers, signature dates, free-period end, Asaas IDs, and store signed PDFs/DOCX off email threads.
+
+**Main flows**
+1. **Novo contrato** → pick active partner place → tipo (`lancamento_6_meses_gratis`, `parceiro_pago`, `aditivo`) + status pipeline.
+2. Upload document (max 10 MB: PDF, DOCX, JPEG/PNG/WebP) → metadata in `contrato_documentos`.
+3. Activating a contract can sync partner program fields on `lugares` (`syncParceiroFromContrato`).
+4. Requires migration `supabase/contratos_comerciais.sql` (RLS via `is_admin_only()` → role `dev` only).
+
+**Edge cases**
+- Role `admin` → 403 on API routes (`requireAdminOnlyApi`).
+- Tables missing → setup banner (`fetchContratosTablesReady`).
+- Print templates for visits: `docs/contratos/*.md` → `npm run contrato:docx` / `contrato:6meses:docx` (`scripts/generate-contrato-docx.mjs`).
+
+---
+
 ## Planned / not in app (roadmap)
 
 | Feature | Status |
@@ -801,7 +842,7 @@ Entender gasto atual, eficiência de cache e risco de escala antes de aumentar b
 | AI roteiro | `/atrativos` (sheet) |
 | Profile | `/perfil`, `/perfil/editar` |
 | Login | `/login`, modal, `/auth/callback` |
-| Admin | `/admin`, `/admin/logs`, `/admin/relatorios`, `/admin/taxonomia`, … |
+| Admin | `/admin`, `/admin/locais`, `/admin/parceiros` (dev), `/admin/contratos` (dev), `/admin/relatorios`, … |
 
 ---
 

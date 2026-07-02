@@ -32,8 +32,8 @@ Arquivo: [`APRESENTACAO-PARCEIRO-A4.html`](./APRESENTACAO-PARCEIRO-A4.html)
 
 Folha resumida para colocar **dentro da pasta personalizada** na visita presencial. Complementa a proposta/contrato:
 
-- **6 meses grátis (lançamento):** [`../contratos/MODELO-CONTRATO-PARCEIRO-6-MESES-GRATIS.md`](../contratos/MODELO-CONTRATO-PARCEIRO-6-MESES-GRATIS.md) · Word: `npm run contrato:6meses:docx` → `.docx` na mesma pasta
-- **Plano pago R$ 299/mês:** [`../contratos/MODELO-CONTRATO-PARCEIRO-GUIA-DE-BOLSO.md`](../contratos/MODELO-CONTRATO-PARCEIRO-GUIA-DE-BOLSO.md) · Word: `npm run contrato:docx`
+- **6 meses grátis (lançamento):** [`../contratos/MODELO-CONTRATO-PARCEIRO-6-MESES-GRATIS.md`](../contratos/MODELO-CONTRATO-PARCEIRO-6-MESES-GRATIS.md) · Word: `npm run contrato:6meses:docx` → `.docx` na mesma pasta (conteúdo **somente impressão**: sem instruções internas; anexos II/III mesclados do modelo pago)
+- **Plano pago R$ 299/mês:** [`../contratos/MODELO-CONTRATO-PARCEIRO-GUIA-DE-BOLSO.md`](../contratos/MODELO-CONTRATO-PARCEIRO-GUIA-DE-BOLSO.md) · Word: `npm run contrato:docx` (gerador: `scripts/generate-contrato-docx.mjs`)
 
 ### Como imprimir
 

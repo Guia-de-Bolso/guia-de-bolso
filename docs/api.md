@@ -66,15 +66,16 @@ Public read of active places via server-side anon client (`getAnonServerClient`)
 | Param | Description |
 |-------|-------------|
 | `mode=populares` | Trending places (RPC/favorites); `limit` 1–50 (default 8) |
-| `mode=destaques` | Active commercial highlights |
+| `mode=parceiros` | Active partners (`eh_parceiro = true`); `limit` 1–100 |
+| `mode=curadoria` | Editorial flag (`conteudo_curadoria = true`); `limit` 1–100 |
 | `ids` | Comma-separated place ids → `{ lugares: [...] }` |
 | `categoria` | Filter by category name (with default list query) |
 | `limit` | 1–100 for default active list (default 50) |
 
-**Success:** `{ "lugares": [...] }` or `{ "destaques": [...] }`  
+**Success:** `{ "lugares": [...] }`  
 **Errors:** `503` if Supabase env missing on server; `500` on query failure
 
-Implementation: `app/api/lugares/route.js`, queries in `lib/lugaresQuery.js` / `lib/lugaresPopulares.js` / `lib/destaques.js`. Client wrapper: `lib/fetchLugaresApi.js`.
+Implementation: `app/api/lugares/route.js`, queries in `lib/lugaresQuery.js` / `lib/lugaresPopulares.js`. Client wrapper: `lib/fetchLugaresApi.js`.
 
 ---
 
@@ -263,7 +264,41 @@ Public short link for establishment QR codes. Not under `/api`; implemented as A
 
 **Printed URL:** `{SITE}/q/{slug}` where `SITE` is `NEXT_PUBLIC_SITE_URL`, request origin, or `VERCEL_URL`.
 
-**Admin:** slug generated on save in `LocalForm`; PDF download in `LugarQrSection` (`lib/qrPdf.js`).
+**Admin:** slug generated on save in `LocalForm`; premium PDF download in `LugarQrSection` (`lib/qrPdf.js`, formats in `lib/qrPdf/formats.js`).
+
+---
+
+### `POST /api/admin/contratos/[id]/documentos`
+
+Upload a commercial contract document (dev role only).
+
+**Auth:** Session + `perfis.role = dev` (`requireAdminOnlyApi` — 401/403 otherwise)
+
+**Body:** `multipart/form-data` — `file` (PDF, DOCX, JPEG, PNG, WebP; max 10 MB), `tipo` (`proposta`, `contrato_assinado`, `aditivo`, `comprovante`, `outro`)
+
+**Success (201):** `{ "ok": true, "documento": { ... } }`
+
+**Errors:** `400` `VALIDATION`; `404` `NOT_FOUND`; `500` `STORAGE`
+
+**Storage:** private bucket `contratos-parceiros`; metadata in `contrato_documentos`.
+
+---
+
+### `GET /api/admin/contratos/documentos/[docId]`
+
+Returns a 1-hour signed download URL for a stored contract document.
+
+**Auth:** Dev only (`requireAdminOnlyApi`)
+
+**Success (200):** `{ "ok": true, "url": "<signed>", "nome_arquivo": "..." }`
+
+---
+
+### `DELETE /api/admin/contratos/documentos/[docId]`
+
+Removes document row and Storage object (dev only).
+
+**Success (200):** `{ "ok": true }`
 
 ---
 
@@ -382,7 +417,7 @@ Not all data goes through `/api`. The browser Supabase client reads public data 
 | List places | `supabase.from("lugares")` |
 | Favorites CRUD | `supabase.from("favoritos")` |
 | Submit review | `supabase.from("avaliacoes").insert()` then `POST /api/avaliacoes/analisar` |
-| Admin CRUD | Admin pages + RLS for `admin`/`dev` roles (no dedicated `/api/admin/*`; dashboard/logs/taxonomia query Supabase from the browser) |
+| Admin CRUD | Admin pages + RLS; **contracts API** dev-only (`requireAdminOnlyApi`). Most admin grids query Supabase from the browser. |
 
 ## Environment variables (API)
 

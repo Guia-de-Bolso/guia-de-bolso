@@ -1,5 +1,7 @@
 /**
- * Gera modelo de contrato parceiro (.docx) a partir do Markdown.
+ * Gera contratos parceiro (.docx) prontos para impressão e Google Docs.
+ * Exclui instruções internas, referências a arquivos e avisos de revisão.
+ *
  * Uso:
  *   node scripts/generate-contrato-docx.mjs
  *   node scripts/generate-contrato-docx.mjs [caminho-saida.docx] [caminho-entrada.md]
@@ -36,6 +38,7 @@ const PRESETS = {
     coverSubtitle: "Proposta Comercial e Contrato de Parceria",
     coverLine: "Plano Parceiro — Imbituba/SC",
     coverVersion: "Versão 1.1 · 2026",
+    mergeAnnexesFromPago: false,
   },
   "6meses": {
     md: "docs/contratos/MODELO-CONTRATO-PARCEIRO-6-MESES-GRATIS.md",
@@ -45,6 +48,7 @@ const PRESETS = {
     coverSubtitle: "Programa Parceiro de Lançamento",
     coverLine: "6 meses grátis · sem compromisso de pagamento",
     coverVersion: "Versão 1.0 · 2026",
+    mergeAnnexesFromPago: true,
   },
 };
 
@@ -120,7 +124,7 @@ function run(text, opts = {}) {
     font: FONT,
     size: opts.size ?? 22,
     bold: opts.bold,
-    color: opts.color,
+    color: opts.color ?? GRAY,
     italics: opts.italics,
     underline: opts.underline ? {} : undefined,
   });
@@ -135,6 +139,60 @@ function para(children, opts = {}) {
   });
 }
 
+/** @param {string} md @param {string} start @param {string|null} end */
+function extractSection(md, start, end) {
+  const startIdx = md.indexOf(start);
+  if (startIdx < 0) return "";
+  const from = startIdx;
+  const to = end ? md.indexOf(end, from + start.length) : md.length;
+  if (to < 0) return md.slice(from).trim();
+  return md.slice(from, to).trim();
+}
+
+/** @param {string} line */
+function isInternalLine(line) {
+  const t = line.trim();
+  if (!t) return false;
+  if (t.startsWith("> ")) return true;
+  if (/^## Instruções/i.test(t)) return true;
+  if (/Documento para impressão/i.test(t)) return true;
+  if (/Aviso legal/i.test(t)) return true;
+  if (/advogado/i.test(t)) return true;
+  if (/`docs\//.test(t) || /`MODELO-CONTRATO/.test(t)) return true;
+  if (/\.md[`\)]/.test(t)) return true;
+  if (/^\*Anexos II e III:/i.test(t)) return true;
+  if (/^\*Fim do documento/i.test(t)) return true;
+  if (t === "<br/>" || t === "<br>") return true;
+  if (t.startsWith("**Proposta nº** `[Nº DA PROPOSTA]`")) return true;
+  if (t.startsWith("**Versão do documento:**")) return true;
+  return false;
+}
+
+/**
+ * Prepara markdown apenas com conteúdo para impressão (a partir da Parte 1).
+ * @param {string} md
+ * @param {typeof PRESETS.pago} preset
+ */
+function preparePrintMarkdown(md, preset) {
+  const partIdx = md.indexOf("# PARTE 1");
+  if (partIdx < 0) return md;
+
+  let printMd = md.slice(partIdx);
+
+  printMd = printMd.replace(/\*Anexos II e III:[\s\S]*$/m, "").trim();
+  printMd = printMd.replace(/\*Fim do documento[\s\S]*$/m, "").trim();
+
+  if (preset.mergeAnnexesFromPago) {
+    const pagoPath = path.join(ROOT, PRESETS.pago.md);
+    const pagoMd = fs.readFileSync(pagoPath, "utf8");
+    const anexoII = extractSection(pagoMd, "# ANEXO II", "# ANEXO III");
+    const anexoIII = extractSection(pagoMd, "# ANEXO III", "*Fim do documento");
+    printMd = `${printMd}\n\n---\n\n${anexoII}\n\n---\n\n${anexoIII}`;
+  }
+
+  return printMd;
+}
+
 /** @param {string} line */
 function parseInline(line) {
   const runs = [];
@@ -142,30 +200,39 @@ function parseInline(line) {
     /(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|__[^_]+__|\[[^\]]+\]\([^)]+\)|\[[^\]]+\]|https?:\/\/[^\s,)]+|[^*\[`_]+|\*+)/g;
 
   for (const match of line.matchAll(pattern)) {
-    let chunk = match[0];
+    const chunk = match[0];
     if (!chunk) continue;
 
     if (chunk.startsWith("**") && chunk.endsWith("**")) {
       runs.push(run(chunk.slice(2, -2), { bold: true, color: "1A2E28" }));
     } else if (chunk.startsWith("*") && chunk.endsWith("*") && chunk.length > 2) {
-      runs.push(run(chunk.slice(1, -1), { italics: true, color: GRAY }));
+      runs.push(run(chunk.slice(1, -1), { italics: true }));
     } else if (chunk.startsWith("__") && chunk.endsWith("__")) {
       runs.push(run(chunk.slice(2, -2), { underline: true }));
     } else if (chunk.startsWith("`") && chunk.endsWith("`")) {
-      runs.push(run(chunk.slice(1, -1), { color: GRAY, size: 20 }));
+      runs.push(run(chunk.slice(1, -1), { size: 20 }));
     } else if (/^\[[^\]]+\]\([^)]+\)$/.test(chunk)) {
       const label = chunk.match(/^\[([^\]]+)\]/)?.[1] ?? chunk;
       runs.push(run(label, { color: GREEN, underline: true }));
     } else if (/^\[[^\]]+\]$/.test(chunk)) {
-      runs.push(run(chunk.slice(1, -1), { color: GRAY }));
+      runs.push(run(chunk.slice(1, -1)));
     } else if (/^https?:\/\//.test(chunk)) {
       runs.push(run(chunk, { color: GREEN, underline: true, size: 20 }));
     } else {
-      runs.push(run(chunk.replace(/<\/?sup>/g, ""), { color: GRAY }));
+      runs.push(run(chunk.replace(/<\/?sup>/g, "")));
     }
   }
 
-  return runs.length ? runs : [run(line, { color: GRAY })];
+  return runs.length ? runs : [run(line)];
+}
+
+/** @param {string} cell */
+function cellParagraph(cell) {
+  const cleaned = cell.replace(/\*\*/g, "").trim();
+  return new Paragraph({
+    spacing: { after: 40, before: 40 },
+    children: parseInline(cleaned),
+  });
 }
 
 /** @param {string[]} lines @param {number} start */
@@ -201,20 +268,7 @@ function tableFromRows(rows) {
               : undefined,
             verticalAlign: VerticalAlign.CENTER,
             margins: { top: 80, bottom: 80, left: 120, right: 120 },
-            children: [
-              new Paragraph({
-                children: parseInline(cell.replace(/\*\*/g, "").trim()).map(
-                  (r) =>
-                    new TextRun({
-                      ...r.root?.[0]?.root?.[0],
-                      bold: isHeader || cell.includes("**"),
-                      font: FONT,
-                      size: isHeader ? 20 : 20,
-                      color: isHeader ? GREEN : GRAY,
-                    })
-                ),
-              }),
-            ],
+            children: [cellParagraph(cell)],
           })
       ),
     });
@@ -235,14 +289,18 @@ function mdToDocxChildren(md) {
   let inCenter = false;
   let listItems = [];
   let listType = null;
+  let olCounter = 0;
+  let skipCapa = true;
 
   function flushList() {
     if (!listItems.length) return;
-    for (const item of listItems) {
+    for (const [idx, item] of listItems.entries()) {
+      const prefix =
+        listType === "ol" ? `${idx + 1}. ` : "• ";
       blocks.push(
         para(
           [
-            run(listType === "ol" ? "• " : "• ", { bold: true, color: GREEN }),
+            run(prefix, { bold: true, color: GREEN }),
             ...parseInline(item),
           ],
           { after: 80 }
@@ -251,13 +309,19 @@ function mdToDocxChildren(md) {
     }
     listItems = [];
     listType = null;
+    olCounter = 0;
   }
 
   while (i < lines.length) {
     const raw = lines[i];
     const line = raw.trim();
 
-    if (line === "<div align=\"center\">") {
+    if (isInternalLine(line)) {
+      i++;
+      continue;
+    }
+
+    if (line === '<div align="center">') {
       flushList();
       inCenter = true;
       i++;
@@ -265,12 +329,6 @@ function mdToDocxChildren(md) {
     }
     if (line === "</div>") {
       inCenter = false;
-      i++;
-      continue;
-    }
-    if (line === "<br/>" || line === "<br>") {
-      flushList();
-      blocks.push(para([], { after: 200 }));
       i++;
       continue;
     }
@@ -321,27 +379,13 @@ function mdToDocxChildren(md) {
       continue;
     }
 
-    if (line.startsWith("> ")) {
-      blocks.push(
-        new Paragraph({
-          spacing: { after: 160 },
-          shading: { fill: GRAY_LIGHT, type: ShadingType.CLEAR },
-          indent: { left: 360 },
-          children: parseInline(line.slice(2)),
-        })
-      );
-      i++;
-      continue;
-    }
-
     if (line.startsWith("# ")) {
       const text = line.slice(2).replace(/\*\*/g, "");
-      const isPart =
+      const isMajorBreak =
         text.startsWith("PARTE ") ||
         text.startsWith("ANEXO ") ||
-        text.includes("PROPOSTA COMERCIAL") ||
         text.includes("CONTRATO DE PRESTAÇÃO");
-      if (isPart) {
+      if (isMajorBreak) {
         blocks.push(new Paragraph({ children: [new PageBreak()] }));
       }
       blocks.push(
@@ -349,9 +393,7 @@ function mdToDocxChildren(md) {
           heading: HeadingLevel.HEADING_1,
           alignment: inCenter ? AlignmentType.CENTER : undefined,
           spacing: { before: 280, after: 200 },
-          children: [
-            run(text, { size: 32, bold: true, color: GREEN }),
-          ],
+          children: [run(text, { size: 32, bold: true, color: GREEN })],
         })
       );
       i++;
@@ -359,18 +401,25 @@ function mdToDocxChildren(md) {
     }
 
     if (line.startsWith("## ")) {
+      const title = line.slice(3).replace(/\*\*/g, "");
+      if (skipCapa && title === "Capa") {
+        i++;
+        while (i < lines.length) {
+          const inner = lines[i].trim();
+          if (inner.startsWith("## ") || inner.startsWith("# ")) break;
+          if (inner === "---") {
+            i++;
+            break;
+          }
+          i++;
+        }
+        continue;
+      }
       blocks.push(
         new Paragraph({
           heading: HeadingLevel.HEADING_2,
           spacing: { before: 240, after: 140 },
-          shading: { fill: GRAY_LIGHT, type: ShadingType.CLEAR },
-          children: [
-            run(line.slice(3).replace(/\*\*/g, ""), {
-              size: 26,
-              bold: true,
-              color: GREEN,
-            }),
-          ],
+          children: [run(title, { size: 26, bold: true, color: GREEN })],
         })
       );
       i++;
@@ -408,83 +457,96 @@ function mdToDocxChildren(md) {
   return blocks;
 }
 
+function buildCoverBlock() {
+  return [
+    para([], { after: 800 }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 240 },
+      children: [run(PRESET.coverTitle, { size: 56, bold: true, color: GREEN })],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 200 },
+      children: [run(PRESET.coverSubtitle, { size: 30, color: GRAY })],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 120 },
+      children: [run(PRESET.coverLine, { size: 24, color: GRAY })],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 480 },
+      children: [run(PRESET.coverVersion, { size: 22, color: GRAY, italics: true })],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 160 },
+      children: [
+        run("Proposta nº ", { size: 24, color: GRAY }),
+        run("___________", { size: 24, underline: true }),
+        run(" /2026", { size: 24, color: GRAY }),
+      ],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 120 },
+      children: [run("Imbituba, Santa Catarina", { size: 22, color: GRAY })],
+    }),
+    para([], { after: 200 }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 80 },
+      children: [
+        run("Estabelecimento: ", { size: 22, color: GRAY }),
+        run("_______________________________________________", {
+          size: 22,
+          underline: true,
+        }),
+      ],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 80 },
+      children: [
+        run("Data: ", { size: 22, color: GRAY }),
+        run("____ / ____ / __________", { size: 22, underline: true }),
+      ],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 400 },
+      children: [
+        run("Validade desta proposta: 30 dias a partir da data acima", {
+          size: 20,
+          color: GRAY,
+          italics: true,
+        }),
+      ],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      children: [
+        run("guiadebolso.app · contato@guiadebolso.app", {
+          size: 22,
+          color: GREEN,
+          bold: true,
+        }),
+      ],
+    }),
+    new Paragraph({ children: [new PageBreak()] }),
+  ];
+}
+
 const md = fs.readFileSync(MD_PATH, "utf8");
-const skipUntilPart1 = md.indexOf("# PARTE 1");
-const contentMd =
-  skipUntilPart1 >= 0
-    ? md.slice(0, md.indexOf("---", md.indexOf("## Instruções"))) +
-      "\n\n" +
-      md.slice(skipUntilPart1)
-    : md;
-
-const coverBlock = [
-  para([], { after: 600 }),
-  new Paragraph({
-    alignment: AlignmentType.CENTER,
-    spacing: { after: 240 },
-    children: [
-      run(PRESET.coverTitle, { size: 56, bold: true, color: GREEN }),
-    ],
-  }),
-  new Paragraph({
-    alignment: AlignmentType.CENTER,
-    spacing: { after: 200 },
-    children: [
-      run(PRESET.coverSubtitle, {
-        size: 30,
-        color: GRAY,
-      }),
-    ],
-  }),
-  new Paragraph({
-    alignment: AlignmentType.CENTER,
-    spacing: { after: 120 },
-    children: [
-      run(PRESET.coverLine, { size: 24, color: GRAY }),
-    ],
-  }),
-  new Paragraph({
-    alignment: AlignmentType.CENTER,
-    spacing: { after: 400 },
-    children: [
-      run(PRESET.coverVersion, { size: 22, color: GRAY, italics: true }),
-    ],
-  }),
-  new Paragraph({
-    alignment: AlignmentType.CENTER,
-    children: [
-      run("guiadebolso.app · contato@guiadebolso.app", {
-        size: 22,
-        color: GREEN,
-        bold: true,
-      }),
-    ],
-  }),
-  new Paragraph({
-    alignment: AlignmentType.CENTER,
-    spacing: { before: 200 },
-    children: [
-      run("Modelo para impressão e assinatura presencial", {
-        size: 20,
-        color: GRAY,
-        italics: true,
-      }),
-    ],
-  }),
-  new Paragraph({ children: [new PageBreak()] }),
-];
-
-const instructionsEnd = md.indexOf("# PARTE 1");
-const instructionsMd =
-  instructionsEnd > 0
-    ? md.slice(md.indexOf("## Instruções"), instructionsEnd)
-    : "";
+const printMd = preparePrintMarkdown(md, PRESET);
 
 const doc = new Document({
   styles: {
     default: {
       document: {
-        run: { font: FONT, size: 22 },
+        run: { font: FONT, size: 22, color: GRAY },
       },
     },
   },
@@ -498,16 +560,9 @@ const doc = new Document({
       headers: {
         default: new Header({
           children: [
-            para(
-              [
-                run(PRESET.header, {
-                  size: 16,
-                  color: GREEN,
-                  italics: true,
-                }),
-              ],
-              { after: 0 }
-            ),
+            para([run(PRESET.header, { size: 16, color: GREEN, italics: true })], {
+              after: 0,
+            }),
           ],
         }),
       },
@@ -529,15 +584,7 @@ const doc = new Document({
           ],
         }),
       },
-      children: [
-        ...coverBlock,
-        ...mdToDocxChildren(
-          md.slice(0, md.indexOf("<br/>")).replace(/^# .+\n\n/m, "")
-        ),
-        ...(instructionsMd ? mdToDocxChildren(instructionsMd) : []),
-        new Paragraph({ children: [new PageBreak()] }),
-        ...mdToDocxChildren(md.slice(skipUntilPart1)),
-      ],
+      children: [...buildCoverBlock(), ...mdToDocxChildren(printMd)],
     },
   ],
 });

@@ -28,10 +28,6 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const mode = searchParams.get("mode");
 
-  if (mode === "destaques") {
-    return jsonCached({ destaques: [], deprecated: true });
-  }
-
   if (mode === "parceiros" || mode === "curadoria") {
     const limit = Math.min(Math.max(Number(searchParams.get("limit")) || 50, 1), 100);
     const eq =

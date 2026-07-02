@@ -95,19 +95,23 @@ There is no global React Context for auth or premium; each page or hook loads se
 
 ### Route map (admin)
 
-Requires `perfis.role` ∈ `admin`, `dev` (`lib/adminRoles.js` → `canAccessAdmin`). Primary CMS path is **`/admin/locais`**; `/admin/lugares` re-exports the same grid.
+Requires `perfis.role` ∈ `admin`, `dev` (`lib/adminRoles.js` → `canAccessAdmin`). Routes marked **(dev)** also require `canAccessDevAdmin` (`DEV_ONLY_ADMIN_PATHS`, `AdminShell`). Primary CMS path is **`/admin/locais`** (`/admin/lugares` and `/admin/destaques` → 301 redirect).
 
-| Route | Purpose |
-|-------|---------|
-| `/admin` | Dashboard (hero, KPI grid, moderation queue, operational summary, activity timeline) |
-| `/admin/locais`, `/admin/locais/novo`, `/admin/locais/[id]/editar` | Place CRUD |
-| `/admin/lugares` | Legacy alias of locais grid |
-| `/admin/atrativos`, `/admin/atrativos/nova`, `/admin/atrativos/[id]/editar` | Curated atrativo CRUD (`/admin/rotas` → 301 redirect) |
-| `/admin/avaliacoes` | Review moderation (`?tab=` for filter chips) |
-| `/admin/usuarios` | User management, roles, Premium IA |
-| `/admin/logs` | Activity log browser (`?acao=`, `?user_id=`, period filters) |
-| `/admin/ia` | Monitoramento de IA (custo, tokens, latência, erros, projeções) |
-| `/admin/taxonomia` | CRUD for `subcategorias` and `tags` (no manual SQL) |
+| Route | Access | Purpose |
+|-------|--------|---------|
+| `/admin` | admin, dev | Dashboard (hero, KPI grid, moderation queue, partner ops sidebar, activity timeline) |
+| `/admin/locais`, `/admin/locais/novo`, `/admin/locais/[id]/editar` | admin, dev | Place CRUD (+ partner program fields, QR PDF) |
+| `/admin/atrativos`, `/admin/atrativos/nova`, `/admin/atrativos/[id]/editar` | admin, dev | Curated atrativo CRUD (`/admin/rotas` → 301 redirect) |
+| `/admin/avaliacoes` | admin, dev | Review moderation (`?tab=` for filter chips) |
+| `/admin/relatorios` | admin, dev | Establishment performance reports |
+| `/admin/parceiros` | **dev** | Partner program CRM (deadlines, curadoria) |
+| `/admin/contratos` | **dev** | Commercial contracts + document storage |
+| `/admin/usuarios` | **dev** | User management, roles, Premium IA |
+| `/admin/logs` | **dev** | Activity log browser (`?acao=`, `?user_id=`, period filters) |
+| `/admin/ia` | **dev** | AI cost / token / latency monitoring (`logs_ia`) |
+| `/admin/despesas` | **dev** | Operational expenses ledger |
+| `/admin/feedback` | **dev** | User feedback queue |
+| `/admin/taxonomia` | **dev** | CRUD for `subcategorias` and `tags` (no manual SQL) |
 
 ### Component organization
 
@@ -131,7 +135,7 @@ components/
 └── …                      # Other root-level UI (maps, autocomplete, etc.)
 ```
 
-**Home** logic is driven by `lib/homeContext.js` (quick-search chips, `pickHeroLugar` scoring, preset plans; `getFraseContextual` for chips, not the header). Header weather is inline in `HomeContextHeader`. **Place detail** uses `lib/lugarDetalhe.js` to distinguish public venues (beaches, trails) from establishments (restaurants, services) and to shape quick actions.
+**Home** logic: hero atrativo via `resolveAtrativoDoDia` / `pickHeroRotaCiclo` (`lib/homeSelection.js`, `lib/atrativoDoDia.js`); quick-search chips and distance sort in `lib/homeContext.js`; partner carousel + “Em alta” in `lib/homeSelection.js` + `lib/publicCatalog.js`. Header weather is inline in `HomeContextHeader`. **Place detail** uses `lib/lugarDetalhe.js` to distinguish public venues (beaches, trails) from establishments (restaurants, services) and to shape quick actions.
 
 ### Client-side state patterns
 
@@ -246,7 +250,7 @@ lib/supabase.js
 
 | Endpoint | Auth | Responsibility |
 |----------|------|----------------|
-| `GET /api/lugares` | Public | Cached catalog reads (`mode=populares`, `destaques`, `ids`, `categoria`, `limit`) via anon server client |
+| `GET /api/lugares` | Public | Cached catalog reads (`mode=populares|parceiros|curadoria`, `ids`, `categoria`, `limit`) via anon server client |
 | `GET /api/health` | Public | Deploy smoke `{ ok, service, timestamp }` |
 | `POST /api/buscar` | Required (non-empty `query`) | Premium check → load places → **reserve quota** → Claude ranking → filter; `decrement_*` on Claude error; empty `query` returns `{ lugares: [] }` without auth |
 | `POST /api/roteiro` | Required | **Reserve quota** → generate itinerary (Claude); release on failure |
@@ -268,7 +272,9 @@ Server-only secrets: `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`. These never use the
 | `logs.js` | Shared | Insert into `logs` for analytics |
 | `storageUpload.js` | Client | Admin photo upload to Storage (uses `imageCompress.js` when over 200KB) |
 | `imageCompress.js` | Client | Canvas resize/JPEG for avatars and entity photos |
-| `homeContext.js` | Shared | Hero scoring (`pickHeroLugar`), quick-search chips, preset plans, `getMelhorHorario` (null without hours) |
+| `homeContext.js` | Shared | Quick-search chips, `sortLugaresPorDistancia`, `getMelhorHorario` (null without hours); hero scoring lives in `homeSelection.js` / `atrativoDoDia.js` |
+| `homeSelection.js` | Shared | `pickParceirosPorCategoria`, `pickEmAltaCuradoria`, `pickHeroRotaCiclo` |
+| `publicCatalog.js` | Shared | `PUBLIC_APP_PARTNERS_ONLY` filters for production consumer lists |
 | `lugarDetalhe.js` | Shared | Establishment vs public place, quick actions, persuasion copy, `getStaticMapUrl` (Google Static Maps) |
 | `lugaresPopulares.js` | Shared | Trending places by favorite count |
 | `lugaresVisitados.js` | Client | Recent places in `localStorage` for search browse |
@@ -508,8 +514,8 @@ On first login, Supabase creates `auth.users`. The app expects a matching row in
 | Layer | Mechanism |
 |-------|-----------|
 | **Premium features** | `perfis.premium_ativo`; daily counters `buscas_ia` / `roteiros_ia` in `uso_ia_mes` (day key `YYYY-MM-DD`, SP); limits 5 buscas + 2 roteiros/day; Premium unlimited |
-| **Admin** | `perfis.role` ∈ `admin`, `dev` (`canAccessAdmin`) |
-| **Public content** | RLS: active places, approved reviews |
+| **Admin** | `perfis.role` ∈ `admin`, `dev` (`canAccessAdmin`); sensitive CMS + contracts: **`dev` only** (`canAccessDevAdmin`, `is_admin_only()` in SQL) |
+| **Public content** | RLS: active places; consumer catalog may further restrict to `eh_parceiro` (`lib/publicCatalog.js`, `PUBLIC_APP_PARTNERS_ONLY`) |
 | **Gated UI** | `LoginModal` for favorites, reviews, **AI search**, and **AI roteiro**; curated `/atrativos` list and detail are public |
 
 API returns machine-readable codes: `LOGIN_REQUIRED` (401), `LIMIT_REACHED` (403).

@@ -424,7 +424,7 @@ Use this list for **first launch** and **each major release**.
 - [ ] `ANTHROPIC_API_KEY` only in server env (not `NEXT_PUBLIC_*`)
 - [ ] Service role key **not** in Vercel or client
 - [ ] Supabase redirect URLs limited to known domains
-- [ ] Admin UI gated by `perfis.role` (`admin` / `dev`)
+- [ ] Admin UI gated by `perfis.role` — operational: `admin` or `dev`; sensitive routes + contracts API: **`dev` only** (`lib/adminRoles.js`)
 - [ ] Reviews public only when `status = aprovada`
 
 ### Observability & rollback

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-06-28T02:22:37.943Z",
+  "generatedAt": "2026-07-02T19:58:40.730Z",
   "sections": [
     {
       "id": "A",
@@ -3772,7 +3772,7 @@
           "Sino alertas com links operacionais"
         ]
       },
-      "expected": "Links avaliações destaques logs.",
+      "expected": "Links avaliações parceiros logs.",
       "warnings": []
     },
     {
@@ -3884,7 +3884,7 @@
           "Atalhos operacionais dashboard"
         ]
       },
-      "expected": "Links logs destaques expirando.",
+      "expected": "Links parceiros vencendo e curadoria.",
       "warnings": []
     },
     {
@@ -4029,10 +4029,10 @@
       "warnings": []
     },
     {
-      "id": "l-12",
+      "id": "l-12b",
       "sectionId": "L",
-      "title": "Rotas admin CRUD completo",
-      "route": "/admin/rotas",
+      "title": "Atrativos admin CRUD completo",
+      "route": "/admin/atrativos",
       "roles": [
         "admin"
       ],
@@ -4042,15 +4042,15 @@
       "steps": {
         "mobile": [
           "Abra o app no celular (~390px).",
-          "Rotas admin CRUD completo"
+          "Atrativos admin CRUD completo"
         ],
         "desktop": [
           "No desktop, use janela ~390px ou DevTools iPhone.",
-          "Rotas admin CRUD completo"
+          "Atrativos admin CRUD completo"
         ],
         "tablet": [
           "No tablet (~768px) ou iPad; layout mobile centralizado.",
-          "Rotas admin CRUD completo"
+          "Atrativos admin CRUD completo"
         ]
       },
       "expected": "Tipo tags pontos mapa destaque.",
@@ -4115,8 +4115,8 @@
     {
       "id": "l-15",
       "sectionId": "L",
-      "title": "Destaques plano Parceiro vigência",
-      "route": "/admin/destaques",
+      "title": "Parceiro: toggle eh_parceiro em locais",
+      "route": "/admin/locais",
       "roles": [
         "admin"
       ],
@@ -4126,55 +4126,56 @@
       "steps": {
         "mobile": [
           "Abra o app no celular (~390px).",
-          "Destaques plano Parceiro vigência"
+          "Parceiro: toggle eh_parceiro em locais"
         ],
         "desktop": [
           "No desktop, use janela ~390px ou DevTools iPhone.",
-          "Destaques plano Parceiro vigência"
+          "Parceiro: toggle eh_parceiro em locais"
         ],
         "tablet": [
           "No tablet (~768px) ou iPad; layout mobile centralizado.",
-          "Destaques plano Parceiro vigência"
+          "Parceiro: toggle eh_parceiro em locais"
         ]
       },
-      "expected": "CRUD vigência Parceiro.",
+      "expected": "Badge e carrossel após salvar parceiro ativo.",
       "warnings": []
     },
     {
       "id": "l-16",
       "sectionId": "L",
-      "title": "Novo destaque → home Parceiros",
-      "route": "/admin/destaques",
+      "title": "Parceiro ativo → home Parceiros",
+      "route": "/",
       "roles": [
         "admin"
       ],
       "tags": [
-        "admin"
+        "admin",
+        "home"
       ],
       "steps": {
         "mobile": [
           "Abra o app no celular (~390px).",
-          "Novo destaque → home Parceiros"
+          "Parceiro ativo → home Parceiros"
         ],
         "desktop": [
           "No desktop, use janela ~390px ou DevTools iPhone.",
-          "Novo destaque → home Parceiros"
+          "Parceiro ativo → home Parceiros"
         ],
         "tablet": [
           "No tablet (~768px) ou iPad; layout mobile centralizado.",
-          "Novo destaque → home Parceiros"
+          "Parceiro ativo → home Parceiros"
         ]
       },
-      "expected": "Carrossel e badge após vigente.",
+      "expected": "Carrossel e badge no app.",
       "warnings": []
     },
     {
       "id": "l-17",
       "sectionId": "L",
-      "title": "Destaques ?status=expirando expirado",
-      "route": "/admin/destaques",
+      "title": "CRM parceiros filtros vencendo",
+      "route": "/admin/parceiros",
       "roles": [
-        "admin"
+        "dev"
       ],
       "tags": [
         "admin"
@@ -4182,18 +4183,18 @@
       "steps": {
         "mobile": [
           "Abra o app no celular (~390px).",
-          "Destaques ?status=expirando expirado"
+          "CRM parceiros filtros vencendo"
         ],
         "desktop": [
           "No desktop, use janela ~390px ou DevTools iPhone.",
-          "Destaques ?status=expirando expirado"
+          "CRM parceiros filtros vencendo"
         ],
         "tablet": [
           "No tablet (~768px) ou iPad; layout mobile centralizado.",
-          "Destaques ?status=expirando expirado"
+          "CRM parceiros filtros vencendo"
         ]
       },
-      "expected": "Filtros URL funcionam.",
+      "expected": "Filtros vencendo/curadoria funcionam.",
       "warnings": []
     },
     {

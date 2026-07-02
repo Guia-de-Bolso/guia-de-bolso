@@ -247,7 +247,7 @@ const FASE1 = {
       items: [
         {
           title: "Cadastrar todos os locais com fotos reais",
-          onde: "Painel Admin → /admin/lugares + Supabase Storage (bucket imagens)",
+          onde: "Painel Admin → /admin/locais + Supabase Storage (bucket imagens)",
           tempo: "3–5 dias",
           dificuldade: "Médio",
           obs: "Meta de lançamento: ~100 lugares (docs/CUSTOS.md). Catálogo seed atual: ~25 lugares. Usar lib/imageCompress.js para otimizar uploads.",
@@ -268,14 +268,14 @@ const FASE1 = {
         },
         {
           title: "Revisar descrições, horários de funcionamento e contatos",
-          onde: "Admin → /admin/lugares; componente HorarioEditor (dois turnos/dia)",
+          onde: "Admin → /admin/locais; componente HorarioEditor (dois turnos/dia)",
           tempo: "2–3 dias",
           dificuldade: "Médio",
           obs: "Status aberto/fechado é calculado em tempo real (lib/horarios.js). Confirmar com estabelecimentos parceiros.",
         },
         {
           title: "Configurar destaques do carrossel Parceiros na home",
-          onde: "Admin → /admin/destaques + flags eh_parceiro em lugares",
+          onde: "Admin → /admin/parceiros + flags eh_parceiro em lugares",
           tempo: "2–4 horas",
           dificuldade: "Fácil",
           obs: "Plano comercial atual: R$ 299/mês (lib/planoComercial.js). Carrossel: components/home/ParceirosCarrossel.js.",
@@ -1252,7 +1252,7 @@ const FASE7 = {
         },
         {
           title: "Enviar kit de boas-vindas (QR Code, adesivo, artes)",
-          onde: "Admin → PDF QR (/admin/lugares) + design",
+          onde: "Admin → PDF QR (/admin/locais) + design",
           tempo: "1–2 dias",
           dificuldade: "Médio",
           obs: "QR URL curta /q/{slug} já implementada.",

@@ -73,10 +73,10 @@ guia-de-bolso/
 │   │   └── page.js              # Grid de categorias e subcategorias
 │   ├── admin/
 │   │   ├── page.js              # Dashboard admin
-│   │   ├── lugares/page.js      # CRUD de lugares
-│   │   ├── avaliacoes/page.js   # Moderação de avaliações
-│   │   ├── rotas/page.js        # Gestão de rotas
-│   │   ├── destaques/page.js    # Gestão de destaques e planos
+│   │   ├── locais/              # CRUD de lugares (principal)
+│   │   ├── parceiros/page.js    # CRM parceiros (dev)
+│   │   ├── contratos/page.js    # Contratos comerciais (dev)
+│   │   ├── atrativos/           # CRUD atrativos curados
 │   │   └── usuarios/page.js     # Gestão de usuários
 │   └── api/
 │       └── buscar/
@@ -86,7 +86,7 @@ guia-de-bolso/
 ├── components/
 │   ├── Onboarding.js            # Telas de onboarding (3-4 slides)
 │   ├── LoginModal.js            # Bottom sheet de login para conteúdo restrito
-│   ├── home/ParceirosCarrossel.js  # Carrossel de parceiros (destaques vigentes)
+│   ├── home/ParceirosCarrossel.js  # Carrossel de parceiros (`eh_parceiro`)
 │   ├── BotaoIrAgora.js          # Botão que abre Maps preferido
 │   └── AvaliacaoCard.js         # Card de avaliação de um lugar
 ├── public/
@@ -283,7 +283,7 @@ guia-de-bolso/
 - [x] Sign in with Apple no app iOS (Capacitor) — `lib/nativeAppleAuth.js`, botão em `AuthFlow` só no iOS nativo
 - [x] Google Sign-In nativo Android/iOS — `@capgo/capacitor-social-login` + `signInWithIdToken` (`lib/nativeGoogleAuth.js`, `lib/nativeSocialLoginInit.js`)
 - [x] Fluxo de verificação SMS com contador de reenvio e tratamento de erros
-- [x] Carrossel de destaques na home com auto-scroll e dots
+- [x] Carrossel de parceiros na home (`ParceirosCarrossel`, `eh_parceiro`, `lib/homeSelection.js`)
 - [x] Sistema de planos (Básico, Padrão, Premium) com badges visuais
 - [x] Clima regional via Open-Meteo (home header + hero + detalhe Natureza/Aventura)
 - [x] Geolocalização dinâmica com distância real calculada
@@ -321,8 +321,9 @@ guia-de-bolso/
 - [x] Gestão de locais com status (ativo, desativado, em_analise)
 - [x] Admin com seleção de subcategoria e tags
 - [x] Moderação de avaliações (aprovar/rejeitar)
-- [x] Gestão de destaques e planos
-- [x] Gestão de destaques no painel admin
+- [x] Gestão de parceiros no admin (`/admin/parceiros`) — prazos 6 meses grátis, curadoria trimestral
+- [x] Módulo de contratos comerciais no admin (`/admin/contratos`) — documentos PDF/DOCX, alertas
+- [x] PDF premium de QR Code do estabelecimento (múltiplos formatos de impressão)
 - [x] Gestão de usuários
 - [x] Sistema de logs (login, logout, favoritos, IR AGORA, visualizou_lugar, acesso ao app)
 - [x] Relatórios por estabelecimento no admin (`/admin/relatorios`) com PDF e WhatsApp

@@ -56,6 +56,9 @@ const nextConfig = {
       },
       { source: "/api/rotas", destination: "/api/atrativos", permanent: true },
       { source: "/api/rotas/:path*", destination: "/api/atrativos/:path*", permanent: true },
+      { source: "/admin/lugares", destination: "/admin/locais", permanent: true },
+      { source: "/admin/destaques", destination: "/admin/locais", permanent: true },
+      { source: "/admin/destaques/:path*", destination: "/admin/locais", permanent: true },
     ];
   },
   images: {

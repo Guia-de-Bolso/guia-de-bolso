@@ -88,7 +88,7 @@ sequenceDiagram
   API-->>UI: JSON + Cache-Control
 ```
 
-**Query params:** `mode=populares`, `mode=destaques`, `ids=1,2,3`, `limit`, `categoria`.
+**Query params:** `mode=populares`, `mode=parceiros`, `mode=curadoria`, `ids=1,2,3`, `limit`, `categoria`.
 
 Headers: `lib/apiCacheHeaders.js` (CDN-friendly).
 

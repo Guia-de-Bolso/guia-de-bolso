@@ -227,7 +227,7 @@ Policies versionadas em `supabase/`: ver manifest em [`security-rls.md`](./secur
 | P1 | `lib/lugaresPopulares.js` | Fallback: full `favoritos` scan if RPC missing | Table scan |
 | P2 | `lib/adminDashboard.js` | All `perfis` rows to count premium in JS | Grows with users |
 | P2 | `lib/adminRelatorios.js` | Filter `logs.detalhes.lugar_id` in JS | Seq scan on logs |
-| P2 | `lib/destaques.js` | `lugares!inner(*)` on vigentes | Wide rows |
+| P2 | `lib/homeSelection.js` / partner queries | `lugares` + `eh_parceiro` filters for carousel | Wide rows if unbounded |
 
 ### Acceptable patterns (with caps)
 
