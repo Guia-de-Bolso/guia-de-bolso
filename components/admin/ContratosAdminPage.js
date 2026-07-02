@@ -188,6 +188,18 @@ export default function ContratosAdminPage() {
     );
   }, [contratos, filtro, docsByContrato, hoje]);
 
+  const lugaresParaSelect = useMemo(() => {
+    if (!editingId) return lugares;
+
+    const editing = contratos.find((item) => item.id === editingId);
+    const lugarAtual = editing?.lugares;
+    if (!lugarAtual || lugares.some((item) => item.id === lugarAtual.id)) {
+      return lugares;
+    }
+
+    return [...lugares, lugarAtual];
+  }, [lugares, editingId, contratos]);
+
   /**
    * @param {object|null} contrato
    */
@@ -614,7 +626,7 @@ export default function ContratosAdminPage() {
         <div className="space-y-4">
           <div>
             <label className="text-xs font-semibold uppercase text-[#5a6b66]">
-              Estabelecimento
+              Estabelecimento (parceiro ativo)
             </label>
             <select
               value={form.lugar_id}
@@ -622,7 +634,7 @@ export default function ContratosAdminPage() {
               className="mt-1 w-full rounded-xl border border-[#e3e9e6] px-3 py-2.5 text-sm"
             >
               <option value="">Selecione…</option>
-              {lugares.map((lugar) => (
+              {lugaresParaSelect.map((lugar) => (
                 <option key={lugar.id} value={lugar.id}>
                   {lugar.nome} ({lugar.categoria})
                 </option>
