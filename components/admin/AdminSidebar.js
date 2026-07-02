@@ -4,9 +4,9 @@ import Link from "next/link";
 import AdminNavLinkItem from "@/components/admin/AdminNavLinkItem";
 import Logo from "@/components/Logo";
 import {
-  ADMIN_NAV_LINKS,
   AdminNavIcon,
   getAdminInitials,
+  getVisibleAdminNavLinks,
 } from "@/components/admin/adminNavConfig";
 
 /**
@@ -15,12 +15,13 @@ import {
  * @param {string} props.pathname
  * @param {boolean} props.collapsed
  * @param {() => void} props.onToggleCollapse
- * @param {{ nome?: string, foto_url?: string }|null} [props.perfil]
+ * @param {{ nome?: string, foto_url?: string, role?: string }|null} [props.perfil]
  * @returns {import("react").JSX.Element}
  */
 export default function AdminSidebar({ pathname, collapsed, onToggleCollapse, perfil }) {
   const displayName = perfil?.nome || "Administrador";
   const initials = getAdminInitials(displayName);
+  const navLinks = getVisibleAdminNavLinks(perfil?.role);
 
   return (
     <aside
@@ -80,7 +81,7 @@ export default function AdminSidebar({ pathname, collapsed, onToggleCollapse, pe
       )}
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-        {ADMIN_NAV_LINKS.map((link) => (
+        {navLinks.map((link) => (
           <AdminNavLinkItem
             key={link.href}
             link={link}

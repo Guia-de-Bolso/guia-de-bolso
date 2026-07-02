@@ -5,9 +5,9 @@ import { useEffect } from "react";
 import AdminNavLinkItem from "@/components/admin/AdminNavLinkItem";
 import Logo from "@/components/Logo";
 import {
-  ADMIN_NAV_LINKS,
   AdminNavIcon,
   getAdminInitials,
+  getVisibleAdminNavLinks,
 } from "@/components/admin/adminNavConfig";
 
 /**
@@ -16,7 +16,7 @@ import {
  * @param {boolean} props.open
  * @param {() => void} props.onClose
  * @param {string} props.pathname
- * @param {{ nome?: string, foto_url?: string }|null} [props.perfil]
+ * @param {{ nome?: string, foto_url?: string, role?: string }|null} [props.perfil]
  * @returns {import("react").JSX.Element|null}
  */
 export default function AdminNavDrawer({ open, onClose, pathname, perfil }) {
@@ -76,7 +76,7 @@ export default function AdminNavDrawer({ open, onClose, pathname, perfil }) {
         </div>
 
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-          {ADMIN_NAV_LINKS.map((link) => (
+          {getVisibleAdminNavLinks(perfil?.role).map((link) => (
             <AdminNavLinkItem
               key={link.href}
               link={link}

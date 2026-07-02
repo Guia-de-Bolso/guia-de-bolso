@@ -119,7 +119,7 @@ export default function AdminShell({
 
       const { data: perfilData } = await supabase
         .from("perfis")
-        .select("nome, foto_url")
+        .select("nome, foto_url, role")
         .eq("id", id)
         .maybeSingle();
 
@@ -148,6 +148,7 @@ export default function AdminShell({
           <AdminTopBar
             title={title}
             adminUserId={adminUserId}
+            adminRole={adminPerfil?.role}
             headerAction={headerAction}
             onOpenMobileNav={() => setMobileNavOpen(true)}
             onToggleSidebar={() => setSidebarCollapsed((value) => !value)}

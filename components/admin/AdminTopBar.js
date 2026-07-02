@@ -11,6 +11,7 @@ import { AdminNavIcon } from "@/components/admin/adminNavConfig";
  * @param {() => void} [props.onToggleSidebar]
  * @param {boolean} [props.showSidebarToggle]
  * @param {string} [props.adminUserId]
+ * @param {string} [props.adminRole]
  * @param {import("react").ReactNode} [props.headerAction]
  * @returns {import("react").JSX.Element}
  */
@@ -20,6 +21,7 @@ export default function AdminTopBar({
   onToggleSidebar,
   showSidebarToggle = false,
   adminUserId,
+  adminRole,
   headerAction,
 }) {
   return (
@@ -67,7 +69,7 @@ export default function AdminTopBar({
             </div>
           ) : null}
           <div className="order-2 shrink-0 sm:order-none">
-            <AdminAlertsBell userId={adminUserId} />
+            <AdminAlertsBell userId={adminUserId} adminRole={adminRole} />
           </div>
         </div>
       </div>

@@ -166,11 +166,12 @@ Run in order for a **new environment** that already has base tables from the Sup
 | 32 | `lugares_populares_rpc.sql` | RPC popular places |
 | 33 | `lugares_populares_rpc_fix.sql` | Ensures `lugar_id bigint` return (re-run safe) |
 
-### I — Admin financeiro
+### I — Admin financeiro e comercial
 
 | # | File | Purpose |
 |---|------|---------|
 | 34 | `despesas_operacionais.sql` | `despesas_config`, `despesas_operacionais`, `despesas_lancamentos` + RLS admin/dev |
+| 34b | `contratos_comerciais.sql` | Contratos comerciais de parceiros, documentos (PDF/DOCX), bucket privado `contratos-parceiros`, RLS **admin-only** (`is_admin_only()`) |
 
 ### H — Optional / ops
 

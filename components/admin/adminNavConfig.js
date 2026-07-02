@@ -1,6 +1,8 @@
+import { canAccessContratosAdmin } from "@/lib/adminRoles";
+
 /**
  * Links e ícones SVG do menu admin.
- * @typedef {{ href: string, label: string, icon: string }} AdminNavLink
+ * @typedef {{ href: string, label: string, icon: string, adminOnly?: boolean }} AdminNavLink
  */
 
 /** @type {AdminNavLink[]} */
@@ -10,6 +12,7 @@ export const ADMIN_NAV_LINKS = [
   { href: "/admin/despesas", label: "Despesas", icon: "despesas" },
   { href: "/admin/locais", label: "Locais", icon: "locais" },
   { href: "/admin/parceiros", label: "Parceiros", icon: "parceiros" },
+  { href: "/admin/contratos", label: "Contratos", icon: "contratos", adminOnly: true },
   { href: "/admin/atrativos", label: "Atrativos", icon: "rotas" },
   { href: "/admin/avaliacoes", label: "Avaliações", icon: "avaliacoes" },
   { href: "/admin/feedback", label: "Feedback", icon: "feedback" },
@@ -18,6 +21,16 @@ export const ADMIN_NAV_LINKS = [
   { href: "/admin/logs", label: "Logs", icon: "logs" },
   { href: "/admin/taxonomia", label: "Taxonomia", icon: "taxonomia" },
 ];
+
+/**
+ * @param {string} [role]
+ * @returns {AdminNavLink[]}
+ */
+export function getVisibleAdminNavLinks(role) {
+  return ADMIN_NAV_LINKS.filter(
+    (link) => !link.adminOnly || canAccessContratosAdmin(role)
+  );
+}
 
 /**
  * @param {string} pathname
@@ -91,6 +104,16 @@ export function AdminNavIcon({ name, className = "h-5 w-5" }) {
             strokeLinecap="round"
             strokeLinejoin="round"
             d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 013.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"
+          />
+        </svg>
+      );
+    case "contratos":
+      return (
+        <svg {...shared}>
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
           />
         </svg>
       );
