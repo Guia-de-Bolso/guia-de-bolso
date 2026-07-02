@@ -1,5 +1,5 @@
--- Taxonomia: leitura pública + escrita restrita a admin/dev.
--- Requer public.is_admin_or_dev() de perfis_rls_fix.sql.
+-- Taxonomia: leitura pública + escrita restrita a dev.
+-- Requer public.is_dev() de perfis_rls_fix.sql.
 -- tags: complementa "Public read tags" em lugares_related_public_read.sql.
 
 -- ─── tags ───────────────────────────────────────────────────────────────────
@@ -9,22 +9,22 @@ CREATE POLICY "Admin insert tags"
   ON tags
   FOR INSERT
   TO authenticated
-  WITH CHECK (public.is_admin_or_dev());
+  WITH CHECK (public.is_dev());
 
 DROP POLICY IF EXISTS "Admin update tags" ON tags;
 CREATE POLICY "Admin update tags"
   ON tags
   FOR UPDATE
   TO authenticated
-  USING (public.is_admin_or_dev())
-  WITH CHECK (public.is_admin_or_dev());
+  USING (public.is_dev())
+  WITH CHECK (public.is_dev());
 
 DROP POLICY IF EXISTS "Admin delete tags" ON tags;
 CREATE POLICY "Admin delete tags"
   ON tags
   FOR DELETE
   TO authenticated
-  USING (public.is_admin_or_dev());
+  USING (public.is_dev());
 
 -- ─── subcategorias ──────────────────────────────────────────────────────────
 
@@ -48,17 +48,17 @@ CREATE POLICY "Admin insert subcategorias"
   ON subcategorias
   FOR INSERT
   TO authenticated
-  WITH CHECK (public.is_admin_or_dev());
+  WITH CHECK (public.is_dev());
 
 CREATE POLICY "Admin update subcategorias"
   ON subcategorias
   FOR UPDATE
   TO authenticated
-  USING (public.is_admin_or_dev())
-  WITH CHECK (public.is_admin_or_dev());
+  USING (public.is_dev())
+  WITH CHECK (public.is_dev());
 
 CREATE POLICY "Admin delete subcategorias"
   ON subcategorias
   FOR DELETE
   TO authenticated
-  USING (public.is_admin_or_dev());
+  USING (public.is_dev());

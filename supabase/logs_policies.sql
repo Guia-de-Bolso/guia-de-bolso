@@ -16,11 +16,11 @@ DROP POLICY IF EXISTS "Public read logs" ON logs;
 DROP POLICY IF EXISTS "Admin lê logs" ON logs;
 DROP POLICY IF EXISTS "Authenticated insert logs" ON logs;
 
-CREATE POLICY "Admin lê logs"
+CREATE POLICY "Dev lê logs"
   ON logs
   FOR SELECT
   TO authenticated
-  USING (public.is_admin_or_dev());
+  USING (public.is_dev());
 
 CREATE POLICY "Authenticated insert logs"
   ON logs
@@ -29,8 +29,8 @@ CREATE POLICY "Authenticated insert logs"
   WITH CHECK (user_id IS NULL OR user_id = auth.uid());
 
 DROP POLICY IF EXISTS "logs_delete_admin" ON logs;
-CREATE POLICY "logs_delete_admin"
+CREATE POLICY "logs_delete_dev"
   ON logs
   FOR DELETE
   TO authenticated
-  USING (public.is_admin_or_dev());
+  USING (public.is_dev());

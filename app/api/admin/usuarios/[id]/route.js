@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { AdminDeleteUsuarioError, adminDeleteUsuario } from "@/lib/adminDeleteUsuario";
-import { requireAdminApi } from "@/lib/requireAdminApi";
+import { requireAdminOnlyApi } from "@/lib/requireAdminOnlyApi";
 import { createServiceClient } from "@/lib/supabase/service";
 import { USER_MESSAGES } from "@/lib/userMessages";
 
@@ -12,7 +12,7 @@ import { USER_MESSAGES } from "@/lib/userMessages";
  */
 export async function DELETE(request, { params }) {
   try {
-    const auth = await requireAdminApi();
+    const auth = await requireAdminOnlyApi();
     if (auth.error) return auth.error;
 
     const { id: targetUserId } = await params;

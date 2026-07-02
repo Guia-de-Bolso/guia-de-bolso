@@ -15,7 +15,7 @@ BEGIN
   v_ia_bypass := current_setting('app.perfis_ia_usage_write', true) = '1';
 
   IF TG_OP = 'INSERT' THEN
-    IF auth.role() = 'service_role' OR public.is_admin_or_dev() THEN
+    IF auth.role() = 'service_role' OR public.is_dev() THEN
       RETURN NEW;
     END IF;
 
@@ -35,7 +35,7 @@ BEGIN
     RETURN NEW;
   END IF;
 
-  IF auth.role() = 'service_role' OR public.is_admin_or_dev() THEN
+  IF auth.role() = 'service_role' OR public.is_dev() THEN
     RETURN NEW;
   END IF;
 

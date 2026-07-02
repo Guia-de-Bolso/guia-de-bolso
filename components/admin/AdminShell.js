@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import AdminNavDrawer from "@/components/admin/AdminNavDrawer";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminTopBar from "@/components/admin/AdminTopBar";
-import { canAccessAdmin } from "@/lib/adminRoles";
+import { canAccessAdmin, canAccessAdminSection } from "@/lib/adminRoles";
 import { createClient } from "@/lib/supabase";
 
 /**
@@ -14,6 +14,7 @@ import { createClient } from "@/lib/supabase";
  */
 export function useAdminAuth() {
   const router = useRouter();
+  const pathname = usePathname();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [perfil, setPerfil] = useState(null);
@@ -64,6 +65,11 @@ export function useAdminAuth() {
         return;
       }
 
+      if (!canAccessAdminSection(perfilData?.role, pathname)) {
+        router.replace("/admin?section=denied");
+        return;
+      }
+
       setUser(currentUser);
       setPerfil(perfilData);
       setLoading(false);
@@ -74,7 +80,7 @@ export function useAdminAuth() {
     return () => {
       cancelled = true;
     };
-  }, [router]);
+  }, [router, pathname]);
 
   return { loading, user, perfil };
 }

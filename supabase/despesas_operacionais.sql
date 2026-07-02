@@ -106,21 +106,21 @@ CREATE POLICY "Admin despesas_config all"
   ON despesas_config
   FOR ALL
   TO authenticated
-  USING (public.is_admin_or_dev())
-  WITH CHECK (public.is_admin_or_dev());
+  USING (public.is_dev())
+  WITH CHECK (public.is_dev());
 
 DROP POLICY IF EXISTS "Admin despesas_operacionais all" ON despesas_operacionais;
 CREATE POLICY "Admin despesas_operacionais all"
   ON despesas_operacionais
   FOR ALL
   TO authenticated
-  USING (public.is_admin_or_dev())
-  WITH CHECK (public.is_admin_or_dev());
+  USING (public.is_dev())
+  WITH CHECK (public.is_dev());
 
 DROP POLICY IF EXISTS "Admin despesas_lancamentos all" ON despesas_lancamentos;
 CREATE POLICY "Admin despesas_lancamentos all"
   ON despesas_lancamentos
   FOR ALL
   TO authenticated
-  USING (public.is_admin_or_dev())
-  WITH CHECK (public.is_admin_or_dev());
+  USING (public.is_dev())
+  WITH CHECK (public.is_dev());

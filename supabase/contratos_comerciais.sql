@@ -1,5 +1,5 @@
--- Contratos comerciais de parceiros (admin-only — dados sensíveis).
--- Requer perfis com role = 'admin'. Rode após lugares_parceiro_programa.sql.
+-- Contratos comerciais de parceiros (dev-only — dados sensíveis).
+-- Requer perfis com role = 'dev'. Rode após lugares_parceiro_programa.sql.
 
 CREATE OR REPLACE FUNCTION public.is_admin_only()
 RETURNS boolean
@@ -8,12 +8,7 @@ SECURITY DEFINER
 SET search_path = public
 STABLE
 AS $$
-  SELECT EXISTS (
-    SELECT 1
-    FROM public.perfis
-    WHERE id = auth.uid()
-      AND role = 'admin'
-  );
+  SELECT public.is_dev();
 $$;
 
 REVOKE ALL ON FUNCTION public.is_admin_only() FROM PUBLIC;

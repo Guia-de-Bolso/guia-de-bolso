@@ -29,6 +29,7 @@ import {
   getCutoffIso,
   getSaudacao,
 } from "@/lib/adminDashboard";
+import { canAccessDevAdmin } from "@/lib/adminRoles";
 import { createClient } from "@/lib/supabase";
 
 /**
@@ -101,6 +102,7 @@ export default function AdminDashboard() {
     const days = period === "mes" ? 30 : 7;
     const periodLabel = period === "mes" ? "período anterior" : "semana anterior";
     const cutoff = getCutoffIso(days);
+    const devAccess = canAccessDevAdmin(perfil?.role);
 
     const [
       lugaresCounts,
@@ -129,29 +131,37 @@ export default function AdminDashboard() {
       fetchCount(supabase, "lugares", {
         eq: { field: "status", value: "em_analise" },
       }),
-      fetchCountInPeriod(supabase, "perfis", days),
-      fetchCountInPeriod(supabase, "logs", days, {
-        eq: { field: "acao", value: "ir_agora" },
-      }),
-      countParceirosAtivos(supabase),
-      countPremiumAtivos(supabase),
+      devAccess
+        ? fetchCountInPeriod(supabase, "perfis", days)
+        : Promise.resolve({ total: 0, past: 0 }),
+      devAccess
+        ? fetchCountInPeriod(supabase, "logs", days, {
+            eq: { field: "acao", value: "ir_agora" },
+          })
+        : Promise.resolve({ total: 0, past: 0 }),
+      devAccess ? countParceirosAtivos(supabase) : Promise.resolve(0),
+      devAccess ? countPremiumAtivos(supabase) : Promise.resolve(0),
       supabase
         .from("avaliacoes")
         .select("*, lugares(nome)")
         .eq("status", "pendente")
         .order("created_at", { ascending: false })
         .limit(5),
-      supabase
-        .from("logs")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(3),
-      supabase.from("perfis").select("id, nome"),
-      supabase
-        .from("feedback")
-        .select("id", { count: "exact", head: true })
-        .eq("status", "novo"),
-      fetchParceiroProgramaPendencias(supabase),
+      devAccess
+        ? supabase.from("logs").select("*").order("created_at", { ascending: false }).limit(3)
+        : Promise.resolve({ data: [] }),
+      devAccess
+        ? supabase.from("perfis").select("id, nome")
+        : Promise.resolve({ data: [] }),
+      devAccess
+        ? supabase
+            .from("feedback")
+            .select("id", { count: "exact", head: true })
+            .eq("status", "novo")
+        : Promise.resolve({ count: 0 }),
+      devAccess
+        ? fetchParceiroProgramaPendencias(supabase)
+        : Promise.resolve({ vencendo: 0, vencido: 0, curadoriaAtrasada: 0 }),
     ]);
 
     setMetrics({
@@ -218,7 +228,7 @@ export default function AdminDashboard() {
     setLogsRecentes(logsRes.data ?? []);
     setPerfis(perfisRes.data ?? []);
     setDataLoading(false);
-  }, [period]);
+  }, [period, perfil?.role]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -253,6 +263,7 @@ export default function AdminDashboard() {
   }, []);
 
   const periodoHint = period === "mes" ? "Neste mês" : "Nesta semana";
+  const devAccess = canAccessDevAdmin(perfil?.role);
 
   /**
    * @param {string} id
@@ -334,39 +345,45 @@ export default function AdminDashboard() {
               variation={metrics.atrativosPublicados.variation}
               href="/admin/atrativos"
             />
-            <DashboardMetricCard
-              className="sm:col-span-1 lg:col-span-3"
-              label="Parceiros do Guia"
-              hint="Flag eh_parceiro ativo"
-              value={metrics.parceirosVigentes.total}
-              icon={IconSparkles}
-              iconWrap="bg-amber-100"
-              iconColor="text-amber-700"
-              variation={metrics.parceirosVigentes.variation}
-              href="/admin/parceiros"
-            />
-            <DashboardMetricCard
-              className="sm:col-span-1 lg:col-span-3"
-              label="Usuários novos"
-              hint={periodoHint}
-              value={metrics.usuariosNovos.total}
-              icon={IconUserPlus}
-              iconWrap="bg-blue-100"
-              iconColor="text-blue-600"
-              variation={metrics.usuariosNovos.variation}
-              href="/admin/usuarios"
-            />
-            <DashboardMetricCard
-              className="sm:col-span-1 lg:col-span-3"
-              label="IR AGORA"
-              hint={periodoHint}
-              value={metrics.irAgora.total}
-              icon={IconNavigation}
-              iconWrap="bg-emerald-100"
-              iconColor="text-emerald-700"
-              variation={metrics.irAgora.variation}
-              href="/admin/logs?acao=ir_agora"
-            />
+            {devAccess && (
+              <DashboardMetricCard
+                className="sm:col-span-1 lg:col-span-3"
+                label="Parceiros do Guia"
+                hint="Flag eh_parceiro ativo"
+                value={metrics.parceirosVigentes.total}
+                icon={IconSparkles}
+                iconWrap="bg-amber-100"
+                iconColor="text-amber-700"
+                variation={metrics.parceirosVigentes.variation}
+                href="/admin/parceiros"
+              />
+            )}
+            {devAccess && (
+              <DashboardMetricCard
+                className="sm:col-span-1 lg:col-span-3"
+                label="Usuários novos"
+                hint={periodoHint}
+                value={metrics.usuariosNovos.total}
+                icon={IconUserPlus}
+                iconWrap="bg-blue-100"
+                iconColor="text-blue-600"
+                variation={metrics.usuariosNovos.variation}
+                href="/admin/usuarios"
+              />
+            )}
+            {devAccess && (
+              <DashboardMetricCard
+                className="sm:col-span-1 lg:col-span-3"
+                label="IR AGORA"
+                hint={periodoHint}
+                value={metrics.irAgora.total}
+                icon={IconNavigation}
+                iconWrap="bg-emerald-100"
+                iconColor="text-emerald-700"
+                variation={metrics.irAgora.variation}
+                href="/admin/logs?acao=ir_agora"
+              />
+            )}
             <DashboardMetricCard
               className="sm:col-span-2 lg:col-span-3"
               label="Em análise"
@@ -389,11 +406,11 @@ export default function AdminDashboard() {
               />
             </div>
             <div className="min-w-0 lg:col-span-2">
-              <DashboardOperacionalSidebar counts={operacional} />
+              <DashboardOperacionalSidebar counts={operacional} adminRole={perfil?.role} />
             </div>
           </div>
 
-          <DashboardAtividadeSection logs={logsRecentes} perfis={perfis} />
+          {devAccess && <DashboardAtividadeSection logs={logsRecentes} perfis={perfis} />}
         </div>
       )}
     </AdminShell>

@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { Fragment } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AdminShell, { useAdminAuth } from "@/components/admin/AdminShell";
 import ContratoDocumentosSection from "@/components/admin/ContratoDocumentosSection";
-import { canAccessContratosAdmin } from "@/lib/adminRoles";
+import { canAccessDevAdmin } from "@/lib/adminRoles";
 import {
   CONTRATO_FILTROS,
   CONTRATO_STATUS,
@@ -125,11 +125,10 @@ function FilterChip({ active, onClick, children }) {
 }
 
 /**
- * Painel de contratos comerciais — admin only.
+ * Painel de contratos comerciais — somente dev.
  * @returns {import("react").JSX.Element}
  */
 export default function ContratosAdminPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { loading, user, perfil } = useAdminAuth();
   const hoje = hojeISO();
@@ -149,12 +148,6 @@ export default function ContratosAdminPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [expandedId, setExpandedId] = useState(null);
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    if (!loading && perfil && !canAccessContratosAdmin(perfil.role)) {
-      router.replace("/admin?contratos=denied");
-    }
-  }, [loading, perfil, router]);
 
   const loadData = useCallback(async () => {
     const supabase = createClient();
@@ -180,7 +173,7 @@ export default function ContratosAdminPage() {
   }, []);
 
   useEffect(() => {
-    if (loading || !canAccessContratosAdmin(perfil?.role)) return undefined;
+    if (loading || !canAccessDevAdmin(perfil?.role)) return undefined;
     loadData();
   }, [loading, perfil, loadData]);
 
@@ -333,7 +326,7 @@ export default function ContratosAdminPage() {
     await loadData();
   }
 
-  if (loading || !canAccessContratosAdmin(perfil?.role)) {
+  if (loading || !canAccessDevAdmin(perfil?.role)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f0f4f3] text-[#5a6b66]">
         Carregando admin...

@@ -1,25 +1,25 @@
-import { canAccessContratosAdmin } from "@/lib/adminRoles";
+import { canAccessDevAdmin } from "@/lib/adminRoles";
 
 /**
  * Links e ícones SVG do menu admin.
- * @typedef {{ href: string, label: string, icon: string, adminOnly?: boolean }} AdminNavLink
+ * @typedef {{ href: string, label: string, icon: string, devOnly?: boolean }} AdminNavLink
  */
 
 /** @type {AdminNavLink[]} */
 export const ADMIN_NAV_LINKS = [
   { href: "/admin", label: "Dashboard", icon: "dashboard" },
-  { href: "/admin/ia", label: "IA & Custos", icon: "ia" },
-  { href: "/admin/despesas", label: "Despesas", icon: "despesas" },
+  { href: "/admin/ia", label: "IA & Custos", icon: "ia", devOnly: true },
+  { href: "/admin/despesas", label: "Despesas", icon: "despesas", devOnly: true },
   { href: "/admin/locais", label: "Locais", icon: "locais" },
-  { href: "/admin/parceiros", label: "Parceiros", icon: "parceiros" },
-  { href: "/admin/contratos", label: "Contratos", icon: "contratos", adminOnly: true },
+  { href: "/admin/parceiros", label: "Parceiros", icon: "parceiros", devOnly: true },
+  { href: "/admin/contratos", label: "Contratos", icon: "contratos", devOnly: true },
   { href: "/admin/atrativos", label: "Atrativos", icon: "rotas" },
   { href: "/admin/avaliacoes", label: "Avaliações", icon: "avaliacoes" },
-  { href: "/admin/feedback", label: "Feedback", icon: "feedback" },
+  { href: "/admin/feedback", label: "Feedback", icon: "feedback", devOnly: true },
   { href: "/admin/relatorios", label: "Relatórios", icon: "relatorios" },
-  { href: "/admin/usuarios", label: "Usuários", icon: "usuarios" },
-  { href: "/admin/logs", label: "Logs", icon: "logs" },
-  { href: "/admin/taxonomia", label: "Taxonomia", icon: "taxonomia" },
+  { href: "/admin/usuarios", label: "Usuários", icon: "usuarios", devOnly: true },
+  { href: "/admin/logs", label: "Logs", icon: "logs", devOnly: true },
+  { href: "/admin/taxonomia", label: "Taxonomia", icon: "taxonomia", devOnly: true },
 ];
 
 /**
@@ -27,9 +27,7 @@ export const ADMIN_NAV_LINKS = [
  * @returns {AdminNavLink[]}
  */
 export function getVisibleAdminNavLinks(role) {
-  return ADMIN_NAV_LINKS.filter(
-    (link) => !link.adminOnly || canAccessContratosAdmin(role)
-  );
+  return ADMIN_NAV_LINKS.filter((link) => !link.devOnly || canAccessDevAdmin(role));
 }
 
 /**

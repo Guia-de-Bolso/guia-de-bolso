@@ -45,47 +45,24 @@ TO authenticated
 USING (user_id = auth.uid());
 
 DROP POLICY IF EXISTS "Admin le feedback" ON feedback;
-CREATE POLICY "Admin le feedback"
+CREATE POLICY "Dev le feedback"
 ON feedback
 FOR SELECT
 TO authenticated
-USING (
-  EXISTS (
-    SELECT 1 FROM perfis
-    WHERE perfis.id = auth.uid()
-    AND perfis.role IN ('admin', 'dev')
-  )
-);
+USING (public.is_dev());
 
 DROP POLICY IF EXISTS "Admin atualiza feedback" ON feedback;
-CREATE POLICY "Admin atualiza feedback"
+CREATE POLICY "Dev atualiza feedback"
 ON feedback
 FOR UPDATE
 TO authenticated
-USING (
-  EXISTS (
-    SELECT 1 FROM perfis
-    WHERE perfis.id = auth.uid()
-    AND perfis.role IN ('admin', 'dev')
-  )
-)
-WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM perfis
-    WHERE perfis.id = auth.uid()
-    AND perfis.role IN ('admin', 'dev')
-  )
-);
+USING (public.is_dev())
+WITH CHECK (public.is_dev());
 
 DROP POLICY IF EXISTS "Admin exclui feedback" ON feedback;
-CREATE POLICY "Admin exclui feedback"
+DROP POLICY IF EXISTS "feedback_delete_admin" ON feedback;
+CREATE POLICY "feedback_delete_dev"
 ON feedback
 FOR DELETE
 TO authenticated
-USING (
-  EXISTS (
-    SELECT 1 FROM perfis
-    WHERE perfis.id = auth.uid()
-    AND perfis.role IN ('admin', 'dev')
-  )
-);
+USING (public.is_dev());

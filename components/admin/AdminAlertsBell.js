@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { canAccessContratosAdmin } from "@/lib/adminRoles";
+import { canAccessDevAdmin } from "@/lib/adminRoles";
 import {
   ALERTA_PRIORIDADE,
   enrichAlertasComLidas,
@@ -36,7 +36,7 @@ function prioridadeChipClass(prioridade) {
  * Sino de alertas operacionais do painel admin.
  * @param {object} [props]
  * @param {string} [props.userId] - Namespace do localStorage de lidas.
- * @param {string} [props.adminRole] - Filtra alertas sensíveis (contratos) para role admin.
+ * @param {string} [props.adminRole] - Filtra alertas sensíveis (contratos) para role dev.
  * @returns {import("react").JSX.Element}
  */
 export default function AdminAlertsBell({ userId, adminRole }) {
@@ -54,7 +54,7 @@ export default function AdminAlertsBell({ userId, adminRole }) {
     const supabase = createClient();
     const raw = await fetchAdminAlertas(supabase);
     const visible = raw.filter(
-      (alerta) => !alerta.adminOnly || canAccessContratosAdmin(adminRole)
+      (alerta) => !alerta.devOnly || canAccessDevAdmin(adminRole)
     );
     setAlertas(enrichAlertasComLidas(visible, userId));
     setLoading(false);

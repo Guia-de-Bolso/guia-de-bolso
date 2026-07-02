@@ -8,5 +8,5 @@ CREATE POLICY "perfis_update_admin"
   ON perfis
   FOR UPDATE
   TO authenticated
-  USING (public.is_admin_or_dev())
-  WITH CHECK (public.is_admin_or_dev());
+  USING (public.is_dev())
+  WITH CHECK (public.is_dev());

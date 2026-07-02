@@ -22,6 +22,25 @@ $$;
 REVOKE ALL ON FUNCTION public.is_admin_or_dev() FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.is_admin_or_dev() TO authenticated;
 
+-- Role dev — áreas sensíveis do painel (contratos, usuários, logs, etc.)
+CREATE OR REPLACE FUNCTION public.is_dev()
+RETURNS boolean
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+STABLE
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.perfis
+    WHERE id = auth.uid()
+      AND role = 'dev'
+  );
+$$;
+
+REVOKE ALL ON FUNCTION public.is_dev() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.is_dev() TO authenticated;
+
 -- Leitura do próprio perfil (login, /admin, contadores IA)
 DROP POLICY IF EXISTS "perfis_select_own" ON perfis;
 CREATE POLICY "perfis_select_own"
@@ -30,10 +49,10 @@ CREATE POLICY "perfis_select_own"
   TO authenticated
   USING (auth.uid() = id);
 
--- Admin/dev listam todos os perfis (/admin/usuarios) — sem subquery recursiva na policy
+-- Admin/dev listam todos os perfis (/admin/usuarios) — somente dev após 20260702150000
 DROP POLICY IF EXISTS "perfis_select_admin" ON perfis;
 CREATE POLICY "perfis_select_admin"
   ON perfis
   FOR SELECT
   TO authenticated
-  USING (public.is_admin_or_dev());
+  USING (public.is_dev());

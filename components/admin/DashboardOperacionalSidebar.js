@@ -1,14 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import { canAccessDevAdmin } from "@/lib/adminRoles";
 
 /**
  * Resumo operacional (atalhos clicáveis) — sem duplicar timeline de logs.
  * @param {object} props
  * @param {{ emAnalise: number, parceirosAtivos: number, parceirosVencendo?: number, parceirosVencidos?: number, curadoriaAtrasada?: number, premiumAtivos: number, feedbackNovos?: number }} props.counts
+ * @param {string} [props.adminRole]
  * @returns {import("react").JSX.Element}
  */
-export default function DashboardOperacionalSidebar({ counts }) {
+export default function DashboardOperacionalSidebar({ counts, adminRole }) {
+  const devAccess = canAccessDevAdmin(adminRole);
+
   const items = [
     {
       label: "Locais em análise",
@@ -17,7 +21,7 @@ export default function DashboardOperacionalSidebar({ counts }) {
       accent: "text-amber-700",
       bg: "bg-amber-50",
     },
-    {
+    devAccess && {
       label: "Parceiros ativos",
       value: counts.parceirosAtivos,
       href: "/admin/parceiros",
@@ -25,7 +29,7 @@ export default function DashboardOperacionalSidebar({ counts }) {
       accent: "text-amber-700",
       bg: "bg-amber-50",
     },
-    {
+    devAccess && {
       label: "Parceiros vencendo",
       value: counts.parceirosVencendo ?? 0,
       href: "/admin/parceiros?filtro=vencendo",
@@ -33,7 +37,7 @@ export default function DashboardOperacionalSidebar({ counts }) {
       accent: "text-amber-800",
       bg: "bg-amber-50",
     },
-    {
+    devAccess && {
       label: "Curadoria atrasada",
       value: counts.curadoriaAtrasada ?? 0,
       href: "/admin/parceiros?filtro=curadoria",
@@ -41,7 +45,7 @@ export default function DashboardOperacionalSidebar({ counts }) {
       accent: "text-red-600",
       bg: "bg-red-50",
     },
-    {
+    devAccess && {
       label: "Premium IA ativos",
       value: counts.premiumAtivos,
       href: "/admin/usuarios",
@@ -49,14 +53,14 @@ export default function DashboardOperacionalSidebar({ counts }) {
       accent: "text-[#7a6520]",
       bg: "bg-[#f5e6b8]/50",
     },
-    {
+    devAccess && {
       label: "Feedback novos",
       value: counts.feedbackNovos ?? 0,
       href: "/admin/feedback",
       accent: "text-[#1a4a3a]",
       bg: "bg-[#eef8f4]",
     },
-  ];
+  ].filter(Boolean);
 
   return (
     <section className="flex h-full flex-col rounded-3xl bg-white p-5 shadow-md ring-1 ring-black/5 md:p-6">
@@ -82,13 +86,6 @@ export default function DashboardOperacionalSidebar({ counts }) {
           </Link>
         ))}
       </div>
-
-      <Link
-        href="/admin/logs"
-        className="mt-4 block rounded-xl bg-[#eef8f4] px-4 py-3 text-center text-sm font-semibold text-[#1a4a3a] transition hover:bg-[#d4ede8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a4a3a]/30"
-      >
-        Ver atividade e logs →
-      </Link>
     </section>
   );
 }

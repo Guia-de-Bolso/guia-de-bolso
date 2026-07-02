@@ -1,7 +1,5 @@
--- Promove um usuário a Desenvolvedor com Premium ilimitado pelo e-mail de login.
--- Substitua o e-mail abaixo e rode no SQL Editor.
--- O trigger perfis_guard_privileged_columns bloqueia role/premium sem auth admin/dev;
--- desabilite-o temporariamente ou use o painel /admin/usuarios logado como admin.
+-- Promove contas de desenvolvedor com Premium ilimitado pelos e-mails de login.
+-- Rode no SQL Editor. Requer migration 20260702150000_dev_role_access.sql (is_dev + trigger).
 
 ALTER TABLE perfis DISABLE TRIGGER perfis_guard_privileged_columns;
 
@@ -18,7 +16,10 @@ SELECT
   true,
   NULL
 FROM auth.users u
-WHERE u.email = 'brunodislilerdev@gmail.com'
+WHERE lower(u.email) IN (
+  'brunodislilerdev@gmail.com',
+  'rdecaldascampos@gmail.com'
+)
 ON CONFLICT (id) DO UPDATE
 SET
   role = 'dev',
