@@ -16,7 +16,7 @@ User-facing product reference for **Guia de Bolso** (Imbituba, SC). Behavior is 
 | **Admin** | Operational CMS at `/admin` (`canAccessAdmin`: `admin` or `dev`) — locais, atrativos, avaliações, relatórios |
 | **Dev** | Same as admin **plus** sensitive areas (`canAccessDevAdmin`, `DEV_ONLY_ADMIN_PATHS` in `lib/adminRoles.js`): IA & custos, despesas, parceiros, contratos, feedback, usuários, logs, taxonomia |
 
-**Public catalog (production):** `lib/publicCatalog.js` sets `PUBLIC_APP_PARTNERS_ONLY = true` — consumer lists and home feeds only include active places with `eh_parceiro = true` (test drafts stay out of the app until flagged as partner).
+**Public catalog (production):** `lib/publicCatalog.js` sets `PUBLIC_APP_PARTNERS_ONLY = false` — consumer lists and home feeds include **every** active place (curated nature spots, free-tier listings and partners alike); `status = 'ativo'` is the only visibility gate, so test drafts must stay in `em_analise`/`desativado`. Flip the flag back to `true` to restrict feeds to `eh_parceiro = true`.
 
 ---
 
