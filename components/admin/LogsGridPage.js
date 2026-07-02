@@ -7,8 +7,10 @@ import AdminShell, { useAdminAuth } from "@/components/admin/AdminShell";
 import {
   LOG_ACOES,
   LOG_PERIODOS,
+  clearAllAdminLogs,
   fetchLogMetrics7d,
   fetchLogsAdmin,
+  fetchTotalLogsCount,
   formatLogDateTime,
   formatarAcaoLog,
   formatarDetalhesLog,
@@ -22,6 +24,31 @@ import {
 import { createClient } from "@/lib/supabase";
 
 const PAGE_SIZE = 25;
+
+/**
+ * @param {object} props
+ * @returns {import("react").JSX.Element|null}
+ */
+function AdminModal({ isOpen, title, children, onClose }) {
+  if (!isOpen) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl"
+        onClick={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+      >
+        <h3 className="text-lg font-bold text-[#1a2e28]">{title}</h3>
+        <div className="mt-4">{children}</div>
+      </div>
+    </div>
+  );
+}
 
 /**
  * @param {object} props
@@ -170,6 +197,10 @@ export default function LogsGridPage() {
   const [filtroPeriodo, setFiltroPeriodo] = useState("7d");
   const [customInicio, setCustomInicio] = useState("");
   const [customFim, setCustomFim] = useState("");
+  const [clearModalOpen, setClearModalOpen] = useState(false);
+  const [totalLogs, setTotalLogs] = useState(0);
+  const [clearing, setClearing] = useState(false);
+  const [clearError, setClearError] = useState("");
 
   useEffect(() => {
     const timer = setTimeout(() => setBuscaDebounced(busca), 300);
@@ -246,6 +277,37 @@ export default function LogsGridPage() {
     if (userIdParam) router.replace("/admin/logs");
   }
 
+  async function abrirLimparTodos() {
+    const supabase = createClient();
+    const count = await fetchTotalLogsCount(supabase);
+    setTotalLogs(count);
+    setClearError("");
+    setClearModalOpen(true);
+  }
+
+  async function confirmarLimparTodos() {
+    setClearing(true);
+    setClearError("");
+
+    const supabase = createClient();
+    const { error } = await clearAllAdminLogs(supabase);
+
+    if (error) {
+      setClearing(false);
+      setClearError(
+        error.message.includes("policy")
+          ? "Sem permissão para limpar logs. Aplique a migração admin_delete_logs_feedback no Supabase."
+          : "Não foi possível limpar os logs. Tente novamente."
+      );
+      return;
+    }
+
+    setClearing(false);
+    setClearModalOpen(false);
+    setPage(0);
+    await loadData();
+  }
+
   if (authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50 text-[#5a6b66]">
@@ -265,6 +327,16 @@ export default function LogsGridPage() {
         <StatCard label="Acessos ao app" value={metrics.acessos} hint="Últimos 7 dias" accent="text-blue-600" />
         <StatCard label="IR AGORA" value={metrics.irAgora} hint="Últimos 7 dias" accent="text-emerald-600" />
         <StatCard label="Favoritos" value={metrics.favoritos} hint="Últimos 7 dias" accent="text-purple-600" />
+      </div>
+
+      <div className="mt-4 flex justify-end">
+        <button
+          type="button"
+          onClick={abrirLimparTodos}
+          className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700"
+        >
+          Limpar todos os logs
+        </button>
       </div>
 
       {userIdParam && (
@@ -405,6 +477,52 @@ export default function LogsGridPage() {
           </div>
         </div>
       )}
+      <AdminModal
+        isOpen={clearModalOpen}
+        title="Limpar todos os logs"
+        onClose={() => {
+          if (!clearing) {
+            setClearModalOpen(false);
+            setClearError("");
+          }
+        }}
+      >
+        <p className="text-sm leading-relaxed text-[#5a6b66]">
+          Você está prestes a excluir permanentemente{" "}
+          <strong>{totalLogs.toLocaleString("pt-BR")}</strong>{" "}
+          {totalLogs === 1 ? "registro" : "registros"} de atividade do app.
+        </p>
+        <p className="mt-2 text-xs text-[#9aa8a3]">
+          Esta ação não pode ser desfeita. Relatórios e métricas históricas
+          deixarão de refletir eventos anteriores a esta limpeza.
+        </p>
+        {clearError && (
+          <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-xs font-medium text-[#b42318]">
+            {clearError}
+          </p>
+        )}
+        <div className="mt-4 flex gap-2">
+          <button
+            type="button"
+            disabled={clearing}
+            onClick={() => {
+              setClearModalOpen(false);
+              setClearError("");
+            }}
+            className="flex-1 rounded-xl bg-[#f0f4f3] py-2.5 text-sm font-semibold text-[#1a2e28] disabled:opacity-60"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            disabled={clearing || totalLogs === 0}
+            onClick={confirmarLimparTodos}
+            className="flex-1 rounded-xl bg-red-600 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+          >
+            {clearing ? "Limpando…" : "Limpar permanentemente"}
+          </button>
+        </div>
+      </AdminModal>
     </AdminShell>
   );
 }

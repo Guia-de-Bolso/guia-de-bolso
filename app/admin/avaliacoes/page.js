@@ -13,6 +13,7 @@ import {
   parseSugestaoIa,
 } from "@/lib/avaliacoes";
 import { getCategoriaChipClass } from "@/lib/avaliacaoAspectos";
+import { registrarLog } from "@/lib/logs";
 import { createClient } from "@/lib/supabase";
 
 const TABS = [
@@ -126,7 +127,7 @@ function AdminModal({ isOpen, title, children, onClose }) {
 const TAB_IDS = new Set(TABS.map((tab) => tab.id));
 
 function AdminAvaliacoesPage() {
-  const { loading } = useAdminAuth();
+  const { loading, user } = useAdminAuth();
   const searchParams = useSearchParams();
   const tabFromUrl = searchParams.get("tab");
   const initialTab =
@@ -137,6 +138,8 @@ function AdminAvaliacoesPage() {
   const [contagemAprovadasPorUsuario, setContagemAprovadasPorUsuario] = useState({});
   const [rejectModal, setRejectModal] = useState(null);
   const [editModal, setEditModal] = useState(null);
+  const [deleteModal, setDeleteModal] = useState(null);
+  const [deleteError, setDeleteError] = useState("");
   const [motivoSelect, setMotivoSelect] = useState(MOTIVOS_REJEICAO[0]);
   const [motivoDetalhe, setMotivoDetalhe] = useState("");
   const [instrucaoEdicao, setInstrucaoEdicao] = useState("");
@@ -273,6 +276,46 @@ function AdminAvaliacoesPage() {
     });
     setEditModal(null);
     setInstrucaoEdicao("");
+  }
+
+  /**
+   * @param {object} avaliacao
+   */
+  async function confirmarExclusao(avaliacao) {
+    setSalvando(true);
+    setDeleteError("");
+
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("avaliacoes")
+      .delete()
+      .eq("id", avaliacao.id);
+
+    if (error) {
+      setSalvando(false);
+      setDeleteError(
+        error.message.includes("policy")
+          ? "Sem permissão para excluir. Aplique a migração avaliacoes_admin_delete no Supabase."
+          : "Não foi possível excluir a avaliação. Tente novamente."
+      );
+      return;
+    }
+
+    if (user) {
+      await registrarLog(supabase, user, "admin_excluiu_avaliacao", {
+        avaliacao_id: avaliacao.id,
+        lugar_nome: avaliacao.lugares?.nome || null,
+        autor_nome: getNomeAutorAvaliacao(avaliacao),
+        status: avaliacao.status,
+      });
+    }
+
+    setSalvando(false);
+    setDeleteModal(null);
+    setDeleteError("");
+    setAvaliacoes((items) => items.filter((item) => item.id !== avaliacao.id));
+    loadCounts();
+    loadContagemAprovadas();
   }
 
   if (loading) {
@@ -415,42 +458,55 @@ function AdminAvaliacoesPage() {
                   </div>
                 )}
 
-                {(activeTab === AVALIACAO_STATUS.PENDENTE ||
-                  activeTab === AVALIACAO_STATUS.AGUARDANDO_EDICAO) && (
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      disabled={salvando}
-                      onClick={() => aprovar(avaliacao.id)}
-                      className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
-                    >
-                      Aprovar
-                    </button>
-                    <button
-                      type="button"
-                      disabled={salvando}
-                      onClick={() => {
-                        setRejectModal(avaliacao);
-                        setMotivoSelect(MOTIVOS_REJEICAO[0]);
-                        setMotivoDetalhe("");
-                      }}
-                      className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
-                    >
-                      Rejeitar
-                    </button>
-                    <button
-                      type="button"
-                      disabled={salvando}
-                      onClick={() => {
-                        setEditModal(avaliacao);
-                        setInstrucaoEdicao("");
-                      }}
-                      className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
-                    >
-                      Solicitar edição
-                    </button>
-                  </div>
-                )}
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {(activeTab === AVALIACAO_STATUS.PENDENTE ||
+                    activeTab === AVALIACAO_STATUS.AGUARDANDO_EDICAO) && (
+                    <>
+                      <button
+                        type="button"
+                        disabled={salvando}
+                        onClick={() => aprovar(avaliacao.id)}
+                        className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+                      >
+                        Aprovar
+                      </button>
+                      <button
+                        type="button"
+                        disabled={salvando}
+                        onClick={() => {
+                          setRejectModal(avaliacao);
+                          setMotivoSelect(MOTIVOS_REJEICAO[0]);
+                          setMotivoDetalhe("");
+                        }}
+                        className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+                      >
+                        Rejeitar
+                      </button>
+                      <button
+                        type="button"
+                        disabled={salvando}
+                        onClick={() => {
+                          setEditModal(avaliacao);
+                          setInstrucaoEdicao("");
+                        }}
+                        className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+                      >
+                        Solicitar edição
+                      </button>
+                    </>
+                  )}
+                  <button
+                    type="button"
+                    disabled={salvando}
+                    onClick={() => {
+                      setDeleteModal(avaliacao);
+                      setDeleteError("");
+                    }}
+                    className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 disabled:opacity-60"
+                  >
+                    Excluir comentário
+                  </button>
+                </div>
               </article>
             );
           })
@@ -515,6 +571,62 @@ function AdminAvaliacoesPage() {
         >
           Enviar solicitação
         </button>
+      </AdminModal>
+
+      <AdminModal
+        isOpen={Boolean(deleteModal)}
+        title="Excluir comentário permanentemente"
+        onClose={() => {
+          if (!salvando) {
+            setDeleteModal(null);
+            setDeleteError("");
+          }
+        }}
+      >
+        {deleteModal && (
+          <>
+            <p className="text-sm leading-relaxed text-[#5a6b66]">
+              Você está prestes a excluir a avaliação de{" "}
+              <strong>{getNomeAutorAvaliacao(deleteModal)}</strong> em{" "}
+              <strong>{deleteModal.lugares?.nome || "um lugar"}</strong>.
+            </p>
+            <p className="mt-2 text-xs text-[#9aa8a3]">
+              Esta ação não pode ser desfeita. O comentário deixará de aparecer no
+              app e nas estatísticas do estabelecimento.
+            </p>
+            {deleteModal.comentario && (
+              <blockquote className="mt-3 rounded-xl bg-[#f0f4f3] px-3 py-2 text-sm italic text-[#5a6b66]">
+                “{deleteModal.comentario}”
+              </blockquote>
+            )}
+            {deleteError && (
+              <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-xs font-medium text-[#b42318]">
+                {deleteError}
+              </p>
+            )}
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                disabled={salvando}
+                onClick={() => {
+                  setDeleteModal(null);
+                  setDeleteError("");
+                }}
+                className="flex-1 rounded-xl bg-[#f0f4f3] py-2.5 text-sm font-semibold text-[#1a2e28] disabled:opacity-60"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={salvando}
+                onClick={() => confirmarExclusao(deleteModal)}
+                className="flex-1 rounded-xl bg-red-600 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+              >
+                {salvando ? "Excluindo…" : "Excluir permanentemente"}
+              </button>
+            </div>
+          </>
+        )}
       </AdminModal>
     </AdminShell>
   );

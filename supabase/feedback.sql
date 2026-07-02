@@ -76,3 +76,16 @@ WITH CHECK (
     AND perfis.role IN ('admin', 'dev')
   )
 );
+
+DROP POLICY IF EXISTS "Admin exclui feedback" ON feedback;
+CREATE POLICY "Admin exclui feedback"
+ON feedback
+FOR DELETE
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1 FROM perfis
+    WHERE perfis.id = auth.uid()
+    AND perfis.role IN ('admin', 'dev')
+  )
+);

@@ -16,3 +16,10 @@ CREATE POLICY "avaliacoes_update_admin"
   TO authenticated
   USING (public.is_admin_or_dev())
   WITH CHECK (public.is_admin_or_dev());
+
+DROP POLICY IF EXISTS "avaliacoes_delete_admin" ON avaliacoes;
+CREATE POLICY "avaliacoes_delete_admin"
+  ON avaliacoes
+  FOR DELETE
+  TO authenticated
+  USING (public.is_admin_or_dev());

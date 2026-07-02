@@ -137,7 +137,7 @@ Run in order for a **new environment** that already has base tables from the Sup
 | # | File | Purpose |
 |---|------|---------|
 | 22 | `avaliacoes_moderacao.sql` | Moderation columns + RLS |
-| 22b | `avaliacoes_admin_policies.sql` | Admin SELECT/UPDATE all `avaliacoes` (moderação) |
+| 22b | `avaliacoes_admin_policies.sql` | Admin SELECT/UPDATE/DELETE all `avaliacoes` (moderação) |
 | 22c | `favoritos_policies.sql` | Own-row CRUD + admin SELECT (relatórios) |
 | 22d | `destaques_planos_policies.sql` | `planos` read public / write admin; `destaques` admin only |
 | 23 | `plano_comercial_unico.sql` | Single Parceiro plan seed |
@@ -149,9 +149,12 @@ Run in order for a **new environment** that already has base tables from the Sup
 | # | File | Purpose |
 |---|------|---------|
 | 26 | `lugares_public_read.sql` | Public read active `lugares` |
-| 27 | `lugares_related_public_read.sql` | `localizacoes`, `tags`, `lugares_tags` |
+| 27 | `lugares_related_public_read.sql` | `localizacoes`, `tags`, `lugares_tags` (read; admin vê inativos) |
 | 28 | `lugares_admin_write.sql` | Admin CRUD `lugares` |
+| 28b | `lugares_related_admin_write.sql` | Admin write `localizacoes`, `lugares_tags` |
+| 28c | `taxonomia_admin_write.sql` | Admin write `tags`, `subcategorias` (+ RLS subcategorias) |
 | 29 | `storage_admin_fotos.sql` | Admin-only upload to photo buckets |
+| **29b** | **`security_p0_complete.sql`** | **Aplicação única de todo P0** (produção / SQL Editor) |
 
 ### G — Performance and RPC
 

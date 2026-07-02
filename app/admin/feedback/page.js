@@ -9,6 +9,7 @@ import {
   getFeedbackStatusLabel,
   getFeedbackTipoLabel,
 } from "@/lib/feedback";
+import { registrarLog } from "@/lib/logs";
 import { createClient } from "@/lib/supabase";
 
 /**
@@ -39,11 +40,44 @@ function statusBadgeClass(status) {
 }
 
 /**
+ * @param {object} props
+ * @returns {import("react").JSX.Element|null}
+ */
+function AdminModal({ isOpen, title, children, onClose }) {
+  if (!isOpen) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl"
+        onClick={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+      >
+        <h3 className="text-lg font-bold text-[#1a2e28]">{title}</h3>
+        <div className="mt-4">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * @param {object} item
+ * @returns {string}
+ */
+function getFeedbackAutorLabel(item) {
+  return item.nome_contato?.trim() || (item.user_id ? "Usuário logado" : "Visitante");
+}
+
+/**
  * Admin — listagem e moderação de feedback.
  * @returns {import("react").JSX.Element}
  */
 export default function AdminFeedbackPage() {
-  const { loading: authLoading } = useAdminAuth();
+  const { loading: authLoading, user } = useAdminAuth();
   const [activeStatus, setActiveStatus] = useState(FEEDBACK_STATUS.NOVO);
   const [tipoFiltro, setTipoFiltro] = useState("");
   const [items, setItems] = useState([]);
@@ -51,6 +85,8 @@ export default function AdminFeedbackPage() {
   const [expandedId, setExpandedId] = useState(null);
   const [notasDraft, setNotasDraft] = useState({});
   const [salvando, setSalvando] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(null);
+  const [deleteError, setDeleteError] = useState("");
 
   const loadCounts = useCallback(async () => {
     const supabase = createClient();
@@ -137,6 +173,43 @@ export default function AdminFeedbackPage() {
     await atualizarFeedback(id, { admin_notas: notasDraft[id] ?? "" });
   }
 
+  /**
+   * @param {object} item
+   */
+  async function confirmarExclusao(item) {
+    setSalvando(true);
+    setDeleteError("");
+
+    const supabase = createClient();
+    const { error } = await supabase.from("feedback").delete().eq("id", item.id);
+
+    if (error) {
+      setSalvando(false);
+      setDeleteError(
+        error.message.includes("policy")
+          ? "Sem permissão para excluir. Aplique a migração admin_delete_logs_feedback no Supabase."
+          : "Não foi possível excluir o feedback. Tente novamente."
+      );
+      return;
+    }
+
+    if (user) {
+      await registrarLog(supabase, user, "admin_excluiu_feedback", {
+        feedback_id: item.id,
+        autor_nome: getFeedbackAutorLabel(item),
+        tipo: item.tipo,
+        status: item.status,
+      });
+    }
+
+    setSalvando(false);
+    setDeleteModal(null);
+    setDeleteError("");
+    if (expandedId === item.id) setExpandedId(null);
+    await loadCounts();
+    await loadItems();
+  }
+
   return (
     <AdminShell title="Feedback" subtitle="Sugestões e reportes dos usuários">
       <div className="mb-6 flex flex-wrap gap-2">
@@ -190,9 +263,7 @@ export default function AdminFeedbackPage() {
         <ul className="space-y-3">
           {items.map((item) => {
             const expanded = expandedId === item.id;
-            const autor =
-              item.nome_contato?.trim() ||
-              (item.user_id ? "Usuário logado" : "Visitante");
+            const autor = getFeedbackAutorLabel(item);
             const contato = item.email_contato?.trim();
 
             return (
@@ -226,9 +297,23 @@ export default function AdminFeedbackPage() {
                       {item.pagina_origem ? ` · ${item.pagina_origem}` : ""}
                     </p>
                   </div>
-                  <span className="shrink-0 text-xs text-[#9aa8a3]">
-                    {formatDate(item.created_at)}
-                  </span>
+                  <div className="flex shrink-0 flex-col items-end gap-2">
+                    <span className="text-xs text-[#9aa8a3]">
+                      {formatDate(item.created_at)}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={salvando}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setDeleteModal(item);
+                        setDeleteError("");
+                      }}
+                      className="rounded-lg border border-red-200 bg-red-50 px-3 py-1 text-[11px] font-semibold text-red-700 disabled:opacity-60"
+                    >
+                      Excluir
+                    </button>
+                  </div>
                 </button>
 
                 {expanded && (
@@ -307,6 +392,59 @@ export default function AdminFeedbackPage() {
           })}
         </ul>
       )}
+
+      <AdminModal
+        isOpen={Boolean(deleteModal)}
+        title="Excluir feedback permanentemente"
+        onClose={() => {
+          if (!salvando) {
+            setDeleteModal(null);
+            setDeleteError("");
+          }
+        }}
+      >
+        {deleteModal && (
+          <>
+            <p className="text-sm leading-relaxed text-[#5a6b66]">
+              Você está prestes a excluir o feedback de{" "}
+              <strong>{getFeedbackAutorLabel(deleteModal)}</strong> (
+              {getFeedbackTipoLabel(deleteModal.tipo)}).
+            </p>
+            <p className="mt-2 text-xs text-[#9aa8a3]">
+              Esta ação não pode ser desfeita.
+            </p>
+            <blockquote className="mt-3 rounded-xl bg-[#f0f4f3] px-3 py-2 text-sm italic text-[#5a6b66]">
+              “{deleteModal.mensagem}”
+            </blockquote>
+            {deleteError && (
+              <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-xs font-medium text-[#b42318]">
+                {deleteError}
+              </p>
+            )}
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                disabled={salvando}
+                onClick={() => {
+                  setDeleteModal(null);
+                  setDeleteError("");
+                }}
+                className="flex-1 rounded-xl bg-[#f0f4f3] py-2.5 text-sm font-semibold text-[#1a2e28] disabled:opacity-60"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={salvando}
+                onClick={() => confirmarExclusao(deleteModal)}
+                className="flex-1 rounded-xl bg-red-600 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+              >
+                {salvando ? "Excluindo…" : "Excluir permanentemente"}
+              </button>
+            </div>
+          </>
+        )}
+      </AdminModal>
     </AdminShell>
   );
 }

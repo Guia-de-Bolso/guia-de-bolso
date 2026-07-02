@@ -18,10 +18,12 @@ Compare cada política no **Supabase Dashboard → Authentication → Policies**
 | `planos` | `destaques_planos_policies.sql` | `planos_select_public`, `planos_*_admin` |
 | `destaques` | `destaques_planos_policies.sql` | `destaques_*_admin` (admin only) |
 | `avaliacoes` | `avaliacoes_moderacao.sql` | `avaliacoes_insert_own`, `avaliacoes_select_*`, `avaliacoes_update_ia_own` |
-| `avaliacoes` | `avaliacoes_admin_policies.sql` | `avaliacoes_select_admin`, `avaliacoes_update_admin` |
-| `logs` | `logs_policies.sql` | `Admin lê logs`, `Authenticated insert logs` |
+| `avaliacoes` | `avaliacoes_admin_policies.sql` | `avaliacoes_select_admin`, `avaliacoes_update_admin`, `avaliacoes_delete_admin` |
+| `logs` | `logs_policies.sql` | `Admin lê logs`, `Authenticated insert logs`, `logs_delete_admin` |
 | `lugares` | `lugares_public_read.sql`, `lugares_admin_write.sql` | Leitura ativos + CRUD admin |
-| `localizacoes`, `tags`, `lugares_tags` | `lugares_related_public_read.sql` | Leitura pública |
+| `localizacoes`, `tags`, `lugares_tags` | `lugares_related_public_read.sql` | Leitura pública (+ admin lê inativos) |
+| `localizacoes`, `lugares_tags` | `lugares_related_admin_write.sql` | INSERT/UPDATE/DELETE admin |
+| `tags`, `subcategorias` | `taxonomia_admin_write.sql` | Leitura pública tags/subcategorias; escrita admin |
 | `rotas` + filhos | `rotas_policies.sql` | Leitura pública + escrita admin |
 | `rotas_favoritas` | `rotas_favoritas.sql` | CRUD próprio `user_id` |
 | `roteiros` | `roteiros_policies.sql` | CRUD próprio `user_id` |
@@ -46,11 +48,12 @@ Compare cada política no **Supabase Dashboard → Authentication → Policies**
 
 6. `favoritos_policies.sql`
 7. `destaques_planos_policies.sql`
-8. `lugares_public_read.sql` + `lugares_admin_write.sql` + `lugares_related_public_read.sql`
+8. `lugares_public_read.sql` + `lugares_admin_write.sql` + `lugares_related_public_read.sql` + `lugares_related_admin_write.sql` + `taxonomia_admin_write.sql`
 9. `avaliacoes_moderacao.sql` → `avaliacoes_admin_policies.sql`
 10. `logs_policies.sql`
 11. `storage_admin_fotos.sql` (após buckets)
-12. `db_indexes.sql` + `db_indexes_phase2.sql` + `lugares_populares_rpc.sql` + `lugares_populares_rpc_fix.sql`
+12. **`security_p0_complete.sql`** — aplica itens 1–11 de uma vez (recomendado em produção)
+13. `db_indexes.sql` + `db_indexes_phase2.sql` + `lugares_populares_rpc.sql` + `lugares_populares_rpc_fix.sql`
 
 ---
 

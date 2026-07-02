@@ -9,6 +9,10 @@ ALTER TABLE logs
 -- RLS: permitir leitura dos logs no painel admin
 ALTER TABLE logs ENABLE ROW LEVEL SECURITY;
 
+-- Policies legadas / abertas (remover vazamento de PII)
+DROP POLICY IF EXISTS "Enable read access for all users" ON logs;
+DROP POLICY IF EXISTS "Public read logs" ON logs;
+
 DROP POLICY IF EXISTS "Admin lê logs" ON logs;
 DROP POLICY IF EXISTS "Authenticated insert logs" ON logs;
 
@@ -23,3 +27,10 @@ CREATE POLICY "Authenticated insert logs"
   FOR INSERT
   TO authenticated
   WITH CHECK (user_id IS NULL OR user_id = auth.uid());
+
+DROP POLICY IF EXISTS "logs_delete_admin" ON logs;
+CREATE POLICY "logs_delete_admin"
+  ON logs
+  FOR DELETE
+  TO authenticated
+  USING (public.is_admin_or_dev());
