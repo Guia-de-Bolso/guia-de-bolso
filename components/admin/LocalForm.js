@@ -34,6 +34,13 @@ import { isLugarElegivelQr } from "@/lib/lugarQr";
 import { getEffectiveCategoria } from "@/lib/lugarTaxonomia";
 import { getCategoriasVisiveis } from "@/lib/categorias";
 import {
+  fetchTakenSlugs,
+  isMissingSlugColumnError,
+  isSlugAutoFromNome,
+  resolveLugarSlug,
+  slugifyNome,
+} from "@/lib/slug";
+import {
   buildParceiroProgramaPayload,
   fetchParceiroProgramaColumnsReady,
   isMissingParceiroProgramaColumnError,
