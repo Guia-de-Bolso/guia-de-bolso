@@ -791,8 +791,10 @@ export default function LocalForm({
           id: editingId,
           nome: form.nome,
           categoria: form.categoria,
+          subcategoria: form.subcategoria,
           slug: form.slug || initialData?.slug,
           status: form.status,
+          imagemUrl: photoItems[0]?.preview || photoItems[0]?.url || null,
         }}
       />
     )}

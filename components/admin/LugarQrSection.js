@@ -1,17 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import QRCode from "qrcode";
 import { isParceiro } from "@/lib/lugarBadges";
 import { buildQrUrl, isLugarElegivelQr } from "@/lib/lugarQr";
-import { downloadQrPdf, QR_PDF_FORMAT_LIST } from "@/lib/qrPdf";
+import { downloadQrPdf, generateQrDataUrl, QR_PDF_COPY, QR_PDF_FORMAT_LIST } from "@/lib/qrPdf";
 import { getClientSiteUrl } from "@/lib/siteUrl";
-import { createClient } from "@/lib/supabase";
 
 /**
- * Seção admin: preview do QR, URL curta e download PDF.
+ * Seção admin: preview do QR, URL curta e download PDF premium.
  * @param {{
- *   lugar: { id: string|number, nome: string, categoria?: string, slug?: string|null, status?: string },
+ *   lugar: {
+ *     id: string|number,
+ *     nome: string,
+ *     categoria?: string,
+ *     subcategoria?: string,
+ *     slug?: string|null,
+ *     status?: string,
+ *     imagemUrl?: string|null,
+ *   },
  *   slugColumnReady?: boolean,
  * }} props
  * @returns {import("react").ReactElement|null}
@@ -28,6 +35,13 @@ export default function LugarQrSection({ lugar, slugColumnReady = true }) {
   const siteUrl = getClientSiteUrl();
   const qrUrl = slug ? buildQrUrl(slug, siteUrl) : "";
 
+  const categoriaLinha = useMemo(() => {
+    const cat = String(lugar?.categoria || "").trim();
+    const sub = String(lugar?.subcategoria || "").trim();
+    if (cat && sub) return `${cat} · ${sub}`;
+    return cat || sub || "";
+  }, [lugar?.categoria, lugar?.subcategoria]);
+
   useEffect(() => {
     if (!elegivel || !slug) {
       setQrDataUrl("");
@@ -36,23 +50,31 @@ export default function LugarQrSection({ lugar, slugColumnReady = true }) {
 
     let cancelled = false;
 
-    QRCode.toDataURL(qrUrl, {
-      width: 240,
-      margin: 2,
-      errorCorrectionLevel: "H",
-      color: { dark: "#1a4a3a", light: "#ffffff" },
-    })
+    generateQrDataUrl(siteUrl, slug)
       .then((dataUrl) => {
         if (!cancelled) setQrDataUrl(dataUrl);
       })
       .catch(() => {
-        if (!cancelled) setQrDataUrl("");
+        if (!cancelled) {
+          QRCode.toDataURL(qrUrl, {
+            width: 280,
+            margin: 2,
+            errorCorrectionLevel: "H",
+            color: { dark: "#000000", light: "#ffffff" },
+          })
+            .then((dataUrl) => {
+              if (!cancelled) setQrDataUrl(dataUrl);
+            })
+            .catch(() => {
+              if (!cancelled) setQrDataUrl("");
+            });
+        }
       });
 
     return () => {
       cancelled = true;
     };
-  }, [elegivel, slug, qrUrl]);
+  }, [elegivel, slug, qrUrl, siteUrl]);
 
   if (!elegivel) return null;
 
@@ -102,6 +124,7 @@ export default function LugarQrSection({ lugar, slugColumnReady = true }) {
         slug,
         siteUrl,
         ehParceiro,
+        imagemUrl: lugar.imagemUrl,
         format: pdfFormat,
       });
     } finally {
@@ -110,43 +133,62 @@ export default function LugarQrSection({ lugar, slugColumnReady = true }) {
   }
 
   return (
-    <section className="mt-6 rounded-2xl border border-[#e3e9e6] bg-[#f7faf9] p-5">
-      <h3 className="text-sm font-bold uppercase tracking-wide text-[#5a6b66]">
-        QR Code do estabelecimento
-      </h3>
-      <p className="mt-2 text-xs text-[#5a6b66]">
-        Imprima e coloque na mesa ou balcão. O turista escaneia e abre o perfil no app.
-      </p>
+    <section className="mt-6 overflow-hidden rounded-2xl border border-[#1a4a3a]/15 bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54] p-5 text-white shadow-sm">
+      <div className="flex items-start gap-3">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo.png" alt="" className="h-9 w-auto shrink-0 brightness-0 invert" />
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-white/75">
+            {QR_PDF_COPY.badge}
+          </p>
+          <h3 className="mt-0.5 text-base font-bold">{QR_PDF_COPY.headline}</h3>
+          <p className="mt-1 text-xs leading-relaxed text-white/85">{QR_PDF_COPY.subtitle}</p>
+        </div>
+      </div>
 
       {!slug ? (
-        <p className="mt-4 rounded-xl bg-white px-4 py-3 text-sm text-[#5a6b66]">
-          Salve o local para gerar o link curto e o QR Code.
+        <p className="mt-4 rounded-xl bg-white/10 px-4 py-3 text-sm text-white/90">
+          Salve o local para gerar o link curto e o PDF premium.
         </p>
       ) : (
-        <div className="mt-4 flex flex-col gap-4 md:flex-row md:items-start">
-          <div className="flex shrink-0 flex-col items-center rounded-2xl bg-white p-4 shadow-sm">
-            {qrDataUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={qrDataUrl}
-                alt={`QR Code de ${lugar.nome}`}
-                width={160}
-                height={160}
-                className="h-40 w-40"
-              />
-            ) : (
-              <div className="flex h-40 w-40 items-center justify-center text-xs text-[#5a6b66]">
-                Gerando preview…
-              </div>
-            )}
+        <div className="mt-5 flex flex-col gap-4 lg:flex-row lg:items-start">
+          <div className="mx-auto w-full max-w-[220px] shrink-0 rounded-2xl bg-white p-4 text-center shadow-md lg:mx-0">
+            {ehParceiro ? (
+              <span className="mb-2 inline-block rounded-full border border-[#9a7b2f]/40 bg-[#f5f0e4] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#9a7b2f]">
+                {QR_PDF_COPY.parceiroBadge}
+              </span>
+            ) : null}
+            <p className="text-sm font-bold leading-snug text-[#1a2e28]">{lugar.nome}</p>
+            {categoriaLinha ? (
+              <p className="mt-1 text-xs text-[#5a6b66]">{categoriaLinha}</p>
+            ) : null}
+            <div className="mx-auto mt-3 inline-block rounded-xl border-2 border-[#1a4a3a] p-2">
+              {qrDataUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={qrDataUrl}
+                  alt={`QR Code de ${lugar.nome}`}
+                  width={140}
+                  height={140}
+                  className="h-[140px] w-[140px]"
+                />
+              ) : (
+                <div className="flex h-[140px] w-[140px] items-center justify-center text-xs text-[#5a6b66]">
+                  Gerando preview…
+                </div>
+              )}
+            </div>
+            <p className="mt-3 text-[11px] font-semibold text-[#1a4a3a]">
+              {QR_PDF_COPY.instruction}
+            </p>
           </div>
 
           <div className="min-w-0 flex-1 space-y-3">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-[#5a6b66]">
-                URL curta
+              <p className="text-[10px] font-bold uppercase tracking-wide text-white/70">
+                URL curta (abre o perfil no app)
               </p>
-              <p className="mt-1 break-all rounded-xl bg-white px-3 py-2 font-mono text-sm text-[#1a4a3a]">
+              <p className="mt-1 break-all rounded-xl bg-white/10 px-3 py-2 font-mono text-sm text-white">
                 {qrUrl}
               </p>
             </div>
@@ -154,7 +196,7 @@ export default function LugarQrSection({ lugar, slugColumnReady = true }) {
             <div>
               <label
                 htmlFor="qr-pdf-format"
-                className="text-xs font-semibold uppercase tracking-wide text-[#5a6b66]"
+                className="text-[10px] font-bold uppercase tracking-wide text-white/70"
               >
                 Formato de impressão
               </label>
@@ -162,21 +204,23 @@ export default function LugarQrSection({ lugar, slugColumnReady = true }) {
                 id="qr-pdf-format"
                 value={pdfFormat}
                 onChange={(event) => setPdfFormat(event.target.value)}
-                className="mt-1 w-full rounded-xl border border-[#e3e9e6] bg-white px-3 py-2.5 text-sm text-[#1a2e28] outline-none focus:border-[#1a4a3a] focus:ring-2 focus:ring-[#1a4a3a]/15"
+                className="mt-1 w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-sm text-white outline-none focus:border-white/40 focus:ring-2 focus:ring-white/20"
               >
                 {QR_PDF_FORMAT_LIST.map((item) => (
-                  <option key={item.id} value={item.id}>
+                  <option key={item.id} value={item.id} className="text-[#1a2e28]">
                     {item.label}
                   </option>
                 ))}
               </select>
             </div>
 
+            <p className="text-xs leading-relaxed text-white/80">{QR_PDF_COPY.institutional}</p>
+
             <div className="flex flex-col gap-2 sm:flex-row">
               <button
                 type="button"
                 onClick={handleCopiar}
-                className="rounded-xl border border-[#1a4a3a] bg-white px-4 py-2.5 text-sm font-semibold text-[#1a4a3a] transition-colors hover:bg-[#eef8f4]"
+                className="rounded-xl border border-white/30 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/20"
               >
                 {copiado ? "Copiado!" : "Copiar link"}
               </button>
@@ -184,9 +228,9 @@ export default function LugarQrSection({ lugar, slugColumnReady = true }) {
                 type="button"
                 onClick={handleBaixarPdf}
                 disabled={baixando}
-                className="rounded-xl bg-[#1a4a3a] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#153d30] disabled:opacity-60"
+                className="rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-[#1a4a3a] transition-colors hover:bg-[#f0f4f3] disabled:opacity-60"
               >
-                {baixando ? "Gerando PDF…" : "Baixar PDF premium"}
+                {baixando ? "Gerando PDF…" : "Baixar PDF para impressão"}
               </button>
             </div>
           </div>
