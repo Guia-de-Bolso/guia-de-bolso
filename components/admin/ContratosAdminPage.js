@@ -341,8 +341,9 @@ export default function ContratosAdminPage() {
         <button
           type="button"
           onClick={() => openModal()}
-          className="rounded-xl bg-white/15 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/20 hover:bg-white/25"
+          className="inline-flex items-center gap-2 rounded-xl bg-[#1a4a3a] px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-[#1a4a3a]/25 transition hover:bg-[#153d31]"
         >
+          <span className="text-lg leading-none">+</span>
           Novo contrato
         </button>
       }
@@ -421,8 +422,16 @@ export default function ContratosAdminPage() {
               <tbody className="divide-y divide-[#eef3f1]">
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-4 py-8 text-center text-[#5a6b66]">
-                      Nenhum contrato neste filtro.
+                    <td colSpan={7} className="px-4 py-10 text-center">
+                      <p className="text-[#5a6b66]">Nenhum contrato neste filtro.</p>
+                      <button
+                        type="button"
+                        onClick={() => openModal()}
+                        className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#1a4a3a] px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-[#1a4a3a]/25 transition hover:bg-[#153d31]"
+                      >
+                        <span className="text-lg leading-none">+</span>
+                        Novo contrato
+                      </button>
                     </td>
                   </tr>
                 ) : (
