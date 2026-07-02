@@ -15,11 +15,13 @@ import {
 import { getCategoriaAtrativoMeta } from "@/lib/atrativos";
 import { getTagsFromAtrativo } from "@/lib/tags";
 import { fetchCapacitorAtrativoIds } from "@/lib/capacitorStaticParams";
-import { createPageServerClient } from "@/lib/supabase/pageServer";
+import { isCapacitorBuild } from "@/lib/capacitorBuild";
+import { createPublicPageServerClient } from "@/lib/supabase/pageServer";
 
-export async function generateStaticParams() {
-  return fetchCapacitorAtrativoIds();
-}
+// Params só no export estático do Capacitor; na web a rota fica dinâmica.
+export const generateStaticParams = isCapacitorBuild()
+  ? async () => fetchCapacitorAtrativoIds()
+  : undefined;
 
 /**
  * @param {{ params: Promise<{ id: string }> }} props
@@ -27,7 +29,7 @@ export async function generateStaticParams() {
  */
 export async function generateMetadata({ params }) {
   const { id } = await params;
-  const supabase = await createPageServerClient();
+  const supabase = await createPublicPageServerClient();
   const { data: rota } = await supabase.from("rotas").select("*").eq("id", id).maybeSingle();
 
   if (!rota) {
@@ -44,7 +46,7 @@ export async function generateMetadata({ params }) {
  */
 export default async function AtrativoDetalhePage({ params }) {
   const { id } = await params;
-  const supabase = await createPageServerClient();
+  const supabase = await createPublicPageServerClient();
 
   const { data: rota } = await supabase
     .from("rotas")

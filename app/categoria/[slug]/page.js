@@ -7,11 +7,13 @@ import { queryLugaresForCategoria } from "@/lib/lugaresQuery";
 import { buildCategoriaMetadata } from "@/lib/seo";
 import { buildCategoriaJsonLd } from "@/lib/seoJsonLd";
 import { fetchCapacitorCategoriaSlugs } from "@/lib/capacitorStaticParams";
-import { createPageServerClient } from "@/lib/supabase/pageServer";
+import { isCapacitorBuild } from "@/lib/capacitorBuild";
+import { createPublicPageServerClient } from "@/lib/supabase/pageServer";
 
-export async function generateStaticParams() {
-  return fetchCapacitorCategoriaSlugs();
-}
+// Params só no export estático do Capacitor; na web a rota fica dinâmica.
+export const generateStaticParams = isCapacitorBuild()
+  ? async () => fetchCapacitorCategoriaSlugs()
+  : undefined;
 
 /**
  * @param {string} raw
@@ -54,7 +56,7 @@ export default async function CategoriaPage({ params }) {
 
   if (!meta) notFound();
 
-  const supabase = await createPageServerClient();
+  const supabase = await createPublicPageServerClient();
 
   const [{ data: lugares, error: lugaresError }, { data: subcategorias }] = await Promise.all([
     queryLugaresForCategoria(supabase, categoria, 100),

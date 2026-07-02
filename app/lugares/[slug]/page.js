@@ -9,11 +9,14 @@ import { buildLugarMetadata } from "@/lib/seo";
 import { buildLugarBreadcrumbJsonLd, buildLugarJsonLd, toJsonLdGraph } from "@/lib/seoJsonLd";
 import { fetchCapacitorLugarSlugs } from "@/lib/capacitorStaticParams";
 import { isCapacitorBuild } from "@/lib/capacitorBuild";
-import { createPageServerClient } from "@/lib/supabase/pageServer";
+import { createPublicPageServerClient } from "@/lib/supabase/pageServer";
 
-export async function generateStaticParams() {
-  return fetchCapacitorLugarSlugs();
-}
+// Só exporta params no export estático do Capacitor. Na web, a ausência de
+// generateStaticParams mantém a rota dinâmica (SSR sob demanda), com 404 real
+// e sem quebra de `DYNAMIC_SERVER_USAGE`.
+export const generateStaticParams = isCapacitorBuild()
+  ? async () => fetchCapacitorLugarSlugs()
+  : undefined;
 
 /**
  * @param {{ params: Promise<{ slug: string }> }} props
@@ -21,7 +24,7 @@ export async function generateStaticParams() {
  */
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const supabase = await createPageServerClient();
+  const supabase = await createPublicPageServerClient();
   const { lugar } = await fetchLugarSeoBundle(supabase, slug);
 
   if (!lugar) {
@@ -36,13 +39,12 @@ export async function generateMetadata({ params }) {
 
 /**
  * Detalhe público do lugar — URL canônica por slug; UUID legado redireciona 301.
- * @param {{ params: Promise<{ slug: string }>, searchParams: Promise<Record<string, string|string[]|undefined>> }} props
+ * @param {{ params: Promise<{ slug: string }> }} props
  * @returns {Promise<import('react').ReactElement>}
  */
-export default async function LugarPage({ params, searchParams }) {
+export default async function LugarPage({ params }) {
   const { slug } = await params;
-  const query = isCapacitorBuild() ? {} : await searchParams;
-  const supabase = await createPageServerClient();
+  const supabase = await createPublicPageServerClient();
   const initialData = await fetchLugarPageInitialData(supabase, slug);
 
   if (initialData.error) {
@@ -55,20 +57,7 @@ export default async function LugarPage({ params, searchParams }) {
   if (!lugar) notFound();
 
   if (!isCapacitorBuild() && isLugarUuidParam(slug) && lugar.slug) {
-    const target = new URL(
-      `/lugares/${encodeURIComponent(lugar.slug)}`,
-      "http://local"
-    );
-    for (const [key, value] of Object.entries(query)) {
-      if (value === undefined) continue;
-      if (Array.isArray(value)) {
-        value.forEach((v) => target.searchParams.append(key, v));
-      } else {
-        target.searchParams.set(key, value);
-      }
-    }
-    const path = `${target.pathname}${target.search}`;
-    permanentRedirect(path);
+    permanentRedirect(`/lugares/${encodeURIComponent(lugar.slug)}`);
   }
 
   const jsonLd = toJsonLdGraph([
