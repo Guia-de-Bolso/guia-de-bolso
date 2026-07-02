@@ -10,6 +10,7 @@ import DashboardPendentesSection from "@/components/admin/DashboardPendentesSect
 import DashboardSkeleton from "@/components/admin/DashboardSkeleton";
 import {
   IconClipboard,
+  IconMap,
   IconNavigation,
   IconPin,
   IconSparkles,
@@ -21,6 +22,7 @@ import {
   calcVariation,
   countParceirosAtivos,
   countPremiumAtivos,
+  fetchAtrativosPublicadosCount,
   fetchCount,
   fetchCountInPeriod,
   getCutoffIso,
@@ -74,6 +76,7 @@ export default function AdminDashboard() {
   const [metrics, setMetrics] = useState({
     avaliacoesPendentes: { total: 0, variation: { text: "", className: "", direction: "flat" } },
     lugaresAtivos: { total: 0, variation: { text: "", className: "", direction: "flat" } },
+    atrativosPublicados: { total: 0, variation: { text: "", className: "", direction: "flat" } },
     parceirosVigentes: { total: 0, variation: { text: "Parceiros ativos hoje", className: "text-[#5a6b66]", direction: "flat" } },
     usuariosNovos: { total: 0, variation: { text: "", className: "", direction: "flat" } },
     irAgora: { total: 0, variation: { text: "", className: "", direction: "flat" } },
@@ -100,6 +103,7 @@ export default function AdminDashboard() {
 
     const [
       lugaresCounts,
+      atrativosCounts,
       avaliacoesCounts,
       emAnaliseCounts,
       usuariosNovosCounts,
@@ -115,6 +119,7 @@ export default function AdminDashboard() {
         eq: { field: "status", value: "ativo" },
         ltCreatedAt: cutoff,
       }),
+      fetchAtrativosPublicadosCount(supabase, { ltCreatedAt: cutoff }),
       fetchCount(supabase, "avaliacoes", {
         eq: { field: "status", value: "pendente" },
         ltCreatedAt: cutoff,
@@ -158,6 +163,14 @@ export default function AdminDashboard() {
       lugaresAtivos: {
         total: lugaresCounts.total,
         variation: calcVariation(lugaresCounts.total, lugaresCounts.past, periodLabel),
+      },
+      atrativosPublicados: {
+        total: atrativosCounts.total,
+        variation: calcVariation(
+          atrativosCounts.total,
+          atrativosCounts.past,
+          periodLabel
+        ),
       },
       parceirosVigentes: {
         total: parceirosAtivos,
@@ -307,6 +320,17 @@ export default function AdminDashboard() {
             />
             <DashboardMetricCard
               className="sm:col-span-1 lg:col-span-3"
+              label="Atrativos publicados"
+              hint="Status publicado"
+              value={metrics.atrativosPublicados.total}
+              icon={IconMap}
+              iconWrap="bg-[#d4ede8]"
+              iconColor="text-[#1a4a3a]"
+              variation={metrics.atrativosPublicados.variation}
+              href="/admin/atrativos"
+            />
+            <DashboardMetricCard
+              className="sm:col-span-1 lg:col-span-3"
               label="Parceiros do Guia"
               hint="Flag eh_parceiro ativo"
               value={metrics.parceirosVigentes.total}
@@ -317,7 +341,7 @@ export default function AdminDashboard() {
               href="/admin/locais"
             />
             <DashboardMetricCard
-              className="sm:col-span-1 lg:col-span-4"
+              className="sm:col-span-1 lg:col-span-3"
               label="Usuários novos"
               hint={periodoHint}
               value={metrics.usuariosNovos.total}
@@ -328,7 +352,7 @@ export default function AdminDashboard() {
               href="/admin/usuarios"
             />
             <DashboardMetricCard
-              className="sm:col-span-1 lg:col-span-4"
+              className="sm:col-span-1 lg:col-span-3"
               label="IR AGORA"
               hint={periodoHint}
               value={metrics.irAgora.total}
@@ -339,7 +363,7 @@ export default function AdminDashboard() {
               href="/admin/logs?acao=ir_agora"
             />
             <DashboardMetricCard
-              className="sm:col-span-2 lg:col-span-4"
+              className="sm:col-span-2 lg:col-span-3"
               label="Em análise"
               hint="Locais não publicados"
               value={metrics.emAnalise.total}

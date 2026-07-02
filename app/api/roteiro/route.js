@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getClaudeModel } from "@/lib/anthropicConfig";
 import { enrichLugarFlags } from "@/lib/lugarBadges";
+import { applyPublicLugarFilters } from "@/lib/publicCatalog";
 import { checkIaRateLimit } from "@/lib/iaRateLimit";
 import { logIA } from "@/lib/logIA";
 import { reportError } from "@/lib/observability";
@@ -83,10 +84,13 @@ export async function POST(request) {
       return NextResponse.json(buildApiErrorBody("SERVER"), { status: 500 });
     }
 
-    const { data: lugaresRaw, error } = await supabase
-      .from("lugares")
-      .select("id, nome, descricao, categoria, subcategoria, eh_parceiro, conteudo_curadoria, imagem_url, fotos, lugares_tags(tags(nome))")
-      .eq("status", "ativo");
+    const { data: lugaresRaw, error } = await applyPublicLugarFilters(
+      supabase
+        .from("lugares")
+        .select(
+          "id, nome, descricao, categoria, subcategoria, eh_parceiro, conteudo_curadoria, imagem_url, fotos, lugares_tags(tags(nome))"
+        )
+    );
 
     if (error) {
       reportError(error, { route: "POST /api/roteiro supabase" });

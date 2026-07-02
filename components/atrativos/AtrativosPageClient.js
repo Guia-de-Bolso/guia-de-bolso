@@ -1,7 +1,8 @@
-import BottomNav from "@/components/BottomNav";
+"use client";
+
 import RoteiroSection from "@/components/atrativos/RoteiroSection";
 import AtrativosCatalogo from "@/components/atrativos/AtrativosCatalogo";
-import { createClient } from "@/lib/supabase/server";
+import { useAtrativosPageData } from "@/hooks/useAtrativosPageData";
 
 function IconMapEmpty() {
   return (
@@ -14,32 +15,14 @@ function IconMapEmpty() {
 }
 
 /**
- * Routes listing with featured route, AI roteiro section, and saved roteiros.
- * @returns {Promise<import("react").ReactElement>}
+ * Aba Atrativos — lista e roteiros com cache client-side.
+ * @param {{ initialData: { atrativos: object[], roteiros: object[] } }} props
+ * @returns {import("react").ReactElement}
  */
-export default async function AtrativosPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const { data } = await supabase
-    .from("rotas")
-    .select("*, rotas_tags(tags(*))")
-    .eq("ativa", true)
-    .order("created_at", { ascending: false });
-
-  let roteiros = [];
-  if (user) {
-    const { data: roteirosData } = await supabase
-      .from("roteiros")
-      .select("id, titulo, dias, perfil, interesses, conteudo, created_at")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
-    roteiros = roteirosData ?? [];
-  }
-
-  const atrativos = data ?? [];
+export default function AtrativosPageClient({ initialData }) {
+  const { data, loading } = useAtrativosPageData(initialData);
+  const atrativos = data?.atrativos ?? [];
+  const roteiros = data?.roteiros ?? [];
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#f0f4f3] text-[#1a2e28]">
@@ -52,7 +35,19 @@ export default async function AtrativosPage() {
         <div className="min-w-0 space-y-0 pt-5">
           <RoteiroSection roteirosIniciais={roteiros} />
 
-          {atrativos.length === 0 ? (
+          {loading && atrativos.length === 0 ? (
+            <section className="animate-pulse space-y-3" aria-hidden>
+              {[1, 2, 3].map((item) => (
+                <div key={item} className="flex gap-3 rounded-3xl bg-white p-3 shadow-sm">
+                  <div className="h-24 w-24 shrink-0 rounded-xl bg-[#e8eeee]" />
+                  <div className="flex-1 space-y-3 py-1">
+                    <div className="h-5 w-3/4 rounded-xl bg-[#e8eeee]" />
+                    <div className="h-4 w-full rounded-xl bg-[#e8eeee]" />
+                  </div>
+                </div>
+              ))}
+            </section>
+          ) : atrativos.length === 0 ? (
             <section className="overflow-hidden rounded-2xl bg-white p-6 text-center shadow-sm">
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#d4ede8] text-[#1a4a3a]">
                 <IconMapEmpty />
@@ -69,8 +64,6 @@ export default async function AtrativosPage() {
           )}
         </div>
       </div>
-
-      <BottomNav />
     </div>
   );
 }

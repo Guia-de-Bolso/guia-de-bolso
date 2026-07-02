@@ -3,8 +3,10 @@
 
 DROP POLICY IF EXISTS "Auth upload lugares fotos" ON storage.objects;
 DROP POLICY IF EXISTS "Auth update lugares fotos" ON storage.objects;
+DROP POLICY IF EXISTS "Auth delete lugares fotos" ON storage.objects;
 DROP POLICY IF EXISTS "Auth upload rotas fotos" ON storage.objects;
 DROP POLICY IF EXISTS "Auth update rotas fotos" ON storage.objects;
+DROP POLICY IF EXISTS "Auth delete rotas fotos" ON storage.objects;
 
 DROP POLICY IF EXISTS "Admin upload lugares fotos" ON storage.objects;
 CREATE POLICY "Admin upload lugares fotos"

@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { useOfflineMode } from "@/components/OfflineModeProvider";
+import { BOTTOM_NAV_ROUTES } from "@/lib/bottomNavRoutes";
 import {
   OFFLINE_NAV_BLOCKED_MESSAGE,
   isOfflineNavHrefAllowed,
@@ -86,13 +87,18 @@ function IconPerson({ className = "h-[22px] w-[22px]", active = false }) {
   );
 }
 
-const items = [
-  { href: "/", label: "Início", Icon: IconHome },
-  { href: "/categorias", label: "Explorar", Icon: IconGrid },
-  { href: "/atrativos", label: "Atrativos", Icon: IconMap },
-  { href: "/favoritos", label: "Favoritos", Icon: IconHeart },
-  { href: "/perfil", label: "Perfil", Icon: IconPerson },
-];
+const NAV_ICONS = {
+  "/": IconHome,
+  "/categorias": IconGrid,
+  "/atrativos": IconMap,
+  "/favoritos": IconHeart,
+  "/perfil": IconPerson,
+};
+
+const items = BOTTOM_NAV_ROUTES.map((route) => ({
+  ...route,
+  Icon: NAV_ICONS[route.href],
+}));
 
 const navItemClass = (active, blocked) =>
   `group relative flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[20px] px-1 py-1.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a4a3a]/55 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
@@ -117,8 +123,21 @@ const iconWrapClass = (active, blocked) =>
  */
 export default function BottomNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const { offlineLimited } = useOfflineMode();
   const [offlineToast, setOfflineToast] = useState("");
+
+  const prefetchRoute = useCallback(
+    (href) => {
+      if (offlineLimited && !isOfflineNavHrefAllowed(href)) return;
+      router.prefetch(href);
+    },
+    [router, offlineLimited]
+  );
+
+  useEffect(() => {
+    items.forEach(({ href }) => prefetchRoute(href));
+  }, [prefetchRoute]);
 
   function showOfflineMessage() {
     setOfflineToast(OFFLINE_NAV_BLOCKED_MESSAGE);
@@ -168,9 +187,13 @@ export default function BottomNav() {
               <Link
                 key={href}
                 href={href}
+                prefetch
                 aria-label={label}
                 className={navItemClass(active, false)}
                 aria-current={active ? "page" : undefined}
+                onTouchStart={() => prefetchRoute(href)}
+                onMouseEnter={() => prefetchRoute(href)}
+                onFocus={() => prefetchRoute(href)}
               >
                 <span className={iconWrapClass(active, false)}>
                   <Icon active={active} />

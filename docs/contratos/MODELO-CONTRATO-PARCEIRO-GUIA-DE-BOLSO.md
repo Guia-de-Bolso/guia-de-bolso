@@ -4,8 +4,6 @@
 
 **Documento para impressão e apresentação presencial**
 
-> **Aviso legal:** Modelo para fins comerciais. Recomenda-se revisão por advogado antes do uso formal.
-
 ---
 
 ## Instruções de impressão

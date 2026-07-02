@@ -14,7 +14,12 @@ import {
 } from "@/lib/atrativoDetalheDisplay";
 import { getCategoriaAtrativoMeta } from "@/lib/atrativos";
 import { getTagsFromAtrativo } from "@/lib/tags";
-import { createClient } from "@/lib/supabase/server";
+import { fetchCapacitorAtrativoIds } from "@/lib/capacitorStaticParams";
+import { createPageServerClient } from "@/lib/supabase/pageServer";
+
+export async function generateStaticParams() {
+  return fetchCapacitorAtrativoIds();
+}
 
 /**
  * @param {{ params: Promise<{ id: string }> }} props
@@ -22,7 +27,7 @@ import { createClient } from "@/lib/supabase/server";
  */
 export async function generateMetadata({ params }) {
   const { id } = await params;
-  const supabase = await createClient();
+  const supabase = await createPageServerClient();
   const { data: rota } = await supabase.from("rotas").select("*").eq("id", id).maybeSingle();
 
   if (!rota) {
@@ -39,7 +44,7 @@ export async function generateMetadata({ params }) {
  */
 export default async function AtrativoDetalhePage({ params }) {
   const { id } = await params;
-  const supabase = await createClient();
+  const supabase = await createPageServerClient();
 
   const { data: rota } = await supabase
     .from("rotas")

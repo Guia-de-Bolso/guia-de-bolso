@@ -12,11 +12,18 @@ import { useLugarDetalheV2 } from "@/lib/lugarDetalheFeature";
 
 /**
  * Detalhe do lugar (client) — `lugarId` vem do servidor após resolver slug/UUID.
- * @param {{ lugarId: string, offlinePreferred?: boolean }} props
+ * @param {object} props
+ * @param {string} props.lugarId
+ * @param {boolean} [props.offlinePreferred]
+ * @param {import('@/lib/lugarPageData').fetchLugarPageInitialData extends (...args: unknown[]) => Promise<infer R> ? Omit<R, 'error'> : null} [props.initialData]
  * @returns {import("react").ReactElement}
  */
-export default function LugarPageClient({ lugarId, offlinePreferred = false }) {
-  const data = useLugarDetalhe(lugarId, { offlinePreferred });
+export default function LugarPageClient({
+  lugarId,
+  offlinePreferred = false,
+  initialData = null,
+}) {
+  const data = useLugarDetalhe(lugarId, { offlinePreferred, initialData });
   const useV2 = useLugarDetalheV2();
 
   return (

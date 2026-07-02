@@ -12,6 +12,8 @@ const subtitles = {
   busca: "Faça login para buscar lugares com inteligência artificial",
   clima: "Faça login para ver o clima das praias da região",
   premium: "Entre na sua conta para assinar o Guia Premium",
+  onboarding:
+    "Entre com Google ou SMS para salvar favoritos offline e usar a busca com IA",
 };
 
 /**

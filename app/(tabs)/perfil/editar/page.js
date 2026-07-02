@@ -10,6 +10,7 @@ import {
 } from "@/lib/imageCompress";
 import { usesPhoneAuth } from "@/lib/perfil";
 import { createClient } from "@/lib/supabase";
+import { fetchApi } from "@/lib/fetchApi";
 
 /**
  * Resolves display name from user metadata or email.
@@ -142,7 +143,7 @@ export default function EditarPerfilPage() {
     const formData = new FormData();
     formData.append("file", uploadFile, uploadFile.name || "avatar.jpg");
 
-    const response = await fetch("/api/perfil/avatar", {
+    const response = await fetchApi("/api/perfil/avatar", {
       method: "POST",
       body: formData,
       credentials: "same-origin",

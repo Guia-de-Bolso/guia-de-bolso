@@ -110,7 +110,15 @@ After changing env vars in Vercel, **redeploy** (or trigger a new deployment) so
 
 ### Capacitor native apps (Android / iOS)
 
-The mobile shells wrap the production web app (`capacitor.config.ts` → `server.url: https://app.guiadebolso.app`). Native social login does **not** use `/auth/callback`.
+**Padrão (WebView remota):** o app nativo carrega `https://app.guiadebolso.app` (servidor real na Vercel). É o modo estável porque as rotas dinâmicas (detalhe de lugar/atrativo/categoria) dependem de conteúdo do banco em tempo de execução — um bundle estático só serviria os params pré-renderizados no build e retornaria 404 (com reload de página) para qualquer local novo. `npx cap sync` aplica a config nativa.
+
+| Modo | Como ativar |
+|------|-------------|
+| **WebView remota** (padrão) | `npx cap sync` |
+| **Live reload** (dev) | `CAPACITOR_LIVE_RELOAD_URL=http://IP:3000 npx cap sync` |
+| **Bundle local estático** (experimental) | `CAPACITOR_USE_LOCAL_BUNDLE=1 npm run build:capacitor` — ⚠️ navegação para detalhes dinâmicos ainda não funciona nesse modo |
+
+Native social login does **not** use `/auth/callback`.
 
 | Platform | Google | Apple | Repo config |
 |----------|--------|-------|-------------|
@@ -389,6 +397,7 @@ Use this list for **first launch** and **each major release**.
 - [ ] Production project region and backups understood (plan limits)
 - [ ] Migrations applied in documented order
 - [ ] RLS enabled and tested (anonymous read / authenticated write / admin writes)
+- [ ] **Security P0** applied: `supabase/security_p0_complete.sql` (see [SECURITY_CHECKLIST.md](../SECURITY_CHECKLIST.md))
 - [ ] RPC `increment_*_ia` and `decrement_*_ia` exist and are granted to `authenticated`
 - [ ] Storage buckets + policies applied
 - [ ] Auth Site URL and Redirect URLs include production (and previews if needed)

@@ -33,8 +33,16 @@ function assertSupabasePublicEnvForDeploy() {
 
 assertSupabasePublicEnvForDeploy();
 
+const isCapacitorBuild = process.env.CAPACITOR_BUILD === "1";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  ...(isCapacitorBuild
+    ? {
+        output: "export",
+        trailingSlash: true,
+      }
+    : {}),
   async redirects() {
     return [
       { source: "/rotas", destination: "/atrativos", permanent: true },
@@ -51,8 +59,7 @@ const nextConfig = {
     ];
   },
   images: {
-    minimumCacheTTL: 2592000,
-    qualities: [60, 75],
+    ...(isCapacitorBuild ? { unoptimized: true } : { minimumCacheTTL: 2592000, qualities: [60, 75] }),
     remotePatterns: [
       {
         protocol: "https",

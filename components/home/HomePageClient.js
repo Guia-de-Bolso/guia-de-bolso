@@ -2,7 +2,6 @@
 
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import BottomNav from "@/components/BottomNav";
 import LoginModal from "@/components/LoginModal";
 import Onboarding from "@/components/Onboarding";
 import DailyLimitCountdown from "@/components/DailyLimitCountdown";
@@ -13,12 +12,14 @@ import OQueFazerAgora from "@/components/home/OQueFazerAgora";
 import ParceirosCarrossel from "@/components/home/ParceirosCarrossel";
 import PertoDeVoce from "@/components/home/PertoDeVoce";
 import PlanosRapidos from "@/components/home/PlanosRapidos";
+import HomePageSkeleton from "@/components/loading/HomePageSkeleton";
 import SupabaseConfigAlert from "@/components/SupabaseConfigAlert";
 import SearchBrowsePanel from "@/components/home/SearchBrowsePanel";
 import SearchResultsPanel from "@/components/home/SearchResultsPanel";
 import SearchStatusFilter from "@/components/home/SearchStatusFilter";
 import SmartSearch from "@/components/home/SmartSearch";
 import { useStickyShellRef } from "@/hooks/useHomeHeaderScroll";
+import { useHomePrimaryFeed } from "@/hooks/useHomePrimaryFeed";
 import { useUserPosition } from "@/hooks/useUserPosition";
 import {
   createFavoritosSyncGuard,
@@ -29,12 +30,13 @@ import { FILTRO_STATUS_BUSCA } from "@/lib/busca";
 import { buildReportContext } from "@/lib/reportContext";
 import { getNetworkErrorMessage, mapApiErrorResponse } from "@/lib/userMessages";
 import { fetchClimaApisCached } from "@/lib/clima";
+import { fetchApi } from "@/lib/fetchApi";
+import { isCapacitorNative } from "@/lib/capacitorNavigation";
 import { IMBITUBA_COORDS, sortLugaresPorDistancia } from "@/lib/homeContext";
 import { enrichLugaresFlags } from "@/lib/lugarBadges";
 import { pickEmAltaCuradoria, pickParceirosPorCategoria } from "@/lib/homeSelection";
 import { resolveAtrativoDoDia } from "@/lib/atrativoDoDia";
 import { fetchLugaresFromApi } from "@/lib/fetchLugaresApi";
-import { fetchAtrativosFromApi } from "@/lib/fetchAtrativosApi";
 import { fetchLugaresPopulares } from "@/lib/lugaresPopulares";
 import { isSupabasePublicConfigured } from "@/lib/supabase/publicEnv";
 import { getLugaresVisitados } from "@/lib/lugaresVisitados";
@@ -64,20 +66,28 @@ function getUserInitial(user) {
 }
 
 /**
- * Loads active places with location and tags for the home feed.
- * @param {number} [limit=50] - Max rows to fetch.
- * @returns {Promise<object[]>} Active places.
+ * Aplica feed principal da home ao estado local.
+ * @param {Awaited<ReturnType<import('@/lib/fetchHomePrimaryFeed').fetchHomePrimaryFeed>>} feed
+ * @param {object} actions
  */
-async function fetchLugaresAtivos(limit = 50) {
-  return fetchLugaresFromApi({ limit });
-}
+function applyHomePrimaryFeed(feed, actions) {
+  const rotas = feed.atrativosAtivos ?? [];
+  const enriched = feed.lugaresAtivos ?? [];
+  const emAlta = feed.lugaresEmAlta ?? pickEmAltaCuradoria(enriched);
 
-/**
- * Loads active routes for the home hero.
- * @returns {Promise<object[]>}
- */
-async function fetchAtrativosAtivos() {
-  return fetchAtrativosFromApi({ limit: 50 });
+  actions.setAtrativosAtivos(rotas);
+  actions.setLugaresAtivos(enriched);
+  actions.setLugaresParceiros(feed.lugaresParceiros ?? pickParceirosPorCategoria(enriched));
+  actions.setLugaresEmAlta(emAlta);
+  actions.setLugaresProximos(feed.lugaresProximos ?? enriched.slice(0, 6));
+  actions.setSectionErrors({
+    hero: !resolveAtrativoDoDia(rotas, { requireCapa: true }).rota,
+    emAlta: emAlta.length === 0,
+    perto: false,
+    clima: false,
+  });
+  actions.setHomeLoading(false);
+  actions.setPertoLoading(false);
 }
 
 /**
@@ -88,7 +98,6 @@ async function fetchLugaresProximos() {
   const data = await fetchLugaresFromApi({ limit: 20 });
   return data.slice(0, 6);
 }
-
 
 /**
  * Discreet placeholder when a home section fails to load.
@@ -114,9 +123,9 @@ function SectionUnavailable({ title }) {
  * @returns {import("react").ReactElement}
  */
 function Home({ initialHomeData = null }) {
-  const hasInitialHomeData = Boolean(initialHomeData?.lugaresAtivos?.length);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: primaryFeed, loading: primaryFeedLoading } = useHomePrimaryFeed(initialHomeData);
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [onboardingChecked, setOnboardingChecked] = useState(false);
@@ -130,8 +139,8 @@ function Home({ initialHomeData = null }) {
   const [temperaturaClima, setTemperaturaClima] = useState(null);
   const [climaEmoji, setClimaEmoji] = useState(null);
   const [climaCondition, setClimaCondition] = useState(null);
-  const [homeLoading, setHomeLoading] = useState(!hasInitialHomeData);
-  const [pertoLoading, setPertoLoading] = useState(!hasInitialHomeData);
+  const [homeLoading, setHomeLoading] = useState(!initialHomeData?.lugaresAtivos?.length);
+  const [pertoLoading, setPertoLoading] = useState(!initialHomeData?.lugaresAtivos?.length);
   const [sectionErrors, setSectionErrors] = useState({
     hero: false,
     emAlta: false,
@@ -260,93 +269,25 @@ function Home({ initialHomeData = null }) {
   }, []);
 
   useEffect(() => {
-    if (!initialHomeData) return;
+    if (!primaryFeed) return;
 
-    const rotas = initialHomeData.atrativosAtivos ?? [];
-    const enriched = initialHomeData.lugaresAtivos ?? [];
-    setAtrativosAtivos(rotas);
-    setLugaresAtivos(enriched);
-    setLugaresParceiros(initialHomeData.lugaresParceiros ?? pickParceirosPorCategoria(enriched));
-    setLugaresEmAlta(initialHomeData.lugaresEmAlta ?? pickEmAltaCuradoria(enriched));
-    setLugaresProximos(initialHomeData.lugaresProximos ?? enriched.slice(0, 6));
-    setSectionErrors({
-      hero: !resolveAtrativoDoDia(rotas, { requireCapa: true }).rota,
-      emAlta: (initialHomeData.lugaresEmAlta ?? []).length === 0,
-      perto: false,
-      clima: false,
+    applyHomePrimaryFeed(primaryFeed, {
+      setAtrativosAtivos,
+      setLugaresAtivos,
+      setLugaresParceiros,
+      setLugaresEmAlta,
+      setLugaresProximos,
+      setSectionErrors,
+      setHomeLoading,
+      setPertoLoading,
     });
-    setHomeLoading(false);
-    setPertoLoading(false);
-  }, [initialHomeData]);
+  }, [primaryFeed]);
 
   useEffect(() => {
-    if (hasInitialHomeData) return undefined;
-
-    let cancelled = false;
-    setHomeLoading(true);
-
-    if (!isSupabasePublicConfigured()) {
-      setSectionErrors((prev) => ({ ...prev, hero: true, emAlta: true, perto: true }));
-      setHomeLoading(false);
-      return undefined;
+    if (primaryFeedLoading && !primaryFeed) {
+      setHomeLoading(true);
     }
-
-    async function loadPrimary() {
-      try {
-        const [ativosSettled, rotasSettled] = await Promise.allSettled([
-          fetchLugaresAtivos(),
-          fetchAtrativosAtivos(),
-        ]);
-
-        if (cancelled) return;
-
-        const errors = { hero: false, emAlta: false };
-
-        const rotas =
-          rotasSettled.status === "fulfilled" ? rotasSettled.value ?? [] : [];
-        if (rotasSettled.status === "rejected") {
-          console.error("[home] rotas ativas:", rotasSettled.reason);
-        }
-        setAtrativosAtivos(rotas);
-
-        if (ativosSettled.status !== "fulfilled") {
-          console.error("[home] lugares ativos:", ativosSettled.reason);
-          throw ativosSettled.reason;
-        }
-
-        const enriched = enrichLugaresFlags(ativosSettled.value);
-        setLugaresAtivos(enriched);
-        setLugaresParceiros(pickParceirosPorCategoria(enriched));
-        setLugaresEmAlta(pickEmAltaCuradoria(enriched));
-
-        if (!resolveAtrativoDoDia(rotas, { requireCapa: true }).rota) {
-          errors.hero = true;
-        }
-        if (pickEmAltaCuradoria(enriched).length === 0) {
-          errors.emAlta = true;
-        }
-
-        setSectionErrors((prev) => ({
-          ...prev,
-          hero: errors.hero,
-          emAlta: errors.emAlta,
-        }));
-      } catch (err) {
-        console.error("[home] loadPrimary:", err);
-        if (!cancelled) {
-          setSectionErrors((prev) => ({ ...prev, hero: true, emAlta: true }));
-        }
-      } finally {
-        setHomeLoading(false);
-      }
-    }
-
-    loadPrimary();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  }, [primaryFeedLoading, primaryFeed]);
 
   useEffect(() => {
     if (homeLoading) return undefined;
@@ -588,7 +529,7 @@ function Home({ initialHomeData = null }) {
     setErroBuscaContext(null);
 
     try {
-      const response = await fetch("/api/buscar", {
+      const response = await fetchApi("/api/buscar", {
         method: "POST",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
@@ -671,7 +612,7 @@ function Home({ initialHomeData = null }) {
     searchInputRef.current?.focus();
 
     try {
-      const response = await fetch("/api/planos-rapidos", {
+      const response = await fetchApi("/api/planos-rapidos", {
         method: "POST",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
@@ -783,6 +724,11 @@ function Home({ initialHomeData = null }) {
       localStorage.setItem("onboarding_visto", "true");
       setShowOnboarding(false);
       if (dest === "login") {
+        if (isCapacitorNative()) {
+          setMotivoModal("onboarding");
+          setIsModalOpen(true);
+          return;
+        }
         router.replace("/login?from=onboarding");
       }
     },
@@ -790,11 +736,7 @@ function Home({ initialHomeData = null }) {
   );
 
   if (!onboardingChecked) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f0f4f3] text-[#5a6b66]">
-        Carregando...
-      </div>
-    );
+    return <HomePageSkeleton />;
   }
 
   if (showOnboarding) {
@@ -961,8 +903,6 @@ function Home({ initialHomeData = null }) {
         </div>
       </div>
 
-      <BottomNav />
-
       <LoginModal
         isOpen={isModalOpen}
         motivo={motivoModal}
@@ -998,13 +938,7 @@ function Home({ initialHomeData = null }) {
  */
 export default function HomePageClient({ initialHomeData = null }) {
   return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-screen items-center justify-center bg-[#f0f4f3] text-[#5a6b66]">
-          Carregando...
-        </div>
-      }
-    >
+    <Suspense fallback={<HomePageSkeleton />}>
       <Home initialHomeData={initialHomeData} />
     </Suspense>
   );

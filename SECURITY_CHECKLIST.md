@@ -1,11 +1,13 @@
 # Security Checklist — Guia de Bolso
 
-**Última auditoria:** 2026-05-25  
+**Última auditoria:** 2026-06-30  
 **Escopo:** código em `/app`, `/lib`, `/components`, `/middleware.js`, `supabase/*.sql`, variáveis de ambiente documentadas.
 
 ## Resumo executivo
 
-O projeto separa bem segredos de servidor (`ANTHROPIC_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) do cliente e usa RLS em várias tabelas, mas há falhas graves **no banco versionado** (leitura aberta de `logs`, `UPDATE` amplo em `perfis`, upload de fotos para qualquer usuário autenticado) e **proteção de admin só no browser**. APIs de IA exigem login e limites diários, porém sem rate limit por IP e com fallback que libera uso em erro. Priorize corrigir RLS/policies no Supabase e reforçar autorização server-side antes de escalar tráfego ou parceiros pagantes.
+O projeto separa bem segredos de servidor (`ANTHROPIC_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) do cliente e usa RLS em várias tabelas. **Remediação P0 versionada** em `supabase/security_p0_complete.sql` (aplicar no SQL Editor de produção). Itens P1+ permanecem no roadmap abaixo.
+
+**Aplicar P0 em produção:** Supabase → SQL Editor → colar e executar [`supabase/security_p0_complete.sql`](../supabase/security_p0_complete.sql). Pré-requisitos: `rotas_policies.sql`, `perfis_rls_fix.sql`, `perfis_premium_policies.sql`, `perfis_ia_usage_write.sql`, `increment_uso_ia.sql`, `lugares_public_read.sql`, `avaliacoes_moderacao.sql`, buckets `lugares-fotos` / `rotas-fotos`.
 
 ---
 
@@ -30,12 +32,12 @@ O projeto separa bem segredos de servidor (`ANTHROPIC_API_KEY`, `SUPABASE_SERVIC
 
 | Prioridade | Item | Status | Notas |
 |------------|------|--------|-------|
-| P0 | Policy `logs` SELECT com `USING (true)` | Aberto | Qualquer cliente com anon key pode ler PII |
-| P0 | `perfis` UPDATE próprio sem restrição de colunas | Mitigado | Trigger bloqueia `role`, `premium_*` e contadores IA; cotas só via RPC |
-| P0 | Storage `lugares-fotos` / `rotas-fotos` INSERT para `authenticated` | Aberto | Qualquer login envia fotos |
-| P0 | Policies de escrita `lugares` / `destaques` não versionadas | Mitigado | `lugares_admin_write.sql`, `destaques_planos_policies.sql` |
-| P0 | RLS `favoritos` não versionado | Mitigado | `favoritos_policies.sql` |
-| P0 | Admin UPDATE `perfis` de outro usuário | Mitigado | `perfis_admin_policies.sql` + trigger |
+| P0 | Policy `logs` SELECT com `USING (true)` | **Corrigido (repo)** | `logs_policies.sql` → `is_admin_or_dev()`; aplicar `security_p0_complete.sql` |
+| P0 | `perfis` UPDATE próprio sem restrição de colunas | **Corrigido (repo)** | Trigger `perfis_privileged_guard.sql` bloqueia `role`, `premium_*`, contadores IA |
+| P0 | Storage `lugares-fotos` / `rotas-fotos` INSERT para `authenticated` | **Corrigido (repo)** | `storage_admin_fotos.sql` — só `is_admin_user()` |
+| P0 | Policies de escrita `lugares` / `destaques` não versionadas | **Corrigido (repo)** | `lugares_admin_write.sql`, `destaques_planos_policies.sql`, `lugares_related_admin_write.sql` |
+| P0 | RLS `favoritos` não versionado | **Corrigido (repo)** | `favoritos_policies.sql` |
+| P0 | Admin UPDATE `perfis` de outro usuário | **Corrigido (repo)** | `perfis_admin_policies.sql` + trigger |
 | P1 | Admin `/admin` só no cliente (`useAdminAuth`) | Parcial | `app/admin/layout.js` server guard; RLS + PostgREST do browser ainda crítico |
 | P1 | Sem rate limit em `/api/buscar` e `/api/roteiro` | Mitigado | `lib/iaRateLimit.js` (Upstash + fallback memória); cotas premium |
 | P1 | Fallback fail-open em `premiumServer` | Mitigado | `USAGE_CHECK_FAILED` fail-closed; `/api/uso-premium` não inventa cota em erro |
@@ -62,8 +64,8 @@ O projeto separa bem segredos de servidor (`ANTHROPIC_API_KEY`, `SUPABASE_SERVIC
 | **Risco** | Critical |
 | **Impacto** | Exposição de e-mails, nomes, ações (`login`, `ir_agora`, `favoritou`), metadados de lugares e comportamento de usuários a quem tiver a anon key (incluída no JS público). |
 | **Probabilidade** | Likely (chave anon é pública por design; PostgREST expõe tabela se policy permitir). |
-| **Evidência** | `supabase/logs_policies.sql` — policy `"Admin lê logs"` com `FOR SELECT USING (true)` sem filtro de role. |
-| **Solução** | Substituir por `USING (public.is_admin_or_dev())` (mesmo padrão de `perfis_rls_fix.sql`). Revogar SELECT para `anon`. Auditar vazamento já ocorrido nos logs do Supabase. |
+| **Evidência** | `supabase/logs_policies.sql` — policy `"Admin lê logs"` com `FOR SELECT TO authenticated USING (public.is_admin_or_dev())`. |
+| **Solução** | Aplicar `security_p0_complete.sql` em produção. Auditar vazamento prévio no Dashboard → logs. |
 
 ---
 
@@ -74,8 +76,8 @@ O projeto separa bem segredos de servidor (`ANTHROPIC_API_KEY`, `SUPABASE_SERVIC
 | **Risco** | Critical |
 | **Impacto** | Usuário autenticado pode definir `role = 'admin'` ou `premium_ativo = true` e obter acesso ao painel admin ou IA ilimitada, conforme colunas graváveis. |
 | **Probabilidade** | Likely se policy `perfis_update_own_usage` / `perfis_update_own` permitir UPDATE na linha inteira. |
-| **Evidência** | `supabase/perfis_premium_policies.sql` — `WITH CHECK (auth.uid() = id)` sem lista branca de colunas. App atualiza `buscas_ia`, `maps_preferido`, etc. via cliente. |
-| **Solução** | (1) Trigger `BEFORE UPDATE` em `perfis_privileged_guard.sql` congela `role`, `premium_ativo`, `premium_ate`, `buscas_ia`, `roteiros_ia`, `uso_ia_mes` exceto via RPC (`perfis_ia_usage_write_bypass`). (2) Policy separada `perfis_update_admin` com `is_admin_or_dev()` para `/admin/usuarios`. (3) Contadores IA só via RPC `increment_*_ia` / `align_perfil_usage_to_day` — sem UPDATE client em `premiumServer.js`. |
+| **Evidência** | `supabase/perfis_premium_policies.sql` + `perfis_privileged_guard.sql` — trigger congela colunas privilegiadas em self-update. |
+| **Solução** | Aplicar `security_p0_complete.sql` (recria trigger). Contadores IA só via RPC `increment_*_ia`. |
 
 ---
 
@@ -86,8 +88,8 @@ O projeto separa bem segredos de servidor (`ANTHROPIC_API_KEY`, `SUPABASE_SERVIC
 | **Risco** | Critical |
 | **Impacto** | Conteúdo malicioso (imagem ofensiva, malware hospedado), custo de storage, troca visual de estabelecimentos se paths forem adivinháveis. |
 | **Probabilidade** | Possible (requer conta; SMS/Google reduzem bots mas não eliminam). |
-| **Evidência** | `supabase/fotos_migration.sql` — `FOR INSERT TO authenticated WITH CHECK (bucket_id = 'lugares-fotos')` sem `is_admin_user()`. |
-| **Solução** | Restringir INSERT/UPDATE/DELETE a `public.is_admin_user()` (ou `is_admin_or_dev()`). Manter SELECT público se buckets forem públicos. Validar MIME no servidor (magic bytes) em Route Handler de upload futuro. |
+| **Evidência** | `supabase/fotos_migration.sql` (só leitura pública) + `storage_admin_fotos.sql` (escrita admin). |
+| **Solução** | Aplicar `security_p0_complete.sql`; validar no Dashboard que não restam policies `Auth upload *`. |
 
 ---
 
@@ -98,8 +100,8 @@ O projeto separa bem segredos de servidor (`ANTHROPIC_API_KEY`, `SUPABASE_SERVIC
 | **Risco** | Critical (se produção estiver sem RLS de escrita) / High (se só no Dashboard, drift) |
 | **Impacto** | Sem policies de INSERT/UPDATE/DELETE versionadas: risco de tabela aberta no Dashboard ou bloqueio do admin; difícil auditar deploys. |
 | **Probabilidade** | Possible |
-| **Evidência** | `supabase/lugares_public_read.sql` só SELECT; `docs/database.md` lista escrita admin como “esperada” mas não em SQL. Admin grava via `LocalForm.js` / `LugaresGridPage.js`. |
-| **Solução** | Adicionar `lugares_admin_write.sql` com INSERT/UPDATE/DELETE usando `is_admin_or_dev()`. Repetir para `destaques`, `localizacoes`, `lugares_tags`. Incluir no checklist de deploy. |
+| **Evidência** | `lugares_admin_write.sql`, `destaques_planos_policies.sql`, `lugares_related_admin_write.sql`, `taxonomia_admin_write.sql`. |
+| **Solução** | Aplicar `security_p0_complete.sql`; comparar policies ativas com `docs/security-rls.md`. |
 
 ---
 
@@ -314,8 +316,8 @@ O projeto separa bem segredos de servidor (`ANTHROPIC_API_KEY`, `SUPABASE_SERVIC
 
 ## Roadmap de remediação (ordem sugerida)
 
-1. **Imediato (P0):** Corrigir policy `logs` SELECT; triggers/policies em `perfis` para bloquear `role`/`premium_*` em self-update; storage fotos só admin; auditar policies ativas no Supabase Dashboard vs repo.
-2. **Semana 1 (P1):** Rate limit IP nas APIs IA; remover fail-open em `premiumServer`; validar `next` no callback; versionar SQL de escrita `lugares`/`destaques`.
+1. **Imediato (P0):** Aplicar `security_p0_complete.sql` no Supabase de produção; validar admin (CRUD lugar, taxonomia, fotos) e usuário comum (favoritos, sem leitura de logs).
+2. **Semana 1 (P1):** Rate limit IP nas APIs IA; middleware admin; consolidar policies `rotas_tags`/`rota_dicas`.
 3. **Semana 2 (P2):** Middleware admin; consolidar policies `rotas_tags`/`rota_dicas`; triggers em `avaliacoes`; rate limit feedback em KV; restrições GCP Maps.
 4. **Contínuo:** Revisar RLS antes de cada migration; rotação service role; alertas custo Anthropic; testes de regressão RLS (script com anon + user JWT).
 

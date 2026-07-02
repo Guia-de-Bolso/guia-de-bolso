@@ -6,6 +6,7 @@ import UserErrorAlert from "@/components/UserErrorAlert";
 import { FEEDBACK_TIPOS } from "@/lib/feedback";
 import { buildReportContext } from "@/lib/reportContext";
 import { mapApiErrorResponse, USER_MESSAGES } from "@/lib/userMessages";
+import { fetchApi } from "@/lib/fetchApi";
 
 /**
  * @param {object} [initial]
@@ -62,7 +63,7 @@ export default function FeedbackSheet({ isOpen, onClose, isLoggedIn = false, ini
       const paginaOrigem =
         typeof window !== "undefined" ? window.location.pathname : null;
 
-      const response = await fetch("/api/feedback", {
+      const response = await fetchApi("/api/feedback", {
         method: "POST",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },

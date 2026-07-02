@@ -10,6 +10,7 @@ import RoteiroBottomSheet from "@/components/RoteiroBottomSheet";
 import { canUseRoteiro, isDailyRoteiroLimitReached } from "@/lib/premium";
 import RoteiroItineraryView from "@/components/atrativos/RoteiroItineraryView";
 import { fetchLugaresFromApi } from "@/lib/fetchLugaresApi";
+import { fetchApi } from "@/lib/fetchApi";
 import { formatDiasViagem } from "@/lib/roteiroDias";
 import { createClient } from "@/lib/supabase";
 import { LIMITS } from "@/lib/premium";
@@ -274,7 +275,7 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
     if (!user || !roteiroId) return false;
 
     try {
-      const res = await fetch(`/api/roteiro/${encodeURIComponent(String(roteiroId))}`, {
+      const res = await fetchApi(`/api/roteiro/${encodeURIComponent(String(roteiroId))}`, {
         method: "DELETE",
       });
 

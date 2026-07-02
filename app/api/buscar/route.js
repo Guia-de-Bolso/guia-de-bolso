@@ -13,6 +13,7 @@ import {
   queryLugaresByIds,
 } from "@/lib/lugaresQuery";
 import { enrichLugarFlags, enrichLugaresFlags } from "@/lib/lugarBadges";
+import { applyPublicLugarFilters } from "@/lib/publicCatalog";
 import { checkIaRateLimit } from "@/lib/iaRateLimit";
 import { logIA } from "@/lib/logIA";
 import { reportError } from "@/lib/observability";
@@ -76,10 +77,9 @@ export async function POST(request) {
       return NextResponse.json(buildApiErrorBody("SERVER"), { status: 500 });
     }
 
-    const { data: lugares, error } = await supabase
-      .from("lugares")
-      .select(LUGAR_SELECT_BUSCA_CONTEXT)
-      .eq("status", "ativo");
+    const { data: lugares, error } = await applyPublicLugarFilters(
+      supabase.from("lugares").select(LUGAR_SELECT_BUSCA_CONTEXT)
+    );
 
     if (error) {
       console.error("Busca — erro Supabase:", error);

@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppDeveloperCredit from "@/components/AppDeveloperCredit";
 import PrefeituraSupportLine from "@/components/PrefeituraSupportLine";
-import BottomNav from "@/components/BottomNav";
 import PremiumPaywallSheet from "@/components/PremiumPaywallSheet";
 import PerfilHero from "@/components/perfil/PerfilHero";
 import PerfilLoggedOut from "@/components/perfil/PerfilLoggedOut";
@@ -12,7 +11,6 @@ import PerfilNavAppSheet from "@/components/perfil/PerfilNavAppSheet";
 import PerfilPremiumCard from "@/components/perfil/PerfilPremiumCard";
 import PerfilQuickLinks from "@/components/perfil/PerfilQuickLinks";
 import PerfilSettingsGroup from "@/components/perfil/PerfilSettingsGroup";
-import PerfilSkeleton from "@/components/perfil/PerfilSkeleton";
 import PerfilStats from "@/components/perfil/PerfilStats";
 import PerfilBottomSheet from "@/components/perfil/PerfilBottomSheet";
 import PerfilLogoutSheet from "@/components/perfil/PerfilLogoutSheet";
@@ -32,25 +30,42 @@ import {
   getSiteTelHref,
 } from "@/lib/siteContact";
 import { usePremiumUsage } from "@/lib/usePremiumUsage";
+import { usePerfilPageData } from "@/hooks/usePerfilPageData";
 import { createClient } from "@/lib/supabase";
 import { useFeedback } from "@/components/FeedbackProvider";
 import { mapApiErrorResponse, USER_MESSAGES } from "@/lib/userMessages";
 import { registrarLog } from "@/lib/logs";
+import { fetchApi } from "@/lib/fetchApi";
+import { navigateAppPath } from "@/lib/capacitorNavigation";
 
 /**
- * Aba Perfil — conta, preferências e estatísticas.
+ * @param {import('@/lib/perfilPageData').PerfilPageInitialData} initialData
+ * @returns {import('@supabase/supabase-js').User|null}
+ */
+function userFromInitialData(initialData) {
+  return initialData.user;
+}
+
+/**
+ * Aba Perfil — interações client-side; dados iniciais vêm do SSR.
+ * @param {{ initialData: import('@/lib/perfilPageData').PerfilPageInitialData }} props
  * @returns {import("react").JSX.Element}
  */
-export default function PerfilPage() {
+export default function PerfilPageClient({ initialData }) {
   const router = useRouter();
   const feedback = useFeedback();
-  const [user, setUser] = useState(null);
-  const [perfil, setPerfil] = useState(null);
-  const [authLoading, setAuthLoading] = useState(true);
-  const [favoritosCount, setFavoritosCount] = useState(0);
-  const [avaliacoesCount, setAvaliacoesCount] = useState(0);
-  const [roteirosCount, setRoteirosCount] = useState(0);
-  const [navPreference, setNavPreference] = useState("google");
+  const [user, setUser] = useState(() => userFromInitialData(initialData));
+  const { data: cachedPerfil, mutate: mutatePerfilCache } = usePerfilPageData(
+    initialData,
+    user?.id ?? null
+  );
+  const [perfil, setPerfil] = useState(initialData.perfil);
+  const [favoritosCount, setFavoritosCount] = useState(initialData.stats.favoritos);
+  const [avaliacoesCount, setAvaliacoesCount] = useState(initialData.stats.avaliacoes);
+  const [roteirosCount, setRoteirosCount] = useState(initialData.stats.roteiros);
+  const [navPreference, setNavPreference] = useState(
+    () => initialData.perfil?.maps_preferido || "google"
+  );
   const [showNavSheet, setShowNavSheet] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -64,81 +79,65 @@ export default function PerfilPage() {
   const isPremium = isPremiumActive(perfil) || Boolean(premiumUsage?.premium);
 
   useEffect(() => {
+    if (user?.id && cachedPerfil.user?.id && cachedPerfil.user.id !== user.id) {
+      return;
+    }
+    if (!user?.id && cachedPerfil.user?.id) {
+      return;
+    }
+
+    setPerfil(cachedPerfil.perfil);
+    setFavoritosCount(cachedPerfil.stats.favoritos);
+    setAvaliacoesCount(cachedPerfil.stats.avaliacoes);
+    setRoteirosCount(cachedPerfil.stats.roteiros);
+    if (cachedPerfil.perfil?.maps_preferido) {
+      setNavPreference(cachedPerfil.perfil.maps_preferido);
+    }
+  }, [cachedPerfil, user?.id]);
+
+  useEffect(() => {
     const stored =
       typeof window !== "undefined"
         ? localStorage.getItem(MAP_PREFERENCE_STORAGE_KEY)
         : null;
 
-    if (stored) setNavPreference(stored);
+    if (stored) {
+      setNavPreference(stored);
+      return;
+    }
 
+    if (initialData.perfil?.maps_preferido) {
+      localStorage.setItem(
+        MAP_PREFERENCE_STORAGE_KEY,
+        initialData.perfil.maps_preferido
+      );
+    }
+  }, [initialData.perfil?.maps_preferido]);
+
+  useEffect(() => {
     const supabase = createClient();
-
-    supabase.auth.getUser().then(async ({ data: { user: currentUser } }) => {
-      setUser(currentUser);
-      setAuthLoading(false);
-
-      if (currentUser) {
-        const { data: perfilData } = await supabase
-          .from("perfis")
-          .select("*")
-          .eq("id", currentUser.id)
-          .maybeSingle();
-
-        if (perfilData) {
-          setPerfil(perfilData);
-          if (perfilData.maps_preferido) {
-            setNavPreference(perfilData.maps_preferido);
-            localStorage.setItem(
-              MAP_PREFERENCE_STORAGE_KEY,
-              perfilData.maps_preferido
-            );
-          }
-        }
-      }
-    });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setAuthLoading(false);
-      if (!session?.user) {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+
+      if (!currentUser) {
         setPerfil(null);
         setFavoritosCount(0);
         setAvaliacoesCount(0);
         setRoteirosCount(0);
+        return;
+      }
+
+      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+        router.refresh();
       }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (!user) return undefined;
-
-    const supabase = createClient();
-
-    Promise.all([
-      supabase
-        .from("favoritos")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", user.id),
-      supabase
-        .from("avaliacoes")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", user.id),
-      supabase
-        .from("roteiros")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", user.id),
-    ]).then(([favoritosRes, avaliacoesRes, roteirosRes]) => {
-      setFavoritosCount(favoritosRes.count ?? 0);
-      setAvaliacoesCount(avaliacoesRes.count ?? 0);
-      setRoteirosCount(roteirosRes.count ?? 0);
-    });
-
-    return undefined;
-  }, [user]);
+  }, [router]);
 
   /** @returns {Promise<void>} */
   async function handleLogout() {
@@ -148,7 +147,7 @@ export default function PerfilPage() {
     setFeedbackMessage("");
 
     try {
-      const response = await fetch("/api/auth/logout", {
+      const response = await fetchApi("/api/auth/logout", {
         method: "POST",
         credentials: "same-origin",
       });
@@ -176,7 +175,7 @@ export default function PerfilPage() {
       setPerfil(null);
       setShowLogoutConfirm(false);
       router.refresh();
-      router.push("/login");
+      navigateAppPath(router, "/login");
     } catch {
       setFeedbackMessage("Não foi possível sair. Tente novamente.");
     } finally {
@@ -195,7 +194,7 @@ export default function PerfilPage() {
       const supabase = createClient();
       await registrarLog(supabase, user, "deletou_conta");
 
-      const response = await fetch("/api/conta", {
+      const response = await fetchApi("/api/conta", {
         method: "DELETE",
         credentials: "same-origin",
       });
@@ -240,22 +239,6 @@ export default function PerfilPage() {
   const nome = getUserName(user, perfil);
   const avatarUrl = resolveAvatarUrl(user, perfil);
   const membroDesde = perfil?.created_at || user?.created_at;
-
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-[#f0f4f3]">
-        <header className="px-4 pt-safe-top">
-          <div className="mx-auto max-w-md">
-            <h1 className="text-2xl font-bold text-[#1a2e28]">Perfil</h1>
-          </div>
-        </header>
-        <main className="mx-auto max-w-md px-4 pb-28 pt-5">
-          <PerfilSkeleton />
-        </main>
-        <BottomNav />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#f0f4f3] text-[#1a2e28]">
@@ -443,8 +426,6 @@ export default function PerfilPage() {
         )}
       </main>
 
-      <BottomNav />
-
       <PerfilNavAppSheet
         isOpen={showNavSheet}
         onClose={() => setShowNavSheet(false)}
@@ -494,7 +475,7 @@ export default function PerfilPage() {
         user={user}
         onLoginRequired={() => {
           setPaywallOpen(false);
-          router.push("/login?next=/perfil");
+          navigateAppPath(router, "/login?next=/perfil");
         }}
         onPremiumActivated={async (nextUsage) => {
           if (nextUsage?.premium) {
@@ -513,6 +494,7 @@ export default function PerfilPage() {
 
             if (perfilData) {
               setPerfil(perfilData);
+              mutatePerfilCache();
             }
           }
         }}

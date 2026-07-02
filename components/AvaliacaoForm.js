@@ -12,6 +12,7 @@ import { useBottomSheetDrag } from "@/hooks/useBottomSheetDrag";
 import { getLugarPublicPath } from "@/lib/lugarPublicPath";
 import { buildReportContext } from "@/lib/reportContext";
 import { createClient } from "@/lib/supabase";
+import { fetchApi } from "@/lib/fetchApi";
 
 /**
  * @param {object} props
@@ -154,7 +155,7 @@ export default function AvaliacaoForm({ isOpen, onClose, lugar, onSuccess }) {
       return;
     }
 
-    fetch("/api/avaliacoes/analisar", {
+    fetchApi("/api/avaliacoes/analisar", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "same-origin",

@@ -1,6 +1,8 @@
 /**
- * Gera o modelo de contrato parceiro (.docx) a partir do Markdown.
- * Uso: node scripts/generate-contrato-docx.mjs [caminho-saida]
+ * Gera modelo de contrato parceiro (.docx) a partir do Markdown.
+ * Uso:
+ *   node scripts/generate-contrato-docx.mjs
+ *   node scripts/generate-contrato-docx.mjs [caminho-saida.docx] [caminho-entrada.md]
  */
 import fs from "fs";
 import path from "path";
@@ -24,17 +26,87 @@ import {
 } from "docx";
 
 const ROOT = process.cwd();
-const MD_PATH = path.join(
-  ROOT,
-  "docs/contratos/MODELO-CONTRATO-PARCEIRO-GUIA-DE-BOLSO.md"
-);
 
-const DEFAULT_OUTPUT = path.join(
-  ROOT,
-  "docs/contratos/MODELO-CONTRATO-PARCEIRO-GUIA-DE-BOLSO.docx"
-);
+const PRESETS = {
+  pago: {
+    md: "docs/contratos/MODELO-CONTRATO-PARCEIRO-GUIA-DE-BOLSO.md",
+    out: "docs/contratos/MODELO-CONTRATO-PARCEIRO-GUIA-DE-BOLSO.docx",
+    header: "Guia de Bolso — Contrato Parceiro",
+    coverTitle: "Guia de Bolso",
+    coverSubtitle: "Proposta Comercial e Contrato de Parceria",
+    coverLine: "Plano Parceiro — Imbituba/SC",
+    coverVersion: "Versão 1.1 · 2026",
+  },
+  "6meses": {
+    md: "docs/contratos/MODELO-CONTRATO-PARCEIRO-6-MESES-GRATIS.md",
+    out: "docs/contratos/MODELO-CONTRATO-PARCEIRO-6-MESES-GRATIS.docx",
+    header: "Guia de Bolso — Parceiro 6 meses grátis",
+    coverTitle: "Guia de Bolso",
+    coverSubtitle: "Programa Parceiro de Lançamento",
+    coverLine: "6 meses grátis · sem compromisso de pagamento",
+    coverVersion: "Versão 1.0 · 2026",
+  },
+};
 
-const OUTPUT = process.argv[2] || DEFAULT_OUTPUT;
+/** @param {string[]} argv */
+function resolvePaths(argv) {
+  const args = argv.slice(2);
+  if (args.length === 0) {
+    const p = PRESETS.pago;
+    return { mdPath: path.join(ROOT, p.md), output: path.join(ROOT, p.out), preset: p };
+  }
+
+  const mdArg = args.find((a) => a.endsWith(".md"));
+  const docxArg = args.find((a) => a.endsWith(".docx") || a.endsWith(".doc"));
+
+  if (mdArg?.includes("6-MESES") || mdArg?.includes("6-MESES-GRATIS")) {
+    const p = PRESETS["6meses"];
+    return {
+      mdPath: path.isAbsolute(mdArg) ? mdArg : path.join(ROOT, mdArg),
+      output: docxArg
+        ? path.isAbsolute(docxArg)
+          ? docxArg
+          : path.join(ROOT, docxArg)
+        : path.join(ROOT, p.out),
+      preset: p,
+    };
+  }
+
+  if (mdArg) {
+    const p = mdArg.includes("6-MESES") ? PRESETS["6meses"] : PRESETS.pago;
+    return {
+      mdPath: path.isAbsolute(mdArg) ? mdArg : path.join(ROOT, mdArg),
+      output: docxArg
+        ? path.isAbsolute(docxArg)
+          ? docxArg
+          : path.join(ROOT, docxArg)
+        : path.join(ROOT, p.out),
+      preset: p,
+    };
+  }
+
+  if (docxArg?.includes("6-MESES")) {
+    const p = PRESETS["6meses"];
+    return {
+      mdPath: path.join(ROOT, p.md),
+      output: path.isAbsolute(docxArg) ? docxArg : path.join(ROOT, docxArg),
+      preset: p,
+    };
+  }
+
+  const p = PRESETS.pago;
+  return {
+    mdPath: path.join(ROOT, p.md),
+    output: docxArg
+      ? path.isAbsolute(docxArg)
+        ? docxArg
+        : path.join(ROOT, docxArg)
+      : path.join(ROOT, p.out),
+    preset: p,
+  };
+}
+
+const { mdPath: MD_PATH, output: OUTPUT, preset: PRESET } = resolvePaths(process.argv);
 
 const GREEN = "1A4A3A";
 const GRAY = "5A6B66";
@@ -351,14 +423,14 @@ const coverBlock = [
     alignment: AlignmentType.CENTER,
     spacing: { after: 240 },
     children: [
-      run("Guia de Bolso", { size: 56, bold: true, color: GREEN }),
+      run(PRESET.coverTitle, { size: 56, bold: true, color: GREEN }),
     ],
   }),
   new Paragraph({
     alignment: AlignmentType.CENTER,
     spacing: { after: 200 },
     children: [
-      run("Proposta Comercial e Contrato de Parceria", {
+      run(PRESET.coverSubtitle, {
         size: 30,
         color: GRAY,
       }),
@@ -368,14 +440,14 @@ const coverBlock = [
     alignment: AlignmentType.CENTER,
     spacing: { after: 120 },
     children: [
-      run("Plano Parceiro — Imbituba/SC", { size: 24, color: GRAY }),
+      run(PRESET.coverLine, { size: 24, color: GRAY }),
     ],
   }),
   new Paragraph({
     alignment: AlignmentType.CENTER,
     spacing: { after: 400 },
     children: [
-      run("Versão 1.1 · 2026", { size: 22, color: GRAY, italics: true }),
+      run(PRESET.coverVersion, { size: 22, color: GRAY, italics: true }),
     ],
   }),
   new Paragraph({
@@ -428,7 +500,7 @@ const doc = new Document({
           children: [
             para(
               [
-                run("Guia de Bolso — Contrato Parceiro", {
+                run(PRESET.header, {
                   size: 16,
                   color: GREEN,
                   italics: true,

@@ -11,9 +11,10 @@ export default function DashboardSkeleton() {
         <div className="h-52 rounded-3xl bg-white/80 ring-1 ring-black/5 sm:col-span-2 lg:col-span-6" />
         <div className="h-44 rounded-3xl bg-white/80 ring-1 ring-black/5 lg:col-span-3" />
         <div className="h-44 rounded-3xl bg-white/80 ring-1 ring-black/5 lg:col-span-3" />
-        <div className="h-44 rounded-3xl bg-white/80 ring-1 ring-black/5 lg:col-span-4" />
-        <div className="h-44 rounded-3xl bg-white/80 ring-1 ring-black/5 lg:col-span-4" />
-        <div className="h-44 rounded-3xl bg-white/80 ring-1 ring-black/5 sm:col-span-2 lg:col-span-4" />
+        <div className="h-44 rounded-3xl bg-white/80 ring-1 ring-black/5 lg:col-span-3" />
+        <div className="h-44 rounded-3xl bg-white/80 ring-1 ring-black/5 lg:col-span-3" />
+        <div className="h-44 rounded-3xl bg-white/80 ring-1 ring-black/5 lg:col-span-3" />
+        <div className="h-44 rounded-3xl bg-white/80 ring-1 ring-black/5 lg:col-span-3" />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-5 lg:gap-8">

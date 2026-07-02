@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import BottomNav from "@/components/BottomNav";
 import LoginModal from "@/components/LoginModal";
 import Logo from "@/components/Logo";
 import PlaceCard from "@/components/PlaceCard";
@@ -381,8 +380,6 @@ export default function FavoritosPage() {
           </div>
         )}
       </div>
-
-      <BottomNav />
 
       <LoginModal
         isOpen={isModalOpen}

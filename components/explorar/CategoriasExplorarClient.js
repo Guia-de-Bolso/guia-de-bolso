@@ -1,52 +1,25 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import BottomNav from "@/components/BottomNav";
+import { useMemo } from "react";
 import ExplorarAtalhos from "@/components/explorar/ExplorarAtalhos";
 import ExplorarBuscaBar from "@/components/explorar/ExplorarBuscaBar";
 import ExplorarCategoriaCard from "@/components/explorar/ExplorarCategoriaCard";
 import ExplorarHeader from "@/components/explorar/ExplorarHeader";
 import { useStickyShellRef } from "@/hooks/useHomeHeaderScroll";
+import { useExplorarData } from "@/hooks/useExplorarData";
 import ExplorarSkeleton from "@/components/explorar/ExplorarSkeleton";
 import HomeSectionHeader from "@/components/home/HomeSectionHeader";
 import SupabaseConfigAlert from "@/components/SupabaseConfigAlert";
-import { isSupabasePublicConfigured } from "@/lib/supabase/publicEnv";
 import { getCategoriasVisiveis, sortCategoriasPorContagem } from "@/lib/categorias";
-import { fetchExplorarFromApi } from "@/lib/fetchExplorarApi";
 
 /**
  * Tela Explorar — descoberta por categorias, intenções e busca IA.
  */
 export default function CategoriasExplorarClient({ initialData = null }) {
-  const hasInitial = Boolean(initialData?.totalLugares);
   const stickyShellRef = useStickyShellRef();
-  const [counts, setCounts] = useState(initialData?.counts ?? {});
-  const [capas, setCapas] = useState(initialData?.capas ?? {});
-  const [loading, setLoading] = useState(!hasInitial);
-
-  useEffect(() => {
-    if (hasInitial) return undefined;
-
-    if (!isSupabasePublicConfigured()) {
-      setLoading(false);
-      return undefined;
-    }
-
-    fetchExplorarFromApi()
-      .then((data) => {
-        setCounts(data?.counts ?? {});
-        setCapas(data?.capas ?? {});
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("[Explorar] lugares:", err);
-        setCounts({});
-        setCapas({});
-        setLoading(false);
-      });
-
-    return undefined;
-  }, [hasInitial]);
+  const { data: explorarData, loading } = useExplorarData(initialData);
+  const counts = explorarData?.counts ?? {};
+  const capas = explorarData?.capas ?? {};
 
   const totalLugares = useMemo(
     () =>
@@ -159,8 +132,6 @@ export default function CategoriasExplorarClient({ initialData = null }) {
           </>
         )}
       </div>
-
-      <BottomNav />
     </div>
   );
 }

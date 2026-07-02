@@ -2,11 +2,18 @@ import { notFound, permanentRedirect } from "next/navigation";
 import JsonLdScript from "@/components/seo/JsonLdScript";
 import LugarPageClient from "@/components/lugar/LugarPageClient";
 import LugarSeoStatic from "@/components/lugar/LugarSeoStatic";
+import { fetchLugarPageInitialData } from "@/lib/lugarPageData";
 import { fetchLugarSeoBundle } from "@/lib/lugarSeoData";
 import { isLugarUuidParam } from "@/lib/lugarPublicPath";
 import { buildLugarMetadata } from "@/lib/seo";
 import { buildLugarBreadcrumbJsonLd, buildLugarJsonLd, toJsonLdGraph } from "@/lib/seoJsonLd";
-import { createClient } from "@/lib/supabase/server";
+import { fetchCapacitorLugarSlugs } from "@/lib/capacitorStaticParams";
+import { isCapacitorBuild } from "@/lib/capacitorBuild";
+import { createPageServerClient } from "@/lib/supabase/pageServer";
+
+export async function generateStaticParams() {
+  return fetchCapacitorLugarSlugs();
+}
 
 /**
  * @param {{ params: Promise<{ slug: string }> }} props
@@ -14,7 +21,7 @@ import { createClient } from "@/lib/supabase/server";
  */
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const supabase = await createClient();
+  const supabase = await createPageServerClient();
   const { lugar } = await fetchLugarSeoBundle(supabase, slug);
 
   if (!lugar) {
@@ -34,18 +41,20 @@ export async function generateMetadata({ params }) {
  */
 export default async function LugarPage({ params, searchParams }) {
   const { slug } = await params;
-  const query = await searchParams;
-  const supabase = await createClient();
-  const { lugar, localizacao, rating, error } = await fetchLugarSeoBundle(supabase, slug);
+  const query = isCapacitorBuild() ? {} : await searchParams;
+  const supabase = await createPageServerClient();
+  const initialData = await fetchLugarPageInitialData(supabase, slug);
 
-  if (error) {
-    console.error("[lugares] fetch:", error.message);
+  if (initialData.error) {
+    console.error("[lugares] fetch:", initialData.error.message);
     notFound();
   }
 
+  const { lugar, localizacao, rating } = initialData;
+
   if (!lugar) notFound();
 
-  if (isLugarUuidParam(slug) && lugar.slug) {
+  if (!isCapacitorBuild() && isLugarUuidParam(slug) && lugar.slug) {
     const target = new URL(
       `/lugares/${encodeURIComponent(lugar.slug)}`,
       "http://local"
@@ -75,7 +84,16 @@ export default async function LugarPage({ params, searchParams }) {
         descricao={lugar.descricao || lugar.descricao_longa}
         categoria={lugar.categoria}
       />
-      <LugarPageClient lugarId={lugar.id} />
+      <LugarPageClient
+        lugarId={lugar.id}
+        initialData={{
+          lugar,
+          localizacao,
+          rating,
+          tags: initialData.tags,
+          fotos: initialData.fotos,
+        }}
+      />
     </>
   );
 }

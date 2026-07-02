@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import CategoriaPageClient from "@/components/categoria/CategoriaPageClient";
 import JsonLdScript from "@/components/seo/JsonLdScript";
@@ -5,7 +6,12 @@ import { getCategoriaByNome } from "@/lib/categorias";
 import { queryLugaresForCategoria } from "@/lib/lugaresQuery";
 import { buildCategoriaMetadata } from "@/lib/seo";
 import { buildCategoriaJsonLd } from "@/lib/seoJsonLd";
-import { createClient } from "@/lib/supabase/server";
+import { fetchCapacitorCategoriaSlugs } from "@/lib/capacitorStaticParams";
+import { createPageServerClient } from "@/lib/supabase/pageServer";
+
+export async function generateStaticParams() {
+  return fetchCapacitorCategoriaSlugs();
+}
 
 /**
  * @param {string} raw
@@ -48,7 +54,7 @@ export default async function CategoriaPage({ params }) {
 
   if (!meta) notFound();
 
-  const supabase = await createClient();
+  const supabase = await createPageServerClient();
 
   const [{ data: lugares, error: lugaresError }, { data: subcategorias }] = await Promise.all([
     queryLugaresForCategoria(supabase, categoria, 100),
@@ -67,12 +73,20 @@ export default async function CategoriaPage({ params }) {
         <p>{meta.descricao}</p>
         <p>{(lugares ?? []).length} locais em {categoria}, Imbituba</p>
       </div>
-      <CategoriaPageClient
-        categoria={categoria}
-        categoriaMeta={meta}
-        initialLugares={lugares ?? []}
-        initialSubcategorias={subcategorias ?? []}
-      />
+      <Suspense
+        fallback={
+          <div className="flex min-h-screen items-center justify-center bg-[#f0f4f3] text-[#5a6b66]">
+            Carregando…
+          </div>
+        }
+      >
+        <CategoriaPageClient
+          categoria={categoria}
+          categoriaMeta={meta}
+          initialLugares={lugares ?? []}
+          initialSubcategorias={subcategorias ?? []}
+        />
+      </Suspense>
     </>
   );
 }

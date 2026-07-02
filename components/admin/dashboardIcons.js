@@ -19,6 +19,15 @@ export function IconPin({ className = "h-6 w-6" }) {
   );
 }
 
+export function IconMap({ className = "h-6 w-6" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M9 18l-6 3V6l6-3 6 3 6-3v15l-6 3-6-3z" />
+      <path d="M9 3v15M15 6v15" />
+    </svg>
+  );
+}
+
 export function IconSparkles({ className = "h-6 w-6" }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>

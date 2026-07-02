@@ -13,6 +13,7 @@ import {
   getUserMessage,
   mapApiErrorResponse,
 } from "@/lib/userMessages";
+import { fetchApi } from "@/lib/fetchApi";
 
 const DIAS_OPCOES = ROTEIRO_DIAS_OPCOES;
 
@@ -275,7 +276,7 @@ export default function RoteiroBottomSheet({
     setLoadingMessageIndex(0);
 
     try {
-      const response = await fetch("/api/roteiro", {
+      const response = await fetchApi("/api/roteiro", {
         method: "POST",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
@@ -348,7 +349,7 @@ export default function RoteiroBottomSheet({
     setErroContext(null);
 
     try {
-      const response = await fetch("/api/roteiro/salvar", {
+      const response = await fetchApi("/api/roteiro/salvar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ titulo, dias, perfil, interesses, conteudo }),

@@ -4,7 +4,6 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   fetchAvaliacoesLugar,
-  fetchFavoritoLugar,
   fetchFotosLugarLegado,
   fetchJaAvaliouLugar,
   fetchLocalizacaoLugar,
@@ -14,6 +13,7 @@ import {
 } from "@/lib/data/lugarDetalheQueries";
 import { useUserPosition } from "@/hooks/useUserPosition";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { useFavoritoLugar } from "@/hooks/useFavoritoLugar";
 import { AVALIACAO_STATUS_APROVADOS } from "@/lib/avaliacoes";
 import { getCapaFromLugar, getFotosFromLugar } from "@/lib/fotos";
 import {
@@ -63,11 +63,22 @@ import { getReturnPathFromSearch } from "@/lib/navigationReturn";
 /**
  * Estado e ações compartilhados entre layout legado e redesign Airbnb.
  * @param {string} [lugarIdFromServer] - UUID resolvido no servidor (rota por slug).
- * @param {{ offlinePreferred?: boolean }} [options]
+ * @param {{
+ *   offlinePreferred?: boolean,
+ *   initialData?: {
+ *     lugar?: object,
+ *     localizacao?: object|null,
+ *     tags?: object[],
+ *     fotos?: string[],
+ *     rating?: { media: number, count: number }|null,
+ *   }|null,
+ * }} [options]
  * @returns {object}
  */
 export function useLugarDetalhe(lugarIdFromServer, options = {}) {
   const offlinePreferred = Boolean(options.offlinePreferred);
+  const initialData = options.initialData ?? null;
+  const hasInitialData = Boolean(initialData?.lugar);
   const params = useParams();
   const routeParam = params.slug ?? params.id;
   const id = lugarIdFromServer ?? routeParam;
@@ -78,15 +89,18 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
     [offlinePreferred, searchParams]
   );
   const supabase = useMemo(() => createClient(), []);
-  const [lugar, setLugar] = useState(null);
-  const [fotos, setFotos] = useState([]);
+  const [lugar, setLugar] = useState(() => initialData?.lugar ?? null);
+  const [fotos, setFotos] = useState(() => {
+    if (initialData?.fotos?.length) return initialData.fotos;
+    if (initialData?.lugar) return getFotosFromLugar(initialData.lugar);
+    return [];
+  });
   const viewLoggedRef = useRef(false);
-  const favoritoSyncGuardRef = useRef(createFavoritosSyncGuard());
   const avaliacaoSyncGuardRef = useRef(createFavoritosSyncGuard());
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !hasInitialData);
   const [fetchError, setFetchError] = useState(false);
-  const [isFavorito, setIsFavorito] = useState(false);
+  const [offlineFavorito, setOfflineFavorito] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showHorarios, setShowHorarios] = useState(false);
   const [showRotas, setShowRotas] = useState(false);
@@ -98,9 +112,9 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
   const [showAvaliacaoForm, setShowAvaliacaoForm] = useState(false);
   const [toast, setToast] = useState("");
   const [motivoModal, setMotivoModal] = useState("favoritar");
-  const [localizacao, setLocalizacao] = useState(null);
+  const [localizacao, setLocalizacao] = useState(() => initialData?.localizacao ?? null);
   const [subcategoria, setSubcategoria] = useState(null);
-  const [tags, setTags] = useState([]);
+  const [tags, setTags] = useState(() => initialData?.tags ?? []);
   const { userPosition } = useUserPosition();
   const { isOnline, ready: networkReady } = useNetworkStatus();
   const [showQrBanner, setShowQrBanner] = useState(false);
@@ -110,11 +124,38 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
   const [offlineMapsToast, setOfflineMapsToast] = useState("");
   const { offlineLimited } = useOfflineMode();
 
+  const favoritoOnline =
+    Boolean(user?.id && lugar?.id) &&
+    !offlinePreferred &&
+    !isOfflineView &&
+    !(networkReady && !isOnline);
+
+  const { isFavorito: cachedFavorito, setIsFavorito: setCachedFavorito } = useFavoritoLugar(
+    user?.id,
+    lugar?.id,
+    { enabled: favoritoOnline }
+  );
+
+  const isFavorito =
+    offlinePreferred || isOfflineView
+      ? true
+      : networkReady && !isOnline
+        ? offlineFavorito
+        : cachedFavorito;
+
+  /** @param {boolean} value */
+  function setIsFavorito(value) {
+    if (favoritoOnline) {
+      setCachedFavorito(value);
+      return;
+    }
+    setOfflineFavorito(value);
+  }
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user: currentUser } }) => {
       setUser(currentUser);
       if (!currentUser) {
-        setIsFavorito(false);
         setJaAvaliou(false);
       }
     });
@@ -124,13 +165,17 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (!session?.user) {
-        setIsFavorito(false);
         setJaAvaliou(false);
       }
     });
 
     return () => subscription.unsubscribe();
   }, [supabase]);
+
+  useEffect(() => {
+    if (!hasInitialData || !initialData?.lugar) return;
+    saveLugarVisitado(initialData.lugar, getCapaFromLugar(initialData.lugar));
+  }, [hasInitialData, initialData]);
 
   useEffect(() => {
     if (!id) return;
@@ -148,14 +193,11 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
       setFotos(cached.payload.fotos ?? getFotosFromLugar(cached.payload.lugar));
       setFetchError(false);
       setIsOfflineView(true);
-      setIsFavorito(true);
       setOfflineSavedAt(cached.savedAt);
       return true;
     }
 
     async function load() {
-      setLoading(true);
-
       const offlineNow = networkReady && !isOnline;
 
       if (user?.id && (offlinePreferred || offlineNow)) {
@@ -171,11 +213,37 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
           return;
         }
       } else if (offlineNow) {
+        if (hasInitialData && initialData?.lugar) {
+          setLoading(false);
+          return;
+        }
         setFetchError(true);
         setLugar(null);
         setLoading(false);
         return;
       }
+
+      if (hasInitialData && initialData?.lugar && !offlinePreferred) {
+        setFetchError(false);
+        setIsOfflineView(false);
+        setOfflineSavedAt(null);
+        setLoading(false);
+
+        if ((initialData.fotos ?? []).length === 0) {
+          fetchFotosLugarLegado(supabase, id).then(({ data }) => {
+            if (cancelled) return;
+            setFotos((current) => {
+              if (current.length > 0) return current;
+              return (data ?? [])
+                .map((foto) => foto.url || foto.imagem_url || foto.foto_url)
+                .filter(Boolean);
+            });
+          });
+        }
+        return;
+      }
+
+      setLoading(true);
 
       fetchLugarAtivo(supabase, id).then(async ({ data, error }) => {
         if (cancelled) return;
@@ -228,7 +296,7 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
     return () => {
       cancelled = true;
     };
-  }, [id, supabase, user?.id, offlinePreferred, isOnline, networkReady]);
+  }, [id, supabase, user?.id, offlinePreferred, isOnline, networkReady, hasInitialData, initialData]);
 
   useEffect(() => {
     viewLoggedRef.current = false;
@@ -275,21 +343,19 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
   useEffect(() => {
     if (!user?.id || !lugar?.id) {
       if (!user?.id) {
-        setIsFavorito(false);
         setJaAvaliou(false);
       }
       return undefined;
     }
 
     if (offlinePreferred || isOfflineView) {
-      setIsFavorito(true);
       return undefined;
     }
 
     if (networkReady && !isOnline) {
       getOfflineFavorito(user.id, FAVORITO_OFFLINE_TYPES.LUGAR, String(lugar.id)).then(
         (cached) => {
-          setIsFavorito(Boolean(cached?.payload?.lugar));
+          setOfflineFavorito(Boolean(cached?.payload?.lugar));
         }
       );
       return undefined;
@@ -297,13 +363,7 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
 
     const userId = user.id;
     const lugarId = lugar.id;
-    const favoritoFetchGen = favoritoSyncGuardRef.current.bump();
     const avaliacaoFetchGen = avaliacaoSyncGuardRef.current.bump();
-
-    fetchFavoritoLugar(supabase, userId, lugarId).then(({ data }) => {
-      if (!favoritoSyncGuardRef.current.isCurrent(favoritoFetchGen)) return;
-      setIsFavorito(Boolean(data));
-    });
 
     fetchJaAvaliouLugar(supabase, userId, lugarId).then(({ data }) => {
       if (!avaliacaoSyncGuardRef.current.isCurrent(avaliacaoFetchGen)) return;
@@ -345,7 +405,6 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
       return;
     }
 
-    favoritoSyncGuardRef.current.bump();
     const result = await toggleFavoritoLugarBoolean(supabase, user, lugar, setIsFavorito);
     if (result === "added") {
       setToast(FAVORITO_OFFLINE_SAVED_MESSAGE);

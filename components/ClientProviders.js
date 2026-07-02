@@ -6,6 +6,7 @@ import FeedbackProvider from "@/components/FeedbackProvider";
 import FavoritosBackgroundSync from "@/components/favoritos/FavoritosBackgroundSync";
 import OfflineModeProvider from "@/components/OfflineModeProvider";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import SwrProvider from "@/components/SwrProvider";
 
 /**
  * Providers client-side do app.
@@ -15,13 +16,15 @@ import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
  */
 export default function ClientProviders({ children }) {
   return (
-    <FeedbackProvider>
-      <OfflineModeProvider>
-        <ServiceWorkerRegister />
-        <FavoritosBackgroundSync />
-        <CapacitorShell />
-        <AppViewportShell>{children}</AppViewportShell>
-      </OfflineModeProvider>
-    </FeedbackProvider>
+    <SwrProvider>
+      <FeedbackProvider>
+        <OfflineModeProvider>
+          <ServiceWorkerRegister />
+          <FavoritosBackgroundSync />
+          <CapacitorShell />
+          <AppViewportShell>{children}</AppViewportShell>
+        </OfflineModeProvider>
+      </FeedbackProvider>
+    </SwrProvider>
   );
 }

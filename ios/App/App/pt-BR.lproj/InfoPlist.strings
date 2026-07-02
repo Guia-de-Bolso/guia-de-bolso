@@ -1,0 +1,4 @@
+CFBundleDisplayName = "Guia de Bolso";
+NSLocationWhenInUseUsageDescription = "Usamos sua localização para mostrar lugares perto de você e calcular distâncias.";
+NSCameraUsageDescription = "Usamos a câmera para você tirar sua foto de perfil.";
+NSPhotoLibraryUsageDescription = "Usamos suas fotos para atualizar sua foto de perfil.";

@@ -21,7 +21,9 @@ Documento financeiro para planejamento de lançamento. **Não substitui contabil
 **Roadmap V2 (só cenário na planilha, não no código):** Gratuito R$ 0 · Estabelecido R$ 99 · Destaque R$ 149 · Parceiro R$ 229 (`CLAUDE.md`).
 
 **Lançamento:** apps nas **duas lojas** (Google Play + Apple App Store) + web Vercel.  
-**Catálogo:** **100 lugares** no lançamento → **~300** ~3 meses depois (impacto forte na **busca IA**).
+**Catálogo no lançamento:** **~30 lugares** curados (validação do produto).  
+**Meta até março/2027:** **100 estabelecimentos** cadastrados no guia (parceiros + curadoria).  
+**Escala posterior:** crescimento gradual do catálogo conforme adesão de parceiros e curadoria.
 
 ---
 
