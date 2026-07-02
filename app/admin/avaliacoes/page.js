@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import AdminShell, { useAdminAuth } from "@/components/admin/AdminShell";
 import {
   AVALIACAO_STATUS,
@@ -130,6 +131,7 @@ function AdminAvaliacoesPage() {
   const { loading, user } = useAdminAuth();
   const searchParams = useSearchParams();
   const tabFromUrl = searchParams.get("tab");
+  const lugarIdFromUrl = searchParams.get("lugar_id");
   const initialTab =
     tabFromUrl && TAB_IDS.has(tabFromUrl) ? tabFromUrl : AVALIACAO_STATUS.PENDENTE;
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -144,6 +146,7 @@ function AdminAvaliacoesPage() {
   const [motivoDetalhe, setMotivoDetalhe] = useState("");
   const [instrucaoEdicao, setInstrucaoEdicao] = useState("");
   const [salvando, setSalvando] = useState(false);
+  const [lugarFiltroNome, setLugarFiltroNome] = useState("");
 
   const loadCounts = useCallback(async () => {
     const supabase = createClient();
@@ -179,32 +182,56 @@ function AdminAvaliacoesPage() {
   }, []);
 
   const loadAvaliacoes = useCallback(
-    async (status) => {
+    async (status, lugarId) => {
       const supabase = createClient();
       const tab = TABS.find((item) => item.id === status);
       const statuses = tab?.legacy ? [status, tab.legacy] : [status];
 
-      const { data, error } = await supabase
+      let query = supabase
         .from("avaliacoes")
         .select("*, lugares(nome, categoria), perfis:user_id(nome, foto_url, created_at)")
-        .in("status", statuses)
-        .order("created_at", { ascending: false });
+        .in("status", statuses);
+
+      if (lugarId) {
+        query = query.eq("lugar_id", lugarId);
+      }
+
+      const { data, error } = await query.order("created_at", { ascending: false });
 
       if (!error) {
         setAvaliacoes(data ?? []);
         return;
       }
 
-      const fallback = await supabase
+      let fallbackQuery = supabase
         .from("avaliacoes")
         .select("*, lugares(nome, categoria)")
-        .in("status", statuses)
-        .order("created_at", { ascending: false });
+        .in("status", statuses);
+
+      if (lugarId) {
+        fallbackQuery = fallbackQuery.eq("lugar_id", lugarId);
+      }
+
+      const fallback = await fallbackQuery.order("created_at", { ascending: false });
 
       setAvaliacoes(fallback.data ?? []);
     },
     []
   );
+
+  useEffect(() => {
+    if (!lugarIdFromUrl) {
+      setLugarFiltroNome("");
+      return;
+    }
+    const supabase = createClient();
+    supabase
+      .from("lugares")
+      .select("nome")
+      .eq("id", lugarIdFromUrl)
+      .maybeSingle()
+      .then(({ data }) => setLugarFiltroNome(data?.nome || ""));
+  }, [lugarIdFromUrl]);
 
   useEffect(() => {
     if (tabFromUrl && TAB_IDS.has(tabFromUrl) && tabFromUrl !== activeTab) {
@@ -216,8 +243,8 @@ function AdminAvaliacoesPage() {
     if (loading) return;
     loadCounts();
     loadContagemAprovadas();
-    loadAvaliacoes(activeTab);
-  }, [loading, activeTab, loadAvaliacoes, loadCounts, loadContagemAprovadas]);
+    loadAvaliacoes(activeTab, lugarIdFromUrl);
+  }, [loading, activeTab, lugarIdFromUrl, loadAvaliacoes, loadCounts, loadContagemAprovadas]);
 
   /**
    * @param {string} id
@@ -328,6 +355,23 @@ function AdminAvaliacoesPage() {
 
   return (
     <AdminShell title="Avaliações">
+      {lugarIdFromUrl && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-[#eef8f4] px-4 py-3 text-sm text-[#1a2e28]">
+          <p>
+            Filtrando avaliações de{" "}
+            <strong>{lugarFiltroNome || "estabelecimento"}</strong>
+            {activeTab === AVALIACAO_STATUS.APROVADO
+              ? " — curadoria trimestral"
+              : ""}
+          </p>
+          <Link
+            href="/admin/avaliacoes"
+            className="text-xs font-semibold text-[#1a4a3a] hover:underline"
+          >
+            Limpar filtro
+          </Link>
+        </div>
+      )}
       <div className="mb-5 flex flex-wrap gap-2">
         {TABS.map((tab) => (
           <button

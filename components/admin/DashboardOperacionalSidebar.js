@@ -5,7 +5,7 @@ import Link from "next/link";
 /**
  * Resumo operacional (atalhos clicáveis) — sem duplicar timeline de logs.
  * @param {object} props
- * @param {{ emAnalise: number, parceirosAtivos: number, premiumAtivos: number, feedbackNovos?: number }} props.counts
+ * @param {{ emAnalise: number, parceirosAtivos: number, parceirosVencendo?: number, parceirosVencidos?: number, curadoriaAtrasada?: number, premiumAtivos: number, feedbackNovos?: number }} props.counts
  * @returns {import("react").JSX.Element}
  */
 export default function DashboardOperacionalSidebar({ counts }) {
@@ -20,10 +20,26 @@ export default function DashboardOperacionalSidebar({ counts }) {
     {
       label: "Parceiros ativos",
       value: counts.parceirosAtivos,
-      href: "/admin/locais",
-      hint: "Toggle Parceiro do Guia no local",
+      href: "/admin/parceiros",
+      hint: "Prazos e curadoria",
       accent: "text-amber-700",
       bg: "bg-amber-50",
+    },
+    {
+      label: "Parceiros vencendo",
+      value: counts.parceirosVencendo ?? 0,
+      href: "/admin/parceiros?filtro=vencendo",
+      hint: "Gratuito nos próximos 30 dias",
+      accent: "text-amber-800",
+      bg: "bg-amber-50",
+    },
+    {
+      label: "Curadoria atrasada",
+      value: counts.curadoriaAtrasada ?? 0,
+      href: "/admin/parceiros?filtro=curadoria",
+      hint: "Revisão trimestral de avaliações",
+      accent: "text-red-600",
+      bg: "bg-red-50",
     },
     {
       label: "Premium IA ativos",

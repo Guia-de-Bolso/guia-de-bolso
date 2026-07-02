@@ -9,6 +9,7 @@ export const ADMIN_NAV_LINKS = [
   { href: "/admin/ia", label: "IA & Custos", icon: "ia" },
   { href: "/admin/despesas", label: "Despesas", icon: "despesas" },
   { href: "/admin/locais", label: "Locais", icon: "locais" },
+  { href: "/admin/parceiros", label: "Parceiros", icon: "parceiros" },
   { href: "/admin/atrativos", label: "Atrativos", icon: "rotas" },
   { href: "/admin/avaliacoes", label: "Avaliações", icon: "avaliacoes" },
   { href: "/admin/feedback", label: "Feedback", icon: "feedback" },
@@ -80,6 +81,16 @@ export function AdminNavIcon({ name, className = "h-5 w-5" }) {
             strokeLinecap="round"
             strokeLinejoin="round"
             d="M12 21s7-4.5 7-10a7 7 0 10-14 0c0 5.5 7 10 7 10z"
+          />
+        </svg>
+      );
+    case "parceiros":
+      return (
+        <svg {...shared}>
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 013.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"
           />
         </svg>
       );

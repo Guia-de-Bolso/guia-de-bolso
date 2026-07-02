@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import EnderecoAutocomplete from "@/components/EnderecoAutocomplete";
 import HorarioEditor from "@/components/admin/HorarioEditor";
 import LugarQrSection from "@/components/admin/LugarQrSection";
+import ParceiroProgramaFields from "@/components/admin/ParceiroProgramaFields";
 import PhotoUploader from "@/components/admin/PhotoUploader";
 import VideoUploader from "@/components/admin/VideoUploader";
 import { getInitialPhotoItems } from "@/lib/fotos";
@@ -33,12 +34,10 @@ import { isLugarElegivelQr } from "@/lib/lugarQr";
 import { getEffectiveCategoria } from "@/lib/lugarTaxonomia";
 import { getCategoriasVisiveis } from "@/lib/categorias";
 import {
-  fetchTakenSlugs,
-  isMissingSlugColumnError,
-  isSlugAutoFromNome,
-  resolveLugarSlug,
-  slugifyNome,
-} from "@/lib/slug";
+  buildParceiroProgramaPayload,
+  fetchParceiroProgramaColumnsReady,
+  isMissingParceiroProgramaColumnError,
+} from "@/lib/parceiroAdmin";
 
 const emptyHorario = {
   dom: "fechado",
@@ -65,6 +64,13 @@ export const emptyLocalForm = {
   status: "ativo",
   eh_parceiro: false,
   conteudo_curadoria: false,
+  parceiro_modalidade: null,
+  parceiro_inicio_em: "",
+  parceiro_fim_em: "",
+  parceiro_status: null,
+  ultima_curadoria_avaliacoes_em: "",
+  proxima_curadoria_avaliacoes_em: "",
+  parceiro_notas_internas: "",
   horarios: emptyHorario,
   mostrar_endereco: true,
   mostrar_horarios: true,
@@ -141,6 +147,7 @@ export default function LocalForm({
   const [videoRemoved, setVideoRemoved] = useState(false);
   const [videoError, setVideoError] = useState("");
   const [slugColumnReady, setSlugColumnReady] = useState(true);
+  const [parceiroColumnReady, setParceiroColumnReady] = useState(true);
   const { destaque: _destaqueLegado, ...initialSemDestaque } = initialData ?? {};
 
   const [form, setForm] = useState({
@@ -169,6 +176,7 @@ export default function LocalForm({
       .then(({ data }) => setTags(data ?? []));
 
     fetchTakenSlugs(supabase, editingId).then(({ ready }) => setSlugColumnReady(ready));
+    fetchParceiroProgramaColumnsReady(supabase).then(setParceiroColumnReady);
   }, [editingId]);
 
   useEffect(() => {
@@ -269,6 +277,21 @@ export default function LocalForm({
   }
 
   /**
+   * Atualização parcial do lugar (ações rápidas do programa parceiro).
+   * @param {object} patch
+   */
+  async function patchParceiroFields(patch) {
+    if (!editingId) return;
+    const supabase = createClient();
+    const { error } = await supabase.from("lugares").update(patch).eq("id", editingId);
+    if (error) {
+      console.error(error);
+      throw error;
+    }
+    setForm((current) => ({ ...current, ...patch }));
+  }
+
+  /**
    * Persiste lugar, fotos no Storage, localização e vínculos de tags no Supabase.
    * @param {import("react").FormEvent<HTMLFormElement>} event - Evento de submit do formulário.
    */
@@ -286,6 +309,13 @@ export default function LocalForm({
       destaque: _destaqueCampo,
       slug: _slugField,
       slug_auto: _slugAuto,
+      parceiro_modalidade: _parceiroModalidade,
+      parceiro_inicio_em: _parceiroInicio,
+      parceiro_fim_em: _parceiroFim,
+      parceiro_status: _parceiroStatus,
+      ultima_curadoria_avaliacoes_em: _ultimaCuradoria,
+      proxima_curadoria_avaliacoes_em: _proximaCuradoria,
+      parceiro_notas_internas: _parceiroNotas,
       ...formFields
     } = form;
 
@@ -314,6 +344,7 @@ export default function LocalForm({
       mostrar_endereco: Boolean(form.mostrar_endereco),
       mostrar_horarios: Boolean(form.mostrar_horarios),
       horarios: form.horarios,
+      ...(parceiroColumnReady ? buildParceiroProgramaPayload(form) : {}),
     };
     let lugarId = editingId;
     const pendingFiles = getPendingFilesFromPhotoItems(photoItems);
@@ -339,6 +370,8 @@ export default function LocalForm({
       setPhotoError(
         isMissingSlugColumnError(error)
           ? "Coluna slug ainda não existe no banco. Rode supabase/lugares_qr_slug.sql no SQL Editor do Supabase e tente de novo."
+          : isMissingParceiroProgramaColumnError(error)
+            ? "Colunas do programa parceiro ainda não existem. Rode supabase/lugares_parceiro_programa.sql no SQL Editor do Supabase e tente de novo."
           : message.includes("lugares_slug_unique_idx") || message.includes("duplicate key")
             ? "Este slug já está em uso. Escolha outro slug ou altere o nome."
             : message ||
@@ -567,43 +600,13 @@ export default function LocalForm({
         </div>
       )}
 
-      <div className="mt-4 space-y-3 rounded-xl bg-[#eef8f4] px-3 py-3 text-sm text-[#1a2e28]">
-        <label className="flex cursor-pointer items-start gap-3">
-          <input
-            type="checkbox"
-            checked={Boolean(form.eh_parceiro)}
-            onChange={(e) =>
-              setForm((current) => ({ ...current, eh_parceiro: e.target.checked }))
-            }
-            className="mt-1 h-4 w-4 rounded border-[#c5d5cf] text-[#1a4a3a]"
-          />
-          <span>
-            <strong>Parceiro do Guia</strong>
-            <span className="mt-0.5 block text-xs font-normal text-[#5a6b66]">
-              Estabelecimento no plano R$ 299/mês — carrossel Parceiros do Guia e badge no app.
-            </span>
-          </span>
-        </label>
-        <label className="flex cursor-pointer items-start gap-3">
-          <input
-            type="checkbox"
-            checked={Boolean(form.conteudo_curadoria)}
-            onChange={(e) =>
-              setForm((current) => ({
-                ...current,
-                conteudo_curadoria: e.target.checked,
-              }))
-            }
-            className="mt-1 h-4 w-4 rounded border-[#c5d5cf] text-[#1a4a3a]"
-          />
-          <span>
-            <strong>Curadoria do Guia</strong>
-            <span className="mt-0.5 block text-xs font-normal text-[#5a6b66]">
-              Conteúdo curado pela equipe (praia, trilha, igreja…) — hero e Em alta hoje.
-            </span>
-          </span>
-        </label>
-      </div>
+      <ParceiroProgramaFields
+        form={form}
+        setForm={setForm}
+        columnReady={parceiroColumnReady}
+        editingId={editingId}
+        onPatchSave={patchParceiroFields}
+      />
 
       <PhotoUploader
         items={photoItems}

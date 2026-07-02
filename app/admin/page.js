@@ -25,6 +25,7 @@ import {
   fetchAtrativosPublicadosCount,
   fetchCount,
   fetchCountInPeriod,
+  fetchParceiroProgramaPendencias,
   getCutoffIso,
   getSaudacao,
 } from "@/lib/adminDashboard";
@@ -114,6 +115,7 @@ export default function AdminDashboard() {
       logsRes,
       perfisRes,
       feedbackNovosRes,
+      parceiroPendencias,
     ] = await Promise.all([
       fetchCount(supabase, "lugares", {
         eq: { field: "status", value: "ativo" },
@@ -149,6 +151,7 @@ export default function AdminDashboard() {
         .from("feedback")
         .select("id", { count: "exact", head: true })
         .eq("status", "novo"),
+      fetchParceiroProgramaPendencias(supabase),
     ]);
 
     setMetrics({
@@ -205,6 +208,8 @@ export default function AdminDashboard() {
     setOperacional({
       emAnalise: emAnaliseCounts.total,
       parceirosAtivos,
+      parceirosVencendo: parceiroPendencias.vencendo + parceiroPendencias.vencido,
+      curadoriaAtrasada: parceiroPendencias.curadoriaAtrasada,
       premiumAtivos,
       feedbackNovos: feedbackNovosRes.count ?? 0,
     });
@@ -338,7 +343,7 @@ export default function AdminDashboard() {
               iconWrap="bg-amber-100"
               iconColor="text-amber-700"
               variation={metrics.parceirosVigentes.variation}
-              href="/admin/locais"
+              href="/admin/parceiros"
             />
             <DashboardMetricCard
               className="sm:col-span-1 lg:col-span-3"
