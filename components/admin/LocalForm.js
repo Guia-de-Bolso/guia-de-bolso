@@ -45,6 +45,7 @@ import {
   fetchParceiroProgramaColumnsReady,
   isMissingParceiroProgramaColumnError,
 } from "@/lib/parceiroAdmin";
+import { LUGAR_STATUS, LUGAR_STATUS_FORM_OPTIONS } from "@/lib/lugarStatus";
 
 const emptyHorario = {
   dom: "fechado",
@@ -68,7 +69,7 @@ export const emptyLocalForm = {
   site_url: "",
   descricao_longa: "",
   historia_cultura: "",
-  status: "ativo",
+  status: LUGAR_STATUS.PAUSADO,
   eh_parceiro: false,
   conteudo_curadoria: false,
   parceiro_modalidade: null,
@@ -555,10 +556,16 @@ export default function LocalForm({
         </label>
         <label className="block text-sm font-semibold text-[#1a2e28]">
           Status
-          <select value={form.status || "ativo"} onChange={(e) => setForm({ ...form, status: e.target.value })} className="mt-1 w-full rounded-xl bg-[#f0f4f3] px-3 py-2 text-sm font-normal outline-none">
-            <option value="ativo">ativo</option>
-            <option value="desativado">desativado</option>
-            <option value="em_analise">em_analise</option>
+          <select
+            value={form.status || LUGAR_STATUS.PAUSADO}
+            onChange={(e) => setForm({ ...form, status: e.target.value })}
+            className="mt-1 w-full rounded-xl bg-[#f0f4f3] px-3 py-2 text-sm font-normal outline-none"
+          >
+            {LUGAR_STATUS_FORM_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label} — {option.hint}
+              </option>
+            ))}
           </select>
         </label>
         <Input

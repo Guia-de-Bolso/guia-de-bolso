@@ -11,6 +11,13 @@ import {
   formatDiasRestantesExclusao,
   getDiasRestantesExclusao,
 } from "@/lib/lugarPurge";
+import {
+  getLugarStatusLabel,
+  isLugarAtivo,
+  isLugarInativoComPurge,
+  isLugarPausado,
+  LUGAR_STATUS,
+} from "@/lib/lugarStatus";
 import { getCategoriasVisiveis } from "@/lib/categorias";
 import { createClient } from "@/lib/supabase";
 
@@ -38,14 +45,6 @@ const categoryStyles = {
  */
 function getCidade(lugar) {
   return lugar.localizacoes?.cidade || "Imbituba";
-}
-
-/**
- * @param {object} lugar
- * @returns {boolean}
- */
-function isAtivo(lugar) {
-  return lugar.status === "ativo";
 }
 
 /**
@@ -112,20 +111,29 @@ function LugarCard({ lugar, onDeactivate }) {
   const capa = getCapaFromLugar(lugar);
   const categoriaClass = categoryStyles[lugar.categoria] || "bg-[#f0f4f3] text-[#1a4a3a]";
   const cidade = getCidade(lugar);
-  const ativo = isAtivo(lugar);
+  const ativo = isLugarAtivo(lugar);
   const diasExclusao =
-    !ativo && lugar.desativado_em
+    isLugarInativoComPurge(lugar) && lugar.desativado_em
       ? getDiasRestantesExclusao(lugar.desativado_em)
       : null;
   const exclusaoLabel =
     diasExclusao !== null ? formatDiasRestantesExclusao(diasExclusao) : null;
 
-  const statusMeta =
-    lugar.status === "em_analise"
-      ? { label: "Em análise", className: "bg-amber-100 text-amber-800" }
-      : ativo
-        ? { label: "Ativo", className: "bg-emerald-100 text-emerald-800" }
-        : { label: "Inativo", className: "bg-zinc-100 text-zinc-600" };
+  const statusMeta = (() => {
+    if (lugar.status === LUGAR_STATUS.EM_ANALISE) {
+      return { label: "Em análise", className: "bg-amber-100 text-amber-800" };
+    }
+    if (ativo) {
+      return { label: "Ativo", className: "bg-emerald-100 text-emerald-800" };
+    }
+    if (isLugarPausado(lugar)) {
+      return { label: "Desativado", className: "bg-slate-100 text-slate-600" };
+    }
+    return {
+      label: getLugarStatusLabel(lugar.status),
+      className: "bg-zinc-100 text-zinc-600",
+    };
+  })();
 
   return (
     <article className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5">
@@ -233,6 +241,7 @@ function LugarCard({ lugar, onDeactivate }) {
  */
 const STATUS_FROM_URL = {
   em_analise: "Em análise",
+  pausado: "Desativados",
 };
 
 export default function LugaresGridPage() {
@@ -294,23 +303,31 @@ export default function LugaresGridPage() {
     if (!confirmed) return;
 
     const supabase = createClient();
-    await supabase.from("lugares").update({ status: "desativado" }).eq("id", lugar.id);
+    await supabase
+      .from("lugares")
+      .update({ status: LUGAR_STATUS.DESATIVADO })
+      .eq("id", lugar.id);
     setLugares((items) =>
       items.map((item) =>
-        item.id === lugar.id ? { ...item, status: "desativado", ativa: false } : item
+        item.id === lugar.id
+          ? { ...item, status: LUGAR_STATUS.DESATIVADO, ativa: false }
+          : item
       )
     );
   }
 
   const stats = useMemo(() => {
-    const ativos = lugares.filter((l) => isAtivo(l)).length;
-    const emAnalise = lugares.filter((l) => l.status === "em_analise").length;
-    const parceiros = lugares.filter((l) => isAtivo(l) && isParceiro(l)).length;
-    const curadoria = lugares.filter((l) => isAtivo(l) && isConteudoCuradoria(l)).length;
+    const ativos = lugares.filter((l) => isLugarAtivo(l)).length;
+    const emAnalise = lugares.filter((l) => l.status === LUGAR_STATUS.EM_ANALISE).length;
+    const desativados = lugares.filter((l) => isLugarPausado(l)).length;
+    const inativos = lugares.filter((l) => isLugarInativoComPurge(l)).length;
+    const parceiros = lugares.filter((l) => isLugarAtivo(l) && isParceiro(l)).length;
+    const curadoria = lugares.filter((l) => isLugarAtivo(l) && isConteudoCuradoria(l)).length;
     return {
       total: lugares.length,
       ativos,
-      inativos: lugares.length - ativos - emAnalise,
+      desativados,
+      inativos,
       emAnalise,
       parceiros,
       curadoria,
@@ -329,12 +346,13 @@ export default function LugaresGridPage() {
         sub.includes(term) ||
         getCidade(lugar).toLowerCase().includes(term);
       const matchesCategoria = categoria === "Todas" || lugar.categoria === categoria;
-      const ativo = isAtivo(lugar);
+      const ativo = isLugarAtivo(lugar);
       const matchesStatus =
         status === "Todos" ||
         (status === "Ativos" && ativo) ||
-        (status === "Inativos" && !ativo && lugar.status !== "em_analise") ||
-        (status === "Em análise" && lugar.status === "em_analise") ||
+        (status === "Desativados" && isLugarPausado(lugar)) ||
+        (status === "Inativos" && isLugarInativoComPurge(lugar)) ||
+        (status === "Em análise" && lugar.status === LUGAR_STATUS.EM_ANALISE) ||
         (status === "Parceiros" && ativo && isParceiro(lugar)) ||
         (status === "Curadoria" && ativo && isConteudoCuradoria(lugar)) ||
         (status === "Ambos" &&
@@ -387,7 +405,7 @@ export default function LugaresGridPage() {
         </div>
       )}
 
-      <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-6">
+      <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-7">
         <StatCard label="Total" value={stats.total} accent="text-[#1a4a3a]" />
         <StatCard
           label="Publicados"
@@ -412,7 +430,18 @@ export default function LugaresGridPage() {
           value={stats.emAnalise}
           accent="text-amber-600"
         />
-        <StatCard label="Inativos" value={stats.inativos} accent="text-[#5a6b66]" />
+        <StatCard
+          label="Desativados"
+          value={stats.desativados}
+          hint="fora do app"
+          accent="text-slate-600"
+        />
+        <StatCard
+          label="Inativos"
+          value={stats.inativos}
+          hint="exclusão em 30 dias"
+          accent="text-[#5a6b66]"
+        />
       </div>
 
       <div className="mb-5 space-y-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-black/5">
@@ -457,6 +486,7 @@ export default function LugaresGridPage() {
               {[
                 "Todos",
                 "Ativos",
+                "Desativados",
                 "Inativos",
                 "Em análise",
                 "Parceiros",
