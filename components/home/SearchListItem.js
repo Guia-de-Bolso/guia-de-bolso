@@ -16,6 +16,9 @@ function PlaceThumb({ imagemUrl, nome }) {
       <RemotePhoto
         src={imagemUrl}
         alt={nome}
+        width={40}
+        height={40}
+        sizes="40px"
         className="h-10 w-10 shrink-0 rounded-full object-cover"
       />
     );

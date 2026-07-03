@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import RemotePhoto from "@/components/shared/RemotePhoto";
 import { getCapaFromLugar } from "@/lib/fotos";
 import { getLugarPublicPath } from "@/lib/lugarPublicPath";
 import { getBadgeParceiroLabel } from "@/lib/lugarBadges";
@@ -39,12 +40,13 @@ function ParceiroCard({ lugar }) {
       href={getLugarPublicPath(lugar)}
       className="group relative flex h-[220px] w-[292px] shrink-0 snap-start flex-col justify-end overflow-hidden rounded-[26px] ring-1 ring-[#e8eeee] transition-transform duration-300 active:scale-[0.98]"
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <RemotePhoto
         src={getCapaFromLugar(lugar)}
         alt=""
+        fill
+        sizes="292px"
         onLoad={() => setImgLoaded(true)}
-        className={`home-image-fade absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${
+        className={`home-image-fade object-cover transition-transform duration-500 group-hover:scale-105 ${
           imgLoaded ? "is-loaded" : ""
         }`}
       />

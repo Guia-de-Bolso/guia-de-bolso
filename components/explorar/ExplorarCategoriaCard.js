@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import RemotePhoto from "@/components/shared/RemotePhoto";
 import { getCategoriaHref } from "@/lib/categorias";
 
 function CategoriaCardContent({ categoria, count, imagemUrl, vazio, imgLoaded, onImageLoad }) {
@@ -9,12 +10,13 @@ function CategoriaCardContent({ categoria, count, imagemUrl, vazio, imgLoaded, o
     <>
       <div className="relative h-[104px] w-full overflow-hidden">
         {imagemUrl && !vazio ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <RemotePhoto
             src={imagemUrl}
             alt=""
+            fill
+            sizes="(max-width: 768px) 50vw, 200px"
             onLoad={onImageLoad}
-            className={`home-image-fade h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${
+            className={`home-image-fade object-cover transition-transform duration-500 group-hover:scale-105 ${
               imgLoaded ? "is-loaded" : ""
             }`}
           />

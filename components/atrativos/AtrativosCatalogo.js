@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import RemotePhoto from "@/components/shared/RemotePhoto";
 import { useMemo, useState } from "react";
@@ -87,21 +86,13 @@ function CoverImage({
     return <div className={`${className} bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54]`} />;
   }
 
-  if (compact) {
-    return (
-      <div className={`${className} relative overflow-hidden`}>
-        <RemotePhoto src={foto} alt={getAtrativoNome(rota)} fill className="object-cover" />
-      </div>
-    );
-  }
-
   return (
     <div className={`${className} relative overflow-hidden`}>
-      <Image
+      <RemotePhoto
         src={foto}
         alt={getAtrativoNome(rota)}
         fill
-        sizes={sizes}
+        sizes={compact ? "112px" : sizes}
         quality={60}
         className="object-cover"
         priority={priority}

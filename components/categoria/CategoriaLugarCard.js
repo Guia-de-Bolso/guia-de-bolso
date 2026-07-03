@@ -62,6 +62,7 @@ export default function CategoriaLugarCard({
             src={imagemUrl}
             alt={lugar.nome}
             fill
+            sizes="108px"
             onLoad={() => setImgLoaded(true)}
             className={`home-image-fade object-cover transition-transform duration-500 group-hover:scale-105 ${
               imgLoaded ? "is-loaded" : ""

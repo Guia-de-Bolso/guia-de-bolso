@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import RemotePhoto from "@/components/shared/RemotePhoto";
 import { getCapaFromAtrativo } from "@/lib/fotos";
 import {
   formatAtrativoDistancia,
@@ -103,14 +104,14 @@ export default function OQueFazerAgora({ rota, temperatura = null }) {
       <HomeSectionHeader eyebrow="Sugestão do momento" title="O que fazer agora" />
 
       <article className="group relative min-h-[460px] overflow-hidden rounded-[32px] shadow-[0_16px_48px_rgba(11,31,26,0.22)] ring-1 ring-black/8 transition-shadow duration-300 hover:shadow-[0_20px_56px_rgba(11,31,26,0.28)]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <RemotePhoto
           src={capa}
           alt={getAtrativoNome(rota)}
-          fetchPriority="high"
-          decoding="async"
+          fill
+          sizes="(max-width: 768px) 100vw, 400px"
+          priority
           onLoad={() => setImgLoaded(true)}
-          className={`home-image-fade absolute inset-0 h-full w-full scale-105 object-cover transition-transform duration-700 ease-out group-hover:scale-110 ${
+          className={`home-image-fade scale-105 object-cover transition-transform duration-700 ease-out group-hover:scale-110 ${
             imgLoaded ? "is-loaded" : ""
           }`}
         />

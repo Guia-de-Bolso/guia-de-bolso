@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import NavigationBackLink from "@/components/NavigationBackLink";
+import RemotePhoto from "@/components/shared/RemotePhoto";
 import { HOME_CONTEXT_PILL_CLASS } from "@/components/home/homeTokens";
 import { GALLERY_FLOAT_BTN_CLASS } from "@/components/lugar/airbnb/lugarAirbnbTokens";
 
@@ -35,14 +36,14 @@ export default function CategoriaHero({
     >
       <div className="relative min-h-[calc(248px+env(safe-area-inset-top,0px))] overflow-hidden rounded-b-[32px] ring-1 ring-[#e8eeee]/80">
         {capaUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <RemotePhoto
             src={capaUrl}
             alt=""
+            fill
+            sizes="(max-width: 768px) 100vw, 640px"
+            priority
             onLoad={() => setImgLoaded(true)}
-            className={`home-image-fade absolute inset-0 h-full w-full object-cover ${
-              imgLoaded ? "is-loaded" : ""
-            }`}
+            className={`home-image-fade object-cover ${imgLoaded ? "is-loaded" : ""}`}
           />
         ) : (
           <div

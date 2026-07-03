@@ -86,6 +86,7 @@ function RoteiroParadaCard({ parada, ehParceiro = false, capaUrl = "", lugarHref
             src={capaUrl}
             alt={nome}
             fill
+            sizes="(max-width: 640px) 100vw, 320px"
             className="object-cover"
           />
           <div

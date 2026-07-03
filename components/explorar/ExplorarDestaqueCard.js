@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import RemotePhoto from "@/components/shared/RemotePhoto";
 import { getCategoriaHref } from "@/lib/categorias";
 
 /**
@@ -15,12 +16,13 @@ export default function ExplorarDestaqueCard({ categoria, count, imagemUrl }) {
   const inner = (
     <>
       {imagemUrl && !vazio ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <RemotePhoto
           src={imagemUrl}
           alt=""
+          fill
+          sizes="260px"
           onLoad={() => setImgLoaded(true)}
-          className={`home-image-fade absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${
+          className={`home-image-fade object-cover transition-transform duration-500 group-hover:scale-105 ${
             imgLoaded ? "is-loaded" : ""
           }`}
         />
