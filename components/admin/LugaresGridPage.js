@@ -104,10 +104,12 @@ function FilterChip({ active, onClick, children }) {
 /**
  * @param {object} props
  * @param {object} props.lugar
+ * @param {() => void} props.onActivate
  * @param {() => void} props.onDeactivate
+ * @param {() => void} props.onInactivate
  * @returns {import("react").JSX.Element}
  */
-function LugarCard({ lugar, onDeactivate }) {
+function LugarCard({ lugar, onActivate, onDeactivate, onInactivate }) {
   const capa = getCapaFromLugar(lugar);
   const categoriaClass = categoryStyles[lugar.categoria] || "bg-[#f0f4f3] text-[#1a4a3a]";
   const cidade = getCidade(lugar);
@@ -223,9 +225,27 @@ function LugarCard({ lugar, onDeactivate }) {
               <button
                 type="button"
                 onClick={onDeactivate}
-                className="rounded-xl px-3 py-1.5 text-xs font-semibold text-[#d9534f] hover:bg-red-50"
+                className="rounded-xl px-3 py-1.5 text-xs font-semibold text-[#5a6b66] hover:bg-[#f0f4f3]"
               >
                 Desativar
+              </button>
+            )}
+            {!ativo && (
+              <button
+                type="button"
+                onClick={onActivate}
+                className="rounded-xl bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
+              >
+                Ativar
+              </button>
+            )}
+            {(ativo || isLugarPausado(lugar) || lugar.status === LUGAR_STATUS.EM_ANALISE) && (
+              <button
+                type="button"
+                onClick={onInactivate}
+                className="rounded-xl px-3 py-1.5 text-xs font-semibold text-[#d9534f] hover:bg-red-50"
+              >
+                Inativar
               </button>
             )}
           </div>
@@ -297,23 +317,68 @@ export default function LugaresGridPage() {
 
   /**
    * @param {object} lugar
+   * @param {string} nextStatus
+   * @param {object} [patch]
    */
-  async function handleDelete(lugar) {
-    const confirmed = window.confirm(`Desativar "${lugar.nome}"?`);
-    if (!confirmed) return;
-
+  async function updateLugarStatus(lugar, nextStatus, patch = {}) {
     const supabase = createClient();
-    await supabase
+    const { error } = await supabase
       .from("lugares")
-      .update({ status: LUGAR_STATUS.DESATIVADO })
+      .update({ status: nextStatus })
       .eq("id", lugar.id);
+
+    if (error) {
+      console.error("[admin lugares] status:", error.message);
+      window.alert("Não foi possível atualizar o status. Tente novamente.");
+      return;
+    }
+
     setLugares((items) =>
       items.map((item) =>
         item.id === lugar.id
-          ? { ...item, status: LUGAR_STATUS.DESATIVADO, ativa: false }
+          ? {
+              ...item,
+              status: nextStatus,
+              desativado_em:
+                nextStatus === LUGAR_STATUS.DESATIVADO
+                  ? item.desativado_em || new Date().toISOString()
+                  : null,
+              ...patch,
+            }
           : item
       )
     );
+  }
+
+  /**
+   * @param {object} lugar
+   */
+  async function handleActivate(lugar) {
+    const confirmed = window.confirm(`Ativar "${lugar.nome}" e publicar no app?`);
+    if (!confirmed) return;
+    await updateLugarStatus(lugar, LUGAR_STATUS.ATIVO);
+  }
+
+  /**
+   * @param {object} lugar
+   */
+  async function handleDeactivate(lugar) {
+    const confirmed = window.confirm(
+      `Desativar "${lugar.nome}"? O local sai do app, mas pode ser reativado depois.`
+    );
+    if (!confirmed) return;
+    await updateLugarStatus(lugar, LUGAR_STATUS.PAUSADO);
+  }
+
+  /**
+   * @param {object} lugar
+   */
+  async function handleInactivate(lugar) {
+    const confirmed = window.confirm(
+      `Inativar "${lugar.nome}"? O local será excluído definitivamente em 30 dias.`
+    );
+    if (!confirmed) return;
+    await updateLugarStatus(lugar, LUGAR_STATUS.DESATIVADO);
   }
 
   const stats = useMemo(() => {
@@ -543,7 +608,9 @@ export default function LugaresGridPage() {
                 ehParceiroFlag: isParceiro(lugar),
                 ehCuradoriaFlag: isConteudoCuradoria(lugar),
               }}
-              onDeactivate={() => handleDelete(lugar)}
+              onActivate={() => handleActivate(lugar)}
+              onDeactivate={() => handleDeactivate(lugar)}
+              onInactivate={() => handleInactivate(lugar)}
             />
           ))}
         </div>
