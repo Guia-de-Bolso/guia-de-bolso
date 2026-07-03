@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import QRCode from "qrcode";
 import { isParceiro } from "@/lib/lugarBadges";
 import { buildQrUrl, isLugarElegivelQr } from "@/lib/lugarQr";
-import { downloadQrPdf, generateQrDataUrl, QR_PDF_COPY, QR_PDF_FORMAT_LIST } from "@/lib/qrPdf";
+import { downloadQrPdf, generateQrDataUrl, QR_PDF_COPY } from "@/lib/qrPdf";
 import { getClientSiteUrl } from "@/lib/siteUrl";
 
 /**
@@ -27,7 +27,6 @@ export default function LugarQrSection({ lugar, slugColumnReady = true }) {
   const [qrDataUrl, setQrDataUrl] = useState("");
   const [copiado, setCopiado] = useState(false);
   const [baixando, setBaixando] = useState(false);
-  const [pdfFormat, setPdfFormat] = useState("mesa");
   const ehParceiro = isParceiro(lugar);
 
   const elegivel = isLugarElegivelQr(lugar);
@@ -125,7 +124,7 @@ export default function LugarQrSection({ lugar, slugColumnReady = true }) {
         siteUrl,
         ehParceiro,
         imagemUrl: lugar.imagemUrl,
-        format: pdfFormat,
+        format: "adesivo",
       });
     } finally {
       setBaixando(false);
@@ -193,25 +192,11 @@ export default function LugarQrSection({ lugar, slugColumnReady = true }) {
               </p>
             </div>
 
-            <div>
-              <label
-                htmlFor="qr-pdf-format"
-                className="text-[10px] font-bold uppercase tracking-wide text-white/70"
-              >
+            <div className="rounded-xl bg-white/10 px-3 py-2.5">
+              <p className="text-[10px] font-bold uppercase tracking-wide text-white/70">
                 Formato de impressão
-              </label>
-              <select
-                id="qr-pdf-format"
-                value={pdfFormat}
-                onChange={(event) => setPdfFormat(event.target.value)}
-                className="mt-1 w-full rounded-xl border border-white/20 bg-white/10 px-3 py-2.5 text-sm text-white outline-none focus:border-white/40 focus:ring-2 focus:ring-white/20"
-              >
-                {QR_PDF_FORMAT_LIST.map((item) => (
-                  <option key={item.id} value={item.id} className="text-[#1a2e28]">
-                    {item.label}
-                  </option>
-                ))}
-              </select>
+              </p>
+              <p className="mt-0.5 text-sm text-white">Adesivo pequeno (8×8 cm)</p>
             </div>
 
             <p className="text-xs leading-relaxed text-white/80">{QR_PDF_COPY.institutional}</p>
