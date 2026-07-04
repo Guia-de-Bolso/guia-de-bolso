@@ -6,6 +6,7 @@ import LoginModal from "@/components/LoginModal";
 import Onboarding from "@/components/Onboarding";
 import DailyLimitCountdown from "@/components/DailyLimitCountdown";
 import PremiumPaywallSheet from "@/components/PremiumPaywallSheet";
+import BaleiasTemporadaCard from "@/components/home/BaleiasTemporadaCard";
 import EmAltaHoje from "@/components/home/EmAltaHoje";
 import HomeContextHeader from "@/components/home/HomeContextHeader";
 import OQueFazerAgora from "@/components/home/OQueFazerAgora";
@@ -854,6 +855,7 @@ function Home({ initialHomeData = null }) {
               ) : (
                 <OQueFazerAgora rota={heroRota} temperatura={temperaturaClima} />
               )}
+              <BaleiasTemporadaCard />
               <ParceirosCarrossel
                 lugares={lugaresParceiros.map((l) =>
                   withDistanciaDinamica(l, userPosition)
