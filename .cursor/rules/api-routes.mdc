@@ -1,0 +1,30 @@
+---
+description: Route Handlers em app/api — auth, rate limit e segurança
+globs: app/api/**/*
+alwaysApply: false
+---
+
+# API routes (`app/api/**/route.js`)
+
+## Checklist obrigatório em toda rota nova ou alterada
+
+1. **Autenticação:** `getAuthUser()` ou propósito público documentado. Rotas IA: `checkBuscaAccess` / `checkRoteiroAccess`.
+2. **Admin:** rotas `/api/admin/**` — verificar `role` (`canAccessAdmin`, `canAccessDevAdmin` em `lib/adminRoles.js`).
+3. **Service role:** só via `createServiceClient()` em server; nunca importar no cliente.
+4. **Rate limit:** IA → `checkIaRateLimit`; feedback → padrão existente em `app/api/feedback/route.js`.
+5. **Cron:** `verifyCronSecret(request)` (ver `app/api/cron/lugares-purge/route.js`).
+6. **Erros:** `buildApiErrorBody` + códigos `UPPER_SNAKE` (`LOGIN_REQUIRED`, etc.).
+7. **Documentação:** adicionar linha na matriz de `SECURITY_CHECKLIST.md`.
+8. **Validação local:** `node scripts/check-api-security-docs.mjs` após mudanças em `app/api/`.
+
+## Padrão de resposta
+
+```javascript
+return NextResponse.json(buildApiErrorBody("LOGIN_REQUIRED", "Faça login."), { status: 401 });
+```
+
+## Não fazer
+
+- Expor chaves Anthropic/Supabase service no bundle ou em logs.
+- Confiar só em RLS sem checagem na rota para operações sensíveis.
+- Input de IA sem sanitizar (busca/roteiro) — ver achados P2 em `SECURITY_CHECKLIST.md`.

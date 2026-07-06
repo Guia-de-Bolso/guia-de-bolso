@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": "node .cursor/hooks/block-risky-shell.mjs"
+      }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "command": "node .cursor/hooks/block-secrets-prompt.mjs",
+        "matcher": "UserPromptSubmit"
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "node .cursor/hooks/lint-edited-file.mjs"
+      }
+    ],
+    "postToolUse": [
+      {
+        "command": "node .cursor/hooks/api-edit-reminder.mjs",
+        "matcher": "Write|StrReplace"
+      }
+    ]
+  }
+}

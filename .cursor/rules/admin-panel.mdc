@@ -1,0 +1,25 @@
+---
+description: Painel admin — guard server, RLS e roles
+globs: app/admin/**/*
+alwaysApply: false
+---
+
+# Admin (`app/admin/**`)
+
+## Defesa em camadas (obrigatório)
+
+1. **Server:** `app/admin/layout.js` — `getUser()` + `canAccessAdmin(perfil?.role)`; redirect se negado.
+2. **Cliente:** `useAdminAuth` — UX apenas; **não** é barreira de segurança.
+3. **RLS/PostgREST:** browser usa anon key; policies devem bloquear escrita não-admin.
+4. **Seções dev-only** (contratos, taxonomia sensível): `canAccessDevAdmin` / `canAccessAdminSection`.
+
+## Testar mentalmente
+
+- Usuário `role=user` → redirect `/?admin=denied` (layout) + falha em mutations diretas.
+- Guest → redirect `/login?next=/admin`.
+- Nova página admin: incluir no `adminNavConfig.js` com `section` e guard de role correto.
+
+## Referência
+
+- Roles: `lib/adminRoles.js`, `docs/authentication.md`
+- Achado P1: admin não pode depender só do cliente (`SECURITY_CHECKLIST.md`)

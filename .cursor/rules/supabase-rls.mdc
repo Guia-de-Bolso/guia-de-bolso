@@ -1,0 +1,28 @@
+---
+description: Migrations SQL Supabase — RLS, policies e deploy
+globs: supabase/**/*
+alwaysApply: false
+---
+
+# Supabase SQL (`supabase/*.sql`)
+
+## Regras de policy
+
+- Escrita em conteúdo (`lugares`, `destaques`, fotos): `is_admin_user()` ou `is_admin_only()` (contratos = role `dev`).
+- Leitura pública: policies explícitas; nunca `USING (true)` em tabelas sensíveis (`logs`, `perfis`).
+- Self-update `perfis`: respeitar `perfis_privileged_guard.sql` (bloqueia `role`, `premium_*`, contadores IA).
+- Favoritos/roteiros: usuário só na própria linha (`user_id = auth.uid()`).
+
+## Workflow
+
+1. Novo arquivo snake_case descritivo (ex.: `lugares_admin_write.sql`).
+2. Referenciar em `docs/database.md` ou `docs/security-rls.md` se for policy de segurança.
+3. **Produção:** Supabase → SQL Editor → executar (não há migrate automático).
+4. P0 pendente de apply: `supabase/security_p0_complete.sql`.
+5. Atualizar `SECURITY_CHECKLIST.md` se mudar superfície de ataque.
+
+## Helpers existentes
+
+- `is_admin_user()` — admin + dev
+- `is_admin_only()` — só dev (contratos, seções sensíveis)
+- `is_admin_or_dev()` — leitura de logs

@@ -1,6 +1,6 @@
 # Security Checklist — Guia de Bolso
 
-**Última auditoria:** 2026-06-30  
+**Última auditoria:** 2026-07-06  
 **Escopo:** código em `/app`, `/lib`, `/components`, `/middleware.js`, `supabase/*.sql`, variáveis de ambiente documentadas.
 
 ## Resumo executivo
@@ -23,6 +23,21 @@ O projeto separa bem segredos de servidor (`ANTHROPIC_API_KEY`, `SUPABASE_SERVIC
 | `/api/uso-premium` | GET | Opcional | — | Não | Leitura de contadores |
 | `/api/lugares` | GET | Pública (anon server) | — | Não | Só lugares ativos / destaques |
 | `/api/feedback` | POST | Opcional | — | Sim (memória, 5/h) | Guest usa service role |
+| `/api/health` | GET | Pública | — | Não | Smoke deploy; sem dados sensíveis |
+| `/api/explorar` | GET | Pública | — | Não | Agregados de categorias para home |
+| `/api/atrativos` | GET | Pública | — | Não | Lista atrativos curados |
+| `/api/atrativos/catalogo` | GET | Pública | — | Não | Catálogo leve para clientes |
+| `/api/waitlist` | POST | Pública | — | Sim (`waitlistRateLimit`) | Insert waitlist + e-mail Resend |
+| `/api/planos-rapidos` | POST | Obrigatória | — | Não | Atalhos de plano comercial (admin flow) |
+| `/api/perfil/avatar` | POST | Obrigatória | — | Não | Upload via service role; MIME/tamanho validados |
+| `/api/conta` | DELETE | Obrigatória | — | Não | Exclusão de conta (App Store / Play) |
+| `/api/auth/logout` | POST | Opcional | — | Não | Encerra sessão Supabase |
+| `/api/premium/verify-apple` | POST | Obrigatória | — | Não | Valida receipt IAP Apple |
+| `/api/premium/verify-play` | POST | Obrigatória | — | Não | Valida purchase Play Billing |
+| `/api/cron/lugares-purge` | GET | `CRON_SECRET` | — | Não | Purge lugares desativados 30d+ |
+| `/api/admin/usuarios/[id]` | DELETE | Obrigatória | `admin` (`requireAdminOnlyApi`) | Não | Exclusão de usuário (service role) |
+| `/api/admin/contratos/[id]/documentos` | POST | Obrigatória | `dev` | Não | Upload documento contrato |
+| `/api/admin/contratos/documentos/[docId]` | GET, DELETE | Obrigatória | `dev` | Não | Download/remoção de documento |
 
 **Outras rotas sensíveis:** `app/auth/callback` (OAuth), `app/q/[slug]` (redirect + log via service role).
 

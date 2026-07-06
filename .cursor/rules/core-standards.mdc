@@ -1,0 +1,14 @@
+---
+description: Padrões centrais do Guia de Bolso — sempre aplicar
+alwaysApply: true
+---
+
+# Guia de Bolso — padrões centrais
+
+- **JavaScript puro** (sem TypeScript). Node 20+, Next.js 16 App Router.
+- **Docs canônicas:** `ENGINEERING_GUIDE.md`, `CODING_STANDARDS.md`, `SECURITY_CHECKLIST.md`, `docs/README.md`.
+- **Negócio/contexto:** `CLAUDE.md` (não duplicar aqui).
+- **Copy UI:** pt-BR, tom direto. Código/comentários: consistente no arquivo.
+- **Segredos:** nunca commitar `.env.local`; `ANTHROPIC_API_KEY` e `SUPABASE_SERVICE_ROLE_KEY` só server-side (`lib/supabase/service.js`).
+- **Commits:** só quando o usuário pedir explicitamente.
+- **Testes:** lógica nova em `lib/` → `lib/*.test.js` (`node --test`). CI: lint → test → build → e2e.

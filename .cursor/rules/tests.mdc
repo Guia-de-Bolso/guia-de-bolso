@@ -1,0 +1,30 @@
+---
+description: Testes unitários e E2E — quando e como adicionar
+globs: lib/**/*
+alwaysApply: false
+---
+
+# Testes
+
+## Unitário (`lib/*.test.js`)
+
+- Framework: `node --test` + `node:assert/strict`.
+- Um arquivo de teste por módulo: `horarios.js` → `horarios.test.js`.
+- Cobrir: regras de negócio, parsers, guards, redirects (`safeRedirectPath`), premium, horários.
+- Rodar: `npm test` ou `node --test lib/nome.test.js`.
+
+## Quando adicionar teste no mesmo PR
+
+- Nova função exportada em `lib/` com lógica não trivial.
+- Bug fix → teste de regressão.
+- Mudança em `SECURITY_CHECKLIST.md` / auth / rate limit → teste se houver módulo `lib/` correspondente.
+
+## E2E smoke (`e2e/smoke.spec.js`)
+
+- Fluxos guest e redirects críticos; CI roda após `build`.
+- Novas rotas públicas importantes: considerar caso smoke (onboarding skip via `localStorage`).
+
+## Manual
+
+- Checklist 155 casos: `docs/TESTING-CHECKLIST.md`, `/checklist-testes.html`.
+- Capacitor, IAP, premium real: manual (não automatizar no CI ainda).
