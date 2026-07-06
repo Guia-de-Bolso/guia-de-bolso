@@ -9,7 +9,7 @@ Pirâmide de QA do projeto:
 | Camada | Comando | Onde | CI |
 |--------|---------|------|-----|
 | Unitário | `npm test` | `lib/*.test.js` (~40 arquivos, `node --test`) | Sim, antes do build |
-| E2E smoke | `npm run test:e2e` | `e2e/smoke.spec.js` (10 casos, Playwright + Chromium) | Sim, após `npm run build` |
+| E2E smoke | `npm run test:e2e` | `e2e/smoke.spec.js`, `e2e/auth-gates.spec.js` (17 casos, Playwright + Chromium) | Sim, após `npm run build` |
 | Manual | checklist abaixo | Capacitor, IAP, premium, admin logado, visual | Não |
 
 **Primeira vez local (E2E):** `npx playwright install chromium`
@@ -28,8 +28,20 @@ Pirâmide de QA do projeto:
 | 6 | `/favoritos` (guest) | Gate “Faça login para ver seus favoritos” |
 | 7 | Favoritos → Fazer login | Modal com auth; subtítulo menciona offline |
 | 8 | `/perfil` (guest) | Benefícios + Google |
-| 9 | `/admin` (guest) | Redirect para `/login` |
-| 10 | Bottom nav Início → Explorar | Navega para `/categorias` |
+| 9 | Bottom nav Início → Explorar | Navega para `/categorias` |
+
+### Casos cobertos por `e2e/auth-gates.spec.js`
+
+| # | Caso | Esperado |
+|---|------|----------|
+| 1 | `POST /api/buscar` (guest) | 401, `code: LOGIN_REQUIRED` |
+| 2 | `POST /api/roteiro` (guest) | 401, `code: LOGIN_REQUIRED` |
+| 3 | `POST /api/roteiro/salvar` (guest) | 401, `code: LOGIN_REQUIRED` |
+| 4 | `DELETE /api/conta` (guest) | 401, `code: UNAUTHORIZED` |
+| 5 | `GET /api/cron/lugares-purge` (sem secret) | 401, `error: Unauthorized` |
+| 6 | Home → busca IA (guest) | Modal login com copy de busca IA |
+| 7 | Home → chip “Lugares calmos” (guest) | Modal login para busca IA |
+| 8 | `/admin` (guest) | Redirect `/login` com `next=/admin` |
 
 Regras de código e quando adicionar testes: [`CODING_STANDARDS.md`](../CODING_STANDARDS.md) §10, [`conventions.md`](./conventions.md).
 

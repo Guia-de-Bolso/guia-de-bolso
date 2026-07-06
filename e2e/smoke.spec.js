@@ -1,14 +1,6 @@
 // @ts-check
 import { test, expect } from "@playwright/test";
-
-const baseURL = process.env.PLAYWRIGHT_BASE_URL || "http://localhost:3000";
-
-/** Evita overlay de onboarding em sessões novas do Playwright. */
-async function skipOnboarding(page) {
-  await page.addInitScript(() => {
-    localStorage.setItem("onboarding_visto", "1");
-  });
-}
+import { baseURL, skipOnboarding } from "./helpers.js";
 
 test.describe("smoke", () => {
   test("health endpoint", async ({ request }) => {
@@ -62,11 +54,6 @@ test.describe("smoke", () => {
     await page.goto(`${baseURL}/perfil`);
     await expect(page.getByRole("heading", { name: "Entre e personalize sua viagem" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Entrar com Google" })).toBeVisible();
-  });
-
-  test("admin redirects guest to login", async ({ page }) => {
-    await page.goto(`${baseURL}/admin`);
-    await expect(page).toHaveURL(/\/login/);
   });
 
   test("bottom nav navigates to explorar", async ({ page }) => {
