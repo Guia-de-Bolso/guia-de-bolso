@@ -122,7 +122,7 @@ O projeto separa bem segredos de servidor (`ANTHROPIC_API_KEY`, `SUPABASE_SERVIC
 | Campo | Valor |
 |-------|--------|
 | **Risco** | High |
-| **Impacto** | Conta legítima ou comprometida pode esgotar cota Anthropic; DDoS econômico mesmo com limite diário de 5 buscas (múltiplas contas). |
+| **Impacto** | Conta legítima ou comprometida pode esgotar cota Anthropic; DDoS econômico mesmo com limite diário de 10 buscas (múltiplas contas). |
 | **Probabilidade** | Likely em campanha automatizada |
 | **Evidência** | `app/api/buscar/route.js`, `app/api/roteiro/route.js` — sem throttle IP/usuário além de `checkBuscaAccess` / `checkRoteiroAccess`. |
 | **Solução** | Vercel Firewall / Upstash Redis: ex. 10 req/min por IP nas rotas POST de IA; captcha após falhas; alertas de billing Anthropic. |

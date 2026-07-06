@@ -16,7 +16,7 @@ Documento financeiro para planejamento de lançamento. **Não substitui contabil
 |-------|-----------|---------------------------|------------|
 | **B2B Parceiro (principal)** | Estabelecimento | **R$ 299/mês** — `lib/planoComercial.js`, `plano_comercial_unico.sql` | Carrossel Parceiros, prioridade na busca IA, badges |
 | **B2C Guia Premium (secundário)** | Usuário final | **R$ 9,90/mês** — IA ilimitada (`lib/premium.js`) | Não paga o negócio sozinho; cobre heavy users parcialmente |
-| **Free tier IA** | — | 5 buscas/dia + 2 roteiros/dia (America/Sao_Paulo) | Teto teórico de custo variável |
+| **Free tier IA** | — | 10 buscas/dia + 2 roteiros/dia (America/Sao_Paulo) | Teto teórico de custo variável |
 
 **Roadmap V2 (só cenário na planilha, não no código):** Gratuito R$ 0 · Estabelecido R$ 99 · Destaque R$ 149 · Parceiro R$ 229 (`CLAUDE.md`).
 
@@ -77,7 +77,7 @@ Método: payload real no código — `rankLugaresForBusca` limita a **60** lugar
 | **Conservador** | 35% | 25% | 4 | 0,4 | 0,15 |
 | **Médio (padrão)** | 40% | 45% | 12 | 1,5 | 0,35 |
 | **Alta temporada** | 45% | 60% | 28 | 5 | 0,6 |
-| **Teto teórico** | 50% | 100% | 90 | 60 | 1,0 |
+| **Teto teórico** | 50% | 100% | 180 | 60 | 1,0 |
 
 *Teto = usuário batendo limite diário free quase todo dia (referência, não previsão).*
 
@@ -104,10 +104,10 @@ Valores **médios** (cenário **Médio**). Desde **jun/2026**, a busca envia no 
 
 | MAU | Conservador | Médio | Alta temporada | Teto teórico |
 |-----|-------------|-------|----------------|--------------|
-| 10 | R$ 1 | R$ 2 | R$ 4 | R$ 7 |
-| 100 | R$ 5 | R$ 18 | R$ 42 | R$ 70 |
-| 200 | R$ 10 | R$ 35 | R$ 84 | R$ 140 |
-| 500 | R$ 24 | R$ 87 | R$ 210 | R$ 350 |
+| 10 | R$ 1 | R$ 2 | R$ 4 | R$ 14 |
+| 100 | R$ 5 | R$ 18 | R$ 42 | R$ 140 |
+| 200 | R$ 10 | R$ 35 | R$ 84 | R$ 280 |
+| 500 | R$ 24 | R$ 87 | R$ 210 | R$ 700 |
 
 *(Teto com 500 MAU é cenário de stress — configurar alertas de billing antes.)*
 

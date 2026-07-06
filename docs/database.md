@@ -87,7 +87,7 @@ One row per registered user. Extends auth with app profile, admin role, and AI/p
 | `buscas_ia` | `integer` | AI searches used **today** *(migration)* |
 | `roteiros_ia` | `integer` | AI itineraries used **today** *(migration)* |
 
-**Free tier limits** (enforced in app + RPC): **5 searches/day**, **2 roteiros/day**; counters reset at **midnight** (SP). Premium: unlimited (`lib/premium.js`). See `supabase/premium_uso_diario.sql` (column comment).
+**Free tier limits** (enforced in app + RPC): **10 searches/day**, **2 roteiros/day**; counters reset at **midnight** (SP). Premium: unlimited (`lib/premium.js`). See `supabase/premium_uso_diario.sql` (column comment).
 
 ---
 
@@ -678,7 +678,7 @@ RLS policies for **`rotas`** and related tables are in [`rotas_policies.sql`](..
 
 | Function | Parameter | Returns | Purpose | File |
 |----------|-----------|---------|---------|------|
-| `increment_busca_ia` | `p_user_id uuid` | `jsonb` | Auth check, **daily** reset (`YYYY-MM-DD`), reserva 1 busca (limit **5**/day), premium bypass | `increment_uso_ia.sql` |
+| `increment_busca_ia` | `p_user_id uuid` | `jsonb` | Auth check, **daily** reset (`YYYY-MM-DD`), reserva 1 busca (limit **10**/day), premium bypass | `increment_uso_ia.sql` |
 | `increment_roteiro_ia` | `p_user_id uuid` | `jsonb` | Same for roteiros (limit 2/day); returns `resets_at` (next midnight SP) in `usage` | `increment_uso_ia.sql` |
 | `decrement_busca_ia` | `p_user_id uuid` | `jsonb` | Estorna 1 busca após falha da Claude (não premium) | `increment_uso_ia.sql` |
 | `decrement_roteiro_ia` | `p_user_id uuid` | `jsonb` | Estorna 1 roteiro após falha da Claude (não premium) | `increment_uso_ia.sql` |
@@ -696,7 +696,7 @@ RLS policies for **`rotas`** and related tables are in [`rotas_policies.sql`](..
     "day": "2026-05-19",
     "month": "2026-05-19",
     "resets_at": "2026-05-20T03:00:00.000Z",
-    "buscas": { "used": 1, "limit": 5, "remaining": 4 },
+    "buscas": { "used": 1, "limit": 10, "remaining": 9 },
     "roteiros": { "used": 0, "limit": 2, "remaining": 2 }
   }
 }

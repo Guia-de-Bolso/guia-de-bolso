@@ -1,7 +1,5 @@
--- Funções atômicas para contadores de IA (limite diário, fuso America/Sao_Paulo).
--- A coluna perfis.uso_ia_mes armazena a chave do dia (YYYY-MM-DD).
--- Depende de: premium_usuario.sql, perfis_ia_usage_write.sql
--- Após aplicar, rode perfis_privileged_guard.sql (bloqueia UPDATE client nos contadores).
+-- Free tier: aumenta limite diário de buscas IA de 5 para 10 (America/Sao_Paulo).
+-- Mantém em sync com supabase/increment_uso_ia.sql
 
 CREATE OR REPLACE FUNCTION increment_busca_ia(p_user_id uuid)
 RETURNS jsonb
@@ -73,7 +71,6 @@ BEGIN
     );
   END IF;
 
-  -- Dia corrente SP apenas; chave legada YYYY-MM ou outro dia → contadores do dia = 0
   v_used := CASE
     WHEN v_perfil.uso_ia_mes = v_day THEN COALESCE(v_perfil.buscas_ia, 0)
     ELSE 0
@@ -237,7 +234,6 @@ BEGIN
 END;
 $$;
 
--- Estorna 1 unidade de cota quando a chamada à IA falha após reserva (increment antes da Claude).
 CREATE OR REPLACE FUNCTION decrement_busca_ia(p_user_id uuid)
 RETURNS jsonb
 LANGUAGE plpgsql

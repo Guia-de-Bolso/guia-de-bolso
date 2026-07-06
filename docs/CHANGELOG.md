@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Free tier AI search limit** — daily cap raised from **5** to **10** buscas/dia (`lib/premium.js`, RPC `increment_busca_ia` / `decrement_busca_ia` in `supabase/increment_uso_ia.sql`, migration `20260706120000_busca_ia_daily_limit_10.sql`). Onboarding, paywall and home counter use `LIMITS.busca` dynamically.
+
 - **Admin role split** — `admin` = operational CMS (locais, atrativos, avaliações, relatórios); `dev` = full panel including parceiros, contratos, logs, taxonomia, IA, despesas, feedback, usuários (`lib/adminRoles.js`, `AdminShell`, `requireAdminOnlyApi`).
 - **Public catalog** — consumer lists use `PUBLIC_APP_PARTNERS_ONLY` (`lib/publicCatalog.js`, `queryLugaresAtivos`) — only active `eh_parceiro` places in production app feeds.
 - **Home “Em alta hoje”** — daily shuffle over partner pool (`pickEmAltaCuradoria` + `filterLugaresPublicos`), not `conteudo_curadoria` nor `lugares_populares`.

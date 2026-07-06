@@ -278,7 +278,7 @@ flowchart TB
 
 | Tier | Buscas IA/dia | Roteiros IA/dia |
 |------|---------------|-----------------|
-| Gratuito (logado) | 5 | 2 |
+| Gratuito (logado) | 10 | 2 |
 | Premium | Ilimitado | Ilimitado |
 
 Reset: meia-noite **America/Sao_Paulo**. Reserva atômica antes da Claude: RPC `increment_busca_ia`, `increment_roteiro_ia`. Estorno em falha da IA: `decrement_busca_ia`, `decrement_roteiro_ia`.

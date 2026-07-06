@@ -84,7 +84,7 @@ Implementation: `app/api/lugares/route.js`, queries in `lib/lugaresQuery.js` / `
 Natural-language place search powered by Claude.
 
 **Auth:** Required  
-**Premium:** Free tier — **5 searches/day** (resets at midnight, America/Sao_Paulo); Premium — unlimited
+**Premium:** Free tier — **10 searches/day** (resets at midnight, America/Sao_Paulo); Premium — unlimited
 
 **Request body:**
 
@@ -104,7 +104,7 @@ Natural-language place search powered by Claude.
   "lugares": [/* full place objects with relations */],
   "usage": {
     "premium": false,
-    "buscas": { "used": 1, "limit": 5 }
+    "buscas": { "used": 1, "limit": 10 }
   }
 }
 ```
@@ -390,7 +390,7 @@ Returns current user's premium status and **daily** AI usage (with optional `res
   "usage": {
     "premium": false,
     "day": "2026-05-19",
-    "buscas": { "used": 2, "limit": 5, "remaining": 3 },
+    "buscas": { "used": 2, "limit": 10, "remaining": 8 },
     "roteiros": { "used": 0, "limit": 2, "remaining": 2 },
     "resetsAt": "2026-05-20T03:00:00.000Z",
     "msUntilReset": 19800000
@@ -433,7 +433,7 @@ Full reference: [environment.md](./environment.md).
 
 ## Rate limits and cost control
 
-- Free-tier limits are **per calendar day** (America/Sao_Paulo): 5 buscas, 2 roteiros; enforced in `lib/premiumServer.js` and RPC `increment_*_ia` before AI calls.
+- Free-tier limits are **per calendar day** (America/Sao_Paulo): 10 buscas, 2 roteiros; enforced in `lib/premiumServer.js` and RPC `increment_*_ia` before AI calls.
 - Read path realigns stale or legacy `YYYY-MM` keys before normalize; RPC `increment_*_ia` matches exact `YYYY-MM-DD` only. Client must not trust `localStorage` over server when counts diverge.
 - `LIMIT_REACHED` responses include `usage`; RPC JSON uses `resets_at`, client-normalized `usage` uses camelCase `resetsAt` / `msUntilReset`.
 - Roteiro generation uses a filtered place list (`lib/roteiroLugares.js`) to reduce tokens.

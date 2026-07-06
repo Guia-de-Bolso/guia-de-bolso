@@ -11,7 +11,7 @@ User-facing product reference for **Guia de Bolso** (Imbituba, SC). Behavior is 
 | Role | Typical access |
 |------|----------------|
 | **Guest** | Browse places, categories, curated routes, place details; mini weather on outdoor detail; **no** AI search/roteiros; full `ClimaSheet` requires login |
-| **Logged-in user** | Favorites, reviews, AI search (5/day), AI roteiros (2/day), saved roteiros, full outdoor weather sheet on place detail |
+| **Logged-in user** | Favorites, reviews, AI search (10/day), AI roteiros (2/day), saved roteiros, full outdoor weather sheet on place detail |
 | **Premium** | Unlimited AI search & roteiros (weather on detail is login-gated, not premium-gated today) |
 | **Admin** | Operational CMS at `/admin` (`canAccessAdmin`: `admin` or `dev`) — locais, atrativos, avaliações, relatórios |
 | **Dev** | Same as admin **plus** sensitive areas (`canAccessDevAdmin`, `DEV_ONLY_ADMIN_PATHS` in `lib/adminRoles.js`): IA & custos, despesas, parceiros, contratos, feedback, usuários, logs, taxonomia |
@@ -78,12 +78,12 @@ Find places matching intent (“romantic dinner”, “open now”, “sunset sp
 
 **Edge cases**
 - **Guest** → `LoginModal` with motivo `busca`.
-- **Daily limit reached** (5/day) → `PremiumPaywallSheet` (`busca`) with countdown; search panel may close. Inline `DailyLimitCountdown` while search is open.
+- **Daily limit reached** (10/day) → `PremiumPaywallSheet` (`busca`) with countdown; search panel may close. Inline `DailyLimitCountdown` while search is open.
 - Empty catalog after status filter → API message, zero results.
 - Network/API error → inline error string; optimistic UI not applied to results.
 - Server returns `LOGIN_REQUIRED` / `LIMIT_REACHED` even if client pre-check passed (session/expiry race).
 - Usage counter: hydrates from `localStorage` on same calendar day, then syncs via `GET /api/uso-premium` (server is source of truth). Shows “Carregando uso de IA…” until cache or API is ready — never a false `0/3` flash.
-- When daily limit reached with search open: inline `DailyLimitCountdown` + paywall; label shows `X/5 hoje`.
+- When daily limit reached with search open: inline `DailyLimitCountdown` + paywall; label shows `X/10 hoje`.
 
 ---
 
@@ -521,7 +521,7 @@ Get a custom day-by-day plan for the region.
 ## 23. Guia Premium (paywall)
 
 **Description**  
-Subscription at **R$ 9,90/mo** for **unlimited** AI search and roteiros (no daily cap). Free tier: **5 buscas + 2 roteiros per day**, resetting at **midnight** (`America/Sao_Paulo`). `PremiumPaywallSheet` explains the daily limit; `DailyLimitCountdown` shows time until reset (`HH:MM:SS`, updates every second).
+Subscription at **R$ 9,90/mo** for **unlimited** AI search and roteiros (no daily cap). Free tier: **10 buscas + 2 roteiros per day**, resetting at **midnight** (`America/Sao_Paulo`). `PremiumPaywallSheet` explains the daily limit; `DailyLimitCountdown` shows time until reset (`HH:MM:SS`, updates every second).
 
 **User goal**  
 Understand the daily free quota, when it renews, or upgrade for unlimited use.

@@ -53,7 +53,7 @@ Use a ferramenta com **155 casos de teste**, passo a passo por dispositivo, resu
 |-------|-------------------|-----------------|
 | Login | `/login`, `LoginModal`, Perfil; Capacitor iOS also Apple + native Google | — |
 | Cadastro | Primeiro login (Google/SMS/Apple iOS) + `/perfil/editar` | — |
-| Busca IA | Home `SmartSearch`, `/?busca=1`, `/?q=` | Login + limite 5/dia (free) |
+| Busca IA | Home `SmartSearch`, `/?busca=1`, `/?q=` | Login + limite 10/dia (free) |
 | Relatórios admin | `/admin/relatorios` | Admin/dev; lugar ativo + período |
 | QR estabelecimento | Admin editar local → PDF; scan `/q/{slug}` | Natureza/Aventura sem QR |
 | Ver lugar | Cards → `/lugares/[id]` | Nenhuma |

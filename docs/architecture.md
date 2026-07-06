@@ -513,7 +513,7 @@ On first login, Supabase creates `auth.users`. The app expects a matching row in
 
 | Layer | Mechanism |
 |-------|-----------|
-| **Premium features** | `perfis.premium_ativo`; daily counters `buscas_ia` / `roteiros_ia` in `uso_ia_mes` (day key `YYYY-MM-DD`, SP); limits 5 buscas + 2 roteiros/day; Premium unlimited |
+| **Premium features** | `perfis.premium_ativo`; daily counters `buscas_ia` / `roteiros_ia` in `uso_ia_mes` (day key `YYYY-MM-DD`, SP); limits 10 buscas + 2 roteiros/day; Premium unlimited |
 | **Admin** | `perfis.role` ∈ `admin`, `dev` (`canAccessAdmin`); sensitive CMS + contracts: **`dev` only** (`canAccessDevAdmin`, `is_admin_only()` in SQL) |
 | **Public content** | RLS: active places; consumer catalog may further restrict to `eh_parceiro` (`lib/publicCatalog.js`, `PUBLIC_APP_PARTNERS_ONLY`) |
 | **Gated UI** | `LoginModal` for favorites, reviews, **AI search**, and **AI roteiro**; curated `/atrativos` list and detail are public |

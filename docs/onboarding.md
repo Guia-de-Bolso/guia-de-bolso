@@ -74,7 +74,7 @@ Documentação de segurança: [`security-rls.md`](./security-rls.md), [`../SECUR
 | Fluxo | Rota / ação | O que validar |
 |-------|-------------|---------------|
 | Catálogo público | `/`, `/categorias` | Lugares `ativo`, sem login |
-| Busca IA | Home → busca (logado) | `POST /api/buscar`, contador 5/dia |
+| Busca IA | Home → busca (logado) | `POST /api/buscar`, contador 10/dia |
 | Detalhe | `/lugares/[id]` | Horários, mapa, favorito (login) |
 | Roteiro IA | `/rotas` | `POST /api/roteiro`, limite 2/dia |
 | Auth Google | `/login` | Redirect `/auth/callback` |

@@ -342,7 +342,7 @@ const FASE1 = {
           obs: "Apple Sign In desabilitado (pendente Apple Developer Program). SMS via Supabase Auth + Twilio.",
         },
         {
-          title: "Testar busca por IA e limites free (5/dia)",
+          title: "Testar busca por IA e limites free (10/dia)",
           onde: "Home SmartSearch → POST /api/buscar",
           tempo: "1 hora",
           dificuldade: "Médio",
