@@ -26,7 +26,7 @@ import {
   getOfflineFavorito,
 } from "@/lib/favoritosOffline";
 import { isMissingTableError } from "@/lib/supabaseErrors";
-import { createClient } from "@/lib/supabase";
+import OpenInAppBanner from "@/components/shared/OpenInAppBanner";
 
 function VerifiedIcon() {
   return (
@@ -173,6 +173,7 @@ export default function AtrativoDetalhePremium({
 
   return (
     <div className="min-h-screen bg-[#f0f4f3] pb-28 text-[#1a2e28]">
+      <OpenInAppBanner path={`/atrativos/${rotaId}`} />
       {toast && (
         <div className="fixed left-4 right-4 top-4 z-[60] mx-auto max-w-md rounded-xl bg-[#1a4a3a] px-4 py-3 text-center text-sm font-semibold text-white shadow-lg">
           {toast}

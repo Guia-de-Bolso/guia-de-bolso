@@ -21,7 +21,8 @@ import {
   DESTAQUE_CHIP_PREMIUM_CLASS,
   DETALHE_CARD_OVERLAP_CLASS,
 } from "@/components/lugar/airbnb/lugarAirbnbTokens";
-import { getBadgeCuradoriaLabel, getBadgeParceiroLabel } from "@/lib/lugarBadges";
+import { getLugarPublicPath } from "@/lib/lugarPublicPath";
+import OpenInAppBanner from "@/components/shared/OpenInAppBanner";
 import { lugarExibeClima } from "@/lib/clima";
 import { lugarExibeVideo } from "@/lib/lugarVideo";
 import { formatHorario, getDiasHorario } from "@/lib/horarios";
@@ -98,6 +99,7 @@ export default function LugarDetalheAirbnb(props) {
 
   return (
     <div className="min-h-screen bg-[#f0f4f3] pb-28 text-[#1a2e28]">
+      <OpenInAppBanner path={getLugarPublicPath(lugar)} />
       {toast && (
         <div className="fixed left-4 right-4 top-4 z-[60] mx-auto max-w-md rounded-xl bg-[#1a4a3a] px-4 py-3 text-center text-sm font-semibold text-white shadow-lg">
           {toast}
