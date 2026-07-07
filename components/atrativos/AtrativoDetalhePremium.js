@@ -152,11 +152,13 @@ export default function AtrativoDetalhePremium({
   async function handleShare() {
     if (!rotaId) return;
 
+    const url = getAtrativoShareUrl(rotaId);
+
     try {
       const outcome = await shareContent({
         title: nome,
         text: descricao || undefined,
-        url: getAtrativoShareUrl(rotaId),
+        url,
       });
 
       if (outcome === "copied") {
@@ -164,7 +166,8 @@ export default function AtrativoDetalhePremium({
         setTimeout(() => setToast(""), 2500);
       }
     } catch {
-      // Falha silenciosa — share indisponível ou erro inesperado.
+      setToast("Não foi possível compartilhar.");
+      setTimeout(() => setToast(""), 2500);
     }
   }
 

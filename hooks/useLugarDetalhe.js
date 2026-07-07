@@ -491,11 +491,13 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
   async function handleShare() {
     if (!lugar) return;
 
+    const url = getLugarShareUrl(lugar);
+
     try {
       const outcome = await shareContent({
         title: lugar.nome,
         text: lugar.descricao,
-        url: getLugarShareUrl(lugar),
+        url,
       });
 
       if (outcome === "copied") {
@@ -503,7 +505,8 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
         setTimeout(() => setToast(""), 2500);
       }
     } catch {
-      // Falha silenciosa — share indisponível ou erro inesperado.
+      setToast("Não foi possível compartilhar.");
+      setTimeout(() => setToast(""), 2500);
     }
   }
 
