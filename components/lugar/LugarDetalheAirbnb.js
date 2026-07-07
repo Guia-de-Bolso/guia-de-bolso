@@ -22,6 +22,7 @@ import {
   DETALHE_CARD_OVERLAP_CLASS,
 } from "@/components/lugar/airbnb/lugarAirbnbTokens";
 import { getLugarPublicPath } from "@/lib/lugarPublicPath";
+import { getBadgeCuradoriaLabel, getBadgeParceiroLabel } from "@/lib/lugarBadges";
 import OpenInAppBanner from "@/components/shared/OpenInAppBanner";
 import { lugarExibeClima } from "@/lib/clima";
 import { lugarExibeVideo } from "@/lib/lugarVideo";
