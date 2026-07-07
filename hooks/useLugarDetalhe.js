@@ -27,6 +27,11 @@ import {
   isLugarEstabelecimento,
 } from "@/lib/lugarDetalhe";
 import {
+  getLugarShareUrl,
+  shareContent,
+  SHARE_COPIED_MESSAGE,
+} from "@/lib/shareContent";
+import {
   appleMapsUrl,
   CATEGORIA_STYLES,
   facebookUrl,
@@ -486,23 +491,19 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
   async function handleShare() {
     if (!lugar) return;
 
-    const shareData = {
-      title: lugar.nome,
-      text: lugar.descricao,
-      url: window.location.href,
-    };
-
     try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-        return;
-      }
+      const outcome = await shareContent({
+        title: lugar.nome,
+        text: lugar.descricao,
+        url: getLugarShareUrl(lugar),
+      });
 
-      await navigator.clipboard.writeText(window.location.href);
-      setToast("Link copiado!");
-      setTimeout(() => setToast(""), 2500);
+      if (outcome === "copied") {
+        setToast(SHARE_COPIED_MESSAGE);
+        setTimeout(() => setToast(""), 2500);
+      }
     } catch {
-      // Cancelamento do share nativo.
+      // Falha silenciosa — share indisponível ou erro inesperado.
     }
   }
 
