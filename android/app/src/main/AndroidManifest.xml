@@ -19,6 +19,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="guiadebolso.app" android:pathPrefix="/lugares" />
+                <data android:scheme="https" android:host="guiadebolso.app" android:pathPrefix="/atrativos" />
+                <data android:scheme="https" android:host="guiadebolso.app" android:pathPrefix="/categoria" />
+                <data android:scheme="https" android:host="guiadebolso.app" android:pathPrefix="/guia" />
+                <data android:scheme="https" android:host="guiadebolso.app" android:pathPrefix="/baixar" />
+                <data android:scheme="https" android:host="www.guiadebolso.app" android:pathPrefix="/lugares" />
+                <data android:scheme="https" android:host="www.guiadebolso.app" android:pathPrefix="/atrativos" />
+                <data android:scheme="https" android:host="www.guiadebolso.app" android:pathPrefix="/categoria" />
+                <data android:scheme="https" android:host="www.guiadebolso.app" android:pathPrefix="/guia" />
+                <data android:scheme="https" android:host="www.guiadebolso.app" android:pathPrefix="/baixar" />
+            </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />

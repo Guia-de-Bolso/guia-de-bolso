@@ -1,6 +1,7 @@
 "use client";
 
 import AppViewportShell from "@/components/AppViewportShell";
+import CapacitorAppLinks from "@/components/CapacitorAppLinks";
 import CapacitorShell from "@/components/CapacitorShell";
 import FeedbackProvider from "@/components/FeedbackProvider";
 import FavoritosBackgroundSync from "@/components/favoritos/FavoritosBackgroundSync";
@@ -22,6 +23,7 @@ export default function ClientProviders({ children }) {
           <ServiceWorkerRegister />
           <FavoritosBackgroundSync />
           <CapacitorShell />
+          <CapacitorAppLinks />
           <AppViewportShell>{children}</AppViewportShell>
         </OfflineModeProvider>
       </FeedbackProvider>
