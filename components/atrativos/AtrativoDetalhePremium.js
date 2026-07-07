@@ -17,16 +17,11 @@ import {
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { toggleRotasFavorita, createFavoritosSyncGuard, FAVORITO_OFFLINE_SAVED_MESSAGE } from "@/lib/rotasFavoritas";
 import {
-  getAtrativoShareUrl,
-  shareContent,
-  SHARE_COPIED_MESSAGE,
-} from "@/lib/shareContent";
-import {
   FAVORITO_OFFLINE_TYPES,
   getOfflineFavorito,
 } from "@/lib/favoritosOffline";
 import { isMissingTableError } from "@/lib/supabaseErrors";
-import OpenInAppBanner from "@/components/shared/OpenInAppBanner";
+import { createClient } from "@/lib/supabase";
 
 function VerifiedIcon() {
   return (
@@ -150,30 +145,28 @@ export default function AtrativoDetalhePremium({
   }
 
   async function handleShare() {
-    if (!rotaId) return;
-
-    const url = getAtrativoShareUrl(rotaId);
+    const shareData = {
+      title: nome,
+      text: descricao || undefined,
+      url: window.location.href,
+    };
 
     try {
-      const outcome = await shareContent({
-        title: nome,
-        text: descricao || undefined,
-        url,
-      });
-
-      if (outcome === "copied") {
-        setToast(SHARE_COPIED_MESSAGE);
-        setTimeout(() => setToast(""), 2500);
+      if (navigator.share) {
+        await navigator.share(shareData);
+        return;
       }
-    } catch {
-      setToast("Não foi possível compartilhar.");
+
+      await navigator.clipboard.writeText(window.location.href);
+      setToast("Link copiado!");
       setTimeout(() => setToast(""), 2500);
+    } catch {
+      // Cancelamento do share nativo.
     }
   }
 
   return (
     <div className="min-h-screen bg-[#f0f4f3] pb-28 text-[#1a2e28]">
-      <OpenInAppBanner path={`/atrativos/${rotaId}`} />
       {toast && (
         <div className="fixed left-4 right-4 top-4 z-[60] mx-auto max-w-md rounded-xl bg-[#1a4a3a] px-4 py-3 text-center text-sm font-semibold text-white shadow-lg">
           {toast}

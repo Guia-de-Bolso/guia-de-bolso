@@ -6,11 +6,6 @@ import LoginModal from "@/components/LoginModal";
 import { toggleRotasFavorita, createFavoritosSyncGuard, FAVORITO_OFFLINE_SAVED_MESSAGE } from "@/lib/rotasFavoritas";
 import { isMissingTableError } from "@/lib/supabaseErrors";
 import { createClient } from "@/lib/supabase";
-import {
-  getAtrativoShareUrl,
-  shareContent,
-  SHARE_COPIED_MESSAGE,
-} from "@/lib/shareContent";
 
 /**
  * Carrossel de fotos da rota — mesmo layout do detalhe de lugar.
@@ -100,24 +95,23 @@ export default function AtrativoGaleria({
   }
 
   async function handleShare() {
-    if (!rotaId) return;
-
-    const url = getAtrativoShareUrl(rotaId);
+    const shareData = {
+      title: nome,
+      text: descricao || undefined,
+      url: window.location.href,
+    };
 
     try {
-      const outcome = await shareContent({
-        title: nome,
-        text: descricao || undefined,
-        url,
-      });
-
-      if (outcome === "copied") {
-        setToast(SHARE_COPIED_MESSAGE);
-        setTimeout(() => setToast(""), 2500);
+      if (navigator.share) {
+        await navigator.share(shareData);
+        return;
       }
-    } catch {
-      setToast("Não foi possível compartilhar.");
+
+      await navigator.clipboard.writeText(window.location.href);
+      setToast("Link copiado!");
       setTimeout(() => setToast(""), 2500);
+    } catch {
+      // Cancelamento do share nativo.
     }
   }
 
