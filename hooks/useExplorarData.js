@@ -12,14 +12,14 @@ import { isSupabasePublicConfigured } from "@/lib/supabase/publicEnv";
  */
 export function useExplorarData(initialData = null) {
   const enabled = isSupabasePublicConfigured();
-  const hasInitial = Boolean(initialData?.totalLugares);
 
   const { data, error, isLoading, isValidating } = useSWR(
     enabled ? CLIENT_CACHE_KEYS.explorar : null,
     fetchExplorarFromApi,
     {
       fallbackData: initialData ?? undefined,
-      revalidateOnMount: !hasInitial,
+      revalidateOnMount: true,
+      dedupingInterval: 30_000,
     }
   );
 

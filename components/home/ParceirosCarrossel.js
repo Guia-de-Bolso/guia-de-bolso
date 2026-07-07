@@ -27,6 +27,15 @@ export default function ParceirosCarrossel({ lugares = [] }) {
           <ParceiroCard key={lugar.id} lugar={lugar} />
         ))}
       </div>
+
+      <p className="mt-4 text-center">
+        <Link
+          href="/categorias"
+          className="text-sm font-semibold text-[#1a4a3a] underline decoration-[#1a4a3a]/30 underline-offset-4 transition hover:decoration-[#1a4a3a]"
+        >
+          Conheça todos os nossos parceiros
+        </Link>
+      </p>
     </section>
   );
 }

@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useOfflineMode } from "@/components/OfflineModeProvider";
 import { BOTTOM_NAV_ROUTES } from "@/lib/bottomNavRoutes";
+import { resolveBottomNavTab } from "@/lib/tabShell";
 import {
   OFFLINE_NAV_BLOCKED_MESSAGE,
   isOfflineNavHrefAllowed,
@@ -162,7 +163,7 @@ export default function BottomNav() {
       >
         <div className="pointer-events-auto flex w-full max-w-md items-center justify-between gap-1 rounded-[32px] border border-[#dce8e3]/90 bg-white/84 px-2 py-2 shadow-[0_-1px_0_rgba(255,255,255,0.92),0_10px_30px_rgba(12,30,25,0.11),0_2px_10px_rgba(12,30,25,0.06)] backdrop-blur-2xl backdrop-saturate-150">
           {items.map(({ href, label, Icon }) => {
-            const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+            const active = resolveBottomNavTab(pathname).root === href;
             const blocked = offlineLimited && !isOfflineNavHrefAllowed(href);
 
             if (blocked) {

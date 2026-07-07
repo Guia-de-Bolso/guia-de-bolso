@@ -35,7 +35,7 @@ import { fetchApi } from "@/lib/fetchApi";
 import { isCapacitorNative } from "@/lib/capacitorNavigation";
 import { IMBITUBA_COORDS, sortLugaresPorDistancia } from "@/lib/homeContext";
 import { enrichLugaresFlags } from "@/lib/lugarBadges";
-import { pickEmAltaCuradoria, pickParceirosPorCategoria } from "@/lib/homeSelection";
+import { pickEmAltaCuradoria, pickParceirosCarrossel } from "@/lib/homeSelection";
 import { resolveAtrativoDoDia } from "@/lib/atrativoDoDia";
 import { fetchLugaresFromApi } from "@/lib/fetchLugaresApi";
 import { fetchLugaresPopulares } from "@/lib/lugaresPopulares";
@@ -78,7 +78,7 @@ function applyHomePrimaryFeed(feed, actions) {
 
   actions.setAtrativosAtivos(rotas);
   actions.setLugaresAtivos(enriched);
-  actions.setLugaresParceiros(feed.lugaresParceiros ?? pickParceirosPorCategoria(enriched));
+  actions.setLugaresParceiros(feed.lugaresParceiros ?? pickParceirosCarrossel(enriched));
   actions.setLugaresEmAlta(emAlta);
   actions.setLugaresProximos(feed.lugaresProximos ?? enriched.slice(0, 6));
   actions.setSectionErrors({
