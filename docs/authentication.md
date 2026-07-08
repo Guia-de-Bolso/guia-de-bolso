@@ -81,8 +81,10 @@ On native apps (Android/iOS), Google **does not** open an external browser: `@ca
 | Platform | Google | Apple |
 |----------|--------|-------|
 | **Web** | OAuth redirect (`/auth/callback`) | Not available |
-| **Android** | Native (`webClientId`) | Not available |
-| **iOS** | Native (`iOSClientId` + `webClientId`) | Native (Sign in with Apple) |
+| **Android** | Native (`webClientId`) | **Not available** (Apple policy / Credential Manager — button hidden on purpose) |
+| **iOS** | Deep link OAuth (default) or native if `NEXT_PUBLIC_IOS_GOOGLE_NATIVE=true` | Native (Sign in with Apple) |
+
+**Android Google:** one `SocialLogin.login` attempt — no auto-retry on `USER_CANCELLED` (that used to reopen the account picker in a loop). Idempotent cancel returns `{ cancelled: true }` without error toast.
 
 ### Native flow (Google and Apple)
 

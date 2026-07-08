@@ -223,7 +223,14 @@ export default function AuthFlow({
         return;
       }
 
-      const { error } = await signInWithGoogleOAuth(supabase, postLoginPath);
+      const { error, cancelled } = await signInWithGoogleOAuth(
+        supabase,
+        postLoginPath
+      );
+
+      if (cancelled) {
+        return;
+      }
 
       if (error) {
         setOauthError(
