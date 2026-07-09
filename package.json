@@ -2,8 +2,12 @@
   "name": "guia-de-bolso",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20 <26"
+  },
   "scripts": {
-    "dev": "next dev",
+    "dev": "NODE_OPTIONS='--disable-warning=DEP0205' next dev",
+    "dev:webpack": "NODE_OPTIONS='--disable-warning=DEP0205' next dev --webpack",
     "build": "node scripts/copy-ffmpeg-core.mjs && next build",
     "start": "next start",
     "lint": "eslint",
@@ -12,6 +16,10 @@
     "icons": "node scripts/refresh-brand-icons.mjs",
     "test:e2e": "playwright test",
     "db:rotas-favoritas": "node scripts/apply-rotas-favoritas.mjs",
+    "photos:backfill": "node scripts/backfill-photo-derivatives.mjs",
+    "marketing:semana": "node scripts/marketing-semana.mjs",
+    "marketing:reels": "node scripts/marketing-semana.mjs --reels-only",
+    "marketing:reels:local": "node scripts/marketing-semana.mjs --reels-only --local-reels",
     "contrato:docx": "node scripts/generate-contrato-docx.mjs",
     "contrato:6meses:docx": "node scripts/generate-contrato-docx.mjs docs/contratos/MODELO-CONTRATO-PARCEIRO-6-MESES-GRATIS.docx docs/contratos/MODELO-CONTRATO-PARCEIRO-6-MESES-GRATIS.md",
     "postinstall": "node scripts/copy-ffmpeg-core.mjs",
@@ -55,7 +63,9 @@
     "docx": "^9.7.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "ffmpeg-static": "^5.3.0",
     "pg": "^8.16.3",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4"
   }
 }

@@ -2,7 +2,7 @@
 
 import FavoritoDetailLink from "@/components/favoritos/FavoritoDetailLink";
 import RemotePhoto from "@/components/shared/RemotePhoto";
-import { getCapaFromAtrativo } from "@/lib/fotos";
+import { getCapaThumbFromAtrativo } from "@/lib/fotos";
 import { getCategoriaAtrativoMeta } from "@/lib/atrativos";
 
 function FavoriteIcon({ active, className = "h-5 w-5" }) {
@@ -33,7 +33,7 @@ function getAtrativoNome(rota) {
  */
 export default function AtrativoFavoritoCard({ rota, onRemover }) {
   const categoria = getCategoriaAtrativoMeta(rota.categoria);
-  const foto = getCapaFromAtrativo(rota);
+  const foto = getCapaThumbFromAtrativo(rota);
   const nome = getAtrativoNome(rota);
 
   return (

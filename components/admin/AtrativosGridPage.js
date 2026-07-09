@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AdminShell, { useAdminAuth } from "@/components/admin/AdminShell";
-import { getCapaFromAtrativo } from "@/lib/fotos";
+import { getCapaThumbFromAtrativo } from "@/lib/fotos";
 import { CATEGORIAS_ATRATIVO, getCategoriaAtrativoMeta, normalizeCategoriaAtrativo } from "@/lib/atrativos";
 import {
   ATRATIVO_DO_DIA_FIXAR_OPCOES,
@@ -121,7 +121,7 @@ function FilterChip({ active, onClick, children }) {
  * @returns {import("react").JSX.Element}
  */
 function AtrativoCard({ rota, onFixarAtrativoDoDia, onRemoverFixacao, onDeactivate }) {
-  const capa = getCapaFromAtrativo(rota);
+  const capa = getCapaThumbFromAtrativo(rota);
   const meta = getCategoriaAtrativoMeta(rota.categoria);
   const pontos = getPontosCount(rota);
   const nome = getAtrativoNome(rota);

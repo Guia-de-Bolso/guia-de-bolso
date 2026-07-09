@@ -9,8 +9,6 @@ import { buildLugarMetadata } from "@/lib/seo";
 import { buildLugarBreadcrumbJsonLd, buildLugarJsonLd, toJsonLdGraph } from "@/lib/seoJsonLd";
 import { fetchCapacitorLugarSlugs } from "@/lib/capacitorStaticParams";
 import { isCapacitorBuild } from "@/lib/capacitorBuild";
-import { createPublicPageServerClient } from "@/lib/supabase/pageServer";
-
 // Só exporta params no export estático do Capacitor. Na web, a ausência de
 // generateStaticParams mantém a rota dinâmica (SSR sob demanda), com 404 real
 // e sem quebra de `DYNAMIC_SERVER_USAGE`.
@@ -24,8 +22,7 @@ export const generateStaticParams = isCapacitorBuild()
  */
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const supabase = await createPublicPageServerClient();
-  const { lugar } = await fetchLugarSeoBundle(supabase, slug);
+  const { lugar } = await fetchLugarSeoBundle(slug);
 
   if (!lugar) {
     return {
@@ -44,8 +41,7 @@ export async function generateMetadata({ params }) {
  */
 export default async function LugarPage({ params }) {
   const { slug } = await params;
-  const supabase = await createPublicPageServerClient();
-  const initialData = await fetchLugarPageInitialData(supabase, slug);
+  const initialData = await fetchLugarPageInitialData(slug);
 
   if (initialData.error) {
     console.error("[lugares] fetch:", initialData.error.message);

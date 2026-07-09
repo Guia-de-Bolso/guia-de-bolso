@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import PrefetchLink from "@/components/PrefetchLink";
 import RemotePhoto from "@/components/shared/RemotePhoto";
 import { getCategoriaHref } from "@/lib/categorias";
 
@@ -9,7 +8,6 @@ import { getCategoriaHref } from "@/lib/categorias";
  * Card horizontal em destaque para uma categoria.
  */
 export default function ExplorarDestaqueCard({ categoria, count, imagemUrl }) {
-  const [imgLoaded, setImgLoaded] = useState(false);
   const vazio = count === 0;
   const href = getCategoriaHref(categoria.nome);
 
@@ -21,10 +19,8 @@ export default function ExplorarDestaqueCard({ categoria, count, imagemUrl }) {
           alt=""
           fill
           sizes="260px"
-          onLoad={() => setImgLoaded(true)}
-          className={`home-image-fade object-cover transition-transform duration-500 group-hover:scale-105 ${
-            imgLoaded ? "is-loaded" : ""
-          }`}
+          categoria={categoria.nome}
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
       ) : (
         <div
@@ -83,8 +79,8 @@ export default function ExplorarDestaqueCard({ categoria, count, imagemUrl }) {
   }
 
   return (
-    <Link href={href} className={`${shellClass} group`}>
+    <PrefetchLink href={href} className={`${shellClass} group`}>
       {inner}
-    </Link>
+    </PrefetchLink>
   );
 }

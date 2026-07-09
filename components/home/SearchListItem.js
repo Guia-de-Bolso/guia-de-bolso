@@ -1,7 +1,7 @@
 "use client";
 
+import PrefetchLink from "@/components/PrefetchLink";
 import RemotePhoto from "@/components/shared/RemotePhoto";
-import Link from "next/link";
 
 /**
  * PlaceThumb - Circular thumbnail or initial fallback for a place row.
@@ -10,7 +10,7 @@ import Link from "next/link";
  * @param {string} props.nome - Place name for fallback initial.
  * @returns {import('react').ReactElement}
  */
-function PlaceThumb({ imagemUrl, nome }) {
+function PlaceThumb({ imagemUrl, nome, categoria }) {
   if (imagemUrl) {
     return (
       <RemotePhoto
@@ -19,6 +19,7 @@ function PlaceThumb({ imagemUrl, nome }) {
         width={40}
         height={40}
         sizes="40px"
+        categoria={categoria}
         className="h-10 w-10 shrink-0 rounded-full object-cover"
       />
     );
@@ -43,18 +44,18 @@ function PlaceThumb({ imagemUrl, nome }) {
  */
 export default function SearchListItem({ href, imagemUrl, nome, categoria, leading }) {
   return (
-    <Link
+    <PrefetchLink
       href={href}
       className="flex items-center gap-3 rounded-xl bg-white px-3 py-2.5 shadow-sm transition-colors hover:bg-[#f7faf9] active:bg-[#eef3f1]"
     >
       <span className="flex h-8 w-8 shrink-0 items-center justify-center text-base">
         {leading}
       </span>
-      <PlaceThumb imagemUrl={imagemUrl} nome={nome} />
+      <PlaceThumb imagemUrl={imagemUrl} nome={nome} categoria={categoria} />
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-semibold text-[#1a2e28]">{nome}</p>
         <p className="truncate text-xs text-[#5a6b66]">{categoria}</p>
       </div>
-    </Link>
+    </PrefetchLink>
   );
 }

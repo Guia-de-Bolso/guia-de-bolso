@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
+import PrefetchLink from "@/components/PrefetchLink";
 import RemotePhoto from "@/components/shared/RemotePhoto";
 import { useMemo, useState } from "react";
-import { getCapaFromLugar } from "@/lib/fotos";
+import { getCapaThumbFromLugar } from "@/lib/fotos";
 import { getLugarPublicPath } from "@/lib/lugarPublicPath";
 import { ROTEIRO_RETURN_PATH } from "@/lib/roteiroDraft";
 import { getBadgeParceiroLabel } from "@/lib/lugarBadges";
@@ -156,12 +156,12 @@ function RoteiroParadaCard({ parada, ehParceiro = false, capaUrl = "", lugarHref
         ) : null}
 
         {lugarHref && !temFoto ? (
-          <Link
+          <PrefetchLink
             href={lugarHref}
             className="mt-2.5 inline-flex text-[13px] font-semibold text-[#1a4a3a] underline-offset-2 hover:underline"
           >
             Ver no guia →
-          </Link>
+          </PrefetchLink>
         ) : null}
       </div>
     </>
@@ -169,12 +169,12 @@ function RoteiroParadaCard({ parada, ehParceiro = false, capaUrl = "", lugarHref
 
   if (lugarHref && temFoto) {
     return (
-      <Link
+      <PrefetchLink
         href={lugarHref}
         className="group block overflow-hidden rounded-xl border border-[#e3e9e6] bg-white shadow-sm transition-shadow hover:shadow-md"
       >
         {cardInner}
-      </Link>
+      </PrefetchLink>
     );
   }
 
@@ -359,7 +359,7 @@ export default function RoteiroItineraryView({
     const map = new Map();
     for (const item of lugaresCatalog ?? []) {
       if (item?.id) {
-        const capa = getCapaFromLugar(item);
+        const capa = getCapaThumbFromLugar(item);
         if (capa) map.set(String(item.id), capa);
       }
     }

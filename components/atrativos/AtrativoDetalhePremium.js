@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import BottomNav from "@/components/BottomNav";
+import { useEffect, useMemo, useRef, useState } from "react";
 import LoginModal from "@/components/LoginModal";
 import DetalheStickyHeader from "@/components/shared/DetalheStickyHeader";
 import GalleryHeroAirbnb from "@/components/shared/GalleryHeroAirbnb";
@@ -22,6 +21,10 @@ import {
 } from "@/lib/favoritosOffline";
 import { isMissingTableError } from "@/lib/supabaseErrors";
 import { createClient } from "@/lib/supabase";
+import {
+  getGalleryPhotosFromAtrativo,
+  mergeGalleryPhotos,
+} from "@/lib/photoGallery";
 
 function VerifiedIcon() {
   return (
@@ -62,6 +65,12 @@ export default function AtrativoDetalhePremium({
   const [toast, setToast] = useState("");
   const favoritoSyncGuardRef = useRef(createFavoritosSyncGuard());
   const { isOnline, ready: networkReady } = useNetworkStatus();
+
+  const galleryFotos = useMemo(() => {
+    if (fotos?.length && rota) return mergeGalleryPhotos(rota, fotos);
+    if (rota) return getGalleryPhotosFromAtrativo(rota);
+    return (fotos ?? []).map((url) => ({ url }));
+  }, [rota, fotos]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -186,13 +195,14 @@ export default function AtrativoDetalhePremium({
         <div className="detalhe-hero-sticky sticky top-0 z-0">
           <GalleryHeroAirbnb
             nome={nome}
-            imagens={fotos}
+            imagens={galleryFotos}
             backHref={backHref}
             isFavorito={isFavorito}
             onFavoritar={handleFavoritar}
             onShare={handleShare}
             immersiveScroll
             mapsTipCategoria={categoria?.nome}
+            categoria="aventura"
           />
         </div>
 
@@ -242,8 +252,6 @@ export default function AtrativoDetalhePremium({
           <AtrativoDicasSection dicas={dicas} />
         </main>
       </div>
-
-      <BottomNav />
 
       <LoginModal
         isOpen={isModalOpen}

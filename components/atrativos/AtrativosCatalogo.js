@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import PrefetchLink from "@/components/PrefetchLink";
 import RemotePhoto from "@/components/shared/RemotePhoto";
 import { useMemo, useState } from "react";
-import { getCapaFromAtrativo } from "@/lib/fotos";
+import { getCapaThumbFromAtrativo } from "@/lib/fotos";
 import {
   CATEGORIAS_ATRATIVO,
   formatCategoriaAtrativoLabel,
@@ -80,7 +81,7 @@ function CoverImage({
   sizes = "(max-width: 768px) 100vw, 400px",
   compact = false,
 }) {
-  const foto = getCapaFromAtrativo(rota);
+  const foto = getCapaThumbFromAtrativo(rota);
 
   if (!foto) {
     return <div className={`${className} bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54]`} />;
@@ -94,6 +95,7 @@ function CoverImage({
         fill
         sizes={compact ? "112px" : sizes}
         quality={60}
+        categoria="aventura"
         className="object-cover"
         priority={priority}
       />
@@ -146,7 +148,7 @@ function AtrativoDoDiaCard({ rota, modo }) {
   const badgeLabel = modo === "fixada" ? "📌 Atrativo do dia" : "🗓️ Atrativo do dia";
 
   return (
-    <Link
+    <PrefetchLink
       href={`/atrativos/${rota.id}`}
       className="box-border block w-full min-w-0 max-w-full overflow-hidden rounded-2xl bg-white shadow-sm"
     >
@@ -171,7 +173,7 @@ function AtrativoDoDiaCard({ rota, modo }) {
           <Metrics rota={rota} />
         </div>
       </div>
-    </Link>
+    </PrefetchLink>
   );
 }
 
@@ -179,7 +181,7 @@ function CompactRouteCard({ rota }) {
   const categoria = getCategoriaAtrativoMeta(rota.categoria);
 
   return (
-    <Link
+    <PrefetchLink
       href={`/atrativos/${rota.id}`}
       className="box-border flex w-full min-w-0 max-w-full gap-3 overflow-hidden rounded-2xl bg-white p-3 shadow-sm"
     >
@@ -199,7 +201,7 @@ function CompactRouteCard({ rota }) {
           <Metrics rota={rota} compact />
         </div>
       </div>
-    </Link>
+    </PrefetchLink>
   );
 }
 

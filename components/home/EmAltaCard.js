@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { getCapaFromLugar } from "@/lib/fotos";
+import PrefetchLink from "@/components/PrefetchLink";
+import RemotePhoto from "@/components/shared/RemotePhoto";
+import { getCapaThumbFromLugar, getCapaBlurFromLugar } from "@/lib/fotos";
 import { getLugarPublicPath } from "@/lib/lugarPublicPath";
 import { getStatusFuncionamento } from "@/lib/horarios";
 import { getTagsFromLugar } from "@/lib/tags";
@@ -24,31 +23,30 @@ function getRatingMedio(lugar) {
  * EmAltaCard - Compact trending place card for the home carousel.
  */
 export default function EmAltaCard({ lugar, priority = false, returnPath = "" }) {
-  const [imgLoaded, setImgLoaded] = useState(false);
   const status = getStatusFuncionamento(lugar.horarios, lugar.mostrar_horarios);
   const tags = getTagsFromLugar(lugar).slice(0, 2);
   const distancia = lugar.distancia_calculada || lugar.distancia;
   const rating = getRatingMedio(lugar);
-  const imagemUrl = getCapaFromLugar(lugar);
+  const imagemUrl = getCapaThumbFromLugar(lugar);
+  const imagemBlur = getCapaBlurFromLugar(lugar);
 
   return (
-    <Link
+    <PrefetchLink
       href={getLugarPublicPath(lugar, { from: returnPath })}
       className="group flex w-[208px] shrink-0 snap-start flex-col overflow-hidden rounded-[22px] bg-white ring-1 ring-[#e8eeee] transition-transform duration-300 active:scale-[0.98]"
     >
       <div className="relative h-[120px] overflow-hidden">
         {imagemUrl ? (
-          <Image
+          <RemotePhoto
             src={imagemUrl}
             alt={lugar.nome}
             width={416}
             height={312}
             sizes="208px"
             quality={60}
-            onLoad={() => setImgLoaded(true)}
-            className={`home-image-fade h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${
-              imgLoaded ? "is-loaded" : ""
-            }`}
+            categoria={lugar.categoria}
+            blurDataURL={imagemBlur || undefined}
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             priority={priority}
           />
         ) : (
@@ -93,6 +91,6 @@ export default function EmAltaCard({ lugar, priority = false, returnPath = "" })
           </div>
         )}
       </div>
-    </Link>
+    </PrefetchLink>
   );
 }

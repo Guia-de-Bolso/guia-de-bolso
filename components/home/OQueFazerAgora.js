@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import PrefetchLink from "@/components/PrefetchLink";
 import RemotePhoto from "@/components/shared/RemotePhoto";
-import { getCapaFromAtrativo } from "@/lib/fotos";
+import { getCapaThumbFromAtrativo } from "@/lib/fotos";
 import {
   formatAtrativoDistancia,
   formatAtrativoDuracao,
@@ -86,8 +85,6 @@ function HeroSkeleton() {
  * Hero da home — rota curada do dia (round-robin).
  */
 export default function OQueFazerAgora({ rota, temperatura = null }) {
-  const [imgLoaded, setImgLoaded] = useState(false);
-
   if (!rota) {
     return <HeroSkeleton />;
   }
@@ -96,7 +93,7 @@ export default function OQueFazerAgora({ rota, temperatura = null }) {
   const temperaturaExibicao = Number.isFinite(tempNum)
     ? `${Math.round(tempNum)}°`
     : "--°";
-  const capa = getCapaFromAtrativo(rota);
+  const capa = getCapaThumbFromAtrativo(rota);
   const dificuldade = rota.dificuldade || "Fácil";
 
   return (
@@ -110,10 +107,8 @@ export default function OQueFazerAgora({ rota, temperatura = null }) {
           fill
           sizes="(max-width: 768px) 100vw, 400px"
           priority
-          onLoad={() => setImgLoaded(true)}
-          className={`home-image-fade scale-105 object-cover transition-transform duration-700 ease-out group-hover:scale-110 ${
-            imgLoaded ? "is-loaded" : ""
-          }`}
+          categoria="aventura"
+          className="scale-105 object-cover transition-transform duration-700 ease-out group-hover:scale-110"
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#061612] via-[#061612]/70 to-[#061612]/15" />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/25" />
@@ -144,13 +139,13 @@ export default function OQueFazerAgora({ rota, temperatura = null }) {
             <MetricPill icon={<IconSun />} value={temperaturaExibicao} />
           </div>
 
-          <Link
+          <PrefetchLink
             href={`/atrativos/${rota.id}`}
             className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#1a4a3a] py-4 text-center text-sm font-bold uppercase tracking-wide text-white shadow-[0_8px_24px_rgba(26,74,58,0.45)] transition-transform active:scale-[0.98]"
           >
             Ver atrativo
             <span aria-hidden>→</span>
-          </Link>
+          </PrefetchLink>
         </div>
       </article>
     </section>

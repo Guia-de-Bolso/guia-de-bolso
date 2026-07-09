@@ -17,6 +17,10 @@ import { useFavoritoLugar } from "@/hooks/useFavoritoLugar";
 import { AVALIACAO_STATUS_APROVADOS } from "@/lib/avaliacoes";
 import { getCapaFromLugar, getFotosFromLugar } from "@/lib/fotos";
 import {
+  applyGalleryVisibility,
+  mergeGalleryPhotos,
+} from "@/lib/photoGallery";
+import {
   getAcoesRapidasEstabelecimento,
   getAcoesRapidasLocais,
   getCtaIrAgoraText,
@@ -41,7 +45,6 @@ import {
 } from "@/lib/mapsCoordinates";
 import { isConteudoCuradoria, isParceiro } from "@/lib/lugarBadges";
 import {
-  getFotosParaExibicao,
   getTextoHistoriaCultura,
   getTextoSobre,
   getVisibilidadePerfil,
@@ -517,8 +520,8 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
     : [];
   const imagens =
     lugar && visibilidade
-      ? getFotosParaExibicao(
-          fotosCompletas,
+      ? applyGalleryVisibility(
+          mergeGalleryPhotos(lugar, fotosCompletas),
           capaUrl,
           visibilidade.showGaleriaCompleta
         )

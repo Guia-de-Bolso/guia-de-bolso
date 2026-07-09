@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCallback } from "react";
 import { useOfflineMode } from "@/components/OfflineModeProvider";
 
 /**
@@ -17,9 +19,18 @@ export default function FavoritoDetailLink({
   preferDocumentNav = false,
   className,
   children,
+  onTouchStart,
+  onMouseEnter,
+  onFocus,
 }) {
   const { offlineLimited } = useOfflineMode();
+  const router = useRouter();
   const useDocumentNav = preferDocumentNav && offlineLimited;
+
+  const prefetchHref = useCallback(() => {
+    if (!href || useDocumentNav) return;
+    router.prefetch(href);
+  }, [href, router, useDocumentNav]);
 
   if (useDocumentNav) {
     return (
@@ -37,7 +48,23 @@ export default function FavoritoDetailLink({
   }
 
   return (
-    <Link href={href} className={className}>
+    <Link
+      href={href}
+      prefetch
+      className={className}
+      onTouchStart={(event) => {
+        prefetchHref();
+        onTouchStart?.(event);
+      }}
+      onMouseEnter={(event) => {
+        prefetchHref();
+        onMouseEnter?.(event);
+      }}
+      onFocus={(event) => {
+        prefetchHref();
+        onFocus?.(event);
+      }}
+    >
       {children}
     </Link>
   );

@@ -1,15 +1,17 @@
 "use client";
 
-import RemotePhoto from "@/components/shared/RemotePhoto";
+import GallerySlidePhoto from "@/components/shared/GallerySlidePhoto";
 import OfflineMapsInfoButton from "@/components/maps/OfflineMapsInfoButton";
+import { useGalleryPhotoPreload } from "@/hooks/useGalleryPhotoPreload";
 import Link from "next/link";
 import { useRef } from "react";
 import IconBack from "@/components/IconBack";
 import {
-  PHOTO_GALLERY_SLIDE_CLASS,
   PHOTO_GALLERY_TRACK_CLASS,
   useControlledPhotoCarousel,
 } from "@/lib/horizontalCarousel";
+import { getCategoryPlaceholderHex } from "@/lib/imagePlaceholder";
+import { normalizeGalleryPhotos } from "@/lib/photoGallery";
 
 /**
  * Ícone de coração para favoritar ou indicar favorito ativo.
@@ -94,29 +96,34 @@ export default function LugarHero({
   onShare,
 }) {
   const carouselRef = useRef(null);
-  const fotoAtual = useControlledPhotoCarousel(carouselRef, imagens.length);
+  const fotos = normalizeGalleryPhotos(imagens);
+  const fotoAtual = useControlledPhotoCarousel(carouselRef, fotos.length);
+  const placeholderHex = getCategoryPlaceholderHex(categoria);
   const temNota = totalAvaliacoes > 0 && mediaAvaliacoes > 0;
 
+  useGalleryPhotoPreload(fotos, fotoAtual);
+
   return (
-    <div className="relative h-[min(52vh,380px)] min-h-[300px] overflow-hidden bg-[#0b1f1a]">
+    <div
+      className="relative h-[min(52vh,380px)] min-h-[300px] overflow-hidden"
+      style={{ backgroundColor: placeholderHex }}
+    >
       <div
         ref={carouselRef}
         className={PHOTO_GALLERY_TRACK_CLASS}
       >
-        {imagens.map((foto, index) => (
-          <div
-            key={`${foto}-${index}`}
-            className={PHOTO_GALLERY_SLIDE_CLASS}
-          >
-            <RemotePhoto
-              src={foto}
-              alt={nome}
-              fill
-              sizes="(max-width: 768px) 100vw, 640px"
-              className="object-cover"
-              priority={index === 0}
-            />
-          </div>
+        {fotos.map((foto, index) => (
+          <GallerySlidePhoto
+            key={`${foto.url}-${index}`}
+            src={foto.url}
+            thumbSrc={foto.thumb}
+            blurDataURL={foto.blur}
+            alt={nome}
+            categoria={categoria}
+            index={index}
+            activeIndex={fotoAtual}
+            total={fotos.length}
+          />
         ))}
       </div>
 

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import JsonLdScript from "@/components/seo/JsonLdScript";
 import AtrativoDetalhePremium from "@/components/atrativos/AtrativoDetalhePremium";
 import AtrativoSeoStatic from "@/components/atrativos/AtrativoSeoStatic";
+import { fetchAtrativoPageData } from "@/lib/atrativoPageData";
 import { buildAtrativoMetadata } from "@/lib/seo";
 import { buildAtrativoJsonLd } from "@/lib/seoJsonLd";
 import { getFotosFromAtrativo } from "@/lib/fotos";
@@ -16,7 +17,6 @@ import { getCategoriaAtrativoMeta } from "@/lib/atrativos";
 import { getTagsFromAtrativo } from "@/lib/tags";
 import { fetchCapacitorAtrativoIds } from "@/lib/capacitorStaticParams";
 import { isCapacitorBuild } from "@/lib/capacitorBuild";
-import { createPublicPageServerClient } from "@/lib/supabase/pageServer";
 
 // Params só no export estático do Capacitor; na web a rota fica dinâmica.
 export const generateStaticParams = isCapacitorBuild()
@@ -29,8 +29,7 @@ export const generateStaticParams = isCapacitorBuild()
  */
 export async function generateMetadata({ params }) {
   const { id } = await params;
-  const supabase = await createPublicPageServerClient();
-  const { data: rota } = await supabase.from("rotas").select("*").eq("id", id).maybeSingle();
+  const { rota } = await fetchAtrativoPageData(id);
 
   if (!rota) {
     return { title: "Atrativo não encontrado | Guia de Bolso", robots: { index: false, follow: false } };
@@ -46,36 +45,10 @@ export async function generateMetadata({ params }) {
  */
 export default async function AtrativoDetalhePage({ params }) {
   const { id } = await params;
-  const supabase = await createPublicPageServerClient();
-
-  const { data: rota } = await supabase
-    .from("rotas")
-    .select("*, rotas_tags(tags(*))")
-    .eq("id", id)
-    .maybeSingle();
+  const { rota, pontos, dicas, localizacao } = await fetchAtrativoPageData(id);
 
   if (!rota) notFound();
 
-  const { data: pontosData } = await supabase
-    .from("rota_pontos")
-    .select("*, rota_ponto_detalhes(id, texto, ordem)")
-    .eq("rota_id", id)
-    .order("ordem", { ascending: true });
-
-  const { data: dicasData } = await supabase
-    .from("rota_dicas")
-    .select("*")
-    .eq("rota_id", id)
-    .order("ordem", { ascending: true });
-
-  const { data: localizacao } = await supabase
-    .from("rotas_localizacoes")
-    .select("*")
-    .eq("rota_id", id)
-    .maybeSingle();
-
-  const pontos = pontosData ?? [];
-  const dicas = dicasData ?? [];
   const nome = getAtrativoNome(rota);
   const categoria = getCategoriaAtrativoMeta(rota.categoria);
   const tags = getTagsFromAtrativo(rota);

@@ -1,10 +1,11 @@
 "use client";
 
 import { useRef } from "react";
-import RemotePhoto from "@/components/shared/RemotePhoto";
 import NavigationBackLink from "@/components/NavigationBackLink";
 import OfflineMapsInfoButton from "@/components/maps/OfflineMapsInfoButton";
 import GalleryPhotoCounter from "@/components/shared/GalleryPhotoCounter";
+import GallerySlidePhoto from "@/components/shared/GallerySlidePhoto";
+import { useGalleryPhotoPreload } from "@/hooks/useGalleryPhotoPreload";
 import {
   GALLERY_FAVORITO_ATIVO_BTN_CLASS,
   GALLERY_FLOAT_BTN_CLASS,
@@ -13,10 +14,11 @@ import {
   PARCEIRO_BADGE_GRADIENT_CLASS,
 } from "@/components/lugar/airbnb/lugarAirbnbTokens";
 import {
-  PHOTO_GALLERY_SLIDE_CLASS,
   PHOTO_GALLERY_TRACK_CLASS,
   useControlledPhotoCarousel,
 } from "@/lib/horizontalCarousel";
+import { getCategoryPlaceholderHex } from "@/lib/imagePlaceholder";
+import { normalizeGalleryPhotos } from "@/lib/photoGallery";
 
 function FavoriteIcon({ active, className = GALLERY_FLOAT_ICON_CLASS }) {
   return (
@@ -70,10 +72,14 @@ export default function GalleryHeroAirbnb({
   showFavorite = true,
   immersiveScroll = false,
   mapsTipCategoria,
+  categoria,
 }) {
   const carouselRef = useRef(null);
-  const fotos = imagens?.length ? imagens : [];
+  const fotos = normalizeGalleryPhotos(imagens);
   const fotoAtual = useControlledPhotoCarousel(carouselRef, fotos.length);
+  const placeholderHex = getCategoryPlaceholderHex(categoria);
+
+  useGalleryPhotoPreload(fotos, fotoAtual);
 
   const temVariasFotos = fotos.length > 1;
   const showFooter =
@@ -84,9 +90,10 @@ export default function GalleryHeroAirbnb({
       <div
         className={
           immersiveScroll
-            ? "relative h-full w-full overflow-hidden bg-[#1a4a3a]"
-            : "relative h-[min(52vh,28rem)] w-full overflow-hidden bg-[#1a4a3a]"
+            ? "relative h-full w-full overflow-hidden"
+            : "relative h-[min(52vh,28rem)] w-full overflow-hidden"
         }
+        style={{ backgroundColor: placeholderHex }}
       >
         <div
           className={
@@ -100,16 +107,17 @@ export default function GalleryHeroAirbnb({
           ) : (
             <div ref={carouselRef} className={`${PHOTO_GALLERY_TRACK_CLASS} h-full min-h-full w-full`}>
               {fotos.map((foto, index) => (
-                <div key={`${foto}-${index}`} className={PHOTO_GALLERY_SLIDE_CLASS}>
-                  <RemotePhoto
-                    src={foto}
-                    alt={nome}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 640px"
-                    className="object-cover"
-                    priority={index === 0}
-                  />
-                </div>
+                <GallerySlidePhoto
+                  key={`${foto.url}-${index}`}
+                  src={foto.url}
+                  thumbSrc={foto.thumb}
+                  blurDataURL={foto.blur}
+                  alt={nome}
+                  categoria={categoria}
+                  index={index}
+                  activeIndex={fotoAtual}
+                  total={fotos.length}
+                />
               ))}
             </div>
           )}

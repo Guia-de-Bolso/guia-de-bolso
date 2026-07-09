@@ -110,8 +110,9 @@ export default function LugarDetalheAirbnb(props) {
         isFavorito={isFavorito}
         onFavoritar={handleFavoritar}
         onShare={handleShare}
-        mapsTipCategoria={lugar.categoria}
-      />
+            mapsTipCategoria={lugar.categoria}
+            categoria={lugar.categoria}
+          />
 
       <div className="mx-auto max-w-md">
         <div className="detalhe-hero-sticky sticky top-0 z-0">
