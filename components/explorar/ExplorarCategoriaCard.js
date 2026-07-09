@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import PrefetchLink from "@/components/PrefetchLink";
 import RemotePhoto from "@/components/shared/RemotePhoto";
 import { getCategoriaHref } from "@/lib/categorias";
 
-function CategoriaCardContent({ categoria, count, imagemUrl, vazio, imgLoaded, onImageLoad }) {
+function CategoriaCardContent({ categoria, count, imagemUrl, vazio }) {
   return (
     <>
       <div className="relative h-[104px] w-full overflow-hidden">
@@ -15,10 +14,8 @@ function CategoriaCardContent({ categoria, count, imagemUrl, vazio, imgLoaded, o
             alt=""
             fill
             sizes="(max-width: 768px) 50vw, 200px"
-            onLoad={onImageLoad}
-            className={`home-image-fade object-cover transition-transform duration-500 group-hover:scale-105 ${
-              imgLoaded ? "is-loaded" : ""
-            }`}
+            categoria={categoria.nome}
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <div
@@ -66,7 +63,6 @@ function CategoriaCardContent({ categoria, count, imagemUrl, vazio, imgLoaded, o
  * Card compacto de categoria (grid 2 colunas).
  */
 export default function ExplorarCategoriaCard({ categoria, count, imagemUrl }) {
-  const [imgLoaded, setImgLoaded] = useState(false);
   const vazio = count === 0;
   const baseClass = `group relative flex min-h-[168px] flex-col overflow-hidden rounded-[22px] ring-1 bg-white transition-transform duration-300 active:scale-[0.98] ${
     vazio
@@ -75,7 +71,7 @@ export default function ExplorarCategoriaCard({ categoria, count, imagemUrl }) {
   }`;
 
   return (
-    <Link
+    <PrefetchLink
       href={getCategoriaHref(categoria.nome)}
       className={baseClass}
       aria-label={
@@ -89,9 +85,7 @@ export default function ExplorarCategoriaCard({ categoria, count, imagemUrl }) {
         count={count}
         imagemUrl={imagemUrl}
         vazio={vazio}
-        imgLoaded={imgLoaded}
-        onImageLoad={() => setImgLoaded(true)}
       />
-    </Link>
+    </PrefetchLink>
   );
 }

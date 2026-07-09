@@ -1,7 +1,7 @@
 "use client";
 
 import SearchListItem from "@/components/home/SearchListItem";
-import { getCapaFromLugar } from "@/lib/fotos";
+import { getCapaThumbFromLugar } from "@/lib/fotos";
 import { getLugarPublicPath } from "@/lib/lugarPublicPath";
 
 /**
@@ -63,7 +63,7 @@ export default function SearchBrowsePanel({ visitados = [], populares = [], load
               <SearchListItem
                 key={lugar.id}
                 href={getLugarPublicPath(lugar)}
-                imagemUrl={getCapaFromLugar(lugar)}
+                imagemUrl={getCapaThumbFromLugar(lugar)}
                 nome={lugar.nome}
                 categoria={lugar.categoria}
                 leading="🔥"

@@ -1,3 +1,8 @@
+import path from "path";
+import { fileURLToPath } from "url";
+
+const projectRoot = path.dirname(fileURLToPath(import.meta.url));
+
 /**
  * Falha o build na Vercel se as variáveis públicas do Supabase não estiverem definidas.
  * Sem elas, o JS de produção não consegue buscar lugares (lista vazia na home).
@@ -37,6 +42,10 @@ const isCapacitorBuild = process.env.CAPACITOR_BUILD === "1";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Evita que o Turbopack use ~/package-lock.json como raiz do monorepo.
+  turbopack: {
+    root: projectRoot,
+  },
   ...(isCapacitorBuild
     ? {
         output: "export",

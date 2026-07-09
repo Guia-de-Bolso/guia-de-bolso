@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import Link from "next/link";
+import { useMemo } from "react";
+import PrefetchLink from "@/components/PrefetchLink";
 import RemotePhoto from "@/components/shared/RemotePhoto";
-import { getCapaFromLugar } from "@/lib/fotos";
+import { getCapaThumbFromLugar, getCapaBlurFromLugar } from "@/lib/fotos";
 import { getLugarPublicPath } from "@/lib/lugarPublicPath";
 import {
   getBadgeCuradoriaLabel,
@@ -37,8 +37,8 @@ export default function CategoriaLugarCard({
   userPosition = null,
   returnPath = "",
 }) {
-  const [imgLoaded, setImgLoaded] = useState(false);
-  const imagemUrl = getCapaFromLugar(lugar);
+  const imagemUrl = getCapaThumbFromLugar(lugar);
+  const imagemBlur = getCapaBlurFromLugar(lugar);
 
   const meta = useMemo(
     () => buildLugarListMeta(lugar, userPosition),
@@ -52,7 +52,7 @@ export default function CategoriaLugarCard({
   ].filter(Boolean);
 
   return (
-    <Link
+    <PrefetchLink
       href={getLugarPublicPath(lugar, { from: returnPath })}
       className="group flex gap-3.5 overflow-hidden rounded-[24px] bg-white p-3.5 ring-1 ring-[#e8eeee] transition-all duration-300 hover:ring-[#1a4a3a]/18 hover:shadow-[0_8px_28px_rgba(26,46,40,0.08)] active:scale-[0.99]"
     >
@@ -63,10 +63,9 @@ export default function CategoriaLugarCard({
             alt={lugar.nome}
             fill
             sizes="108px"
-            onLoad={() => setImgLoaded(true)}
-            className={`home-image-fade object-cover transition-transform duration-500 group-hover:scale-105 ${
-              imgLoaded ? "is-loaded" : ""
-            }`}
+            categoria={lugar.categoria}
+            blurDataURL={imagemBlur || undefined}
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54] text-2xl text-white/90">
@@ -157,6 +156,6 @@ export default function CategoriaLugarCard({
           ) : null}
         </div>
       </div>
-    </Link>
+    </PrefetchLink>
   );
 }

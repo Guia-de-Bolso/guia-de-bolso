@@ -1,7 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { isCapacitorNative } from "@/lib/capacitorNavigation";
+import { resolvePhotoBlurDataUrl } from "@/lib/imagePlaceholder";
 
 const DEFAULT_QUALITY = 60;
 const DEFAULT_FILL_SIZES = "(max-width: 768px) 100vw, 640px";
@@ -19,6 +21,13 @@ const DEFAULT_FILL_SIZES = "(max-width: 768px) 100vw, 640px";
  * @param {number} [props.height] - Obrigatório quando `fill` é false.
  * @param {string} [props.sizes] - Hint de largura para o otimizador (crítico em `fill`).
  * @param {number} [props.quality]
+ * @param {string} [props.categoria] - Cor dominante do placeholder blur.
+ * @param {string} [props.blurDataURL] - Blur explícito (sobrescreve categoria).
+ * @param {string} [props.thumbSrc] - Thumb para progressive load no Capacitor.
+ * @param {string} [props.fullSrc] - URL full quando `src` é thumb no nativo.
+ * @param {boolean} [props.placeholderBlur=true] - Ativa blur-up estilo Airbnb.
+ * @param {"lazy"|"eager"} [props.loading]
+ * @param {"high"|"low"|"auto"} [props.fetchPriority]
  * @param {() => void} [props.onLoad] - Chamado quando a imagem termina de carregar.
  * @returns {import("react").JSX.Element|null}
  */
@@ -32,13 +41,43 @@ export default function RemotePhoto({
   height,
   sizes,
   quality = DEFAULT_QUALITY,
+  categoria,
+  blurDataURL,
+  thumbSrc,
+  fullSrc,
+  placeholderBlur = true,
+  loading,
+  fetchPriority,
   onLoad,
 }) {
   const loadNotifiedRef = useRef(false);
+  const [showFullOnNative, setShowFullOnNative] = useState(false);
+
+  const resolvedBlur = useMemo(
+    () => resolvePhotoBlurDataUrl({ blurDataURL, categoria }),
+    [blurDataURL, categoria]
+  );
+
+  const nativeProgressive =
+    isCapacitorNative() &&
+    Boolean(fullSrc && thumbSrc && fullSrc !== thumbSrc && src === thumbSrc);
 
   useEffect(() => {
     loadNotifiedRef.current = false;
-  }, [src]);
+    setShowFullOnNative(false);
+  }, [src, fullSrc, thumbSrc]);
+
+  useEffect(() => {
+    if (!nativeProgressive) return;
+    const full = fullSrc;
+    const img = new window.Image();
+    img.decoding = "async";
+    img.onload = () => setShowFullOnNative(true);
+    img.src = full;
+  }, [nativeProgressive, fullSrc]);
+
+  const displaySrc =
+    nativeProgressive && showFullOnNative && fullSrc ? fullSrc : src;
 
   const notifyLoaded = useCallback(() => {
     if (loadNotifiedRef.current) return;
@@ -48,10 +87,18 @@ export default function RemotePhoto({
 
   if (!src) return null;
 
+  const imagePlaceholder = placeholderBlur
+    ? { placeholder: "blur", blurDataURL: resolvedBlur }
+    : {};
+
+  const loadingProps = loading ? { loading } : {};
+  const fetchPriorityProps = fetchPriority ? { fetchPriority } : {};
+  const imageSrc = displaySrc;
+
   if (fill) {
     return (
       <Image
-        src={src}
+        src={imageSrc}
         alt={alt}
         fill
         sizes={sizes || DEFAULT_FILL_SIZES}
@@ -60,6 +107,9 @@ export default function RemotePhoto({
         onLoad={notifyLoaded}
         onLoadingComplete={notifyLoaded}
         className={className}
+        {...imagePlaceholder}
+        {...loadingProps}
+        {...fetchPriorityProps}
       />
     );
   }
@@ -83,6 +133,9 @@ export default function RemotePhoto({
       onLoad={notifyLoaded}
       onLoadingComplete={notifyLoaded}
       className={className}
+      {...imagePlaceholder}
+      {...loadingProps}
+      {...fetchPriorityProps}
     />
   );
 }

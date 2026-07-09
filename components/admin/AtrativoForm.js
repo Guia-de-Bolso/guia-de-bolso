@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import EnderecoAutocomplete from "@/components/EnderecoAutocomplete";
 import PhotoUploader from "@/components/admin/PhotoUploader";
-import { getInitialPhotoItems } from "@/lib/fotos";
+import { getInitialPhotoItems, getPhotoEntryUrl } from "@/lib/fotos";
 import {
   buildFotosUrlsFromPhotoItems,
   createPhotoItemFromFile,
@@ -585,7 +585,7 @@ export default function AtrativoForm({
         pendingFiles
       );
       const fotos = buildFotosUrlsFromPhotoItems(photoItems, uploadedUrls);
-      const capa = fotos[0] || "";
+      const capa = getPhotoEntryUrl(fotos[0]) || "";
 
       const { error: fotosError } = await supabase
         .from("rotas")

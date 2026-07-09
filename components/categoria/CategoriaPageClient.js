@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import BottomNav from "@/components/BottomNav";
 import CategoriaDestaquesCarousel from "@/components/categoria/CategoriaDestaquesCarousel";
 import CategoriaEmptyState from "@/components/categoria/CategoriaEmptyState";
 import CategoriaHero from "@/components/categoria/CategoriaHero";
@@ -14,7 +13,7 @@ import HomeSectionHeader from "@/components/home/HomeSectionHeader";
 import SupabaseConfigAlert from "@/components/SupabaseConfigAlert";
 import UserErrorAlert from "@/components/UserErrorAlert";
 import { fetchLugaresFromApi } from "@/lib/fetchLugaresApi";
-import { getCapaFromLugar } from "@/lib/fotos";
+import { getCapaThumbFromLugar } from "@/lib/fotos";
 import { isSupabasePublicConfigured } from "@/lib/supabase/publicEnv";
 import { buildReportContext } from "@/lib/reportContext";
 import { createClient } from "@/lib/supabase";
@@ -119,7 +118,7 @@ export default function CategoriaPageClient({
 
   const capaUrl = useMemo(() => {
     for (const lugar of lugaresNaCategoria) {
-      const capa = getCapaFromLugar(lugar);
+      const capa = getCapaThumbFromLugar(lugar);
       if (capa) return capa;
     }
     return "";
@@ -290,8 +289,6 @@ export default function CategoriaPageClient({
           </>
         ) : null}
       </div>
-
-      <BottomNav />
     </div>
   );
 }

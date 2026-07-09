@@ -8,7 +8,7 @@ import LugarQrSection from "@/components/admin/LugarQrSection";
 import ParceiroProgramaFields from "@/components/admin/ParceiroProgramaFields";
 import PhotoUploader from "@/components/admin/PhotoUploader";
 import VideoUploader from "@/components/admin/VideoUploader";
-import { getInitialPhotoItems } from "@/lib/fotos";
+import { getInitialPhotoItems, getPhotoEntryUrl } from "@/lib/fotos";
 import {
   buildFotosUrlsFromPhotoItems,
   createPhotoItemFromFile,
@@ -414,7 +414,7 @@ export default function LocalForm({
         .from("lugares")
         .update({
           fotos,
-          imagem_url: fotos[0] || null,
+          imagem_url: getPhotoEntryUrl(fotos[0]) || null,
         })
         .eq("id", lugarId);
 

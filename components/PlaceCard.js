@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
+import PrefetchLink from "@/components/PrefetchLink";
 import FavoritoDetailLink from "@/components/favoritos/FavoritoDetailLink";
+import RemotePhoto from "@/components/shared/RemotePhoto";
 import { getStatusFuncionamento } from "@/lib/horarios";
-import { getCapaFromLugar } from "@/lib/fotos";
+import { getCapaThumbFromLugar, getCapaBlurFromLugar } from "@/lib/fotos";
 import { getLugarPublicPath } from "@/lib/lugarPublicPath";
 import {
   getBadgeCuradoriaLabel,
@@ -58,15 +57,15 @@ export default function PlaceCard({
   hrefOverride,
   preferDocumentNavWhenOffline = false,
 }) {
-  const [imgLoaded, setImgLoaded] = useState(false);
   const status = getStatusFuncionamento(lugar.horarios, lugar.mostrar_horarios);
   const distancia = lugar.distancia_calculada || lugar.distancia;
   const tags = getTagsFromLugar(lugar).slice(0, 2);
   const rating = getRatingMedio(lugar);
-  const imagemUrl = getCapaFromLugar(lugar);
+  const imagemUrl = getCapaThumbFromLugar(lugar);
+  const imagemBlur = getCapaBlurFromLugar(lugar);
   const detailHref = hrefOverride || getLugarPublicPath(lugar);
   const immersive = variant === "immersive";
-  const DetailLink = preferDocumentNavWhenOffline ? FavoritoDetailLink : Link;
+  const DetailLink = preferDocumentNavWhenOffline ? FavoritoDetailLink : PrefetchLink;
   const detailLinkProps = preferDocumentNavWhenOffline
     ? { preferDocumentNav: true }
     : {};
@@ -80,16 +79,15 @@ export default function PlaceCard({
       }`}
     >
       {imagemUrl ? (
-        <Image
+        <RemotePhoto
           src={imagemUrl}
           alt={lugar.nome}
           fill
           sizes={immersive ? "300px" : "(max-width: 768px) 100vw, 400px"}
           quality={60}
-          onLoad={() => setImgLoaded(true)}
-          className={`home-image-fade object-cover transition-transform duration-500 group-hover:scale-105 ${
-            imgLoaded ? "is-loaded" : ""
-          }`}
+          categoria={lugar.categoria}
+          blurDataURL={imagemBlur || undefined}
+          className="absolute inset-0 object-cover transition-transform duration-500 group-hover:scale-105"
           priority={priority}
         />
       ) : (

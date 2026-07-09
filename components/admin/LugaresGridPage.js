@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AdminShell, { useAdminAuth } from "@/components/admin/AdminShell";
 import { isConteudoCuradoria, isParceiro } from "@/lib/lugarBadges";
-import { getCapaFromLugar } from "@/lib/fotos";
+import { getCapaThumbFromLugar } from "@/lib/fotos";
 import { getLugarPublicPath } from "@/lib/lugarPublicPath";
 import {
   formatDiasRestantesExclusao,
@@ -110,7 +110,7 @@ function FilterChip({ active, onClick, children }) {
  * @returns {import("react").JSX.Element}
  */
 function LugarCard({ lugar, onActivate, onDeactivate, onInactivate }) {
-  const capa = getCapaFromLugar(lugar);
+  const capa = getCapaThumbFromLugar(lugar);
   const categoriaClass = categoryStyles[lugar.categoria] || "bg-[#f0f4f3] text-[#1a4a3a]";
   const cidade = getCidade(lugar);
   const ativo = isLugarAtivo(lugar);
