@@ -28,6 +28,14 @@ function IconClose({ className = "h-3.5 w-3.5" }) {
   );
 }
 
+function IconMic({ className = "h-4 w-4" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M12 14a3 3 0 003-3V5a3 3 0 10-6 0v6a3 3 0 003 3zm5-3a5 5 0 01-10 0H5a7 7 0 0014 0h-2zm-5 9a7 7 0 01-7-7h2a5 5 0 0010 0h2a7 7 0 01-7 7z" />
+    </svg>
+  );
+}
+
 const QuickChip = memo(function QuickChip({ chip, onClick }) {
   return (
     <button type="button" onClick={() => onClick(chip)} className={HOME_CHIP_CLASS}>
@@ -51,6 +59,10 @@ function SmartSearch({
   onClose,
   onChipClick,
   showChips = true,
+  voiceSupported = false,
+  voiceListening = false,
+  voiceError = "",
+  onVoiceToggle,
 }) {
   const [focused, setFocused] = useState(false);
 
@@ -76,6 +88,14 @@ function SmartSearch({
   const active = focused || searchMode;
 
   const showChipRow = showChips && !searchMode;
+
+  const handleVoiceToggle = useCallback(
+    (event) => {
+      event.preventDefault();
+      onVoiceToggle?.();
+    },
+    [onVoiceToggle]
+  );
 
   return (
     <section className="home-smart-search-section relative mb-6 mt-1">
@@ -132,6 +152,22 @@ function SmartSearch({
               )}
             </div>
 
+            {voiceSupported && (
+              <button
+                type="button"
+                onClick={handleVoiceToggle}
+                aria-label={voiceListening ? "Parar busca por voz" : "Buscar por voz"}
+                aria-pressed={voiceListening}
+                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition-all duration-200 active:scale-95 ${
+                  voiceListening
+                    ? "bg-[#c0392b] text-white shadow-[0_6px_20px_rgba(192,57,43,0.32)]"
+                    : "bg-[#e8f0ec] text-[#1a4a3a]"
+                }`}
+              >
+                <IconMic className="h-[18px] w-[18px]" />
+              </button>
+            )}
+
             <button
               type="submit"
               aria-label="Buscar"
@@ -144,6 +180,12 @@ function SmartSearch({
               <IconSend className="h-[17px] w-[17px] -rotate-45" />
             </button>
           </div>
+
+          {voiceError ? (
+            <p className="border-t border-[#eef2f0] px-4 py-2 text-center text-xs text-[#c0392b]">
+              {voiceError}
+            </p>
+          ) : null}
 
           {showChipRow && (
             <div className="home-ai-chips-wrap border-t border-[#eef2f0] px-4 pt-3 pb-4">
