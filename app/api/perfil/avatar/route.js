@@ -6,6 +6,7 @@ import {
 } from "@/lib/avatarStorage";
 import { createServiceClient } from "@/lib/supabase/service";
 import { createClient } from "@/lib/supabase/server";
+import { getSessionUser } from "@/lib/supabase/session";
 import { USER_MESSAGES } from "@/lib/userMessages";
 
 /**
@@ -15,12 +16,9 @@ import { USER_MESSAGES } from "@/lib/userMessages";
 export async function POST(request) {
   try {
     const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const user = await getSessionUser(supabase);
 
-    if (authError || !user) {
+    if (!user) {
       return NextResponse.json(
         { error: USER_MESSAGES.UNAUTHORIZED, code: "UNAUTHORIZED" },
         { status: 401 }

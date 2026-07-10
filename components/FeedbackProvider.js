@@ -4,6 +4,7 @@ import { createContext, Suspense, useCallback, useContext, useEffect, useMemo, u
 import { useSearchParams } from "next/navigation";
 import FeedbackSheet from "@/components/FeedbackSheet";
 import { createClient } from "@/lib/supabase";
+import { getSessionUser } from "@/lib/supabase/session";
 
 /** @type {import("react").Context<null|{ openFeedback: (opts?: object) => void, closeFeedback: () => void }>} */
 const FeedbackContext = createContext(null);
@@ -46,7 +47,7 @@ export default function FeedbackProvider({ children }) {
   useEffect(() => {
     const supabase = createClient();
 
-    supabase.auth.getUser().then(async ({ data: { user: currentUser } }) => {
+    getSessionUser(supabase).then(async (currentUser) => {
       setUser(currentUser ?? null);
       if (currentUser) {
         const { data } = await supabase

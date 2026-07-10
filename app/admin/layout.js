@@ -1,15 +1,14 @@
 import { redirect } from "next/navigation";
 import { canAccessAdmin } from "@/lib/adminRoles";
 import { createClient } from "@/lib/supabase/server";
+import { getSessionUser } from "@/lib/supabase/session";
 
 /**
  * Guard de servidor para todas as rotas /admin (complementa useAdminAuth no cliente).
  */
 export default async function AdminLayout({ children }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getSessionUser(supabase);
 
   if (!user) {
     redirect("/login?next=/admin");

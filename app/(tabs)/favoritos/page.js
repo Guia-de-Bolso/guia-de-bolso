@@ -24,6 +24,7 @@ import {
 import { buildFavoritosPrecachePaths } from "@/lib/serviceWorkerPaths";
 import { precacheFavoritosShell } from "@/lib/serviceWorker";
 import { createClient } from "@/lib/supabase";
+import { getSessionUser } from "@/lib/supabase/session";
 import { registrarLog } from "@/lib/logs";
 
 /**
@@ -64,7 +65,7 @@ export default function FavoritosPage() {
   useEffect(() => {
     const supabase = createClient();
 
-    supabase.auth.getUser().then(({ data: { user: currentUser } }) => {
+    getSessionUser(supabase).then((currentUser) => {
       setUser(currentUser);
       if (!currentUser) {
         setLugares([]);

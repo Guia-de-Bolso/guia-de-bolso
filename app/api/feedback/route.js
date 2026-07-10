@@ -6,6 +6,7 @@ import {
 import { checkFeedbackRateLimit } from "@/lib/feedbackRateLimit";
 import { createServiceClient } from "@/lib/supabase/service";
 import { createClient } from "@/lib/supabase/server";
+import { getSessionUser } from "@/lib/supabase/session";
 import { USER_MESSAGES } from "@/lib/userMessages";
 
 const MAX_ASSUNTO = 120;
@@ -41,9 +42,7 @@ function getRateLimitKey(request, userId) {
 export async function POST(request) {
   try {
     const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getSessionUser(supabase);
 
     const body = await request.json();
     const tipo = sanitizeText(body.tipo, 32);

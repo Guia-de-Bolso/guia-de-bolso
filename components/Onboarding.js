@@ -6,6 +6,7 @@ import PrefeituraSupportLine from "@/components/PrefeituraSupportLine";
 import { ONBOARDING_SLIDES } from "@/lib/authImagery";
 import { PREFETURA_SUPPORT_LINE } from "@/lib/institutionalSupport";
 import { createClient } from "@/lib/supabase/client";
+import { getSessionUser } from "@/lib/supabase/session";
 
 const SWIPE_THRESHOLD_PX = 52;
 const SLIDE_COUNT = ONBOARDING_SLIDES.length;
@@ -86,8 +87,8 @@ export default function Onboarding({ isLoggedIn = false, onComplete }) {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) setSessionLoggedIn(true);
+    getSessionUser(supabase).then((currentUser) => {
+      if (currentUser) setSessionLoggedIn(true);
     });
   }, []);
 

@@ -6,6 +6,7 @@ import LoginModal from "@/components/LoginModal";
 import { toggleRotasFavorita, createFavoritosSyncGuard, FAVORITO_OFFLINE_SAVED_MESSAGE } from "@/lib/rotasFavoritas";
 import { isMissingTableError } from "@/lib/supabaseErrors";
 import { createClient } from "@/lib/supabase";
+import { getSessionUser } from "@/lib/supabase/session";
 
 /**
  * Carrossel de fotos da rota — mesmo layout do detalhe de lugar.
@@ -33,7 +34,7 @@ export default function AtrativoGaleria({
   useEffect(() => {
     const supabase = createClient();
 
-    supabase.auth.getUser().then(({ data: { user: currentUser } }) => {
+    getSessionUser(supabase).then((currentUser) => {
       setUser(currentUser ?? null);
     });
 

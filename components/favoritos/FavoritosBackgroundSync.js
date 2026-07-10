@@ -9,6 +9,7 @@ import { listOfflineFavoritos } from "@/lib/favoritosOffline";
 import { buildFavoritosPrecachePaths } from "@/lib/serviceWorkerPaths";
 import { precacheFavoritosShell } from "@/lib/serviceWorker";
 import { createClient } from "@/lib/supabase";
+import { getSessionUser } from "@/lib/supabase/session";
 
 /**
  * Mantém cache offline de favoritos atualizado quando o app está online.
@@ -24,16 +25,12 @@ export default function FavoritosBackgroundSync() {
 
     async function syncNow() {
       const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const user = await getSessionUser(supabase);
       if (cancelled || !user?.id) return;
 
       await runFavoritosBackgroundSync(supabase, user.id);
       if (!cancelled) {
-        const {
-          data: { user: currentUser },
-        } = await supabase.auth.getUser();
+        const currentUser = await getSessionUser(supabase);
         if (currentUser?.id) {
           const cached = await listOfflineFavoritos(currentUser.id);
           const paths = buildFavoritosPrecachePaths(cached.lugares, cached.atrativos);

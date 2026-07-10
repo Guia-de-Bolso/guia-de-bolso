@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { registrarLog } from "@/lib/logs";
 import { createClient } from "@/lib/supabase/server";
+import { getSessionUser } from "@/lib/supabase/session";
 import { USER_MESSAGES } from "@/lib/userMessages";
 
 /**
@@ -10,17 +11,7 @@ import { USER_MESSAGES } from "@/lib/userMessages";
 export async function POST() {
   try {
     const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError) {
-      return NextResponse.json(
-        { error: USER_MESSAGES.SERVER, code: "SERVER" },
-        { status: 500 }
-      );
-    }
+    const user = await getSessionUser(supabase);
 
     if (user) {
       await registrarLog(supabase, user, "logout");

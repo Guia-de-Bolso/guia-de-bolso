@@ -21,6 +21,7 @@ import {
 } from "@/lib/favoritosOffline";
 import { isMissingTableError } from "@/lib/supabaseErrors";
 import { createClient } from "@/lib/supabase";
+import { getSessionUser } from "@/lib/supabase/session";
 import {
   getGalleryPhotosFromAtrativo,
   mergeGalleryPhotos,
@@ -75,7 +76,7 @@ export default function AtrativoDetalhePremium({
   useEffect(() => {
     const supabase = createClient();
 
-    supabase.auth.getUser().then(({ data: { user: currentUser } }) => {
+    getSessionUser(supabase).then((currentUser) => {
       setUser(currentUser ?? null);
     });
 

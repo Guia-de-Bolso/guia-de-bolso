@@ -18,6 +18,7 @@ import {
   revokePhotoItemPreview,
 } from "@/lib/photoItems";
 import { createClient } from "@/lib/supabase";
+import { getSessionUser } from "@/lib/supabase/session";
 import { isLugarElegivelVideo } from "@/lib/lugarVideo";
 import {
   LUGARES_FOTOS_BUCKET,
@@ -391,9 +392,7 @@ export default function LocalForm({
 
     try {
       if (pendingFiles.length > 0) {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
+        const user = await getSessionUser(supabase);
         if (!user) {
           throw new Error("Faça login para enviar fotos.");
         }
@@ -432,9 +431,7 @@ export default function LocalForm({
 
     if (lugarId && (pendingVideo || videoRemoved)) {
       try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
+        const user = await getSessionUser(supabase);
         if (pendingVideo && !user) {
           throw new Error("Faça login para enviar vídeo.");
         }

@@ -13,7 +13,7 @@ Visão de sistema: [`architecture.md`](./architecture.md#authentication-flow).
 | Transporte | Cookies HTTP gerenciados por `@supabase/ssr` |
 | Cliente browser | `lib/supabase/client.js` → `createBrowserClient` |
 | Server (Route Handlers, layouts) | `lib/supabase/server.js` → `createServerClient` |
-| Refresh | `middleware.js` chama `auth.getUser()` em cada request elegível |
+| Refresh de sessão | **Somente** `middleware.js` (`getUser`). Cliente/server leem com `getSessionUser()` (`lib/supabase/session.js`); browser com `autoRefreshToken: false` |
 | Expiração | Política padrão Supabase (refresh automático via middleware) |
 
 **Não há** Context global React de auth — cada página/hook chama `getUser()` ou `onAuthStateChange` conforme necessário.
@@ -317,7 +317,7 @@ Eventos analytics: `lib/logs.js` → tabela `logs`.
 | Sintoma | Verificar |
 |---------|-----------|
 | Loop no login | Redirect URLs no Supabase |
-| Sessão some no refresh | `middleware.js` matcher; cookies bloqueados |
+| Sessão some no refresh | Corrida de refresh token — confirmar `autoRefreshToken: false` no client e uso de `getSessionUser()` fora do middleware |
 | Admin nega acesso | `perfis.role`, layout server |
 | IA sempre 401 | Cookies em domínio preview vs produção |
 | Cota não zera | Fuso `America/Sao_Paulo`, RPC e `uso_ia_mes` |

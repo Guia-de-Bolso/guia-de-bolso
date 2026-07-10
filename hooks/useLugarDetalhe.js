@@ -60,6 +60,7 @@ import { getDistanciaLugar } from "@/lib/localizacao";
 import { registrarLog } from "@/lib/logs";
 import { MAP_PREFERENCE_STORAGE_KEY } from "@/lib/perfil";
 import { createClient } from "@/lib/supabase";
+import { getSessionUser } from "@/lib/supabase/session";
 import { getDiaAtualKey, getStatusFuncionamento } from "@/lib/horarios";
 import { getReturnPathFromSearch } from "@/lib/navigationReturn";
 
@@ -156,7 +157,7 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
   }
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user: currentUser } }) => {
+    getSessionUser(supabase).then((currentUser) => {
       setUser(currentUser);
       if (!currentUser) {
         setJaAvaliou(false);
@@ -310,7 +311,7 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
 
     viewLoggedRef.current = true;
 
-    supabase.auth.getUser().then(({ data: { user: currentUser } }) => {
+    getSessionUser(supabase).then((currentUser) => {
       registrarLog(supabase, currentUser, "visualizou_lugar", {
         lugar_id: lugar.id,
         lugar_nome: lugar.nome,

@@ -7,6 +7,7 @@ import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminTopBar from "@/components/admin/AdminTopBar";
 import { canAccessAdmin, canAccessAdminSection } from "@/lib/adminRoles";
 import { createClient } from "@/lib/supabase";
+import { getSessionUser } from "@/lib/supabase/session";
 
 /**
  * Hook que valida sessão Supabase e role admin; redireciona para home se não autorizado.
@@ -31,9 +32,7 @@ export function useAdminAuth() {
         return;
       }
 
-      const {
-        data: { user: currentUser },
-      } = await supabase.auth.getUser();
+      const currentUser = await getSessionUser(supabase);
 
       if (cancelled) return;
 
@@ -114,8 +113,8 @@ export default function AdminShell({
   useEffect(() => {
     const supabase = createClient();
 
-    supabase.auth.getUser().then(async ({ data }) => {
-      const id = data.user?.id ?? null;
+    getSessionUser(supabase).then(async (currentUser) => {
+      const id = currentUser?.id ?? null;
       setAdminUserId(id);
 
       if (!id) {

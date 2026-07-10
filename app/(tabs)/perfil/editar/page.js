@@ -10,6 +10,7 @@ import {
 } from "@/lib/imageCompress";
 import { usesPhoneAuth } from "@/lib/perfil";
 import { createClient } from "@/lib/supabase";
+import { getSessionUser } from "@/lib/supabase/session";
 import { fetchApi } from "@/lib/fetchApi";
 
 /**
@@ -71,7 +72,7 @@ export default function EditarPerfilPage() {
   useEffect(() => {
     const supabase = createClient();
 
-    supabase.auth.getUser().then(async ({ data: { user: currentUser } }) => {
+    getSessionUser(supabase).then(async (currentUser) => {
       if (!currentUser) {
         router.replace("/perfil");
         return;

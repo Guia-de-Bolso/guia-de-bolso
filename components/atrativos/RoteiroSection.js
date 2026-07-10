@@ -13,6 +13,7 @@ import { fetchLugaresFromApi } from "@/lib/fetchLugaresApi";
 import { fetchApi } from "@/lib/fetchApi";
 import { formatDiasViagem } from "@/lib/roteiroDias";
 import { createClient } from "@/lib/supabase";
+import { getSessionUser } from "@/lib/supabase/session";
 import { LIMITS } from "@/lib/premium";
 import {
   clearRoteiroDraft,
@@ -206,8 +207,8 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
   useEffect(() => {
     const supabase = createClient();
 
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user ?? null);
+    getSessionUser(supabase).then((currentUser) => {
+      setUser(currentUser ?? null);
     });
 
     const {

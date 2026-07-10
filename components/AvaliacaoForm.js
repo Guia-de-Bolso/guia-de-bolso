@@ -12,6 +12,7 @@ import { useBottomSheetDrag } from "@/hooks/useBottomSheetDrag";
 import { getLugarPublicPath } from "@/lib/lugarPublicPath";
 import { buildReportContext } from "@/lib/reportContext";
 import { createClient } from "@/lib/supabase";
+import { getSessionUser } from "@/lib/supabase/session";
 import { fetchApi } from "@/lib/fetchApi";
 
 /**
@@ -126,9 +127,7 @@ export default function AvaliacaoForm({ isOpen, onClose, lugar, onSuccess }) {
     setErro("");
 
     const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getSessionUser(supabase);
 
     if (!user) {
       setEnviando(false);

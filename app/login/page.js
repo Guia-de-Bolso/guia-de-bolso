@@ -12,6 +12,7 @@ import { LOGIN_HERO_IMAGE, LOGIN_VALUE_PILLS } from "@/lib/authImagery";
 import { FAVORITO_OFFLINE_BENEFIT_BODY } from "@/lib/favoritosOffline";
 import { safeRedirectPath } from "@/lib/safeRedirectPath";
 import { createClient } from "@/lib/supabase";
+import { getSessionUser } from "@/lib/supabase/session";
 
 /**
  * Skeleton da tela de login.
@@ -76,7 +77,7 @@ function LoginPageContent() {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    getSessionUser(supabase).then((user) => {
       if (user) router.replace(redirectAfterLogin);
       else setCheckingSession(false);
     });
