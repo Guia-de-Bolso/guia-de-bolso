@@ -20,9 +20,15 @@ export async function POST(request) {
       );
     }
 
-    const { titulo, dias, perfil, interesses, conteudo } = await request.json();
+    const { titulo, dias, perfil, interesses, conteudo, tiposGastronomia } = await request.json();
 
     const diasNumero = parseDiasViagem(dias);
+    const interessesLista = Array.isArray(interesses) ? interesses : [];
+    const tiposLista = Array.isArray(tiposGastronomia) ? tiposGastronomia : [];
+    const interessesSalvos = [
+      ...interessesLista,
+      ...tiposLista.filter((item) => !interessesLista.includes(item)),
+    ];
 
     if (!titulo?.trim() || diasNumero === null || !perfil?.trim() || !conteudo?.trim()) {
       return NextResponse.json(
@@ -41,7 +47,7 @@ export async function POST(request) {
         titulo: titulo.trim(),
         dias: diasNumero,
         perfil: perfil.trim(),
-        interesses: Array.isArray(interesses) ? interesses : [],
+        interesses: interessesSalvos,
         conteudo: conteudo.trim(),
       })
       .select("id, titulo, dias, perfil, interesses, conteudo, created_at")
