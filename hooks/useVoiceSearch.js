@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  canUseNativeVoiceSearch,
+  canUseVoiceSearch,
   createVoiceCaptureSession,
   ensureSpeechPermissions,
   VOICE_SEARCH_MESSAGES,
@@ -63,7 +63,10 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
   }, [cleanupSession]);
 
   const start = useCallback(async () => {
-    if (!canUseNativeVoiceSearch()) return;
+    if (!canUseVoiceSearch()) {
+      setError(VOICE_SEARCH_MESSAGES.UNAVAILABLE);
+      return;
+    }
 
     setError("");
 
@@ -90,6 +93,11 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
   }, [cleanupSession]);
 
   const toggle = useCallback(async () => {
+    if (!canUseVoiceSearch()) {
+      setError(VOICE_SEARCH_MESSAGES.UNAVAILABLE);
+      return;
+    }
+
     if (status === "listening") {
       const text = await stop();
       if (text) onTranscriptRef.current?.(text);
@@ -106,7 +114,7 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
   }, [cleanupSession]);
 
   return {
-    supported: canUseNativeVoiceSearch(),
+    supported: canUseVoiceSearch(),
     status,
     error,
     isListening: status === "listening",

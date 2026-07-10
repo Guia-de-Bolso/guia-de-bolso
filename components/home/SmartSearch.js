@@ -4,14 +4,6 @@ import { memo, useCallback, useState } from "react";
 import { HOME_CHIP_CLASS, HOME_SURFACE_CLASS } from "@/components/home/homeTokens";
 import { QUICK_SEARCH_CHIPS } from "@/lib/homeContext";
 
-function IconSparkle({ className = "h-4 w-4" }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M12 2l1.2 4.2L17.4 7.4 13.2 8.6 12 12.8 10.8 8.6 6.6 7.4 10.8 4.2 12 2zm7 9l.9 3.1 3.1.9-3.1.9-.9 3.1-.9-3.1-3.1-.9 3.1-.9.9-3.1zm-14 0l.7 2.4 2.4.7-2.4.7-.7 2.4-.7-2.4-2.4-.7 2.4-.7.7-2.4z" />
-    </svg>
-  );
-}
-
 function IconSend({ className = "h-4 w-4" }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -59,7 +51,6 @@ function SmartSearch({
   onClose,
   onChipClick,
   showChips = true,
-  voiceSupported = false,
   voiceListening = false,
   voiceError = "",
   onVoiceToggle,
@@ -106,15 +97,21 @@ function SmartSearch({
           }`}
         >
           <div className="home-ai-search-input-row flex items-center gap-3 px-4 py-3.5">
-            <div
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition-all duration-300 ${
-                active
-                  ? "bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54] text-white shadow-[0_4px_14px_rgba(26,74,58,0.35)]"
-                  : "bg-[#eef6f2] text-[#1a4a3a]"
+            <button
+              type="button"
+              onClick={handleVoiceToggle}
+              aria-label={voiceListening ? "Parar busca por voz" : "Buscar por voz"}
+              aria-pressed={voiceListening}
+              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition-all duration-200 active:scale-95 ${
+                voiceListening
+                  ? "bg-[#c0392b] text-white shadow-[0_6px_20px_rgba(192,57,43,0.32)]"
+                  : active
+                    ? "bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54] text-white shadow-[0_4px_14px_rgba(26,74,58,0.35)]"
+                    : "bg-[#eef6f2] text-[#1a4a3a]"
               }`}
             >
-              <IconSparkle className="h-[18px] w-[18px]" />
-            </div>
+              <IconMic className="h-[18px] w-[18px]" />
+            </button>
 
             <div className="relative min-w-0 flex-1">
               <label htmlFor="smart-search-input" className="sr-only">
@@ -151,22 +148,6 @@ function SmartSearch({
                 </button>
               )}
             </div>
-
-            {voiceSupported && (
-              <button
-                type="button"
-                onClick={handleVoiceToggle}
-                aria-label={voiceListening ? "Parar busca por voz" : "Buscar por voz"}
-                aria-pressed={voiceListening}
-                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition-all duration-200 active:scale-95 ${
-                  voiceListening
-                    ? "bg-[#c0392b] text-white shadow-[0_6px_20px_rgba(192,57,43,0.32)]"
-                    : "bg-[#e8f0ec] text-[#1a4a3a]"
-                }`}
-              >
-                <IconMic className="h-[18px] w-[18px]" />
-              </button>
-            )}
 
             <button
               type="submit"

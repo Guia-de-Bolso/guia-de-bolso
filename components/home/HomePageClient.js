@@ -794,12 +794,11 @@ function Home({ initialHomeData = null }) {
                 executarBusca(chip.query, filtro);
               }}
               showChips={!searchMode}
-              voiceSupported={voiceSearch.supported}
               voiceListening={voiceSearch.isListening}
               voiceError={voiceSearch.error}
               onVoiceToggle={() => {
                 voiceSearch.clearError();
-                voiceSearch.toggle();
+                void voiceSearch.toggle();
               }}
             />
           </div>
