@@ -797,7 +797,6 @@ function Home({ initialHomeData = null }) {
               voiceListening={voiceSearch.isListening}
               voiceError={voiceSearch.error}
               onVoiceToggle={() => {
-                voiceSearch.clearError();
                 void voiceSearch.toggle();
               }}
             />

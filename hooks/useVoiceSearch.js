@@ -3,8 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   canUseVoiceSearch,
+  canUseWebVoiceSearch,
   createVoiceCaptureSession,
   ensureSpeechPermissions,
+  formatSpeechError,
+  probeNativeSpeechPlugin,
   VOICE_SEARCH_MESSAGES,
 } from "@/lib/speechRecognition";
 
@@ -15,7 +18,7 @@ import {
  * @param {(text: string) => void} [options.onTranscript] - Texto final ao encerrar a captura.
  * @returns {{
  *   supported: boolean,
- *   status: "idle" | "listening" | "denied" | "error",
+ *   status: "idle" | "preparing" | "listening" | "denied" | "error",
  *   error: string,
  *   isListening: boolean,
  *   start: () => Promise<void>,
@@ -64,48 +67,67 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
 
   const start = useCallback(async () => {
     if (!canUseVoiceSearch()) {
+      setStatus("error");
       setError(VOICE_SEARCH_MESSAGES.UNAVAILABLE);
       return;
     }
 
+    setStatus("preparing");
     setError("");
 
-    const permission = await ensureSpeechPermissions();
-    if (!permission.granted) {
-      setStatus("denied");
-      setError(VOICE_SEARCH_MESSAGES.PERMISSION_DENIED);
-      return;
-    }
-
     try {
+      const probe = await probeNativeSpeechPlugin();
+      if (!probe.ok && canUseVoiceSearch() && !canUseWebVoiceSearch()) {
+        setStatus("error");
+        setError(probe.error ?? VOICE_SEARCH_MESSAGES.PLUGIN_MISSING);
+        return;
+      }
+
+      const permission = await ensureSpeechPermissions();
+      if (!permission.granted) {
+        setStatus("denied");
+        setError(permission.error ?? VOICE_SEARCH_MESSAGES.PERMISSION_DENIED);
+        return;
+      }
+
       const session = await createVoiceCaptureSession({
         onPartial: (text) => onPartialRef.current?.(text),
-        onError: (message) => setError(message),
+        onError: (message) => {
+          setStatus("error");
+          setError(message);
+        },
       });
 
       sessionRef.current = session;
       setStatus("listening");
     } catch (err) {
       setStatus("error");
-      setError(err?.message ?? VOICE_SEARCH_MESSAGES.START_FAILED);
+      setError(formatSpeechError(err));
       await cleanupSession();
     }
   }, [cleanupSession]);
 
   const toggle = useCallback(async () => {
-    if (!canUseVoiceSearch()) {
-      setError(VOICE_SEARCH_MESSAGES.UNAVAILABLE);
-      return;
-    }
+    try {
+      if (!canUseVoiceSearch()) {
+        setStatus("error");
+        setError(VOICE_SEARCH_MESSAGES.UNAVAILABLE);
+        return;
+      }
 
-    if (status === "listening") {
-      const text = await stop();
-      if (text) onTranscriptRef.current?.(text);
-      return;
-    }
+      if (status === "listening" || status === "preparing") {
+        const text = await stop();
+        if (text) onTranscriptRef.current?.(text);
+        return;
+      }
 
-    await start();
-  }, [start, status, stop]);
+      await start();
+    } catch (err) {
+      setStatus("error");
+      setError(formatSpeechError(err));
+      await cleanupSession();
+    }
+  }, [cleanupSession, start, status, stop]);
 
   useEffect(() => {
     return () => {
@@ -117,7 +139,7 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
     supported: canUseVoiceSearch(),
     status,
     error,
-    isListening: status === "listening",
+    isListening: status === "listening" || status === "preparing",
     start,
     stop,
     toggle,
