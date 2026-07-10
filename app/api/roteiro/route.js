@@ -6,6 +6,7 @@ import { checkIaRateLimit } from "@/lib/iaRateLimit";
 import { logIA } from "@/lib/logIA";
 import { reportError } from "@/lib/observability";
 import { checkRoteiroAccess, getAuthUser, releaseRoteiroIaUsage, reserveRoteiroIaUsage } from "@/lib/premiumServer";
+import { parseDiasViagem } from "@/lib/roteiroDias";
 import { selecionarLugaresParaRoteiro } from "@/lib/roteiroLugares";
 import { supabase } from "@/lib/supabase/anon";
 import { buildApiErrorBody } from "@/lib/userMessages";
@@ -37,6 +38,8 @@ Siga RIGOROSAMENTE este formato markdown — cada parada precisa das 4 linhas ap
 Regras obrigatórias:
 - Uma linha → por parada (sem segunda linha de atividade).
 - Repita o bloco completo (## período + parada com **nome**, →, 💡, ⏱️) para cada dia solicitado.
+- Monte EXATAMENTE o número de dias pedido no prompt (Dia 1 até Dia N). Não adicione dias a mais nem a menos.
+- Se houver preferências gastronômicas (ex.: Pizza, Sushi), priorize restaurantes com essas especialidades nas refeições.
 - Não deixe períodos vazios: se não houver lugar à noite, omita o bloco ## daquele período.
 - Não invente lugares. Não use parágrafos soltos fora do formato.
 - Tom direto, português do Brasil, emojis apenas nos títulos ## de período.`;
@@ -48,11 +51,20 @@ Regras obrigatórias:
  */
 export async function POST(request) {
   try {
-    const { dias, perfil, interesses } = await request.json();
+    const { dias, perfil, interesses, tiposGastronomia } = await request.json();
 
     if (!dias?.trim() || !perfil?.trim() || !interesses?.length) {
       return NextResponse.json(buildApiErrorBody("VALIDATION"), { status: 400 });
     }
+
+    const diasNumero = parseDiasViagem(dias);
+    if (diasNumero === null) {
+      return NextResponse.json(buildApiErrorBody("VALIDATION"), { status: 400 });
+    }
+
+    const tiposGastronomiaLista = Array.isArray(tiposGastronomia)
+      ? tiposGastronomia.map((item) => String(item ?? "").trim()).filter(Boolean)
+      : [];
 
     const { user } = await getAuthUser();
 
@@ -99,11 +111,21 @@ export async function POST(request) {
 
     const lugaresComParceiro = (lugaresRaw ?? []).map((lugar) => enrichLugarFlags(lugar));
 
-    const lugares = selecionarLugaresParaRoteiro(lugaresComParceiro, interesses);
+    const lugares = selecionarLugaresParaRoteiro(
+      lugaresComParceiro,
+      interesses,
+      24,
+      tiposGastronomiaLista
+    );
 
     const interessesTexto = Array.isArray(interesses)
       ? interesses.join(", ")
       : String(interesses);
+    const gastronomiaTexto = tiposGastronomiaLista.length
+      ? ` | Preferências gastronômicas: ${tiposGastronomiaLista.join(", ")}`
+      : "";
+    const diasPrompt = `EXATAMENTE ${diasNumero} ${diasNumero === 1 ? "dia" : "dias"}`;
+    const maxTokens = Math.min(4096, 900 + diasNumero * 520);
 
     const reserved = await reserveRoteiroIaUsage(user?.id, { user });
     if (!reserved.allowed) {
@@ -133,7 +155,7 @@ export async function POST(request) {
         },
         body: JSON.stringify({
           model: getClaudeModel(),
-          max_tokens: 2400,
+          max_tokens: maxTokens,
           system: [
             {
               type: "text",
@@ -152,7 +174,7 @@ export async function POST(request) {
                 },
                 {
                   type: "text",
-                  text: `Roteiro de ${dias} | Perfil: ${perfil} | Interesses: ${interessesTexto}`,
+                  text: `Roteiro de ${diasPrompt} | Perfil: ${perfil} | Interesses: ${interessesTexto}${gastronomiaTexto}`,
                 },
               ],
             },
