@@ -7,7 +7,9 @@ import {
   createVoiceCaptureSession,
   ensureSpeechPermissions,
   formatSpeechError,
+  isAndroidNative,
   probeNativeSpeechPlugin,
+  runAndroidPopupVoiceCapture,
   VOICE_SEARCH_MESSAGES,
 } from "@/lib/speechRecognition";
 
@@ -65,10 +67,57 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
     return text;
   }, [cleanupSession]);
 
+  const runAndroidVoiceFlow = useCallback(async () => {
+    setStatus("preparing");
+    setError("");
+
+    const probe = await probeNativeSpeechPlugin();
+    if (!probe.ok) {
+      setStatus("error");
+      setError(probe.error ?? VOICE_SEARCH_MESSAGES.PLUGIN_MISSING);
+      return;
+    }
+
+    const permission = await ensureSpeechPermissions();
+    if (!permission.granted) {
+      setStatus("denied");
+      setError(permission.error ?? VOICE_SEARCH_MESSAGES.PERMISSION_DENIED);
+      return;
+    }
+
+    try {
+      const text = await runAndroidPopupVoiceCapture({
+        onPartial: (value) => onPartialRef.current?.(value),
+      });
+
+      setStatus("idle");
+
+      if (text) {
+        onTranscriptRef.current?.(text);
+        return;
+      }
+
+      setError("Não captamos áudio. Verifique o microfone e tente de novo.");
+      setStatus("error");
+    } catch (err) {
+      const message = formatSpeechError(err);
+      setStatus("idle");
+      if (message) {
+        setStatus("error");
+        setError(message);
+      }
+    }
+  }, []);
+
   const start = useCallback(async () => {
     if (!canUseVoiceSearch()) {
       setStatus("error");
       setError(VOICE_SEARCH_MESSAGES.UNAVAILABLE);
+      return;
+    }
+
+    if (isAndroidNative()) {
+      await runAndroidVoiceFlow();
       return;
     }
 
@@ -77,7 +126,7 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
 
     try {
       const probe = await probeNativeSpeechPlugin();
-      if (!probe.ok && canUseVoiceSearch() && !canUseWebVoiceSearch()) {
+      if (!probe.ok && !canUseWebVoiceSearch()) {
         setStatus("error");
         setError(probe.error ?? VOICE_SEARCH_MESSAGES.PLUGIN_MISSING);
         return;
@@ -105,13 +154,19 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
       setError(formatSpeechError(err));
       await cleanupSession();
     }
-  }, [cleanupSession]);
+  }, [cleanupSession, runAndroidVoiceFlow]);
 
   const toggle = useCallback(async () => {
     try {
       if (!canUseVoiceSearch()) {
         setStatus("error");
         setError(VOICE_SEARCH_MESSAGES.UNAVAILABLE);
+        return;
+      }
+
+      if (isAndroidNative()) {
+        if (status === "preparing") return;
+        await runAndroidVoiceFlow();
         return;
       }
 
@@ -127,7 +182,7 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
       setError(formatSpeechError(err));
       await cleanupSession();
     }
-  }, [cleanupSession, start, status, stop]);
+  }, [cleanupSession, runAndroidVoiceFlow, start, status, stop]);
 
   useEffect(() => {
     return () => {
