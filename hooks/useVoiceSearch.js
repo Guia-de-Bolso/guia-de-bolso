@@ -38,6 +38,7 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
   const [hint, setHint] = useState("");
   const sessionRef = useRef(null);
   const captureBusyRef = useRef(false);
+  const latestPartialRef = useRef("");
   const onPartialRef = useRef(onPartial);
   const onTranscriptRef = useRef(onTranscript);
 
@@ -79,20 +80,32 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
 
   const cancelCapture = useCallback(async () => {
     captureBusyRef.current = false;
+    latestPartialRef.current = "";
     await cleanupSession();
     await abortNativeVoiceCapture();
     resetVoiceUi();
     setError("");
   }, [cleanupSession, resetVoiceUi]);
 
+  const rememberPartial = useCallback((text) => {
+    const value = String(text || "").trim();
+    if (!value) return;
+    latestPartialRef.current = value;
+    onPartialRef.current?.(value);
+  }, []);
+
   const finishWithTranscript = useCallback(
     (text) => {
+      const finalText = String(text || latestPartialRef.current || "").trim();
+      latestPartialRef.current = "";
       resetVoiceUi();
-      if (text) {
-        onTranscriptRef.current?.(text);
+
+      if (finalText) {
+        onTranscriptRef.current?.(finalText);
         return;
       }
-      setError("Não captamos áudio. Verifique o microfone e tente de novo.");
+
+      setError(VOICE_SEARCH_MESSAGES.NO_SPEECH);
       setStatus("error");
     },
     [resetVoiceUi]
@@ -100,6 +113,7 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
 
   const runAndroidVoiceFlow = useCallback(async () => {
     captureBusyRef.current = true;
+    latestPartialRef.current = "";
     setStatus("preparing");
     setError("");
     setHint("");
@@ -122,7 +136,7 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
       setHint("Fale no diálogo do Google…");
 
       const text = await runAndroidPopupVoiceCapture({
-        onPartial: (value) => onPartialRef.current?.(value),
+        onPartial: rememberPartial,
       });
 
       finishWithTranscript(text);
@@ -136,10 +150,11 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
     } finally {
       captureBusyRef.current = false;
     }
-  }, [finishWithTranscript, resetVoiceUi]);
+  }, [finishWithTranscript, rememberPartial, resetVoiceUi]);
 
   const runIosVoiceFlow = useCallback(async () => {
     captureBusyRef.current = true;
+    latestPartialRef.current = "";
     setStatus("preparing");
     setError("");
     setHint("");
@@ -160,7 +175,7 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
       }
 
       const session = await createVoiceCaptureSession({
-        onPartial: (text) => onPartialRef.current?.(text),
+        onPartial: rememberPartial,
         onError: (message) => {
           setStatus("error");
           setError(message);
@@ -185,7 +200,7 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
         captureBusyRef.current = false;
       }
     }
-  }, [cleanupSession]);
+  }, [cleanupSession, rememberPartial]);
 
   const start = useCallback(async () => {
     if (!canUseVoiceSearch()) {
@@ -216,7 +231,7 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
       }
 
       const session = await createVoiceCaptureSession({
-        onPartial: (text) => onPartialRef.current?.(text),
+        onPartial: rememberPartial,
         onError: (message) => {
           setStatus("error");
           setError(message);
@@ -230,7 +245,7 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
       setError(formatSpeechError(err));
       await cleanupSession();
     }
-  }, [cleanupSession, runAndroidVoiceFlow, runIosVoiceFlow]);
+  }, [cleanupSession, rememberPartial, runAndroidVoiceFlow, runIosVoiceFlow]);
 
   const toggle = useCallback(async () => {
     try {
