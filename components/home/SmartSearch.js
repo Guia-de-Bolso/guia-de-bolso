@@ -53,6 +53,7 @@ function SmartSearch({
   showChips = true,
   voiceListening = false,
   voiceError = "",
+  voiceHint = "",
   onVoiceToggle,
 }) {
   const [focused, setFocused] = useState(false);
@@ -161,6 +162,12 @@ function SmartSearch({
               <IconSend className="h-[17px] w-[17px] -rotate-45" />
             </button>
           </div>
+
+          {voiceHint && !voiceError ? (
+            <p className="border-t border-[#eef2f0] px-4 py-2 text-center text-xs font-medium text-[#1a4a3a]">
+              {voiceHint}
+            </p>
+          ) : null}
 
           {voiceError ? (
             <p className="border-t border-[#eef2f0] px-4 py-2 text-center text-xs text-[#c0392b]">
