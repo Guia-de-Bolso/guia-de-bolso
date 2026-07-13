@@ -6,16 +6,13 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.speech.RecognizerIntent;
 import android.util.Log;
-import androidx.activity.result.ActivityResult;
 import androidx.core.content.ContextCompat;
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
-import com.getcapacitor.annotation.ActivityCallback;
 import com.getcapacitor.annotation.CapacitorPlugin;
-
 import java.util.ArrayList;
 
 /**
@@ -25,7 +22,6 @@ import java.util.ArrayList;
 public class GuiaVoiceSearchPlugin extends Plugin {
 
     private static final String TAG = "GuiaVoiceSearch";
-    private static final String GOOGLE_APP_PACKAGE = "com.google.android.googlequicksearchbox";
 
     @PluginMethod
     public void ping(PluginCall call) {
@@ -35,7 +31,7 @@ public class GuiaVoiceSearchPlugin extends Plugin {
     @PluginMethod
     public void speak(PluginCall call) {
         Activity activity = getActivity();
-        if (activity == null) {
+        if (!(activity instanceof MainActivity)) {
             call.reject("NO_ACTIVITY", "Atividade indisponível.");
             return;
         }
@@ -50,6 +46,7 @@ public class GuiaVoiceSearchPlugin extends Plugin {
         if (language == null || language.isEmpty()) {
             language = "pt-BR";
         }
+        language = language.replace('_', '-');
 
         String prompt = call.getString("prompt", "O que você quer descobrir em Imbituba?");
         Intent intent = buildSpeechIntent(language, prompt);
@@ -59,43 +56,34 @@ public class GuiaVoiceSearchPlugin extends Plugin {
             return;
         }
 
-        Log.i(TAG, "Abrindo RecognizerIntent");
-
-        activity.runOnUiThread(() -> startActivityForResult(call, intent, "handleSpeechResult"));
+        Log.i(TAG, "Abrindo RecognizerIntent via MainActivity");
+        ((MainActivity) activity).startVoiceRecognition(call, intent);
     }
 
     private Intent buildSpeechIntent(String language, String prompt) {
-        Intent base = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        base.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        base.putExtra(RecognizerIntent.EXTRA_LANGUAGE, language);
-        base.putExtra(RecognizerIntent.EXTRA_PROMPT, prompt);
-        base.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5);
-        base.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getContext().getPackageName());
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, language);
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, prompt);
+        intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5);
+        intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getContext().getPackageName());
 
-        Intent googleIntent = new Intent(base);
-        googleIntent.setPackage(GOOGLE_APP_PACKAGE);
-        if (googleIntent.resolveActivity(getContext().getPackageManager()) != null) {
-            return googleIntent;
+        if (intent.resolveActivity(getContext().getPackageManager()) == null) {
+            return null;
         }
 
-        if (base.resolveActivity(getContext().getPackageManager()) != null) {
-            return base;
-        }
-
-        return null;
+        return intent;
     }
 
-    @ActivityCallback
-    private void handleSpeechResult(PluginCall call, ActivityResult result) {
+    static void finishSpeechCall(PluginCall call, int resultCode, Intent data) {
         if (call == null) {
             return;
         }
 
-        int resultCode = result.getResultCode();
         Log.i(TAG, "Resultado do reconhecimento: " + resultCode);
 
-        if (resultCode == Activity.RESULT_OK && result.getData() != null) {
-            ArrayList<String> matches = result.getData().getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+        if (resultCode == Activity.RESULT_OK && data != null) {
+            ArrayList<String> matches = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
             JSObject payload = new JSObject();
             JSArray matchesJson = new JSArray();
 

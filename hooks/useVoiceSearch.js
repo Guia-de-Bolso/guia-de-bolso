@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   abortNativeVoiceCapture,
   ANDROID_VOICE_POPUP_TIMEOUT_MS,
-  ANDROID_VOICE_PREPARE_TIMEOUT_MS,
   canUseNativeVoiceSearch,
   canUseVoiceSearch,
   createVoiceCaptureSession,
@@ -132,19 +131,9 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
     setError("");
     setHint(VOICE_ANDROID_POPUP_HINT);
 
-    const watchdog = setTimeout(() => {
-      if (!captureBusyRef.current) return;
-      captureBusyRef.current = false;
-      setStatus("error");
-      setError(VOICE_SEARCH_MESSAGES.POPUP_TIMEOUT);
-      setHint("");
-      void abortNativeVoiceCapture();
-      void resetNativeSpeechBridge();
-    }, 15000);
-
     try {
       setStatus("idle");
-      setHint("Aguarde o diálogo do Google na tela.");
+      setHint("Fale no diálogo do Google que vai abrir.");
 
       const text = await withVoiceCaptureTimeout(
         runAndroidPopupVoiceCapture(),
@@ -164,8 +153,6 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
       setError(message || VOICE_SEARCH_MESSAGES.START_FAILED);
       setHint("");
       await resetNativeSpeechBridge();
-    } finally {
-      clearTimeout(watchdog);
     }
   }, [deliverTranscript, resetVoiceUi]);
 
