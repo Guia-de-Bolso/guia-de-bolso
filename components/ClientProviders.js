@@ -2,6 +2,7 @@
 
 import AppViewportShell from "@/components/AppViewportShell";
 import CapacitorShell from "@/components/CapacitorShell";
+import PushNotificationsProvider from "@/components/PushNotificationsProvider";
 import FeedbackProvider from "@/components/FeedbackProvider";
 import FavoritosBackgroundSync from "@/components/favoritos/FavoritosBackgroundSync";
 import OfflineModeProvider from "@/components/OfflineModeProvider";
@@ -22,6 +23,7 @@ export default function ClientProviders({ children }) {
           <ServiceWorkerRegister />
           <FavoritosBackgroundSync />
           <CapacitorShell />
+          <PushNotificationsProvider />
           <AppViewportShell>{children}</AppViewportShell>
         </OfflineModeProvider>
       </FeedbackProvider>

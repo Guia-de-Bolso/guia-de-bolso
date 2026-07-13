@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Capacitor } from "@capacitor/core";
 import AppDeveloperCredit from "@/components/AppDeveloperCredit";
 import PrefeituraSupportLine from "@/components/PrefeituraSupportLine";
 import PremiumPaywallSheet from "@/components/PremiumPaywallSheet";
@@ -11,6 +12,7 @@ import PerfilNavAppSheet from "@/components/perfil/PerfilNavAppSheet";
 import PerfilPremiumCard from "@/components/perfil/PerfilPremiumCard";
 import PerfilQuickLinks from "@/components/perfil/PerfilQuickLinks";
 import PerfilSettingsGroup from "@/components/perfil/PerfilSettingsGroup";
+import PerfilPushToggleRow from "@/components/perfil/PerfilPushToggleRow";
 import PerfilStats from "@/components/perfil/PerfilStats";
 import PerfilBottomSheet from "@/components/perfil/PerfilBottomSheet";
 import PerfilLogoutSheet from "@/components/perfil/PerfilLogoutSheet";
@@ -37,6 +39,12 @@ import { mapApiErrorResponse, USER_MESSAGES } from "@/lib/userMessages";
 import { registrarLog } from "@/lib/logs";
 import { fetchApi } from "@/lib/fetchApi";
 import { navigateAppPath } from "@/lib/capacitorNavigation";
+import {
+  disablePushNotifications,
+  enablePushNotifications,
+  getPushNotificationsPreference,
+  isPushNotificationsAvailable,
+} from "@/lib/pushNotifications";
 
 /**
  * @param {import('@/lib/perfilPageData').PerfilPageInitialData} initialData
@@ -73,6 +81,10 @@ export default function PerfilPageClient({ initialData }) {
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(false);
+  const [pushBusy, setPushBusy] = useState(false);
+  const showPushSettings =
+    Boolean(user) && isPushNotificationsAvailable() && Capacitor.isNativePlatform();
 
   const { usage: premiumUsage, refresh: refreshPremiumUsage, setUsage: setPremiumUsage } =
     usePremiumUsage(user);
@@ -113,6 +125,45 @@ export default function PerfilPageClient({ initialData }) {
       );
     }
   }, [initialData.perfil?.maps_preferido]);
+
+  useEffect(() => {
+    if (!showPushSettings) return;
+    setPushEnabled(getPushNotificationsPreference());
+  }, [showPushSettings]);
+
+  /** @returns {Promise<void>} */
+  async function handleTogglePushNotifications(nextEnabled) {
+    if (pushBusy) return;
+
+    setPushBusy(true);
+    setFeedbackMessage("");
+
+    try {
+      if (nextEnabled) {
+        const result = await enablePushNotifications();
+        if (!result.ok) {
+          if (result.reason === "denied") {
+            setFeedbackMessage(
+              "Permissão negada. Ative notificações nas configurações do celular."
+            );
+          } else {
+            setFeedbackMessage("Não foi possível ativar as notificações. Tente novamente.");
+          }
+          setPushEnabled(false);
+          return;
+        }
+        setPushEnabled(true);
+        return;
+      }
+
+      await disablePushNotifications();
+      setPushEnabled(false);
+    } catch {
+      setFeedbackMessage("Não foi possível atualizar as notificações. Tente novamente.");
+    } finally {
+      setPushBusy(false);
+    }
+  }
 
   useEffect(() => {
     const supabase = createClient();
@@ -294,6 +345,24 @@ export default function PerfilPageClient({ initialData }) {
                 },
               ]}
             />
+
+            {showPushSettings && (
+              <section aria-labelledby="perfil-group-notificacoes">
+                <h2
+                  id="perfil-group-notificacoes"
+                  className="mb-2 px-1 text-xs font-bold uppercase tracking-[0.12em] text-[#5a6b66]"
+                >
+                  Notificações
+                </h2>
+                <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-[#e8eeee]">
+                  <PerfilPushToggleRow
+                    enabled={pushEnabled}
+                    busy={pushBusy}
+                    onChange={handleTogglePushNotifications}
+                  />
+                </div>
+              </section>
+            )}
 
             <PerfilSettingsGroup
               title="Conta"

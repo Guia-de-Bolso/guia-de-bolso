@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { FAVORITOS_OFFLINE_NAV_HREF, isFavoritosOfflineAllowedPath } from "@/lib/offlineNavigation";
 import { initNativeSafeAreaInsets } from "@/lib/nativeSafeArea";
 import { ensureSocialLoginInitialized } from "@/lib/nativeSocialLoginInit";
+import { ensurePushNotificationListeners } from "@/lib/pushNotifications";
 
 /**
  * Inicializa status bar, splash e classe no document para safe areas no app nativo.
@@ -59,6 +60,8 @@ export default function CapacitorShell() {
       ensureSocialLoginInitialized().catch((error) => {
         console.warn("SocialLogin.initialize:", error);
       });
+
+      ensurePushNotificationListeners();
     })();
 
     window.addEventListener("resize", applySafeArea);

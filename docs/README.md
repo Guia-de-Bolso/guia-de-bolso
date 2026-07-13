@@ -28,6 +28,7 @@ Porta de entrada do repositório: [README.md](../README.md) (visão executiva). 
 | [**Estrutura de pastas**](./project-structure.md) | `app/`, `components/`, `lib/`, `supabase/`, `e2e/` |
 | [**Arquitetura do sistema**](./architecture.md) | Stack, frontend/backend, integrações, diagramas |
 | [**Fluxo de autenticação**](./authentication.md) | OAuth, SMS, sessão, admin, Premium |
+| [**Push notifications**](./push-notifications.md) | FCM/APNs, tokens, envio admin |
 | [**Fluxo de dados**](./data-flows.md) | Leituras, IA, writes, admin, analytics |
 | [**Convenções**](./conventions.md) | Código, SQL, API, UI, Git, testes |
 | [**Decisões arquiteturais**](./architectural-decisions.md) | ADRs aceitas e roadmap técnico |

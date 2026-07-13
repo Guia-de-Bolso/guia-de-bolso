@@ -54,19 +54,24 @@ if (!command) {
 
 const lower = command.toLowerCase();
 
-// Secrets / env files
-const envFilePattern = /\.env(\.|$)|credentials\.json|service[-_]?role|\.pem\b|id_rsa/i;
-if (
+// Secrets / env files — allow .env.example (template versionado); block .env.local / .env
+const envFilePattern = /\.env\.local\b|\.env$|credentials\.json|service[-_]?role|\.pem\b|id_rsa/i;
+const stagingSecretEnv =
   /\bgit\s+add\b/i.test(command) &&
-  (envFilePattern.test(command) || /\b\.env\b/i.test(command))
-) {
+  (envFilePattern.test(command) ||
+    (/\b\.env\b/i.test(command) && !/\.env\.example\b/i.test(command)));
+if (stagingSecretEnv) {
   deny(
     "Bloqueado: não adicionar arquivos de ambiente ou credenciais ao git.",
     "O hook bloqueou git add de .env/credenciais. Esses arquivos devem permanecer fora do repositório."
   );
 }
 
-if (/\bgit\s+commit\b/i.test(command) && envFilePattern.test(command)) {
+if (
+  /\bgit\s+commit\b/i.test(command) &&
+  envFilePattern.test(command) &&
+  !/\.env\.example\b/i.test(command)
+) {
   deny(
     "Bloqueado: commit menciona arquivos de ambiente/credenciais.",
     "Verifique o staging; nunca commitar .env.local ou chaves."

@@ -12,6 +12,9 @@ const plugins = {
       twitter: false,
     },
   },
+  PushNotifications: {
+    presentationOptions: ["badge", "sound", "alert"],
+  },
 };
 
 /**

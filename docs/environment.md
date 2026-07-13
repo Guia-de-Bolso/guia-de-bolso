@@ -26,6 +26,9 @@ Referência única para configuração local, Vercel e CI. Template versionado: 
 | `UPSTASH_REDIS_REST_TOKEN` | Opcional | Runtime server | Par Upstash Redis REST |
 | `NEXT_PUBLIC_SENTRY_DSN` | Opcional | Build | Observabilidade (`lib/observability.js`) |
 | `NEXT_PUBLIC_OPENWEATHER_API_KEY` | Opcional | Build | Legado; clima principal usa Open-Meteo |
+| `FIREBASE_SERVICE_ACCOUNT_JSON_BASE64` | Opcional | Runtime server | **Recomendado** — service account FCM em base64 (só envio push) |
+| `FIREBASE_SERVICE_ACCOUNT_JSON` | Opcional | Runtime server | Alternativa: JSON minificado em uma linha |
+| `FIREBASE_PROJECT_ID` + `FIREBASE_CLIENT_EMAIL` + `FIREBASE_PRIVATE_KEY` | Opcional | Runtime server | Alternativa em 3 campos (Vercel) |
 
 \* Obrigatória para features de IA em produção; build CI pode usar secret placeholder se só validar compilação.
 
@@ -116,6 +119,22 @@ O projeto valida presença de `NEXT_PUBLIC_SUPABASE_*` no build (`next.config.mj
 ### `NEXT_PUBLIC_SENTRY_DSN`
 
 - Quando preenchido, erros podem ser enviados via `reportError()` (evolução contínua)
+
+### Firebase push (`FIREBASE_*`)
+
+Usado em `lib/pushMessaging.js` para enviar notificações via FCM. O parser aceita três formatos (`lib/serviceAccountEnv.js`):
+
+1. **`FIREBASE_SERVICE_ACCOUNT_JSON_BASE64`** — recomendado na Vercel
+2. **`FIREBASE_SERVICE_ACCOUNT_JSON`** — JSON em uma linha
+3. **`FIREBASE_PROJECT_ID` + `FIREBASE_CLIENT_EMAIL` + `FIREBASE_PRIVATE_KEY`**
+
+Gerar valores a partir do JSON baixado no Firebase:
+
+```bash
+node scripts/encode-firebase-service-account.mjs caminho/para/service-account.json
+```
+
+Passo a passo completo: [`push-notifications.md`](./push-notifications.md).
 
 ---
 
