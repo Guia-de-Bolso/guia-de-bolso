@@ -16,8 +16,8 @@ public class MainActivity extends BridgeActivity implements ModifiedMainActivity
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         registerPlugin(GuiaVoiceSearchPlugin.class);
+        super.onCreate(savedInstanceState);
     }
 
     @Override

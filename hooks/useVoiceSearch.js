@@ -140,7 +140,7 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
       setHint("");
       void abortNativeVoiceCapture();
       void resetNativeSpeechBridge();
-    }, ANDROID_VOICE_PREPARE_TIMEOUT_MS + 12000);
+    }, 15000);
 
     try {
       setStatus("idle");
