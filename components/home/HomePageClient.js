@@ -22,7 +22,6 @@ import SmartSearch from "@/components/home/SmartSearch";
 import { useStickyShellRef } from "@/hooks/useHomeHeaderScroll";
 import { useHomePrimaryFeed } from "@/hooks/useHomePrimaryFeed";
 import { useUserPosition } from "@/hooks/useUserPosition";
-import { useVoiceSearch } from "@/hooks/useVoiceSearch";
 import {
   createFavoritosSyncGuard,
   fetchFavoritoIds,
@@ -590,13 +589,6 @@ function Home({ initialHomeData = null }) {
     }
   }
 
-  const voiceSearch = useVoiceSearch({
-    onPartial: setTermoBusca,
-    onTranscript: (text) => {
-      executarBusca(text);
-    },
-  });
-
   /**
    * Runs curated plan search (deterministic, no IA quota).
    * @param {{ id: string, titulo: string, filtro: string }} plano - Quick plan preset.
@@ -794,13 +786,6 @@ function Home({ initialHomeData = null }) {
                 executarBusca(chip.query, filtro);
               }}
               showChips={!searchMode}
-              voiceListening={voiceSearch.isListening}
-              voicePreparing={voiceSearch.isPreparing}
-              voiceError={voiceSearch.error}
-              voiceHint={voiceSearch.hint}
-              onVoiceToggle={() => {
-                void voiceSearch.toggle();
-              }}
             />
           </div>
         </div>

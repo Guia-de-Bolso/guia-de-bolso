@@ -39,17 +39,5 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="com.android.vending.BILLING" />
-
-    <!-- Android 11+ — necessário para abrir o diálogo de reconhecimento de fala -->
-    <queries>
-        <intent>
-            <action android:name="android.speech.RecognitionService" />
-        </intent>
-        <intent>
-            <action android:name="android.speech.action.RECOGNIZE_SPEECH" />
-        </intent>
-        <package android:name="com.google.android.googlequicksearchbox" />
-    </queries>
 </manifest>

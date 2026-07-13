@@ -53,10 +53,6 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Usamos a câmera para você tirar sua foto de perfil.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Usamos o microfone para você buscar lugares por voz.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Usamos reconhecimento de fala para transformar sua pergunta em texto na busca com IA.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Usamos sua localização para mostrar lugares perto de você e calcular distâncias.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
