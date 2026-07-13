@@ -9,8 +9,7 @@ import {
   ensureSpeechPermissions,
   ensureVoiceSessionIdle,
   formatSpeechError,
-  isAndroidNative,
-  isIosNative,
+  isRecoverableSpeechError,
   probeNativeSpeechPlugin,
   VOICE_LISTENING_HINT,
   VOICE_SEARCH_MESSAGES,
@@ -18,6 +17,8 @@ import {
 
 /** Encerra automaticamente se o usuário não parar manualmente. */
 const NATIVE_AUTO_STOP_MS = 30000;
+/** Tempo mínimo ouvindo antes de aceitar o segundo toque (evita parar cedo demais). */
+const MIN_NATIVE_LISTEN_MS = 1500;
 
 /**
  * Hook de busca por voz no app nativo Capacitor.
@@ -33,6 +34,7 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
   const captureBusyRef = useRef(false);
   const latestPartialRef = useRef("");
   const autoStopTimerRef = useRef(null);
+  const listenStartedAtRef = useRef(0);
   const onPartialRef = useRef(onPartial);
   const onTranscriptRef = useRef(onTranscript);
 
@@ -145,6 +147,8 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
       const session = await createVoiceCaptureSession({
         onPartial: rememberPartial,
         onError: (message) => {
+          if (isRecoverableSpeechError(message)) return;
+
           captureBusyRef.current = false;
           setStatus("error");
           setError(message);
@@ -152,12 +156,14 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
           void cleanupSession();
         },
         onStarted: () => {
+          listenStartedAtRef.current = Date.now();
           setStatus("listening");
           setHint(VOICE_LISTENING_HINT);
         },
       });
 
       sessionRef.current = session;
+      listenStartedAtRef.current = Date.now();
       setStatus("listening");
       setHint(VOICE_LISTENING_HINT);
 
@@ -233,6 +239,13 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
         (status === "listening" || status === "preparing" || captureBusyRef.current);
 
       if (nativeActive) {
+        const elapsed = Date.now() - listenStartedAtRef.current;
+        if (elapsed < MIN_NATIVE_LISTEN_MS && !latestPartialRef.current) {
+          const secondsLeft = Math.max(1, Math.ceil((MIN_NATIVE_LISTEN_MS - elapsed) / 1000));
+          setHint(`Ouvindo… fale por mais ${secondsLeft}s e toque de novo.`);
+          return;
+        }
+
         const text = await stop();
         finishWithTranscript(text);
         await ensureVoiceSessionIdle();
