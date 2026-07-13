@@ -795,6 +795,7 @@ function Home({ initialHomeData = null }) {
               }}
               showChips={!searchMode}
               voiceListening={voiceSearch.isListening}
+              voicePreparing={voiceSearch.isPreparing}
               voiceError={voiceSearch.error}
               voiceHint={voiceSearch.hint}
               onVoiceToggle={() => {

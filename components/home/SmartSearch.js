@@ -52,6 +52,7 @@ function SmartSearch({
   onChipClick,
   showChips = true,
   voiceListening = false,
+  voicePreparing = false,
   voiceError = "",
   voiceHint = "",
   onVoiceToggle,
@@ -89,6 +90,8 @@ function SmartSearch({
     [onVoiceToggle]
   );
 
+  const micActive = voiceListening || voicePreparing;
+
   return (
     <section className="home-smart-search-section relative mb-6 mt-1">
       <form ref={searchContainerRef} onSubmit={onSubmit}>
@@ -101,17 +104,31 @@ function SmartSearch({
             <button
               type="button"
               onClick={handleVoiceToggle}
-              aria-label={voiceListening ? "Parar busca por voz" : "Buscar por voz"}
-              aria-pressed={voiceListening}
-              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition-all duration-200 active:scale-95 ${
+              aria-label={
+                voiceListening
+                  ? "Parar busca por voz"
+                  : voicePreparing
+                    ? "Cancelar abertura do microfone"
+                    : "Buscar por voz"
+              }
+              aria-pressed={micActive}
+              className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition-all duration-200 active:scale-95 ${
                 voiceListening
                   ? "bg-[#c0392b] text-white shadow-[0_6px_20px_rgba(192,57,43,0.32)]"
-                  : active
-                    ? "bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54] text-white shadow-[0_4px_14px_rgba(26,74,58,0.35)]"
-                    : "bg-[#eef6f2] text-[#1a4a3a]"
+                  : voicePreparing
+                    ? "bg-[#d35400] text-white shadow-[0_6px_20px_rgba(211,84,0,0.28)]"
+                    : active
+                      ? "bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54] text-white shadow-[0_4px_14px_rgba(26,74,58,0.35)]"
+                      : "bg-[#eef6f2] text-[#1a4a3a]"
               }`}
             >
-              <IconMic className="h-[18px] w-[18px]" />
+              {voiceListening ? (
+                <span
+                  className="absolute inset-0 rounded-2xl bg-[#c0392b]/30 motion-safe:animate-ping"
+                  aria-hidden
+                />
+              ) : null}
+              <IconMic className="relative h-[18px] w-[18px]" />
             </button>
 
             <div className="relative min-w-0 flex-1">
