@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   abortNativeVoiceCapture,
+  ANDROID_VOICE_POPUP_TIMEOUT_MS,
+  ANDROID_VOICE_PREPARE_TIMEOUT_MS,
   canUseNativeVoiceSearch,
   canUseVoiceSearch,
   createVoiceCaptureSession,
@@ -12,10 +14,12 @@ import {
   isAndroidNative,
   isRecoverableSpeechError,
   probeNativeSpeechPlugin,
+  resetNativeSpeechBridge,
   runAndroidPopupVoiceCapture,
   VOICE_SEARCH_MESSAGES,
   VOICE_ANDROID_POPUP_HINT,
   VOICE_IOS_LISTENING_HINT,
+  withVoiceCaptureTimeout,
 } from "@/lib/speechRecognition";
 
 /** Encerra automaticamente se o usuário não parar manualmente (iOS). */
@@ -128,29 +132,25 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
     setError("");
     setHint(VOICE_ANDROID_POPUP_HINT);
 
+    const watchdog = setTimeout(() => {
+      if (!captureBusyRef.current) return;
+      captureBusyRef.current = false;
+      setStatus("error");
+      setError(VOICE_SEARCH_MESSAGES.POPUP_TIMEOUT);
+      setHint("");
+      void abortNativeVoiceCapture();
+      void resetNativeSpeechBridge();
+    }, ANDROID_VOICE_PREPARE_TIMEOUT_MS + 12000);
+
     try {
-      await ensureVoiceSessionIdle();
-
-      const probe = await probeNativeSpeechPlugin();
-      if (!probe.ok) {
-        setStatus("error");
-        setError(probe.error ?? VOICE_SEARCH_MESSAGES.PLUGIN_MISSING);
-        captureBusyRef.current = false;
-        return;
-      }
-
-      const permission = await ensureSpeechPermissions();
-      if (!permission.granted) {
-        setStatus("denied");
-        setError(permission.error ?? VOICE_SEARCH_MESSAGES.PERMISSION_DENIED);
-        captureBusyRef.current = false;
-        return;
-      }
-
       setStatus("idle");
-      setHint("Fale no diálogo do Google que abriu na tela.");
+      setHint("Aguarde o diálogo do Google na tela.");
 
-      const text = await runAndroidPopupVoiceCapture();
+      const text = await withVoiceCaptureTimeout(
+        runAndroidPopupVoiceCapture(),
+        ANDROID_VOICE_POPUP_TIMEOUT_MS,
+        "popup-timeout"
+      );
 
       deliverTranscript(text);
     } catch (err) {
@@ -163,7 +163,9 @@ export function useVoiceSearch({ onPartial, onTranscript } = {}) {
       setStatus("error");
       setError(message || VOICE_SEARCH_MESSAGES.START_FAILED);
       setHint("");
-      await ensureVoiceSessionIdle();
+      await resetNativeSpeechBridge();
+    } finally {
+      clearTimeout(watchdog);
     }
   }, [deliverTranscript, resetVoiceUi]);
 
