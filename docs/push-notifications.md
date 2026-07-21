@@ -71,9 +71,9 @@ ls ios/App/App/GoogleService-Info.plist
    ```
 2. Conecte um celular Android (USB + depuração) **ou** use um emulador **com Play Services**.
 3. Rode o app (▶ Run) no target `app`.
-4. Faça **login** no app.
-5. Vá em **Perfil → Notificações push** e ative o toggle.
-6. Aceite a permissão do sistema (Android 13+).
+4. Faça **login**. O app pede permissão de notificação automaticamente (push ligado por padrão).
+5. Aceite a permissão do sistema (Android 13+).
+6. Confira no **Perfil** que o toggle está ligado (só desliga se você quiser).
 7. No Supabase → Table Editor → `push_tokens`: deve aparecer uma linha com `platform = android` e `enabled = true`.
 8. Envie um push de teste (seção [Envio de teste](#envio-de-teste) abaixo).
 9. A notificação deve chegar; ao tocar, o app abre o path de `url` (ex.: `/`).
@@ -86,6 +86,8 @@ ls ios/App/App/GoogleService-Info.plist
 | Permissão negada | Ajustes do celular → Apps → Guia de Bolso → Notificações |
 | Sem linha em `push_tokens` | Login + rede; logs do `POST /api/push/register` |
 | Token registra, push não chega | `google-services.json` + env Firebase na Vercel + redeploy |
+| `messaging/mismatched-credential` | Service account sem permissão de envio: no Google Cloud IAM do projeto, dê o papel **Firebase Cloud Messaging API Admin** à conta `firebase-adminsdk-...@` (e confira se a Firebase Cloud Messaging API está ativa) |
+| `messaging/registration-token-not-registered` | Token morto (app reinstalado/rebuildado) — desligue e ligue o toggle no perfil; o envio admin desativa tokens mortos automaticamente |
 
 ### C. iOS
 
@@ -95,9 +97,9 @@ ls ios/App/App/GoogleService-Info.plist
    ```
 2. Selecione o target **App**, Team correto, Bundle ID `app.guiadebolso`.
 3. Conecte um **iPhone físico** (não simulador) → Run (▶).
-4. Faça **login** no app.
-5. Vá em **Perfil → Notificações push** e ative o toggle.
-6. Aceite o alerta “Permitir notificações”.
+4. Faça **login** no app. O alerta “Permitir notificações” deve aparecer sozinho (push ligado por padrão).
+5. Aceite o alerta.
+6. Confira no **Perfil** que o toggle de notificações está ligado (só desliga se você quiser).
 7. No Supabase → `push_tokens`: linha com `platform = ios` e `enabled = true`.
 8. Envie um push de teste (seção abaixo).
 9. Toque na notificação e confira o deep link.
@@ -138,10 +140,17 @@ Resposta esperada:
 
 Se `sent: 0` e mensagem de “nenhum dispositivo”, o token ainda não foi registrado ou `enabled = false`.
 
+Para isolar problemas sem depender da Vercel, há um script que envia direto da máquina local usando o JSON da service account (mostra o código de erro completo do FCM por token):
+
+```bash
+node --env-file=.env.local scripts/debug-push-local.mjs ~/Downloads/<service-account>.json
+```
+
 ### E. Critérios de sucesso
 
-- [ ] Toggle no Perfil (só nativo, usuário logado)
-- [ ] Linha em `push_tokens` após ativar
+- [ ] Após login no nativo, permissão do SO é pedida sem precisar do toggle
+- [ ] Toggle no Perfil (só nativo, usuário logado) — ligado por padrão
+- [ ] Linha em `push_tokens` após ativar / login
 - [ ] Notificação chega com o app em background
 - [ ] Toque abre a rota `url` (path interno, ex. `/` ou `/lugares/...`)
 - [ ] Logout desativa o token (`enabled = false` ou DELETE na API)
@@ -211,11 +220,12 @@ Local: mesma variável em `.env.local`. Ver [`.env.example`](../.env.example).
 
 ## Fluxo no app
 
-1. Usuário logado → **Perfil → Notificações push**.
-2. Permissão do SO → `PushNotifications.register()` → `POST /api/push/register`.
-3. Preferência em `localStorage` (`gb_push_notifications_enabled`).
-4. Logout → `DELETE /api/push/register`.
-5. Tap → path interno em `data.url` (`safeRedirectPath`).
+1. Usuário loga no app nativo → push **ligado por padrão** (pede permissão do SO na 1ª vez).
+2. `PushNotifications.register()` → `POST /api/push/register`.
+3. Preferência em `localStorage` (`gb_push_notifications_enabled`): ausência ou `"1"` = ligado; `"0"` = usuário desligou.
+4. Toggle no Perfil só para o usuário desligar (ou religar).
+5. Logout → `DELETE /api/push/register`.
+6. Tap → path interno em `data.url` (`safeRedirectPath`).
 
 ## Envio (admin)
 
