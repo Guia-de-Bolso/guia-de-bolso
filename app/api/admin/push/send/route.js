@@ -93,6 +93,7 @@ export async function POST(request) {
       failed: result.failed,
       recipients: tokens.length,
       disabledInvalid,
+      errorCounts: result.errorCounts,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : USER_MESSAGES.SERVER;
