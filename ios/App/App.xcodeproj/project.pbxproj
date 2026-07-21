@@ -414,10 +414,10 @@
 /* Begin XCRemoteSwiftPackageReference section */
 		B4F1A1052FFB0001000F0005 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 11.0.0;
+				kind = exactVersion;
+				version = 12.16.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
