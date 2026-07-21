@@ -1,6 +1,8 @@
 import UIKit
 import Capacitor
 import CapApp_SPM
+import FirebaseCore
+import FirebaseMessaging
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -8,7 +10,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        // Firebase Messaging → token FCM (necessário para envio via firebase-admin).
+        FirebaseApp.configure()
         return true
     }
 
@@ -49,7 +52,34 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        NotificationCenter.default.post(name: .capacitorDidRegisterForRemoteNotifications, object: deviceToken)
+        // Converte APNs → FCM e entrega o token FCM ao plugin Capacitor (String).
+        Messaging.messaging().apnsToken = deviceToken
+        Messaging.messaging().token { token, error in
+            if let error = error {
+                NotificationCenter.default.post(
+                    name: .capacitorDidFailToRegisterForRemoteNotifications,
+                    object: error
+                )
+                return
+            }
+
+            guard let token = token else {
+                NotificationCenter.default.post(
+                    name: .capacitorDidFailToRegisterForRemoteNotifications,
+                    object: NSError(
+                        domain: "GuiaDeBolsoPush",
+                        code: 1,
+                        userInfo: [NSLocalizedDescriptionKey: "FCM token ausente"]
+                    )
+                )
+                return
+            }
+
+            NotificationCenter.default.post(
+                name: .capacitorDidRegisterForRemoteNotifications,
+                object: token
+            )
+        }
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {

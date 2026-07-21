@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { sendPushNotificationBatch } from "@/lib/pushMessaging";
-import { getEnabledPushTokensForUsers } from "@/lib/pushTokens";
+import {
+  disableInvalidPushTokens,
+  getEnabledPushTokensForUsers,
+} from "@/lib/pushTokens";
 import { validateAdminPushPayload } from "@/lib/pushTokenValidation";
 import { requireAdminApi } from "@/lib/requireAdminApi";
 import { createServiceClient } from "@/lib/supabase/service";
@@ -72,11 +75,24 @@ export async function POST(request) {
       );
     }
 
+    let disabledInvalid = 0;
+    if (result.invalidTokens?.length) {
+      try {
+        disabledInvalid = await disableInvalidPushTokens(admin, result.invalidTokens);
+      } catch (cleanupError) {
+        console.warn(
+          "POST /api/admin/push/send: falha ao desativar tokens inválidos:",
+          cleanupError
+        );
+      }
+    }
+
     return NextResponse.json({
       ok: result.ok,
       sent: result.sent,
       failed: result.failed,
       recipients: tokens.length,
+      disabledInvalid,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : USER_MESSAGES.SERVER;

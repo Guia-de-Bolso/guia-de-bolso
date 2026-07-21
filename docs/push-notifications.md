@@ -108,7 +108,8 @@ ls ios/App/App/GoogleService-Info.plist
 |---------|--------------|
 | Toggle não aparece | Deploy da feature no servidor que o WebView carrega |
 | Sem token / registrationError | Push ligado no App ID + `GoogleService-Info.plist` no target |
-| Token ok, push não chega | APNs `.p8` no Firebase Cloud Messaging |
+| Token ok, push não chega | APNs `.p8` no Firebase Cloud Messaging + `FirebaseApp.configure()` no AppDelegate |
+| Token parece hex curto (~64 chars) | Build antigo sem FCM — precisa rebuild com Firebase Messaging (token FCM é mais longo) |
 | Funciona em Debug, falha em TestFlight | Trocar `aps-environment` para `production` no release |
 
 > No Xcode, **“Push Notifications Console”** não é a capability — é só o console da Apple. O projeto já tem `aps-environment` em `App.entitlements`.
@@ -168,8 +169,10 @@ Ou migration: `supabase/migrations/20260713180000_push_tokens.sql`.
 ### 3. iOS (projeto)
 
 - `aps-environment` em `ios/App/App/App.entitlements` (`development` em Debug; `production` no release loja).
-- `AppDelegate.swift` já encaminha o device token ao Capacitor.
+- `AppDelegate.swift` configura `FirebaseApp` e converte o token **APNs → FCM** (obrigatório para `firebase-admin`).
+- Pacotes SPM no target App: `FirebaseCore` + `FirebaseMessaging`.
 - App ID com Push Notifications no Apple Developer.
+- `GoogleService-Info.plist` no target App.
 
 ### 4. Android (projeto)
 
