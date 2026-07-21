@@ -56,6 +56,28 @@ Implementation: `app/api/cron/lugares-purge/route.js`, `lib/purgeLugaresInativos
 
 ---
 
+### `GET /api/cron/push-automations`
+
+Prepara e envia campanhas automáticas de push: clima favorável, destaque
+semanal, lembrete de roteiro salvo e eventos pendentes de novo local/parceiro.
+Agendado diariamente às 12:00 UTC (9h em São Paulo).
+
+**Auth:** `Authorization: Bearer <CRON_SECRET>` ou `x-cron-secret`.
+
+**Requires:** `SUPABASE_SERVICE_ROLE_KEY`, credenciais Firebase e migration
+`20260721190000_push_campaigns.sql`.
+
+**Success:** `{ ok, prepared, campaigns, sent, failed, skipped, partial }`
+
+O endpoint `POST /api/admin/push/process` usa o mesmo processador, com sessão
+`admin`/`dev`, logo após alterações de conteúdo. Ele não aceita texto ou
+destinatários manuais.
+
+Implementation: `app/api/cron/push-automations/route.js`,
+`app/api/admin/push/process/route.js`, `lib/pushCampaigns.js`.
+
+---
+
 ### `GET /api/lugares`
 
 Public read of active places via server-side anon client (`getAnonServerClient`). Responses include CDN-friendly cache headers (`lib/apiCacheHeaders.js`).

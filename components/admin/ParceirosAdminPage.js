@@ -16,6 +16,7 @@ import {
   getParceiroStatusLabel,
 } from "@/lib/parceiroAdmin";
 import { hojeISO } from "@/lib/homeRotation";
+import { processPendingPushCampaigns } from "@/lib/processPendingPushCampaigns";
 import { createClient } from "@/lib/supabase";
 
 const FILTROS = [
@@ -129,6 +130,9 @@ export default function ParceirosAdminPage() {
     );
     if (patch.eh_parceiro === false) {
       setLugares((items) => items.filter((item) => item.id !== id));
+    }
+    if (patch.eh_parceiro === true) {
+      await processPendingPushCampaigns();
     }
   }
 

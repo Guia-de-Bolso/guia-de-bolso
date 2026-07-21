@@ -31,6 +31,7 @@ import {
   filterTagsBySubcategoria,
   getTagIds,
 } from "@/lib/tags";
+import { processPendingPushCampaigns } from "@/lib/processPendingPushCampaigns";
 import { isLugarElegivelQr } from "@/lib/lugarQr";
 import { getEffectiveCategoria } from "@/lib/lugarTaxonomia";
 import { getCategoriasVisiveis } from "@/lib/categorias";
@@ -298,6 +299,9 @@ export default function LocalForm({
       throw error;
     }
     setForm((current) => ({ ...current, ...patch }));
+    if (patch.eh_parceiro === true) {
+      await processPendingPushCampaigns();
+    }
   }
 
   /**
@@ -497,6 +501,7 @@ export default function LocalForm({
       }
     }
 
+    await processPendingPushCampaigns();
     router.push("/admin/locais");
   }
 

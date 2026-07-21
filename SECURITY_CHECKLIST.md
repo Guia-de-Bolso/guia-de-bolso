@@ -36,6 +36,8 @@ O projeto separa bem segredos de servidor (`ANTHROPIC_API_KEY`, `SUPABASE_SERVIC
 | `/api/premium/verify-play` | POST | Obrigatória | — | Não | Valida purchase Play Billing |
 | `/api/push/register` | POST, DELETE | Obrigatória | — | Não | Registro/desativação de token FCM/APNs (service role upsert) |
 | `/api/admin/push/send` | POST | Obrigatória | `admin` ou `dev` (`requireAdminApi`) | Não | Envio push via Firebase Admin; destinatários explícitos |
+| `/api/admin/push/process` | POST | Obrigatória | `admin` ou `dev` (`requireAdminApi`) | Não | Processa automaticamente eventos de conteúdo pendentes |
+| `/api/cron/push-automations` | GET | `CRON_SECRET` | — | Não | Clima, destaque semanal, roteiro e fila de conteúdo |
 | `/api/cron/lugares-purge` | GET | `CRON_SECRET` | — | Não | Purge lugares desativados 30d+ |
 | `/api/admin/usuarios/[id]` | DELETE | Obrigatória | `admin` (`requireAdminOnlyApi`) | Não | Exclusão de usuário (service role) |
 | `/api/admin/contratos/[id]/documentos` | POST | Obrigatória | `dev` | Não | Upload documento contrato |

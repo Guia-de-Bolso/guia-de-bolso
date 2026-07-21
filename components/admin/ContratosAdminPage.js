@@ -31,6 +31,7 @@ import {
 import { hojeISO } from "@/lib/homeRotation";
 import { PLANO_COMERCIAL_PRECO } from "@/lib/planoComercial";
 import { formatDiasRestantesParceiro } from "@/lib/parceiroAdmin";
+import { processPendingPushCampaigns } from "@/lib/processPendingPushCampaigns";
 import { createClient } from "@/lib/supabase";
 
 const EMPTY_FORM = {
@@ -286,6 +287,7 @@ export default function ContratosAdminPage() {
       window.alert(result.message || "Não foi possível ativar no app.");
       return;
     }
+    await processPendingPushCampaigns();
     await loadData();
   }
 
@@ -334,7 +336,10 @@ export default function ContratosAdminPage() {
       return;
     }
 
-    await syncParceiroFromContrato(supabase, contratoId, user?.id);
+    const syncResult = await syncParceiroFromContrato(supabase, contratoId, user?.id);
+    if (syncResult.ok) {
+      await processPendingPushCampaigns();
+    }
     await loadData();
   }
 

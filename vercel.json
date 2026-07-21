@@ -9,6 +9,10 @@
     {
       "path": "/api/cron/lugares-purge",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/push-automations",
+      "schedule": "0 12 * * *"
     }
   ],
   "redirects": [

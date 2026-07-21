@@ -144,6 +144,8 @@ Run in order for a **new environment** that already has base tables from the Sup
 | 23 | `plano_comercial_unico.sql` | Single Parceiro plan seed |
 | 24 | `roteiros_policies.sql` | RLS on AI `roteiros` |
 | 25 | `feedback.sql` | Support table + RLS |
+| 25b | `20260713180000_push_tokens.sql` | Tokens FCM por instalação + RLS |
+| 25c | `20260721190000_push_campaigns.sql` | Fila idempotente, triggers de conteúdo e claim das automações push |
 
 ### F — Security P0 (lugares + storage write)
 

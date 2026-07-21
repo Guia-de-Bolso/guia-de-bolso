@@ -19,6 +19,7 @@ import {
   LUGAR_STATUS,
 } from "@/lib/lugarStatus";
 import { getCategoriasVisiveis } from "@/lib/categorias";
+import { processPendingPushCampaigns } from "@/lib/processPendingPushCampaigns";
 import { createClient } from "@/lib/supabase";
 
 /** Categorias fixas do app (chips de filtro). */
@@ -348,6 +349,10 @@ export default function LugaresGridPage() {
           : item
       )
     );
+
+    if (nextStatus === LUGAR_STATUS.ATIVO) {
+      await processPendingPushCampaigns();
+    }
   }
 
   /**

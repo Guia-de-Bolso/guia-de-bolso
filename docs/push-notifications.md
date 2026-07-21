@@ -218,6 +218,27 @@ O mesmo script imprime `FIREBASE_SERVICE_ACCOUNT_JSON` minificado.
 
 Local: mesma variável em `.env.local`. Ver [`.env.example`](../.env.example).
 
+## Automações
+
+Não há campanha manual no painel. Os cinco envios são automáticos:
+
+| Tipo | Regra | Audiência | Repetição |
+|------|-------|-----------|-----------|
+| Novo local | Quando um local passa a `status = ativo` pela primeira vez | Todos com token ativo | Uma vez por local |
+| Novo parceiro | Quando `eh_parceiro` passa para `true` em local ativo | Todos com token ativo | Uma vez por parceiro |
+| Destaque da semana | Parceiro ativo com imagem, seleção determinística semanal | Todos com token ativo | Uma vez por semana |
+| Clima | Manhã com tempo aberto/parcialmente nublado e máxima ≥ 22 °C | Todos com token ativo | No máximo uma vez por dia |
+| Lembrete de roteiro | Roteiro IA salvo há 3 dias | Dono do roteiro | Uma vez por roteiro |
+
+Locais e parceiros são enfileirados por trigger do Supabase e processados logo
+após o CRUD admin; se a chamada falhar, o cron diário recupera o evento. As
+campanhas agendadas rodam às 12:00 UTC (9h em `America/Sao_Paulo`) em
+`GET /api/cron/push-automations`.
+
+Antes do deploy, aplique
+`supabase/migrations/20260721190000_push_campaigns.sql` no SQL Editor. A
+`event_key` única e o claim transacional impedem notificações duplicadas.
+
 ## Fluxo no app
 
 1. Usuário loga no app nativo → push **ligado por padrão** (pede permissão do SO na 1ª vez).

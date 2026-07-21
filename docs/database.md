@@ -419,6 +419,29 @@ Written by `POST /api/roteiro/salvar`; listed on `/rotas` when logged in.
 
 ---
 
+### `push_tokens` e `push_campaigns`
+
+`push_tokens` guarda um token FCM por instalação, vinculado ao usuário. O toggle
+do app controla `enabled`; tokens rejeitados pelo FCM são desativados no envio.
+
+`push_campaigns` é a fila e o histórico idempotente das automações:
+
+| Campo | Uso |
+|-------|-----|
+| `event_key` | Chave única que impede repetir a mesma campanha |
+| `type` | `novo_local`, `novo_parceiro`, `destaque_semana`, `clima`, `lembrete_roteiro` |
+| `audience` / `user_id` | Broadcast para tokens ativos ou usuário de um roteiro |
+| `status` | `pending`, `processing`, `sent`, `partial`, `failed`, `skipped` |
+| `*_count`, `error_counts` | Resultado agregado, sem armazenar token no histórico |
+
+Novos locais públicos e novos parceiros entram na fila por trigger em `lugares`.
+O cron cria as campanhas de clima, destaque e roteiro e usa
+`claim_push_campaigns()` (`FOR UPDATE SKIP LOCKED`) para evitar envio duplicado.
+RLS bloqueia escrita pelo cliente; somente o service role processa a fila.
+Migration: `20260721190000_push_campaigns.sql`.
+
+---
+
 ### `planos`
 
 Commercial highlight **pricing tiers** (Básico, Padrão, Premium).
