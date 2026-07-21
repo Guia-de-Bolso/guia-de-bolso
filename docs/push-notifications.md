@@ -112,7 +112,7 @@ ls ios/App/App/GoogleService-Info.plist
 | Sem token / registrationError | Push ligado no App ID + `GoogleService-Info.plist` no target |
 | Token ok, push não chega | APNs `.p8` no Firebase Cloud Messaging + `FirebaseApp.configure()` no AppDelegate |
 | Token parece hex curto (~64 chars) | Build antigo sem FCM — precisa rebuild com Firebase Messaging (token FCM é mais longo) |
-| Funciona em Debug, falha em TestFlight | Trocar `aps-environment` para `production` no release |
+| Funciona em Debug, falha em TestFlight | Release usa `AppRelease.entitlements` (`production`); no Firebase, a chave APNs também precisa estar no slot **Production** |
 
 > No Xcode, **“Push Notifications Console”** não é a capability — é só o console da Apple. O projeto já tem `aps-environment` em `App.entitlements`.
 
@@ -177,7 +177,8 @@ Ou migration: `supabase/migrations/20260713180000_push_tokens.sql`.
 
 ### 3. iOS (projeto)
 
-- `aps-environment` em `ios/App/App/App.entitlements` (`development` em Debug; `production` no release loja).
+- `aps-environment`: Debug → `App/App.entitlements` (`development`); Release/Archive → `App/AppRelease.entitlements` (`production`).
+- Firebase Cloud Messaging → Apple app: chave APNs nos slots **Development** e **Production** (o mesmo `.p8` serve nos dois).
 - `AppDelegate.swift` configura `FirebaseApp` e converte o token **APNs → FCM** (obrigatório para `firebase-admin`).
 - Pacotes SPM no target App: `FirebaseCore` + `FirebaseMessaging`.
 - App ID com Push Notifications no Apple Developer.
@@ -284,4 +285,5 @@ Antes do deploy, aplique
 - [ ] `google-services.json` / `GoogleService-Info.plist` no build local
 - [ ] APNs no Firebase (iOS)
 - [ ] Teste Android + iOS (critérios acima)
-- [ ] Antes da App Store: `aps-environment` = `production`
+- [ ] Release usa `AppRelease.entitlements` (`aps-environment` = `production`)
+- [ ] Firebase: chave APNs também no slot **Production**
