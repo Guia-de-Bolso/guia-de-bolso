@@ -35,8 +35,8 @@ export default function PerfilPushToggleRow({ enabled, busy = false, onChange })
         } ${busy ? "opacity-60" : ""}`}
       >
         <span
-          className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${
-            enabled ? "translate-x-5" : "translate-x-0.5"
+          className={`absolute left-0.5 top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${
+            enabled ? "translate-x-5" : "translate-x-0"
           }`}
         />
       </button>
