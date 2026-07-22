@@ -40,12 +40,51 @@ assertSupabasePublicEnvForDeploy();
 
 const isCapacitorBuild = process.env.CAPACITOR_BUILD === "1";
 
+/**
+ * Origens extras do `next dev` (Capacitor live reload via IP da LAN).
+ * Sem isso o Next 16 bloqueia chunks/HMR e a home fica no skeleton eterno.
+ * @returns {string[]}
+ */
+function getAllowedDevOrigins() {
+  const origins = new Set(["127.0.0.1", "localhost", "127.0.0.1:3000", "localhost:3000"]);
+
+  const liveReload = process.env.CAPACITOR_LIVE_RELOAD_URL?.trim();
+  if (liveReload) {
+    try {
+      const url = new URL(liveReload);
+      if (url.hostname) {
+        origins.add(url.hostname);
+        if (url.host) origins.add(url.host);
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  const extra = process.env.ALLOWED_DEV_ORIGINS?.trim();
+  if (extra) {
+    for (const part of extra.split(",")) {
+      const value = part.trim();
+      if (value) origins.add(value);
+    }
+  }
+
+  // IPs comuns de rede local (live reload no celular)
+  for (const host of ["192.168.1.8", "192.168.0.10", "192.168.1.10"]) {
+    origins.add(host);
+    origins.add(`${host}:3000`);
+  }
+
+  return [...origins];
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Evita que o Turbopack use ~/package-lock.json como raiz do monorepo.
   turbopack: {
     root: projectRoot,
   },
+  allowedDevOrigins: getAllowedDevOrigins(),
   ...(isCapacitorBuild
     ? {
         output: "export",

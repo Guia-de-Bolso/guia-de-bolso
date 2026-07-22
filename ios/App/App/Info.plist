@@ -55,8 +55,17 @@
 	<string>Usamos a câmera para você tirar sua foto de perfil.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Usamos sua localização para mostrar lugares perto de você e calcular distâncias.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Usamos o microfone para você buscar locais por voz.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Usamos suas fotos para atualizar sua foto de perfil.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Usamos o reconhecimento de voz para você buscar locais falando.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

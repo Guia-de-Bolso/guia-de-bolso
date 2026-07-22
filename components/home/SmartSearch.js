@@ -28,6 +28,15 @@ function IconClose({ className = "h-3.5 w-3.5" }) {
   );
 }
 
+function IconMic({ className = "h-4 w-4" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+      <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+    </svg>
+  );
+}
+
 const QuickChip = memo(function QuickChip({ chip, onClick }) {
   return (
     <button type="button" onClick={() => onClick(chip)} className={HOME_CHIP_CLASS}>
@@ -51,6 +60,10 @@ function SmartSearch({
   onClose,
   onChipClick,
   showChips = true,
+  voiceSupported = false,
+  voiceListening = false,
+  voiceError = "",
+  onVoiceToggle,
 }) {
   const [focused, setFocused] = useState(false);
 
@@ -73,9 +86,9 @@ function SmartSearch({
   );
 
   const hasQuery = termoBusca.trim().length > 0;
-  const active = focused || searchMode;
+  const active = focused || searchMode || voiceListening;
 
-  const showChipRow = showChips && !searchMode;
+  const showChipRow = showChips && !searchMode && !voiceListening;
 
   return (
     <section className="home-smart-search-section relative mb-6 mt-1">
@@ -83,17 +96,23 @@ function SmartSearch({
         <div
           className={`home-ai-search-surface ${HOME_SURFACE_CLASS} transition-shadow duration-300 ease-out ${
             active ? "home-ai-search-active" : "shadow-none ring-[#e8eeee]"
-          }`}
+          } ${voiceListening ? "home-ai-search-listening" : ""}`}
         >
-          <div className="home-ai-search-input-row flex items-center gap-3 px-4 py-3.5">
+          <div className="home-ai-search-input-row flex items-center gap-2.5 px-4 py-3.5 sm:gap-3">
             <div
               className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition-all duration-300 ${
-                active
+                voiceListening
                   ? "bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54] text-white shadow-[0_4px_14px_rgba(26,74,58,0.35)]"
-                  : "bg-[#eef6f2] text-[#1a4a3a]"
+                  : active
+                    ? "bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54] text-white shadow-[0_4px_14px_rgba(26,74,58,0.35)]"
+                    : "bg-[#eef6f2] text-[#1a4a3a]"
               }`}
             >
-              <IconSparkle className="h-[18px] w-[18px]" />
+              {voiceListening ? (
+                <IconMic className="h-[18px] w-[18px]" />
+              ) : (
+                <IconSparkle className="h-[18px] w-[18px]" />
+              )}
             </div>
 
             <div className="relative min-w-0 flex-1">
@@ -101,7 +120,7 @@ function SmartSearch({
                 Busca inteligente com IA
               </label>
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1a4a3a]/50">
-                Pergunte à IA
+                {voiceListening ? "Ouvindo…" : "Pergunte à IA"}
               </p>
               <input
                 id="smart-search-input"
@@ -115,12 +134,16 @@ function SmartSearch({
                 onFocus={handleFocus}
                 onBlur={handleBlur}
                 onChange={(e) => onChange(e.target.value)}
-                placeholder="O que você quer descobrir hoje?"
+                placeholder={
+                  voiceListening
+                    ? "Fale o que você quer descobrir…"
+                    : "O que você quer descobrir hoje?"
+                }
                 className={`mt-0.5 w-full appearance-none border-0 bg-transparent text-[16px] leading-snug text-[#1a2e28] shadow-none outline-none ring-0 placeholder:text-[#9aa8a3] focus:outline-none focus-visible:outline-none ${
                   searchMode ? "pr-8" : ""
                 }`}
               />
-              {searchMode && (
+              {searchMode && !voiceListening && (
                 <button
                   type="button"
                   onClick={onClose}
@@ -131,6 +154,30 @@ function SmartSearch({
                 </button>
               )}
             </div>
+
+            {voiceSupported && (
+              <button
+                type="button"
+                data-search-interactive="true"
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  onVoiceToggle?.(event);
+                }}
+                aria-label={voiceListening ? "Parar de ouvir" : "Buscar por voz"}
+                aria-pressed={voiceListening}
+                className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition-all duration-200 active:scale-95 ${
+                  voiceListening
+                    ? "bg-[#1a4a3a] text-white shadow-[0_6px_20px_rgba(26,74,58,0.32)]"
+                    : "bg-[#e8f0ec] text-[#1a4a3a]"
+                }`}
+              >
+                {voiceListening && (
+                  <span className="voice-pulse absolute inset-0 rounded-2xl" aria-hidden />
+                )}
+                <IconMic className="relative z-[1] h-[17px] w-[17px]" />
+              </button>
+            )}
 
             <button
               type="submit"
@@ -144,6 +191,15 @@ function SmartSearch({
               <IconSend className="h-[17px] w-[17px] -rotate-45" />
             </button>
           </div>
+
+          {voiceError ? (
+            <p
+              className="border-t border-[#f3e8d8] bg-[#fff8ef] px-4 py-2.5 text-xs leading-snug text-[#9a6700]"
+              role="status"
+            >
+              {voiceError}
+            </p>
+          ) : null}
 
           {showChipRow && (
             <div className="home-ai-chips-wrap border-t border-[#eef2f0] px-4 pt-3 pb-4">

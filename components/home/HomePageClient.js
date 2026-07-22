@@ -22,6 +22,7 @@ import SmartSearch from "@/components/home/SmartSearch";
 import { useStickyShellRef } from "@/hooks/useHomeHeaderScroll";
 import { useHomePrimaryFeed } from "@/hooks/useHomePrimaryFeed";
 import { useUserPosition } from "@/hooks/useUserPosition";
+import { useVoiceSearch } from "@/hooks/useVoiceSearch";
 import {
   createFavoritosSyncGuard,
   fetchFavoritoIds,
@@ -159,6 +160,30 @@ function Home({ initialHomeData = null }) {
   const [loadingPopulares, setLoadingPopulares] = useState(false);
   const searchInputRef = useRef(null);
   const searchContainerRef = useRef(null);
+  const executarBuscaRef = useRef(/** @type {(query: string, filtro?: string) => Promise<void>} */ (async () => {}));
+
+  const voiceSearch = useVoiceSearch({
+    onTranscriptChange: setTermoBusca,
+    onFinalTranscript: (text) => {
+      setTermoBusca(text);
+      void executarBuscaRef.current(text);
+    },
+  });
+
+  const handleVoiceToggle = useCallback(() => {
+    if (!voiceSearch.listening && !voiceSearch.busy) {
+      setVisitadosRecentes(getLugaresVisitados());
+      if (searchMode !== "results") setSearchMode("browse");
+      voiceSearch.clearError();
+    }
+    void voiceSearch.toggle();
+  }, [
+    searchMode,
+    voiceSearch.busy,
+    voiceSearch.clearError,
+    voiceSearch.listening,
+    voiceSearch.toggle,
+  ]);
 
   const [favoritos, setFavoritos] = useState([]);
   const favoritosSyncGuardRef = useRef(createFavoritosSyncGuard());
@@ -589,6 +614,8 @@ function Home({ initialHomeData = null }) {
     }
   }
 
+  executarBuscaRef.current = executarBusca;
+
   /**
    * Runs curated plan search (deterministic, no IA quota).
    * @param {{ id: string, titulo: string, filtro: string }} plano - Quick plan preset.
@@ -786,6 +813,10 @@ function Home({ initialHomeData = null }) {
                 executarBusca(chip.query, filtro);
               }}
               showChips={!searchMode}
+              voiceSupported={voiceSearch.supported}
+              voiceListening={voiceSearch.listening}
+              voiceError={voiceSearch.errorMessage}
+              onVoiceToggle={handleVoiceToggle}
             />
           </div>
         </div>

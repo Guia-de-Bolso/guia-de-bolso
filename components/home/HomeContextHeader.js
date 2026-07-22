@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import Logo from "@/components/Logo";
 import PrefeituraSupportLine from "@/components/PrefeituraSupportLine";
 import { HOME_CONTEXT_PILL_CLASS } from "@/components/home/homeTokens";
@@ -37,7 +38,13 @@ export default function HomeContextHeader({
     user?.email?.split("@")?.[0] ||
     null;
 
-  const saudacao = primeiroNome ? `${getSaudacao()}, ${primeiroNome}` : getSaudacao();
+  // Saudação só no client — evita mismatch SSR (UTC no servidor vs fuso do aparelho).
+  const [saudacao, setSaudacao] = useState("Olá");
+
+  useEffect(() => {
+    const base = getSaudacao();
+    setSaudacao(primeiroNome ? `${base}, ${primeiroNome}` : base);
+  }, [primeiroNome]);
 
   const tempNum = Number(temperatura);
   const tempExibicao = Number.isFinite(tempNum) ? `${Math.round(tempNum)}°` : null;
@@ -58,7 +65,9 @@ export default function HomeContextHeader({
             <PrefeituraSupportLine variant="inline" />
           </div>
 
-          <p className="mt-3 text-sm font-medium text-[#5a6b66]">{saudacao} 👋</p>
+          <p className="mt-3 text-sm font-medium text-[#5a6b66]" suppressHydrationWarning>
+            {saudacao} 👋
+          </p>
 
           <h1 className="mt-1 font-display text-[1.75rem] font-bold leading-[1.12] tracking-tight text-[#1a2e28]">
             O que fazer <span className="text-[#1a4a3a]">agora?</span>
