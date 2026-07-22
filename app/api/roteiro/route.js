@@ -100,7 +100,7 @@ export async function POST(request) {
       supabase
         .from("lugares")
         .select(
-          "id, nome, descricao, categoria, subcategoria, eh_parceiro, conteudo_curadoria, imagem_url, fotos, lugares_tags(tags(nome))"
+          "id, nome, slug, descricao, categoria, subcategoria, eh_parceiro, conteudo_curadoria, imagem_url, fotos, lugares_tags(tags(nome))"
         )
     );
 
