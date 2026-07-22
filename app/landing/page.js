@@ -7,6 +7,9 @@ import { buildLandingMetadata } from "@/lib/seo";
 
 export const metadata = buildLandingMetadata();
 
+/** ISR — mock do app na landing reflete parceiros/catálogo atualizados. */
+export const revalidate = 60;
+
 /**
  * Landing marketing — SSR com lugares e categorias reais.
  * @returns {Promise<import('react').ReactElement>}

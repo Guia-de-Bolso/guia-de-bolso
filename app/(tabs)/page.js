@@ -7,6 +7,9 @@ import { buildHomeJsonLd } from "@/lib/seoJsonLd";
 
 export const metadata = buildHomeMetadata();
 
+/** ISR — parceiros/catálogo mudam no admin; evita Full Route Cache eternamente stale. */
+export const revalidate = 60;
+
 /**
  * Home — SSR do feed principal + shell SEO.
  * @returns {Promise<import('react').ReactElement>}

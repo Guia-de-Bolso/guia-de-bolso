@@ -12,14 +12,13 @@ import { isSupabasePublicConfigured } from "@/lib/supabase/publicEnv";
  */
 export function useAtrativosPageData(initialData = null) {
   const enabled = isSupabasePublicConfigured();
-  const hasInitial = Boolean(initialData?.atrativos?.length);
 
   const { data, error, isLoading, isValidating, mutate } = useSWR(
     enabled ? CLIENT_CACHE_KEYS.atrativosPage : null,
     fetchAtrativosPageFromApi,
     {
       fallbackData: initialData ?? undefined,
-      revalidateOnMount: !hasInitial,
+      revalidateOnMount: true,
     }
   );
 
