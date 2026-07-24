@@ -11,7 +11,7 @@ import {
   isOfflineNavHrefAllowed,
 } from "@/lib/offlineNavigation";
 
-function IconHome({ className = "h-[22px] w-[22px]", active = false }) {
+function IconHome({ className = "h-5 w-5", active = false }) {
   return (
     <svg
       className={className}
@@ -26,7 +26,51 @@ function IconHome({ className = "h-[22px] w-[22px]", active = false }) {
   );
 }
 
-function IconHeart({ className = "h-[22px] w-[22px]", active = false }) {
+function IconCompass({ className = "h-5 w-5", active = false }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill={active ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth={active ? 0 : 1.75}
+      aria-hidden
+    >
+      {active ? (
+        <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm3.5 6.5l-2.2 5.3-5.3 2.2 2.2-5.3 5.3-2.2z" />
+      ) : (
+        <>
+          <circle cx="12" cy="12" r="9" />
+          <path d="M15.5 8.5l-2.2 5.3-5.3 2.2 2.2-5.3 5.3-2.2z" />
+        </>
+      )}
+    </svg>
+  );
+}
+
+function IconLandscape({ className = "h-5 w-5", active = false }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill={active ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth={active ? 0 : 1.75}
+      aria-hidden
+    >
+      {active ? (
+        <path d="M3 5a2 2 0 012-2h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm4.5 7.5L5 16h14l-4.5-6-3 4-2-2.5z" />
+      ) : (
+        <>
+          <rect x="3" y="5" width="18" height="14" rx="2" />
+          <path d="M3 15l4.5-4.5 3 3 3.5-4.5L21 15" />
+        </>
+      )}
+    </svg>
+  );
+}
+
+function IconHeart({ className = "h-5 w-5", active = false }) {
   return (
     <svg
       className={className}
@@ -41,38 +85,7 @@ function IconHeart({ className = "h-[22px] w-[22px]", active = false }) {
   );
 }
 
-function IconGrid({ className = "h-[22px] w-[22px]", active = false }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill={active ? "currentColor" : "none"}
-      stroke="currentColor"
-      strokeWidth={active ? 0 : 1.75}
-      aria-hidden
-    >
-      <path d="M4 4h6v6H4V4zM14 4h6v6h-6V4zM4 14h6v6H4v-6zM14 14h6v6h-6v-6z" />
-    </svg>
-  );
-}
-
-function IconMap({ className = "h-[22px] w-[22px]", active = false }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill={active ? "currentColor" : "none"}
-      stroke="currentColor"
-      strokeWidth={active ? 0 : 1.75}
-      aria-hidden
-    >
-      <path d="M9 18l-6 3V6l6-3 6 3 6-3v15l-6 3-6-3z" />
-      <path d="M9 3v15M15 6v15" />
-    </svg>
-  );
-}
-
-function IconPerson({ className = "h-[22px] w-[22px]", active = false }) {
+function IconPerson({ className = "h-5 w-5", active = false }) {
   return (
     <svg
       className={className}
@@ -90,8 +103,8 @@ function IconPerson({ className = "h-[22px] w-[22px]", active = false }) {
 
 const NAV_ICONS = {
   "/": IconHome,
-  "/categorias": IconGrid,
-  "/atrativos": IconMap,
+  "/categorias": IconCompass,
+  "/atrativos": IconLandscape,
   "/favoritos": IconHeart,
   "/perfil": IconPerson,
 };
@@ -102,21 +115,12 @@ const items = BOTTOM_NAV_ROUTES.map((route) => ({
 }));
 
 const navItemClass = (active, blocked) =>
-  `group relative flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[20px] px-1 py-1.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a4a3a]/55 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
+  `group relative flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-1.5 rounded-[16px] px-1 py-1 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a4a3a]/55 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
     blocked
       ? "cursor-not-allowed text-[#9aaba5] opacity-55"
       : active
-        ? "text-[#1a4a3a] active:scale-[0.98]"
-        : "text-[#6f837d] hover:bg-white/60 hover:text-[#4f635d] active:scale-[0.98] active:bg-white/80"
-  }`;
-
-const iconWrapClass = (active, blocked) =>
-  `flex h-9 w-9 items-center justify-center rounded-full border transition-all duration-200 ${
-    blocked
-      ? "border-[#e2ebe8] bg-[#f4f7f6] text-[#9aaba5]"
-      : active
-        ? "border-[#cfe5dd] bg-[#ddf0ea] text-[#1a4a3a] shadow-[0_1px_0_rgba(255,255,255,0.85),inset_0_0_0_1px_rgba(26,74,58,0.04)]"
-        : "border-[#d7e3de] bg-white/72 text-[#6f837d] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.7)] group-hover:border-[#c6d8d1] group-hover:bg-white"
+        ? "bg-[#e7f3ef] text-[#1a4a3a] active:scale-[0.98]"
+        : "text-[#6f837d] hover:bg-[#f4f8f6]/80 hover:text-[#4f635d] active:scale-[0.98]"
   }`;
 
 /**
@@ -149,7 +153,7 @@ export default function BottomNav() {
     <>
       {offlineToast ? (
         <div
-          className="pointer-events-none fixed inset-x-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-50 mx-auto max-w-md rounded-2xl border border-[#1a4a3a]/15 bg-[#1a4a3a] px-4 py-3 text-center text-sm font-medium leading-snug text-white shadow-lg"
+          className="pointer-events-none fixed inset-x-4 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-50 mx-auto max-w-md rounded-2xl border border-[#1a4a3a]/15 bg-[#1a4a3a] px-4 py-3 text-center text-sm font-medium leading-snug text-white shadow-lg"
           role="status"
           aria-live="polite"
         >
@@ -158,10 +162,10 @@ export default function BottomNav() {
       ) : null}
 
       <nav
-        className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-5 pb-[max(0.85rem,env(safe-area-inset-bottom))]"
+        className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-5 pb-[max(0.65rem,env(safe-area-inset-bottom))]"
         aria-label="Navegação principal"
       >
-        <div className="pointer-events-auto flex w-full max-w-md items-center justify-between gap-1 rounded-[32px] border border-[#dce8e3]/90 bg-white/84 px-2 py-2 shadow-[0_-1px_0_rgba(255,255,255,0.92),0_10px_30px_rgba(12,30,25,0.11),0_2px_10px_rgba(12,30,25,0.06)] backdrop-blur-2xl backdrop-saturate-150">
+        <div className="pointer-events-auto flex w-full max-w-md items-center justify-between gap-0.5 rounded-[26px] bg-white/94 px-1.5 py-1.5 shadow-[0_8px_24px_rgba(12,30,25,0.1)] ring-1 ring-[#dce8e3]/75 backdrop-blur-xl backdrop-saturate-150">
           {items.map(({ href, label, Icon }) => {
             const active = resolveBottomNavTab(pathname).root === href;
             const blocked = offlineLimited && !isOfflineNavHrefAllowed(href);
@@ -176,10 +180,10 @@ export default function BottomNav() {
                   aria-disabled="true"
                   className={navItemClass(active, true)}
                 >
-                  <span className={iconWrapClass(active, true)}>
-                    <Icon active={active} />
+                  <Icon active={active} />
+                  <span className="text-[11px] font-semibold leading-none tracking-wide">
+                    {label}
                   </span>
-                  <span className="text-[12px] font-semibold leading-tight">{label}</span>
                 </button>
               );
             }
@@ -196,22 +200,14 @@ export default function BottomNav() {
                 onMouseEnter={() => prefetchRoute(href)}
                 onFocus={() => prefetchRoute(href)}
               >
-                <span className={iconWrapClass(active, false)}>
-                  <Icon active={active} />
-                </span>
+                <Icon active={active} />
                 <span
-                  className={`text-[12px] font-semibold leading-tight transition-colors ${
+                  className={`text-[11px] font-semibold leading-none tracking-wide transition-colors ${
                     active ? "text-[#1a4a3a]" : "text-[#6f837d]"
                   }`}
                 >
                   {label}
                 </span>
-                <span
-                  aria-hidden
-                  className={`h-0.5 rounded-full bg-[#1a4a3a] transition-all duration-200 ${
-                    active ? "w-6 opacity-80" : "w-2 opacity-0"
-                  }`}
-                />
               </Link>
             );
           })}
