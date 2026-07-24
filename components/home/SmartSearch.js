@@ -29,6 +29,14 @@ function IconMic({ className = "h-4 w-4" }) {
   );
 }
 
+function IconSparkle({ className = "h-3.5 w-3.5" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M12 2l1.6 5.2L19 9l-5.4 1.8L12 16l-1.6-5.2L5 9l5.4-1.8L12 2zm7 11l.9 2.9L23 17l-3.1.9L19 21l-.9-3.1L15 17l3.1-.9L19 13zM5 14l.8 2.5L8 18l-2.2.7L5 21l-.8-2.3L2 18l2.2-.5L5 14z" />
+    </svg>
+  );
+}
+
 const QuickChip = memo(function QuickChip({ chip, onClick }) {
   return (
     <button type="button" onClick={() => onClick(chip)} className={HOME_CHIP_CLASS}>
@@ -79,18 +87,17 @@ function SmartSearch({
 
   const hasQuery = termoBusca.trim().length > 0;
   const active = focused || searchMode || voiceListening;
-
   const showChipRow = showChips && !searchMode && !voiceListening;
 
   return (
-    <section className="home-smart-search-section relative mb-6 mt-1">
+    <section className="home-smart-search-section relative mb-5 mt-0.5">
       <form ref={searchContainerRef} onSubmit={onSubmit}>
         <div
-          className={`home-ai-search-surface ${HOME_SURFACE_CLASS} transition-shadow duration-300 ease-out ${
+          className={`home-ai-search-surface ${HOME_SURFACE_CLASS} transition-shadow duration-300 ease-out motion-reduce:transition-none ${
             active ? "home-ai-search-active" : "shadow-none ring-[#e8eeee]"
           } ${voiceListening ? "home-ai-search-listening" : ""}`}
         >
-          <div className="home-ai-search-input-row flex items-center gap-2.5 px-4 py-3.5 sm:gap-3">
+          <div className="home-ai-search-input-row flex items-center gap-2 px-3 py-2.5 sm:gap-2.5 sm:px-3.5">
             {voiceSupported ? (
               <button
                 type="button"
@@ -102,27 +109,37 @@ function SmartSearch({
                 }}
                 aria-label={voiceListening ? "Parar de ouvir" : "Buscar por voz"}
                 aria-pressed={voiceListening}
-                className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition-all duration-200 active:scale-95 ${
+                className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all duration-200 active:scale-95 ${
                   voiceListening
-                    ? "bg-[#1a4a3a] text-white shadow-[0_6px_20px_rgba(26,74,58,0.32)]"
+                    ? "bg-[#1a4a3a] text-white shadow-[0_4px_14px_rgba(26,74,58,0.28)]"
                     : active
-                      ? "bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54] text-white shadow-[0_4px_14px_rgba(26,74,58,0.35)]"
+                      ? "bg-[#1a4a3a] text-white"
                       : "bg-[#eef6f2] text-[#1a4a3a]"
                 }`}
               >
                 {voiceListening && (
-                  <span className="voice-pulse absolute inset-0 rounded-2xl" aria-hidden />
+                  <span className="voice-pulse absolute inset-0 rounded-xl" aria-hidden />
                 )}
-                <IconMic className="relative z-[1] h-[18px] w-[18px]" />
+                <IconMic className="relative z-[1] h-4 w-4" />
               </button>
-            ) : null}
+            ) : (
+              <span
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#eef6f2] text-[#1a4a3a]"
+                aria-hidden
+              >
+                <IconSparkle className="h-4 w-4" />
+              </span>
+            )}
 
             <div className="relative min-w-0 flex-1">
               <label htmlFor="smart-search-input" className="sr-only">
-                Busca inteligente com IA
+                Pergunte ao Guia
               </label>
-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#1a4a3a]/50">
-                {voiceListening ? "Ouvindo…" : "Pergunte à IA"}
+              <p className="flex items-center gap-1 text-[11px] font-semibold text-[#1a4a3a]/70">
+                {voiceSupported ? (
+                  <IconSparkle className="h-3 w-3 shrink-0 text-[#1a4a3a]/55" />
+                ) : null}
+                {voiceListening ? "Ouvindo…" : "Pergunte ao Guia"}
               </p>
               <input
                 id="smart-search-input"
@@ -141,7 +158,7 @@ function SmartSearch({
                     ? "Fale o que você quer descobrir…"
                     : "O que você quer descobrir hoje?"
                 }
-                className={`mt-0.5 w-full appearance-none border-0 bg-transparent text-[16px] leading-snug text-[#1a2e28] shadow-none outline-none ring-0 placeholder:text-[#9aa8a3] focus:outline-none focus-visible:outline-none ${
+                className={`mt-0.5 w-full appearance-none border-0 bg-transparent text-[15px] leading-snug text-[#1a2e28] shadow-none outline-none ring-0 placeholder:text-[#9aa8a3] focus:outline-none focus-visible:outline-none ${
                   searchMode ? "pr-8" : ""
                 }`}
               />
@@ -161,16 +178,16 @@ function SmartSearch({
               <button
                 type="submit"
                 aria-label="Buscar"
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#1a4a3a] text-white shadow-[0_6px_20px_rgba(26,74,58,0.32)] transition-all duration-200 active:scale-95"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1a4a3a] text-white shadow-[0_4px_14px_rgba(26,74,58,0.28)] transition-all duration-200 active:scale-95"
               >
-                <IconSend className="h-[17px] w-[17px] -rotate-45" />
+                <IconSend className="h-4 w-4 -rotate-45" />
               </button>
             ) : null}
           </div>
 
           {voiceError ? (
             <p
-              className="border-t border-[#f3e8d8] bg-[#fff8ef] px-4 py-2.5 text-xs leading-snug text-[#9a6700]"
+              className="border-t border-[#f3e8d8] bg-[#fff8ef] px-3.5 py-2 text-xs leading-snug text-[#9a6700]"
               role="status"
             >
               {voiceError}
@@ -178,12 +195,12 @@ function SmartSearch({
           ) : null}
 
           {showChipRow && (
-            <div className="home-ai-chips-wrap border-t border-[#eef2f0] px-4 pt-3 pb-4">
-              <div className="home-ai-chips-row flex gap-2.5 overflow-x-auto scrollbar-hide snap-x snap-mandatory">
+            <div className="home-ai-chips-wrap border-t border-[#eef2f0] px-3 pb-3 pt-2.5">
+              <div className="home-ai-chips-row flex gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory">
                 {QUICK_SEARCH_CHIPS.map((chip) => (
                   <QuickChip key={chip.id} chip={chip} onClick={handleChip} />
                 ))}
-                <span className="w-5 shrink-0 snap-end" aria-hidden />
+                <span className="w-3 shrink-0 snap-end" aria-hidden />
               </div>
             </div>
           )}
