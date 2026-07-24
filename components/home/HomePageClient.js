@@ -19,6 +19,7 @@ import SearchBrowsePanel from "@/components/home/SearchBrowsePanel";
 import SearchResultsPanel from "@/components/home/SearchResultsPanel";
 import SearchStatusFilter from "@/components/home/SearchStatusFilter";
 import SmartSearch from "@/components/home/SmartSearch";
+import PrefeituraSupportLine from "@/components/PrefeituraSupportLine";
 import { useStickyShellRef } from "@/hooks/useHomeHeaderScroll";
 import { useHomePrimaryFeed } from "@/hooks/useHomePrimaryFeed";
 import { useUserPosition } from "@/hooks/useUserPosition";
@@ -140,7 +141,6 @@ function Home({ initialHomeData = null }) {
   const [lugaresParceiros, setLugaresParceiros] = useState(initialHomeData?.lugaresParceiros ?? []);
   const [temperaturaClima, setTemperaturaClima] = useState(null);
   const [climaEmoji, setClimaEmoji] = useState(null);
-  const [climaCondition, setClimaCondition] = useState(null);
   const [homeLoading, setHomeLoading] = useState(!initialHomeData?.lugaresAtivos?.length);
   const [pertoLoading, setPertoLoading] = useState(!initialHomeData?.lugaresAtivos?.length);
   const [sectionErrors, setSectionErrors] = useState({
@@ -341,12 +341,10 @@ function Home({ initialHomeData = null }) {
           const temp = Number(climaResult.value?.temperature);
           setTemperaturaClima(Number.isFinite(temp) ? temp : null);
           setClimaEmoji(climaResult.value?.weatherEmoji ?? null);
-          setClimaCondition(climaResult.value?.condition ?? null);
           setSectionErrors((prev) => ({ ...prev, clima: false }));
         } else {
           setTemperaturaClima(null);
           setClimaEmoji(null);
-          setClimaCondition(null);
           setSectionErrors((prev) => ({ ...prev, clima: true }));
         }
       } finally {
@@ -775,7 +773,7 @@ function Home({ initialHomeData = null }) {
 
   return (
     <div className="min-h-screen bg-[#f0f4f3] text-[#1a2e28]">
-      <div className="mx-auto max-w-md px-4 pb-32">
+      <div className="mx-auto max-w-md px-4 pb-[calc(6.5rem+env(safe-area-inset-bottom))]">
         <div className="home-context-atmosphere -mx-4">
           <div className="home-context-atmosphere__mesh" aria-hidden="true" />
 
@@ -785,7 +783,6 @@ function Home({ initialHomeData = null }) {
               avatarUrl={avatarUrl}
               temperatura={temperaturaClima}
               weatherEmoji={climaEmoji}
-              weatherCondition={climaCondition}
               climaLoading={!homeLoading && pertoLoading}
               climaErro={!homeLoading && sectionErrors.clima}
               getUserInitial={getUserInitial}
@@ -793,7 +790,7 @@ function Home({ initialHomeData = null }) {
             <SupabaseConfigAlert />
           </div>
 
-          <div ref={stickyShellRef} className="home-header-shell relative z-[1] px-4 pb-4 pt-2">
+          <div ref={stickyShellRef} className="home-header-shell relative z-[1] px-4 pb-3 pt-1.5">
             <SmartSearch
               searchContainerRef={searchContainerRef}
               searchInputRef={searchInputRef}
@@ -884,7 +881,7 @@ function Home({ initialHomeData = null }) {
               {sectionErrors.hero ? (
                 <SectionUnavailable title="O que fazer agora" />
               ) : (
-                <OQueFazerAgora rota={heroRota} temperatura={temperaturaClima} />
+                <OQueFazerAgora rota={heroRota} />
               )}
               <BaleiasTemporadaCard />
               <ParceirosCarrossel
@@ -925,6 +922,14 @@ function Home({ initialHomeData = null }) {
                   onFavoritar={handleFavoritar}
                 />
               )}
+
+              <footer className="mt-4 border-t border-[#e4ece9] pt-6 pb-3 text-center">
+                <PrefeituraSupportLine
+                  variant="footer"
+                  showLink
+                  className="[&_p]:text-[14px] [&_p]:font-semibold [&_p]:text-[#1a4a3a]/80"
+                />
+              </footer>
             </>
           )}
 

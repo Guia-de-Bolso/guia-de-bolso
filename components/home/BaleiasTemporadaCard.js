@@ -21,11 +21,11 @@ export default function BaleiasTemporadaCard() {
 
   return (
     <section
-      className="mb-10 home-reveal"
+      className="mb-8 home-reveal"
       style={{ animationDelay: "60ms" }}
       aria-labelledby="baleias-temporada-title"
     >
-      <HomeSectionHeader eyebrow="Natureza · temporada" title="🐋 Onde tem baleia?" />
+      <HomeSectionHeader eyebrow="Natureza · temporada" title="Onde tem baleia?" />
 
       <div className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#0c2f4a] via-[#134a5c] to-[#1a4a3a] p-5 text-white shadow-[0_12px_40px_rgba(12,47,74,0.22)] ring-1 ring-white/10">
         <span

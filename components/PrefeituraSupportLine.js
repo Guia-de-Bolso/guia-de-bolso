@@ -9,10 +9,10 @@ const VARIANT_CLASS = {
   inline: "mt-1 text-[10px] font-semibold leading-snug text-[#1a4a3a]/55",
   onboarding:
     "text-xs font-bold uppercase tracking-[0.18em] leading-snug text-[#b8e6d4]",
-  footer: "text-[10px] leading-relaxed text-[#9aa8a3]",
+  footer: "text-[13px] font-medium leading-relaxed text-[#5a6b66]",
 };
 
-const FOOTER_LINK_CLASS = "text-[10px] leading-relaxed text-[#9aa8a3]";
+const FOOTER_LINK_CLASS = "text-[12px] leading-relaxed text-[#5a6b66]";
 
 /**
  * Linha de apoio institucional da Prefeitura Municipal de Imbituba.
