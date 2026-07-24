@@ -8,7 +8,7 @@ import AtrativoMapsCta from "@/components/atrativos/AtrativoMapsCta";
 import AtrativoMetrics from "@/components/atrativos/AtrativoMetrics";
 import AtrativoSobreSection from "@/components/atrativos/AtrativoSobreSection";
 import AtrativoDicasSection from "@/components/atrativos/AtrativoDicasSection";
-import AtrativoTimeline from "@/components/atrativos/AtrativoTimeline";
+import AtrativoPercursoSection from "@/components/atrativos/AtrativoPercursoSection";
 import {
   DESTAQUE_CHIP_PREMIUM_CLASS,
   DETALHE_CARD_OVERLAP_CLASS,
@@ -248,7 +248,7 @@ export default function AtrativoDetalhePremium({
 
           <AtrativoSobreSection descricao={descricao} infoCards={infoCards} />
 
-          <AtrativoTimeline pontos={pontos} />
+          <AtrativoPercursoSection rotaId={rotaId} nome={nome} pontos={pontos} />
 
           <AtrativoDicasSection dicas={dicas} />
         </main>
