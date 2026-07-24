@@ -4,14 +4,6 @@ import { memo, useCallback, useState } from "react";
 import { HOME_CHIP_CLASS, HOME_SURFACE_CLASS } from "@/components/home/homeTokens";
 import { QUICK_SEARCH_CHIPS } from "@/lib/homeContext";
 
-function IconSparkle({ className = "h-4 w-4" }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M12 2l1.2 4.2L17.4 7.4 13.2 8.6 12 12.8 10.8 8.6 6.6 7.4 10.8 4.2 12 2zm7 9l.9 3.1 3.1.9-3.1.9-.9 3.1-.9-3.1-3.1-.9 3.1-.9.9-3.1zm-14 0l.7 2.4 2.4.7-2.4.7-.7 2.4-.7-2.4-2.4-.7 2.4-.7.7-2.4z" />
-    </svg>
-  );
-}
-
 function IconSend({ className = "h-4 w-4" }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -99,21 +91,31 @@ function SmartSearch({
           } ${voiceListening ? "home-ai-search-listening" : ""}`}
         >
           <div className="home-ai-search-input-row flex items-center gap-2.5 px-4 py-3.5 sm:gap-3">
-            <div
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition-all duration-300 ${
-                voiceListening
-                  ? "bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54] text-white shadow-[0_4px_14px_rgba(26,74,58,0.35)]"
-                  : active
-                    ? "bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54] text-white shadow-[0_4px_14px_rgba(26,74,58,0.35)]"
-                    : "bg-[#eef6f2] text-[#1a4a3a]"
-              }`}
-            >
-              {voiceListening ? (
-                <IconMic className="h-[18px] w-[18px]" />
-              ) : (
-                <IconSparkle className="h-[18px] w-[18px]" />
-              )}
-            </div>
+            {voiceSupported ? (
+              <button
+                type="button"
+                data-search-interactive="true"
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  onVoiceToggle?.(event);
+                }}
+                aria-label={voiceListening ? "Parar de ouvir" : "Buscar por voz"}
+                aria-pressed={voiceListening}
+                className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition-all duration-200 active:scale-95 ${
+                  voiceListening
+                    ? "bg-[#1a4a3a] text-white shadow-[0_6px_20px_rgba(26,74,58,0.32)]"
+                    : active
+                      ? "bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54] text-white shadow-[0_4px_14px_rgba(26,74,58,0.35)]"
+                      : "bg-[#eef6f2] text-[#1a4a3a]"
+                }`}
+              >
+                {voiceListening && (
+                  <span className="voice-pulse absolute inset-0 rounded-2xl" aria-hidden />
+                )}
+                <IconMic className="relative z-[1] h-[18px] w-[18px]" />
+              </button>
+            ) : null}
 
             <div className="relative min-w-0 flex-1">
               <label htmlFor="smart-search-input" className="sr-only">
@@ -155,41 +157,15 @@ function SmartSearch({
               )}
             </div>
 
-            {voiceSupported && (
+            {hasQuery ? (
               <button
-                type="button"
-                data-search-interactive="true"
-                onClick={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  onVoiceToggle?.(event);
-                }}
-                aria-label={voiceListening ? "Parar de ouvir" : "Buscar por voz"}
-                aria-pressed={voiceListening}
-                className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition-all duration-200 active:scale-95 ${
-                  voiceListening
-                    ? "bg-[#1a4a3a] text-white shadow-[0_6px_20px_rgba(26,74,58,0.32)]"
-                    : "bg-[#e8f0ec] text-[#1a4a3a]"
-                }`}
+                type="submit"
+                aria-label="Buscar"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#1a4a3a] text-white shadow-[0_6px_20px_rgba(26,74,58,0.32)] transition-all duration-200 active:scale-95"
               >
-                {voiceListening && (
-                  <span className="voice-pulse absolute inset-0 rounded-2xl" aria-hidden />
-                )}
-                <IconMic className="relative z-[1] h-[17px] w-[17px]" />
+                <IconSend className="h-[17px] w-[17px] -rotate-45" />
               </button>
-            )}
-
-            <button
-              type="submit"
-              aria-label="Buscar"
-              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl transition-all duration-200 active:scale-95 ${
-                hasQuery || active
-                  ? "bg-[#1a4a3a] text-white shadow-[0_6px_20px_rgba(26,74,58,0.32)]"
-                  : "bg-[#e8f0ec] text-[#9aa8a3]"
-              }`}
-            >
-              <IconSend className="h-[17px] w-[17px] -rotate-45" />
-            </button>
+            ) : null}
           </div>
 
           {voiceError ? (
