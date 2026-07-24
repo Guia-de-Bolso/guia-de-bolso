@@ -49,7 +49,7 @@ function AtalhoCard({ href, titulo, descricao, emoji, destaque = false }) {
 }
 
 /**
- * Atalhos secundários: rotas e busca IA.
+ * Atalhos secundários na Explorar.
  */
 export default function ExplorarAtalhos() {
   return (
@@ -61,12 +61,6 @@ export default function ExplorarAtalhos() {
         titulo="Atrativos guiados"
         descricao="Trilhas e percursos com etapas e dicas"
         destaque
-      />
-      <AtalhoCard
-        href="/?busca=1"
-        emoji="✨"
-        titulo="Busca inteligente"
-        descricao='Ex: "restaurante com vista" ou "praia tranquila"'
       />
     </section>
   );
