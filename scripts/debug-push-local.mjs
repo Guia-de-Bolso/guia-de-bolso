@@ -57,8 +57,8 @@ const app = initializeApp({
 const result = await getMessaging(app).sendEachForMulticast({
   tokens: rows.map((row) => row.token),
   notification: {
-    title: "Teste local Guia de Bolso",
-    body: "Envio direto do computador — push está ok",
+    title: "Teste local — Guia de Bolso",
+    body: "Envio direto do computador. Se chegou, o push do app está ok.",
   },
   android: { priority: "high" },
   apns: { payload: { aps: { sound: "default" } } },

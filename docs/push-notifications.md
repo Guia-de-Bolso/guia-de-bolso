@@ -125,8 +125,8 @@ curl -X POST https://app.guiadebolso.app/api/admin/push/send \
   -H "Content-Type: application/json" \
   -H "Cookie: <cookie da sessão admin no browser>" \
   -d '{
-    "title": "Teste Guia de Bolso",
-    "body": "Se você recebeu, push está ok",
+    "title": "Olá do Guia de Bolso",
+    "body": "Se você recebeu isto, as notificações do app estão ok. Toque para abrir.",
     "url": "/",
     "userIds": ["<uuid-do-usuario>"]
   }'
@@ -236,9 +236,12 @@ após o CRUD admin; se a chamada falhar, o cron diário recupera o evento. As
 campanhas agendadas rodam às 12:00 UTC (9h em `America/Sao_Paulo`) em
 `GET /api/cron/push-automations`.
 
-Antes do deploy, aplique
-`supabase/migrations/20260721190000_push_campaigns.sql` no SQL Editor. A
-`event_key` única e o claim transacional impedem notificações duplicadas.
+Antes do deploy, aplique no SQL Editor (nessa ordem, se ainda não rodou):
+
+1. `supabase/migrations/20260721190000_push_campaigns.sql`
+2. `supabase/migrations/20260722120000_push_copy_ptbr.sql` (copy pt-BR das campanhas de local/parceiro)
+
+A `event_key` única e o claim transacional impedem notificações duplicadas.
 
 ## Fluxo no app
 
@@ -255,8 +258,8 @@ Antes do deploy, aplique
 
 ```json
 {
-  "title": "Destaque da semana",
-  "body": "Confira o novo parceiro no guia",
+  "title": "✨ Destaque da semana no app",
+  "body": "Esta semana o destaque é Praia da Vila. Toque e confira no Guia de Bolso.",
   "url": "/lugares/uuid-do-lugar",
   "userIds": ["uuid-usuario-1", "uuid-usuario-2"]
 }

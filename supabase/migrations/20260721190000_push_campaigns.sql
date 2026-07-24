@@ -97,10 +97,10 @@ BEGIN
       'novo_local:' || NEW.id::text,
       'novo_local',
       'all',
-      'Novo no Guia: ' || left(NEW.nome, 100),
+      '📍 Novidade no app',
       left(
-        COALESCE(NULLIF(NEW.categoria, ''), 'Um novo local')
-          || ' acabou de chegar ao Guia de Bolso. Conheça agora.',
+        COALESCE(NULLIF(NEW.nome, ''), 'Um novo lugar')
+          || ' acabou de entrar no Guia de Bolso. Toque para conhecer.',
         500
       ),
       '/lugares/' || NEW.id::text
@@ -122,7 +122,11 @@ BEGIN
       'novo_parceiro',
       'all',
       '🤝 Novo Parceiro Oficial',
-      left(NEW.nome || ' agora é parceiro do Guia de Bolso. Confira!', 500),
+      left(
+        COALESCE(NULLIF(NEW.nome, ''), 'Um estabelecimento')
+          || ' agora é Parceiro Oficial. Abra o app e conheça.',
+        500
+      ),
       '/lugares/' || NEW.id::text
     )
     ON CONFLICT (event_key) DO NOTHING;
