@@ -790,7 +790,7 @@ function Home({ initialHomeData = null }) {
             <SupabaseConfigAlert />
           </div>
 
-          <div ref={stickyShellRef} className="home-header-shell relative z-[1] px-4 pb-3 pt-1.5">
+          <div ref={stickyShellRef} className="home-header-shell relative z-[1] px-4 pb-2 pt-1.5">
             <SmartSearch
               searchContainerRef={searchContainerRef}
               searchInputRef={searchInputRef}

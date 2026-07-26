@@ -37,7 +37,7 @@ export default function HomePageSkeleton() {
 
         <div className="animate-pulse space-y-8" aria-hidden>
           <section>
-            <div className="relative min-h-[340px] overflow-hidden rounded-[28px] bg-[#e8eeee] ring-1 ring-[#e8eeee]">
+            <div className="relative min-h-[372px] overflow-hidden rounded-[28px] bg-[#e8eeee] ring-1 ring-[#e8eeee]">
               <div className="absolute inset-0 bg-gradient-to-br from-[#d8e8e2] to-[#eef2f0]" />
               <div className="absolute inset-x-0 bottom-0 space-y-3 p-5">
                 <div className="h-7 w-2/3 rounded-xl bg-white/40" />

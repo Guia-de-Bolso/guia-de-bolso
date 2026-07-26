@@ -38,7 +38,7 @@ export default function OQueFazerAgora({ rota }) {
       </p>
       <PrefetchLink
         href={href}
-        className="group relative block min-h-[340px] overflow-hidden rounded-[28px] shadow-[0_14px_40px_rgba(11,31,26,0.2)] ring-1 ring-black/8 transition-[transform,box-shadow] duration-300 hover:shadow-[0_18px_48px_rgba(11,31,26,0.26)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a4a3a]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#f0f4f3] active:scale-[0.995] motion-reduce:transition-none motion-reduce:active:scale-100"
+        className="group relative block min-h-[372px] overflow-hidden rounded-[28px] shadow-[0_14px_40px_rgba(11,31,26,0.2)] ring-1 ring-black/8 transition-[transform,box-shadow] duration-300 hover:shadow-[0_18px_48px_rgba(11,31,26,0.26)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a4a3a]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#f0f4f3] active:scale-[0.995] motion-reduce:transition-none motion-reduce:active:scale-100"
         aria-label={`${nome}. Ver detalhes`}
       >
         <RemotePhoto
@@ -100,7 +100,7 @@ function HeroSkeleton() {
       <p id="sugestao-momento-title" className={`${HOME_SECTION_EYEBROW_CLASS} mb-3`}>
         Sugestão do momento
       </p>
-      <div className="relative min-h-[340px] overflow-hidden rounded-[28px] bg-[#e8eeee] shadow-[0_12px_40px_rgba(26,46,40,0.08)] ring-1 ring-[#e8eeee]">
+      <div className="relative min-h-[372px] overflow-hidden rounded-[28px] bg-[#e8eeee] shadow-[0_12px_40px_rgba(26,46,40,0.08)] ring-1 ring-[#e8eeee]">
         <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-[#d8e8e2] to-[#eef2f0]" />
         <div className="absolute inset-x-0 bottom-0 space-y-3 p-5">
           <div className="h-7 w-2/3 rounded-xl bg-white/40" />

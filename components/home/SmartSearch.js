@@ -90,7 +90,7 @@ function SmartSearch({
   const showChipRow = showChips && !searchMode && !voiceListening;
 
   return (
-    <section className="home-smart-search-section relative mb-5 mt-0.5">
+    <section className="home-smart-search-section relative mb-2.5 mt-0.5">
       <form ref={searchContainerRef} onSubmit={onSubmit}>
         <div
           className={`home-ai-search-surface ${HOME_SURFACE_CLASS} transition-shadow duration-300 ease-out motion-reduce:transition-none ${

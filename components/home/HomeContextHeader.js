@@ -46,9 +46,9 @@ export default function HomeContextHeader({
     <header className="pb-2">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2.5">
-            <Logo size="md" variant="default" />
-            <p className="min-w-0 truncate text-[12px] font-bold uppercase tracking-[0.12em] text-[#1a4a3a]/75">
+          <div className="flex items-center gap-3">
+            <Logo size="md" className="!h-11 w-auto" priority />
+            <p className="min-w-0 flex-1 self-center truncate text-[12px] font-bold uppercase leading-none tracking-[0.14em] text-[#1a4a3a]/80">
               Guia de Bolso · Imbituba
             </p>
           </div>
