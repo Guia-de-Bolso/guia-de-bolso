@@ -162,7 +162,7 @@ export default function BottomNav() {
       ) : null}
 
       <nav
-        className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-5 pb-[max(0.65rem,env(safe-area-inset-bottom))]"
+        className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-5 pb-[max(0.65rem,env(safe-area-inset-bottom))] app-bottom-nav"
         aria-label="Navegação principal"
       >
         <div className="pointer-events-auto flex w-full max-w-md items-center justify-between gap-0.5 rounded-[26px] bg-white/94 px-1.5 py-1.5 shadow-[0_8px_24px_rgba(12,30,25,0.1)] ring-1 ring-[#dce8e3]/75 backdrop-blur-xl backdrop-saturate-150">

@@ -367,6 +367,12 @@ html.capacitor-native .app-sticky-top-safe {
   opacity: 1;
 }
 
+/* Modo guia: esconde a bottom nav para experiência imersiva. */
+html.guia-percurso-ativo .app-bottom-nav {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .home-context-atmosphere__mesh {
     animation: none;

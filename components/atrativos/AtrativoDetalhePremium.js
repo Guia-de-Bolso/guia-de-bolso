@@ -7,7 +7,6 @@ import GalleryHeroAirbnb from "@/components/shared/GalleryHeroAirbnb";
 import AtrativoMapsCta from "@/components/atrativos/AtrativoMapsCta";
 import AtrativoMetrics from "@/components/atrativos/AtrativoMetrics";
 import AtrativoSobreSection from "@/components/atrativos/AtrativoSobreSection";
-import AtrativoDicasSection from "@/components/atrativos/AtrativoDicasSection";
 import AtrativoPercursoSection from "@/components/atrativos/AtrativoPercursoSection";
 import {
   DESTAQUE_CHIP_PREMIUM_CLASS,
@@ -64,6 +63,7 @@ export default function AtrativoDetalhePremium({
   const [isFavorito, setIsFavorito] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toast, setToast] = useState("");
+  const [guiaOpen, setGuiaOpen] = useState(false);
   const favoritoSyncGuardRef = useRef(createFavoritosSyncGuard());
   const { isOnline, ready: networkReady } = useNetworkStatus();
 
@@ -183,14 +183,16 @@ export default function AtrativoDetalhePremium({
         </div>
       )}
 
-      <DetalheStickyHeader
-        title={nome}
-        backHref={backHref}
-        isFavorito={isFavorito}
-        onFavoritar={handleFavoritar}
-        onShare={handleShare}
-        mapsTipCategoria={categoria?.nome}
-      />
+      {!guiaOpen && (
+        <DetalheStickyHeader
+          title={nome}
+          backHref={backHref}
+          isFavorito={isFavorito}
+          onFavoritar={handleFavoritar}
+          onShare={handleShare}
+          mapsTipCategoria={categoria?.nome}
+        />
+      )}
 
       <div className="mx-auto max-w-md">
         <div className="detalhe-hero-sticky sticky top-0 z-0">
@@ -248,9 +250,13 @@ export default function AtrativoDetalhePremium({
 
           <AtrativoSobreSection descricao={descricao} infoCards={infoCards} />
 
-          <AtrativoPercursoSection rotaId={rotaId} nome={nome} pontos={pontos} />
-
-          <AtrativoDicasSection dicas={dicas} />
+          <AtrativoPercursoSection
+            rotaId={rotaId}
+            nome={nome}
+            pontos={pontos}
+            dicas={dicas}
+            onGuiaOpenChange={setGuiaOpen}
+          />
         </main>
       </div>
 

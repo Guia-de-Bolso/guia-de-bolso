@@ -1,20 +1,26 @@
 "use client";
 
-import { useState } from "react";
-import AtrativoMapaIlustrado from "@/components/atrativos/AtrativoMapaIlustrado";
+import { useEffect, useState } from "react";
 import AtrativoModoGuia from "@/components/atrativos/AtrativoModoGuia";
-import AtrativoTimeline from "@/components/atrativos/AtrativoTimeline";
 import { ATRATIVO_SECTION_TITLE_CLASS } from "@/components/atrativos/atrativoDetalheTokens";
 import { useAtrativoPercursoProgresso } from "@/hooks/useAtrativoPercursoProgresso";
 
 /**
- * Percurso interativo: mapa ilustrado, checklist e modo guia.
+ * Entrada do percurso interativo — CTA + progresso; mapa, pontos e dicas só no modo guia.
  * @param {object} props
  * @param {string|number} props.rotaId
  * @param {string} props.nome
  * @param {Array<object>} props.pontos
+ * @param {Array<{ id?: string, texto?: string, ordem?: number }>} [props.dicas]
+ * @param {(open: boolean) => void} [props.onGuiaOpenChange]
  */
-export default function AtrativoPercursoSection({ rotaId, nome, pontos = [] }) {
+export default function AtrativoPercursoSection({
+  rotaId,
+  nome,
+  pontos = [],
+  dicas = [],
+  onGuiaOpenChange,
+}) {
   const [guiaOpen, setGuiaOpen] = useState(false);
   const [guiaIndex, setGuiaIndex] = useState(0);
   const [guiaSession, setGuiaSession] = useState(0);
@@ -27,9 +33,13 @@ export default function AtrativoPercursoSection({ rotaId, nome, pontos = [] }) {
     isComplete,
     isPontoDone,
     setPontoDone,
-    togglePonto,
     resetProgresso,
   } = useAtrativoPercursoProgresso(rotaId, pontos);
+
+  useEffect(() => {
+    onGuiaOpenChange?.(guiaOpen);
+    return () => onGuiaOpenChange?.(false);
+  }, [guiaOpen, onGuiaOpenChange]);
 
   if (!pontos.length) return null;
 
@@ -49,7 +59,7 @@ export default function AtrativoPercursoSection({ rotaId, nome, pontos = [] }) {
     <section className="mt-10">
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
-          <h2 className={ATRATIVO_SECTION_TITLE_CLASS}>Seu percurso</h2>
+          <h2 className={ATRATIVO_SECTION_TITLE_CLASS}>Percurso guiado</h2>
           <p className="mt-1 text-sm text-[#5a6b66]">
             {isComplete
               ? "Percurso concluído — parabéns!"
@@ -81,32 +91,16 @@ export default function AtrativoPercursoSection({ rotaId, nome, pontos = [] }) {
       >
         <span className="text-[15px] font-bold tracking-wide">{ctaLabel}</span>
         <span className="text-[11px] font-medium text-white/70">
-          Um ponto por vez · progresso salvo neste aparelho
+          Mapa, pontos e dicas no modo interativo
         </span>
       </button>
-
-      <div className="mt-5">
-        <AtrativoMapaIlustrado
-          pontos={pontos}
-          isPontoDone={isPontoDone}
-          currentIndex={isComplete ? -1 : proximoIndex}
-          onPinClick={openGuia}
-        />
-      </div>
-
-      <AtrativoTimeline
-        pontos={pontos}
-        isPontoDone={isPontoDone}
-        onTogglePonto={togglePonto}
-        currentIndex={isComplete ? -1 : proximoIndex}
-        onOpenGuia={openGuia}
-      />
 
       <AtrativoModoGuia
         key={guiaSession}
         isOpen={guiaOpen}
         onClose={() => setGuiaOpen(false)}
         pontos={pontos}
+        dicas={dicas}
         initialIndex={guiaIndex}
         isPontoDone={isPontoDone}
         setPontoDone={setPontoDone}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getDetalhesFromPonto } from "@/lib/atrativoPontos";
 import { useBottomSheetBodyLock } from "@/hooks/useBottomSheetBodyLock";
 
@@ -21,6 +21,7 @@ function clampIndex(initialIndex, length) {
  * @param {boolean} props.isOpen
  * @param {() => void} props.onClose
  * @param {Array<object>} props.pontos
+ * @param {Array<{ id?: string, texto?: string, ordem?: number }>} [props.dicas]
  * @param {number} props.initialIndex
  * @param {(pontoId: string) => boolean} props.isPontoDone
  * @param {(pontoId: string, done: boolean) => void} props.setPontoDone
@@ -30,6 +31,7 @@ export default function AtrativoModoGuia({
   isOpen,
   onClose,
   pontos = [],
+  dicas = [],
   initialIndex = 0,
   isPontoDone,
   setPontoDone,
@@ -38,6 +40,14 @@ export default function AtrativoModoGuia({
   const [index, setIndex] = useState(() => clampIndex(initialIndex, pontos.length));
 
   useBottomSheetBodyLock(isOpen, onClose);
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    document.documentElement.classList.add("guia-percurso-ativo");
+    return () => {
+      document.documentElement.classList.remove("guia-percurso-ativo");
+    };
+  }, [isOpen]);
 
   if (!isOpen || pontos.length === 0) return null;
 
@@ -51,6 +61,7 @@ export default function AtrativoModoGuia({
   const isFirst = safeIndex === 0;
   const isLast = safeIndex === pontos.length - 1;
   const progressLabel = `${safeIndex + 1} de ${pontos.length}`;
+  const dicasValidas = dicas.filter((dica) => dica?.texto?.trim());
 
   function handleMarcarEAvancar() {
     if (pontoId) setPontoDone?.(pontoId, true);
@@ -63,13 +74,13 @@ export default function AtrativoModoGuia({
 
   return (
     <div
-      className="fixed inset-0 z-[80] flex flex-col bg-[#0f2a22] text-white"
+      className="fixed inset-0 z-[100] flex flex-col bg-[#0f2a22] text-white"
       role="dialog"
       aria-modal="true"
       aria-label={`Guia do percurso: ${nomeAtrativo}`}
     >
-      <div className="mx-auto flex h-full w-full max-w-md flex-col">
-        <header className="flex items-center justify-between gap-3 px-5 pb-3 pt-[max(1rem,env(safe-area-inset-top))]">
+      <div className="mx-auto flex h-full w-full max-w-md flex-col px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-[max(1.25rem,env(safe-area-inset-top))]">
+        <header className="flex items-center justify-between gap-3 pb-4">
           <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">
               Modo guia
@@ -85,7 +96,7 @@ export default function AtrativoModoGuia({
           </button>
         </header>
 
-        <div className="px-5">
+        <div className="pb-1">
           <div className="h-1.5 overflow-hidden rounded-full bg-white/15">
             <div
               className="h-full rounded-full bg-[#7dcfb6] transition-[width] duration-300 ease-out"
@@ -95,7 +106,7 @@ export default function AtrativoModoGuia({
           <p className="mt-2 text-xs font-semibold text-white/60">{progressLabel}</p>
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-6">
+        <div className="flex min-h-0 flex-1 flex-col pt-5">
           <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden rounded-[28px] bg-gradient-to-b from-[#1a4a3a] to-[#12352b] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.35)] ring-1 ring-white/10">
             <div
               className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-[#7dcfb6]/15 blur-2xl"
@@ -140,10 +151,31 @@ export default function AtrativoModoGuia({
                   Sem instruções neste ponto — siga para o próximo marco da trilha.
                 </p>
               )}
+
+              {isFirst && dicasValidas.length > 0 ? (
+                <div className="mt-5 rounded-2xl bg-white/8 p-4 ring-1 ring-white/10">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/50">
+                    Dicas do percurso
+                  </p>
+                  <ul className="mt-3 grid list-none gap-2.5 p-0">
+                    {dicasValidas.map((dica, dicaIndex) => (
+                      <li
+                        key={dica.id || `dica-${dicaIndex}`}
+                        className="flex gap-2.5 text-[14px] leading-relaxed text-white/85"
+                      >
+                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/15 text-[10px] font-bold text-[#7dcfb6]">
+                          {dica.ordem || dicaIndex + 1}
+                        </span>
+                        <span>{dica.texto.trim()}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
             </div>
           </div>
 
-          <div className="mt-5 grid gap-2">
+          <div className="mt-5 grid gap-2.5 pb-1">
             <button
               type="button"
               onClick={handleMarcarEAvancar}
@@ -158,7 +190,7 @@ export default function AtrativoModoGuia({
                   : "Estou aqui · próximo"}
             </button>
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2.5">
               <button
                 type="button"
                 disabled={isFirst}
