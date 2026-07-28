@@ -262,7 +262,7 @@ User reviews with moderation.
 | `comentario` | `text` | Optional |
 | `aspectos` | `jsonb` | Selected aspect labels from structured form (default `[]`) |
 | `sugestao_ia` | `text` | Claude pre-moderation hint (`aprovar` / `rejeitar` / `revisar` + reason) |
-| `autor_nome` | `text` | Display name snapshot at insert (public; avoids `perfis` RLS) *(migration: `avaliacoes_autor_snapshot.sql`)* |
+| `autor_nome` | `text` | Display name snapshot at insert: nome → e-mail local → telefone mascarado → Visitante *(migration: `avaliacoes_autor_snapshot.sql`)* |
 | `autor_foto_url` | `text` | Avatar URL snapshot at insert *(same)* |
 | `status` | `text` | `pendente`, `aprovada`, `rejeitada` |
 | `created_at` | `timestamptz` | |

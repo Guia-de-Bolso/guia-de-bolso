@@ -7,6 +7,11 @@ import {
   getAspectosParaLugar,
 } from "@/lib/avaliacaoAspectos";
 import { getNotaEmoji } from "@/lib/avaliacoes";
+import {
+  AUTOR_NOME_MAX_LEN,
+  resolveAutorDisplayName,
+  validateAutorDisplayNameInput,
+} from "@/lib/autorDisplayName";
 import UserErrorAlert from "@/components/UserErrorAlert";
 import { useBottomSheetDrag } from "@/hooks/useBottomSheetDrag";
 import { getLugarPublicPath } from "@/lib/lugarPublicPath";
@@ -41,6 +46,8 @@ export default function AvaliacaoForm({ isOpen, onClose, lugar, onSuccess }) {
   const [nota, setNota] = useState(0);
   const [aspectos, setAspectos] = useState([]);
   const [comentario, setComentario] = useState("");
+  const [nomeExibicao, setNomeExibicao] = useState("");
+  const [carregandoNome, setCarregandoNome] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState("");
   const [limiteAspectosAviso, setLimiteAspectosAviso] = useState(false);
@@ -48,7 +55,9 @@ export default function AvaliacaoForm({ isOpen, onClose, lugar, onSuccess }) {
   const opcoesAspectos = getAspectosParaLugar(lugar);
   const restantes = MAX_COMENTARIO_AVALIACAO - comentario.length;
   const comentarioValido = comentario.trim().length > 0;
-  const podeEnviar = nota >= 1 && comentarioValido && !enviando;
+  const nomeValido = validateAutorDisplayNameInput(nomeExibicao).ok;
+  const podeEnviar =
+    nota >= 1 && comentarioValido && nomeValido && !enviando && !carregandoNome;
 
   const handleDismiss = useCallback(() => {
     if (enviando) return;
@@ -88,10 +97,50 @@ export default function AvaliacaoForm({ isOpen, onClose, lugar, onSuccess }) {
       setNota(0);
       setAspectos([]);
       setComentario("");
+      setNomeExibicao("");
       setErro("");
       setLimiteAspectosAviso(false);
       setEnviando(false);
+      setCarregandoNome(false);
+      return;
     }
+
+    let cancelled = false;
+    setCarregandoNome(true);
+
+    (async () => {
+      const supabase = createClient();
+      const user = await getSessionUser(supabase);
+      if (cancelled) return;
+
+      if (!user) {
+        setNomeExibicao("");
+        setCarregandoNome(false);
+        return;
+      }
+
+      const { data: perfil } = await supabase
+        .from("perfis")
+        .select("nome, email")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (cancelled) return;
+
+      setNomeExibicao(
+        resolveAutorDisplayName({
+          nome: perfil?.nome,
+          email: perfil?.email || user.email,
+          phone: user.phone,
+          user,
+        })
+      );
+      setCarregandoNome(false);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [isOpen]);
 
   /**
@@ -123,6 +172,12 @@ export default function AvaliacaoForm({ isOpen, onClose, lugar, onSuccess }) {
       return;
     }
 
+    const nomeCheck = validateAutorDisplayNameInput(nomeExibicao);
+    if (!nomeCheck.ok) {
+      setErro(nomeCheck.error);
+      return;
+    }
+
     setEnviando(true);
     setErro("");
 
@@ -135,6 +190,31 @@ export default function AvaliacaoForm({ isOpen, onClose, lugar, onSuccess }) {
       return;
     }
 
+    const { error: perfilError } = await supabase
+      .from("perfis")
+      .update({ nome: nomeCheck.nome })
+      .eq("id", user.id);
+
+    if (perfilError) {
+      const { error: upsertError } = await supabase.from("perfis").upsert(
+        {
+          id: user.id,
+          nome: nomeCheck.nome,
+          email: user.email ?? null,
+          foto_url:
+            user.user_metadata?.avatar_url ??
+            user.user_metadata?.picture ??
+            null,
+        },
+        { onConflict: "id" }
+      );
+      if (upsertError) {
+        setEnviando(false);
+        setErro("Não foi possível salvar seu nome. Tente novamente.");
+        return;
+      }
+    }
+
     const { data: inserted, error } = await supabase
       .from("avaliacoes")
       .insert({
@@ -144,6 +224,7 @@ export default function AvaliacaoForm({ isOpen, onClose, lugar, onSuccess }) {
         comentario: textoComentario,
         aspectos,
         status: "pendente",
+        autor_nome: nomeCheck.nome,
       })
       .select("id")
       .single();
@@ -212,6 +293,29 @@ export default function AvaliacaoForm({ isOpen, onClose, lugar, onSuccess }) {
           <p className="mt-1 text-sm text-[#5a6b66]">
             Sua opinião ajuda outros viajantes na região.
           </p>
+
+          <div className="mt-6">
+            <label className="text-sm font-semibold text-[#1a2e28]" htmlFor="avaliacao-nome">
+              Como quer aparecer? <span className="text-[#d9534f]">*</span>
+            </label>
+            <p className="mt-0.5 text-xs text-[#9aa8a3]">
+              Esse nome fica na avaliação e no seu perfil. Você pode alterar quando quiser.
+            </p>
+            <input
+              id="avaliacao-nome"
+              type="text"
+              value={nomeExibicao}
+              maxLength={AUTOR_NOME_MAX_LEN}
+              disabled={carregandoNome || enviando}
+              onChange={(event) => {
+                setNomeExibicao(event.target.value.slice(0, AUTOR_NOME_MAX_LEN));
+                if (erro) setErro("");
+              }}
+              placeholder="Seu nome"
+              autoComplete="name"
+              className="mt-2 w-full rounded-xl bg-[#f0f4f3] px-3 py-3 text-base text-[#1a2e28] outline-none ring-[#1a4a3a]/20 focus:ring-2 disabled:opacity-60"
+            />
+          </div>
 
           <div className="mt-6">
             <p className="text-sm font-semibold text-[#1a2e28]">
