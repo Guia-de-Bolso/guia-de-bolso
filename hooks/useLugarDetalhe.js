@@ -385,20 +385,13 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
   useEffect(() => {
     if (!id) return;
 
-    fetchAvaliacoesLugar(supabase, id).then(async ({ data, error }) => {
-      if (!error) {
-        setAvaliacoes(data ?? []);
+    fetchAvaliacoesLugar(supabase, id).then(({ data, error }) => {
+      if (error) {
+        console.error("[avaliacoes]", error.message);
+        setAvaliacoes([]);
         return;
       }
-
-      const { data: fallbackData } = await supabase
-        .from("avaliacoes")
-        .select("*")
-        .eq("lugar_id", id)
-        .in("status", AVALIACAO_STATUS_APROVADOS)
-        .order("created_at", { ascending: false });
-
-      setAvaliacoes(fallbackData ?? []);
+      setAvaliacoes(data ?? []);
     });
   }, [id, supabase]);
 

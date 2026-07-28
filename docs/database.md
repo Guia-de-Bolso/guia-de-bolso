@@ -262,12 +262,14 @@ User reviews with moderation.
 | `comentario` | `text` | Optional |
 | `aspectos` | `jsonb` | Selected aspect labels from structured form (default `[]`) |
 | `sugestao_ia` | `text` | Claude pre-moderation hint (`aprovar` / `rejeitar` / `revisar` + reason) |
+| `autor_nome` | `text` | Display name snapshot at insert (public; avoids `perfis` RLS) *(migration: `avaliacoes_autor_snapshot.sql`)* |
+| `autor_foto_url` | `text` | Avatar URL snapshot at insert *(same)* |
 | `status` | `text` | `pendente`, `aprovada`, `rejeitada` |
 | `created_at` | `timestamptz` | |
 
 Public reads: `status = 'aprovada'`. Inserts default to `pendente`. After insert, client calls `POST /api/avaliacoes/analisar`. Admin approves/rejects. Migration: `supabase/avaliacoes_moderacao.sql`.
 
-Some selects join `profiles:user_id(...)` (Supabase view); fallback select uses `*` only.
+Author name/photo for the public UI come from `autor_nome` / `autor_foto_url` (trigger fills from `perfis` on insert). Joining `perfis` remains useful only for the author themselves or `dev` (RLS).
 
 ---
 

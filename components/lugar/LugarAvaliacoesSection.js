@@ -1,14 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import {
   formatAvaliacaoDate,
   getDistribuicaoEstrelas,
+  getFotoAutorAvaliacao,
   getIniciaisAutor,
   getNomeAutorAvaliacao,
   getResumoNotas,
   getNotaEmoji,
   parseAspectos,
 } from "@/lib/avaliacoes";
+
+const ASPECTOS_INICIAIS = 3;
 
 /**
  * @param {{ nota: number, className?: string }} props
@@ -66,11 +70,16 @@ function DistribuicaoEstrelas({ avaliacoes }) {
  * @returns {import("react").JSX.Element}
  */
 function AvaliacaoCard({ avaliacao }) {
+  const [aspectosAbertos, setAspectosAbertos] = useState(false);
   const nome = getNomeAutorAvaliacao(avaliacao);
-  const fotoUrl = avaliacao.perfis?.foto_url;
+  const fotoUrl = getFotoAutorAvaliacao(avaliacao);
   const aspectos = parseAspectos(avaliacao.aspectos);
-  const visiveis = aspectos.slice(0, 3);
-  const extras = aspectos.length - visiveis.length;
+  const temExtras = aspectos.length > ASPECTOS_INICIAIS;
+  const visiveis =
+    aspectosAbertos || !temExtras
+      ? aspectos
+      : aspectos.slice(0, ASPECTOS_INICIAIS);
+  const extras = aspectos.length - ASPECTOS_INICIAIS;
 
   return (
     <article className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-[#e8eeee]">
@@ -106,7 +115,7 @@ function AvaliacaoCard({ avaliacao }) {
         </div>
       </div>
 
-      {visiveis.length > 0 && (
+      {aspectos.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5">
           {visiveis.map((aspecto) => (
             <span
@@ -116,10 +125,25 @@ function AvaliacaoCard({ avaliacao }) {
               {aspecto}
             </span>
           ))}
-          {extras > 0 && (
-            <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-500">
+          {temExtras && !aspectosAbertos && (
+            <button
+              type="button"
+              onClick={() => setAspectosAbertos(true)}
+              className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-[#1a4a3a] underline-offset-2 hover:bg-[#e8eeee] hover:underline"
+              aria-expanded="false"
+            >
               e mais {extras}
-            </span>
+            </button>
+          )}
+          {temExtras && aspectosAbertos && (
+            <button
+              type="button"
+              onClick={() => setAspectosAbertos(false)}
+              className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-[#5a6b66] hover:bg-[#e8eeee]"
+              aria-expanded="true"
+            >
+              ver menos
+            </button>
           )}
         </div>
       )}

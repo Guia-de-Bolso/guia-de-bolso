@@ -139,6 +139,7 @@ Run in order for a **new environment** that already has base tables from the Sup
 |---|------|---------|
 | 22 | `avaliacoes_moderacao.sql` | Moderation columns + RLS |
 | 22b | `avaliacoes_admin_policies.sql` | Admin SELECT/UPDATE/DELETE all `avaliacoes` (moderação) |
+| 22b2 | `avaliacoes_autor_snapshot.sql` | `autor_nome` / `autor_foto_url` + trigger (exibição pública sem abrir RLS de `perfis`) |
 | 22c | `favoritos_policies.sql` | Own-row CRUD + admin SELECT (relatórios) |
 | 22d | `destaques_planos_policies.sql` | `planos` read public / write admin; `destaques` admin only |
 | 23 | `plano_comercial_unico.sql` | Single Parceiro plan seed |

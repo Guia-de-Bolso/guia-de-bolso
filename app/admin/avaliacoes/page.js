@@ -7,6 +7,7 @@ import AdminShell, { useAdminAuth } from "@/components/admin/AdminShell";
 import {
   AVALIACAO_STATUS,
   AVALIACAO_STATUS_APROVADOS,
+  getFotoAutorAvaliacao,
   getIniciaisAutor,
   getNomeAutorAvaliacao,
   getSentimentoEmoji,
@@ -187,9 +188,11 @@ function AdminAvaliacoesPage() {
       const tab = TABS.find((item) => item.id === status);
       const statuses = tab?.legacy ? [status, tab.legacy] : [status];
 
+      // Sem embed `perfis:user_id` — não há FK no schema cache (PGRST200).
+      // Nome/foto: snapshot `autor_nome` / `autor_foto_url`.
       let query = supabase
         .from("avaliacoes")
-        .select("*, lugares(nome, categoria), perfis:user_id(nome, foto_url, created_at)")
+        .select("*, lugares(nome, categoria)")
         .in("status", statuses);
 
       if (lugarId) {
@@ -198,23 +201,13 @@ function AdminAvaliacoesPage() {
 
       const { data, error } = await query.order("created_at", { ascending: false });
 
-      if (!error) {
-        setAvaliacoes(data ?? []);
+      if (error) {
+        console.error("[admin/avaliacoes]", error.message);
+        setAvaliacoes([]);
         return;
       }
 
-      let fallbackQuery = supabase
-        .from("avaliacoes")
-        .select("*, lugares(nome, categoria)")
-        .in("status", statuses);
-
-      if (lugarId) {
-        fallbackQuery = fallbackQuery.eq("lugar_id", lugarId);
-      }
-
-      const fallback = await fallbackQuery.order("created_at", { ascending: false });
-
-      setAvaliacoes(fallback.data ?? []);
+      setAvaliacoes(data ?? []);
     },
     []
   );
@@ -406,7 +399,7 @@ function AdminAvaliacoesPage() {
         ) : (
           avaliacoes.map((avaliacao) => {
             const nome = getNomeAutorAvaliacao(avaliacao);
-            const fotoUrl = avaliacao.perfis?.foto_url;
+            const fotoUrl = getFotoAutorAvaliacao(avaliacao);
             const perfilCreated = avaliacao.perfis?.created_at;
             const aprovadasUsuario =
               contagemAprovadasPorUsuario[avaliacao.user_id] || 0;
