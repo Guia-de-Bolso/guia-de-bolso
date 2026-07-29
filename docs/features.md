@@ -642,6 +642,20 @@ Plan beach/outdoor time with local weather awareness at decision time (especiall
 - Widget omitted on detail if marine/weather API fails (silent).
 - `PremiumPaywallSheet` copy for `clima` exists but detail sheet is **login-gated**, not premium-gated in the current build.
 
+### Hub de condições para esportes aquáticos
+
+- Rota pública `/condicoes`, acessada pelo card **Vai entrar no mar?** na home.
+- Compara picos cadastrados com coordenadas e permite alternar entre **Surf**, **Kite/Wind** e **SUP/Caiaque**.
+- Usa previsão Open-Meteo de três dias: ondas, swell, vento, rajadas, temperatura da água e nível do mar.
+- O score é um **potencial estimado**, específico por atividade; não avalia segurança, fundo, correntes, crowd ou habilidade.
+- A maré é apresentada como tendência estimada porque o modelo oceânico tem resolução costeira limitada.
+- Hub inclui busca por nome de praia/pico (filtra o carrossel).
+- Card da home fica **por último** (antes do rodapé).
+- Flags em `lib/featureFlags.js`:
+  - `CONDICOES_HUB_ENABLED` — card + rota `/condicoes`
+  - `BALEIAS_CARD_ENABLED` — card “Onde tem baleia?”
+  - Alterar para `false` desativa sem afetar clima, lugares ou navegação.
+
 ---
 
 ## 28. Dedicated login page

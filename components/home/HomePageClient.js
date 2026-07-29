@@ -7,6 +7,7 @@ import Onboarding from "@/components/Onboarding";
 import DailyLimitCountdown from "@/components/DailyLimitCountdown";
 import PremiumPaywallSheet from "@/components/PremiumPaywallSheet";
 import BaleiasTemporadaCard from "@/components/home/BaleiasTemporadaCard";
+import CondicoesDoMarCard from "@/components/home/CondicoesDoMarCard";
 import EmAltaHoje from "@/components/home/EmAltaHoje";
 import HomeContextHeader from "@/components/home/HomeContextHeader";
 import OQueFazerAgora from "@/components/home/OQueFazerAgora";
@@ -46,6 +47,10 @@ import { getLugaresVisitados } from "@/lib/lugaresVisitados";
 import { withDistanciaDinamica } from "@/lib/localizacao";
 import { shouldLogAcessouAppToday } from "@/lib/acessouAppLog";
 import { ensurePerfil } from "@/lib/ensurePerfil";
+import {
+  BALEIAS_CARD_ENABLED,
+  CONDICOES_HUB_ENABLED,
+} from "@/lib/featureFlags";
 import { LIMITS, canUseBusca, isDailyBuscaLimitReached } from "@/lib/premium";
 import { usePremiumUsage } from "@/lib/usePremiumUsage";
 import { createClient } from "@/lib/supabase";
@@ -883,7 +888,7 @@ function Home({ initialHomeData = null }) {
               ) : (
                 <OQueFazerAgora rota={heroRota} />
               )}
-              <BaleiasTemporadaCard />
+              {BALEIAS_CARD_ENABLED ? <BaleiasTemporadaCard /> : null}
               <ParceirosCarrossel
                 lugares={lugaresParceiros.map((l) =>
                   withDistanciaDinamica(l, userPosition)
@@ -922,6 +927,7 @@ function Home({ initialHomeData = null }) {
                   onFavoritar={handleFavoritar}
                 />
               )}
+              {CONDICOES_HUB_ENABLED ? <CondicoesDoMarCard /> : null}
 
               <footer className="mt-4 border-t border-[#e4ece9] pt-6 pb-3 text-center">
                 <PrefeituraSupportLine
