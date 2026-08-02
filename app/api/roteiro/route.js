@@ -42,6 +42,7 @@ Regras obrigatórias:
 - Se houver preferências gastronômicas (ex.: Pizza, Sushi), priorize restaurantes com essas especialidades nas refeições.
 - Não deixe períodos vazios: se não houver lugar à noite, omita o bloco ## daquele período.
 - Não invente lugares. Não use parágrafos soltos fora do formato.
+- NÃO escreva introdução, conclusão, "bom passeio", "aproveite" nem qualquer texto após o último bloco de período.
 - Tom direto, português do Brasil, emojis apenas nos títulos ## de período.`;
 
 /**
