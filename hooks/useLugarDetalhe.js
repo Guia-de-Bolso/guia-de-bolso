@@ -573,9 +573,11 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
                 : null,
               cardapioUrl: lugar.cardapio_url?.trim() || undefined,
               siteUrl: lugar.site_url?.trim() || undefined,
+              categoria: lugar.categoria,
+              subcategoria: lugar.subcategoria,
             })
           : visibilidade.showAcoesRapidasBloqueadas
-            ? getAcoesRapidasBloqueadas()
+            ? getAcoesRapidasBloqueadas(lugar)
             : []
         : getAcoesRapidasLocais(lugar, tags, distancia)
       : [];

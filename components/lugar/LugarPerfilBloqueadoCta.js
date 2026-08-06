@@ -1,11 +1,12 @@
 "use client";
 
+import { categoriaUsaCardapio } from "@/lib/lugarDetalhe";
 import { getClaimPerfilWhatsAppUrl } from "@/lib/lugarVisibilidade";
 
 /**
  * CTA para o dono/gestor desbloquear o perfil completo (perfil básico / teaser).
  * @param {object} props
- * @param {{ nome?: string, slug?: string, id?: string }} props.lugar
+ * @param {{ nome?: string, slug?: string, id?: string, categoria?: string, subcategoria?: string }} props.lugar
  * @param {() => void} [props.onClaimClick]
  * @param {"default"|"airbnb"} [props.variant]
  * @returns {import("react").JSX.Element}
@@ -17,6 +18,13 @@ export default function LugarPerfilBloqueadoCta({
 }) {
   const href = getClaimPerfilWhatsAppUrl(lugar);
   const isAirbnb = variant === "airbnb";
+  const comCardapio = categoriaUsaCardapio(lugar);
+  const chips = comCardapio
+    ? ["Cardápio", "Instagram", "Site", "WhatsApp"]
+    : ["Facebook", "Instagram", "Site", "WhatsApp"];
+  const blurCopy = comCardapio
+    ? "Galeria de fotos, cardápio, Instagram, site, telefone e avaliações de quem já visitou — tudo no perfil completo do estabelecimento."
+    : "Galeria de fotos, Facebook, Instagram, site, telefone e avaliações de quem já visitou — tudo no perfil completo do estabelecimento.";
 
   return (
     <section
@@ -35,12 +43,9 @@ export default function LugarPerfilBloqueadoCta({
           <span className="text-sm font-semibold text-amber-500">★★★★★</span>
           <span className="text-xs font-medium text-[#5a6b66]">4,8 · 12 avaliações</span>
         </div>
-        <p className="text-sm leading-relaxed text-[#5a6b66]">
-          Galeria de fotos, cardápio, Instagram, site, telefone e avaliações de
-          quem já visitou — tudo no perfil completo do estabelecimento.
-        </p>
+        <p className="text-sm leading-relaxed text-[#5a6b66]">{blurCopy}</p>
         <div className="mt-3 flex flex-wrap gap-2">
-          {["Cardápio", "Instagram", "Site", "WhatsApp"].map((label) => (
+          {chips.map((label) => (
             <span
               key={label}
               className="rounded-lg bg-[#f0f4f3] px-3 py-1.5 text-xs font-semibold text-[#1a4a3a]"
