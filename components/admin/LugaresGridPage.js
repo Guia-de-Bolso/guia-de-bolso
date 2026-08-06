@@ -3,8 +3,11 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import AdminShell, { useAdminAuth } from "@/components/admin/AdminShell";
+import { useAdminFlashToast, useAdminToast } from "@/components/admin/AdminToastContext";
 import { isConteudoCuradoria, isParceiro } from "@/lib/lugarBadges";
+import { isLugarEstabelecimento } from "@/lib/lugarDetalhe";
 import { getCapaThumbFromLugar } from "@/lib/fotos";
 import { getLugarPublicPath } from "@/lib/lugarPublicPath";
 import {
@@ -28,16 +31,27 @@ const CATEGORIAS_LUGAR = getCategoriasVisiveis().map((item) => ({
   icone: item.icone,
 }));
 
+/**
+ * Estabelecimento ativo no app com perfil básico (sem Parceiro do Guia).
+ * @param {object|null|undefined} lugar
+ * @returns {boolean}
+ */
+function isLugarPerfilBasico(lugar) {
+  return (
+    isLugarAtivo(lugar) &&
+    isLugarEstabelecimento(lugar) &&
+    !isParceiro(lugar)
+  );
+}
+
 const categoryStyles = {
   Natureza: "bg-[#d4ede8] text-[#1a4a3a]",
   Gastronomia: "bg-[#f0e4d4] text-[#6b5344]",
   Noite: "bg-[#e4d4f0] text-[#5c4a6e]",
   Serviços: "bg-[#c5dff5] text-[#2a5a7a]",
-  Hospedagem: "bg-[#f5e6b8] text-[#7a6520]",
   Cultura: "bg-purple-100 text-purple-700",
   Aventura: "bg-orange-100 text-orange-800",
   "Bem-estar": "bg-pink-100 text-pink-800",
-  Compras: "bg-sky-100 text-sky-800",
 };
 
 /**
@@ -263,10 +277,14 @@ function LugarCard({ lugar, onActivate, onDeactivate, onInactivate }) {
 const STATUS_FROM_URL = {
   em_analise: "Em análise",
   pausado: "Desativados",
+  perfil_basico: "Perfil básico",
+  parceiros: "Parceiros",
 };
 
 export default function LugaresGridPage() {
   const { loading } = useAdminAuth();
+  const { showToast } = useAdminToast();
+  useAdminFlashToast({ enabled: !loading });
   const searchParams = useSearchParams();
   const statusFromUrl = searchParams.get("status");
   const [lugares, setLugares] = useState([]);
@@ -276,7 +294,6 @@ export default function LugaresGridPage() {
     STATUS_FROM_URL[statusFromUrl] || "Todos"
   );
   const [cidade, setCidade] = useState("Todas");
-  const [message, setMessage] = useState("");
 
   const loadLugares = useCallback(async () => {
     const supabase = createClient();
@@ -297,19 +314,10 @@ export default function LugaresGridPage() {
 
     const timer = setTimeout(() => {
       loadLugares();
-      const params = new URLSearchParams(window.location.search);
-      if (params.get("success") === "created") setMessage("Local criado com sucesso.");
-      if (params.get("success") === "updated") setMessage("Local atualizado com sucesso.");
     }, 0);
 
     return () => clearTimeout(timer);
   }, [loading, loadLugares]);
-
-  useEffect(() => {
-    if (!message) return undefined;
-    const timer = setTimeout(() => setMessage(""), 5000);
-    return () => clearTimeout(timer);
-  }, [message]);
 
   useEffect(() => {
     const mapped = STATUS_FROM_URL[statusFromUrl];
@@ -330,7 +338,7 @@ export default function LugaresGridPage() {
 
     if (error) {
       console.error("[admin lugares] status:", error.message);
-      window.alert("Não foi possível atualizar o status. Tente novamente.");
+      showToast("Não foi possível atualizar o status.", { tone: "error" });
       return;
     }
 
@@ -349,6 +357,8 @@ export default function LugaresGridPage() {
           : item
       )
     );
+
+    showToast(`Status atualizado: ${getLugarStatusLabel(nextStatus)}.`);
 
     if (nextStatus === LUGAR_STATUS.ATIVO) {
       await processPendingPushCampaigns();
@@ -392,6 +402,7 @@ export default function LugaresGridPage() {
     const desativados = lugares.filter((l) => isLugarPausado(l)).length;
     const inativos = lugares.filter((l) => isLugarInativoComPurge(l)).length;
     const parceiros = lugares.filter((l) => isLugarAtivo(l) && isParceiro(l)).length;
+    const perfilBasico = lugares.filter((l) => isLugarPerfilBasico(l)).length;
     const curadoria = lugares.filter((l) => isLugarAtivo(l) && isConteudoCuradoria(l)).length;
     return {
       total: lugares.length,
@@ -400,6 +411,7 @@ export default function LugaresGridPage() {
       inativos,
       emAnalise,
       parceiros,
+      perfilBasico,
       curadoria,
     };
   }, [lugares]);
@@ -424,6 +436,7 @@ export default function LugaresGridPage() {
         (status === "Inativos" && isLugarInativoComPurge(lugar)) ||
         (status === "Em análise" && lugar.status === LUGAR_STATUS.EM_ANALISE) ||
         (status === "Parceiros" && ativo && isParceiro(lugar)) ||
+        (status === "Perfil básico" && isLugarPerfilBasico(lugar)) ||
         (status === "Curadoria" && ativo && isConteudoCuradoria(lugar)) ||
         (status === "Ambos" &&
           ativo &&
@@ -459,23 +472,7 @@ export default function LugaresGridPage() {
       subtitle="Estabelecimentos e pontos do guia na região"
       headerAction={novoLugarLink}
     >
-      {message && (
-        <div
-          className="mb-5 flex items-center justify-between gap-3 rounded-2xl border border-[#d4ede8] bg-[#eef8f4] px-4 py-3 text-sm font-semibold text-[#1a4a3a]"
-          role="status"
-        >
-          <span>✓ {message}</span>
-          <button
-            type="button"
-            onClick={() => setMessage("")}
-            className="rounded-lg px-2 py-1 text-xs text-[#5a6b66] hover:bg-white/60"
-          >
-            Fechar
-          </button>
-        </div>
-      )}
-
-      <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-7">
+      <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4 xl:grid-cols-8">
         <StatCard label="Total" value={stats.total} accent="text-[#1a4a3a]" />
         <StatCard
           label="Publicados"
@@ -486,8 +483,14 @@ export default function LugaresGridPage() {
         <StatCard
           label="Parceiros"
           value={stats.parceiros}
-          hint="plano R$ 299"
+          hint="perfil completo"
           accent="text-amber-700"
+        />
+        <StatCard
+          label="Perfil básico"
+          value={stats.perfilBasico}
+          hint="ativos sem parceiro"
+          accent="text-sky-700"
         />
         <StatCard
           label="Curadoria"
@@ -560,6 +563,7 @@ export default function LugaresGridPage() {
                 "Inativos",
                 "Em análise",
                 "Parceiros",
+                "Perfil básico",
                 "Curadoria",
                 "Ambos",
               ].map((item) => (
@@ -585,24 +589,53 @@ export default function LugaresGridPage() {
       </div>
 
       <p className="mb-4 text-sm text-[#5a6b66]">
-        Exibindo <strong className="text-[#1a4a3a]">{filtered.length}</strong> de{" "}
-        {lugares.length} locais
+        {status === "Todos" && categoria === "Todas" && !search.trim() ? (
+          <>
+            <strong className="text-[#1a4a3a]">{filtered.length}</strong> locais
+          </>
+        ) : (
+          <>
+            Filtro atual: <strong className="text-[#1a4a3a]">{filtered.length}</strong>{" "}
+            locais · total cadastrado: {lugares.length}
+            {(status === "Parceiros" ||
+              status === "Perfil básico" ||
+              status === "Curadoria" ||
+              status === "Ambos") && (
+              <span className="mt-1 block text-xs text-[#9aa8a3]">
+                Parceiros, perfil básico e curadoria não somam o total — um local
+                pode entrar em mais de um filtro (ou só em curadoria, no caso de
+                praias/trilhas).
+              </span>
+            )}
+          </>
+        )}
       </p>
 
       {filtered.length === 0 ? (
-        <div className="rounded-2xl bg-white p-10 text-center shadow-sm ring-1 ring-black/5">
-          <p className="text-4xl">📍</p>
-          <h2 className="mt-3 text-lg font-bold text-[#1a2e28]">Nenhum local encontrado</h2>
-          <p className="mt-2 text-sm text-[#5a6b66]">
-            Ajuste os filtros ou cadastre o primeiro lugar do guia.
-          </p>
-          <Link
-            href="/admin/locais/novo"
-            className="mt-6 inline-flex rounded-xl bg-[#1a4a3a] px-5 py-2.5 text-sm font-semibold text-white"
-          >
-            Criar local
-          </Link>
-        </div>
+        <AdminEmptyState
+          title={
+            lugares.length === 0
+              ? "Nenhum local cadastrado"
+              : "Nenhum local encontrado"
+          }
+          description={
+            lugares.length === 0
+              ? "Cadastre o primeiro estabelecimento ou ponto do guia."
+              : "Ajuste os filtros ou a busca para ver outros resultados."
+          }
+          actionLabel={lugares.length === 0 ? "Criar local" : "Limpar filtros"}
+          actionHref={lugares.length === 0 ? "/admin/locais/novo" : undefined}
+          onAction={
+            lugares.length === 0
+              ? undefined
+              : () => {
+                  setSearch("");
+                  setCategoria("Todas");
+                  setStatus("Todos");
+                  setCidade("Todas");
+                }
+          }
+        />
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {filtered.map((lugar) => (

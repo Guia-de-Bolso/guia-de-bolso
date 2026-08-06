@@ -8,6 +8,7 @@ import DashboardMetricCard from "@/components/admin/DashboardMetricCard";
 import DashboardOperacionalSidebar from "@/components/admin/DashboardOperacionalSidebar";
 import DashboardPendentesSection from "@/components/admin/DashboardPendentesSection";
 import DashboardSkeleton from "@/components/admin/DashboardSkeleton";
+import { useAdminToast } from "@/components/admin/AdminToastContext";
 import {
   IconClipboard,
   IconMap,
@@ -30,6 +31,10 @@ import {
   getSaudacao,
 } from "@/lib/adminDashboard";
 import { canAccessDevAdmin } from "@/lib/adminRoles";
+import {
+  getAdminDashboardPeriod,
+  setAdminDashboardPeriod,
+} from "@/lib/adminUiPrefs";
 import { createClient } from "@/lib/supabase";
 
 /**
@@ -72,8 +77,21 @@ function PeriodSelector({ period, onChange }) {
  */
 export default function AdminDashboard() {
   const { loading: authLoading, user, perfil } = useAdminAuth();
-  const [period, setPeriod] = useState("semana");
+  const { showToast } = useAdminToast();
+  const [period, setPeriodState] = useState("semana");
   const [dataLoading, setDataLoading] = useState(true);
+
+  useEffect(() => {
+    setPeriodState(getAdminDashboardPeriod());
+  }, []);
+
+  /**
+   * @param {string} next
+   */
+  function setPeriod(next) {
+    setPeriodState(next);
+    setAdminDashboardPeriod(next);
+  }
 
   const [metrics, setMetrics] = useState({
     avaliacoesPendentes: { total: 0, variation: { text: "", className: "", direction: "flat" } },
@@ -281,6 +299,10 @@ export default function AdminDashboard() {
         total: Math.max(0, current.avaliacoesPendentes.total - 1),
       },
     }));
+    showToast(
+      status === "aprovado" ? "Avaliação aprovada." : "Avaliação rejeitada.",
+      { tone: status === "aprovado" ? "success" : "info" }
+    );
   }
 
   if (authLoading) {
@@ -308,6 +330,7 @@ export default function AdminDashboard() {
             dataFormatada={dataFormatada}
             resumo={resumoHero}
             subtitle="Visão geral do Guia de Bolso"
+            role={perfil?.role}
           />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-12">

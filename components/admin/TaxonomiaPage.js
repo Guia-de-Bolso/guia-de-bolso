@@ -34,11 +34,9 @@ const categoryStyles = {
   Gastronomia: "bg-[#f0e4d4] text-[#6b5344]",
   Noite: "bg-[#e4d4f0] text-[#5c4a6e]",
   Serviços: "bg-[#c5dff5] text-[#2a5a7a]",
-  Hospedagem: "bg-[#f5e6b8] text-[#7a6520]",
   Cultura: "bg-purple-100 text-purple-700",
   Aventura: "bg-orange-100 text-orange-700",
   "Bem-estar": "bg-pink-100 text-pink-700",
-  Compras: "bg-blue-100 text-blue-700",
 };
 
 /**

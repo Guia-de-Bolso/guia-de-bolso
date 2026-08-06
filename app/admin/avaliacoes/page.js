@@ -3,7 +3,9 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import AdminShell, { useAdminAuth } from "@/components/admin/AdminShell";
+import { useAdminToast } from "@/components/admin/AdminToastContext";
 import {
   AVALIACAO_STATUS,
   AVALIACAO_STATUS_APROVADOS,
@@ -130,6 +132,7 @@ const TAB_IDS = new Set(TABS.map((tab) => tab.id));
 
 function AdminAvaliacoesPage() {
   const { loading, user } = useAdminAuth();
+  const { showToast } = useAdminToast();
   const searchParams = useSearchParams();
   const tabFromUrl = searchParams.get("tab");
   const lugarIdFromUrl = searchParams.get("lugar_id");
@@ -258,6 +261,14 @@ function AdminAvaliacoesPage() {
     setAvaliacoes((items) => items.filter((item) => item.id !== id));
     loadCounts();
     loadContagemAprovadas();
+
+    if (payload.status === AVALIACAO_STATUS.APROVADO) {
+      showToast("Avaliação aprovada.");
+    } else if (payload.status === AVALIACAO_STATUS.REJEITADO) {
+      showToast("Avaliação rejeitada.", { tone: "info" });
+    } else if (payload.status === AVALIACAO_STATUS.AGUARDANDO_EDICAO) {
+      showToast("Avaliação enviada para edição.", { tone: "info" });
+    }
   }
 
   /**
@@ -336,6 +347,7 @@ function AdminAvaliacoesPage() {
     setAvaliacoes((items) => items.filter((item) => item.id !== avaliacao.id));
     loadCounts();
     loadContagemAprovadas();
+    showToast("Avaliação excluída.", { tone: "info" });
   }
 
   if (loading) {
@@ -393,9 +405,26 @@ function AdminAvaliacoesPage() {
 
       <div className="grid gap-4">
         {avaliacoes.length === 0 ? (
-          <p className="rounded-2xl bg-white p-5 text-sm text-[#5a6b66] shadow-sm">
-            Nenhuma avaliação nessa aba.
-          </p>
+          <AdminEmptyState
+            title={
+              activeTab === AVALIACAO_STATUS.PENDENTE
+                ? "Nenhuma avaliação pendente"
+                : "Nenhuma avaliação nessa aba"
+            }
+            description={
+              activeTab === AVALIACAO_STATUS.PENDENTE
+                ? "Fila limpa — novas avaliações dos usuários aparecerão aqui."
+                : lugarIdFromUrl
+                  ? "Nada encontrado para este estabelecimento neste status."
+                  : "Troque de aba ou aguarde novas avaliações."
+            }
+            actionLabel={
+              activeTab === AVALIACAO_STATUS.PENDENTE ? "Ir para locais" : undefined
+            }
+            actionHref={
+              activeTab === AVALIACAO_STATUS.PENDENTE ? "/admin/locais" : undefined
+            }
+          />
         ) : (
           avaliacoes.map((avaliacao) => {
             const nome = getNomeAutorAvaliacao(avaliacao);

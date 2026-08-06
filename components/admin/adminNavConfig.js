@@ -1,44 +1,12 @@
-import { canAccessDevAdmin } from "@/lib/adminRoles";
-
-/**
- * Links e ícones SVG do menu admin.
- * @typedef {{ href: string, label: string, icon: string, devOnly?: boolean }} AdminNavLink
- */
-
-/** @type {AdminNavLink[]} */
-export const ADMIN_NAV_LINKS = [
-  { href: "/admin", label: "Dashboard", icon: "dashboard" },
-  { href: "/admin/ia", label: "IA & Custos", icon: "ia", devOnly: true },
-  { href: "/admin/despesas", label: "Despesas", icon: "despesas", devOnly: true },
-  { href: "/admin/locais", label: "Locais", icon: "locais" },
-  { href: "/admin/parceiros", label: "Parceiros", icon: "parceiros", devOnly: true },
-  { href: "/admin/contratos", label: "Contratos", icon: "contratos", devOnly: true },
-  { href: "/admin/atrativos", label: "Atrativos", icon: "rotas" },
-  { href: "/admin/avaliacoes", label: "Avaliações", icon: "avaliacoes" },
-  { href: "/admin/feedback", label: "Feedback", icon: "feedback", devOnly: true },
-  { href: "/admin/relatorios", label: "Relatórios", icon: "relatorios" },
-  { href: "/admin/usuarios", label: "Usuários", icon: "usuarios", devOnly: true },
-  { href: "/admin/logs", label: "Logs", icon: "logs", devOnly: true },
-  { href: "/admin/taxonomia", label: "Taxonomia", icon: "taxonomia", devOnly: true },
-];
-
-/**
- * @param {string} [role]
- * @returns {AdminNavLink[]}
- */
-export function getVisibleAdminNavLinks(role) {
-  return ADMIN_NAV_LINKS.filter((link) => !link.devOnly || canAccessDevAdmin(role));
-}
-
-/**
- * @param {string} pathname
- * @param {string} href
- * @returns {boolean}
- */
-export function isAdminNavActive(pathname, href) {
-  if (href === "/admin") return pathname === "/admin";
-  return pathname.startsWith(href);
-}
+export {
+  ADMIN_NAV_GROUPS,
+  ADMIN_NAV_LINKS,
+  getVisibleAdminNavGroups,
+  getVisibleAdminNavLinks,
+  isAdminNavActive,
+  isAdminNavGroupActive,
+  shouldAdminNavGroupStartOpen,
+} from "@/lib/adminNav";
 
 /**
  * @param {object} props
@@ -183,6 +151,12 @@ export function AdminNavIcon({ name, className = "h-5 w-5" }) {
             strokeLinejoin="round"
             d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"
           />
+        </svg>
+      );
+    case "chevron":
+      return (
+        <svg {...shared}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
       );
     case "menu":

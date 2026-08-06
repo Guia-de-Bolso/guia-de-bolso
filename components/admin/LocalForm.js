@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import AdminStickySaveBar from "@/components/admin/AdminStickySaveBar";
+import { useAdminToast } from "@/components/admin/AdminToastContext";
 import EnderecoAutocomplete from "@/components/EnderecoAutocomplete";
 import HorarioEditor from "@/components/admin/HorarioEditor";
 import LugarQrSection from "@/components/admin/LugarQrSection";
@@ -142,7 +144,9 @@ export default function LocalForm({
   editingId = null,
 }) {
   const router = useRouter();
+  const { showToast } = useAdminToast();
   const [saving, setSaving] = useState(false);
+  const [dirty, setDirty] = useState(false);
   const [localizacao, setLocalizacao] = useState(initialLocalizacao);
   const [subcategorias, setSubcategorias] = useState([]);
   const [tags, setTags] = useState([]);
@@ -236,6 +240,7 @@ export default function LocalForm({
    * @param {string} tagId - ID da tag como string.
    */
   function toggleTag(tagId) {
+    setDirty(true);
     setSelectedTagIds((current) => {
       if (current.includes(tagId)) {
         setTagLimitMessage("");
@@ -255,6 +260,7 @@ export default function LocalForm({
    * @param {File[]} files - Arquivos de imagem aceitos.
    */
   function addPhotoFiles(files) {
+    setDirty(true);
     setPhotoError("");
     setPhotoItems((current) => [
       ...current,
@@ -267,6 +273,7 @@ export default function LocalForm({
    * @param {string} id - ID interno do item em `photoItems`.
    */
   function removePhotoItem(id) {
+    setDirty(true);
     setPhotoItems((current) => {
       const item = current.find((entry) => entry.id === id);
       revokePhotoItemPreview(item);
@@ -275,6 +282,7 @@ export default function LocalForm({
   }
 
   function setPhotoCover(id) {
+    setDirty(true);
     setPhotoItems((current) => movePhotoItemToCover(current, id));
   }
 
@@ -283,6 +291,7 @@ export default function LocalForm({
    * @param {-1|1} direction
    */
   function reorderPhotoItem(id, direction) {
+    setDirty(true);
     setPhotoItems((current) => movePhotoItem(current, id, direction));
   }
 
@@ -390,6 +399,7 @@ export default function LocalForm({
             : message ||
                 "Não foi possível salvar o local. Se o erro citar colunas mostrar_endereco, mostrar_horarios ou slug, rode as migrations em supabase/."
       );
+      showToast("Não foi possível salvar o local.", { tone: "error" });
       setSaving(false);
       return;
     }
@@ -502,12 +512,20 @@ export default function LocalForm({
     }
 
     await processPendingPushCampaigns();
-    router.push("/admin/locais");
+    setDirty(false);
+    router.push(
+      `/admin/locais?success=${editingId ? "updated" : "created"}`
+    );
   }
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="rounded-2xl bg-white p-5 shadow-sm">
+      <form
+        id="admin-local-form"
+        onSubmit={handleSubmit}
+        onChange={() => setDirty(true)}
+        className="rounded-2xl bg-white p-5 shadow-sm"
+      >
       <div className="grid gap-4 md:grid-cols-2">
         <Input label="Nome" value={form.nome || ""} onChange={(e) => {
           const nome = e.target.value;
@@ -660,6 +678,7 @@ export default function LocalForm({
           disabled={saving}
           error={videoError}
           onPendingChange={(next) => {
+            setDirty(true);
             setVideoError("");
             setVideoRemoved(false);
             if (pendingVideo?.preview) {
@@ -668,6 +687,7 @@ export default function LocalForm({
             setPendingVideo(next);
           }}
           onRemove={() => {
+            setDirty(true);
             setVideoError("");
             if (pendingVideo?.preview) {
               URL.revokeObjectURL(pendingVideo.preview);
@@ -784,14 +804,22 @@ export default function LocalForm({
         </p>
         <EnderecoAutocomplete
           initialValue={localizacao}
-          onSave={(value) => setLocalizacao(value)}
+          onSave={(value) => {
+            setDirty(true);
+            setLocalizacao(value);
+          }}
         />
       </div>
-
-      <button disabled={saving} className="mt-5 rounded-xl bg-[#1a4a3a] px-5 py-3 text-sm font-semibold text-white disabled:opacity-60">
-        {saving ? "Salvando..." : "Salvar local"}
-      </button>
     </form>
+
+    <AdminStickySaveBar
+      formId="admin-local-form"
+      dirty={dirty}
+      saving={saving}
+      requireDirty={Boolean(editingId)}
+      saveLabel={editingId ? "Salvar alterações" : "Salvar local"}
+      cancelHref="/admin/locais"
+    />
 
     {editingId && isLugarElegivelQr(form) && (
       <LugarQrSection

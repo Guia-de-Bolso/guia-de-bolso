@@ -56,8 +56,9 @@ export default function RelatoriosEstabelecimentoPage() {
 
     supabase
       .from("lugares")
-      .select("id, nome")
+      .select("id, nome, categoria")
       .eq("status", "ativo")
+      .not("categoria", "in", "(Natureza,Aventura)")
       .order("nome", { ascending: true })
       .then(({ data, error }) => {
         if (error) {
@@ -150,7 +151,9 @@ export default function RelatoriosEstabelecimentoPage() {
               className="mt-2 w-full rounded-xl border border-[#e3e9e6] bg-[#f7faf9] px-4 py-3 text-sm text-[#1a2e28] focus:border-[#1a4a3a] focus:outline-none focus:ring-2 focus:ring-[#1a4a3a]/20"
             >
               <option value="">
-                {lugaresLoading ? "Carregando locais…" : "Selecione um local"}
+                {lugaresLoading
+                  ? "Carregando estabelecimentos…"
+                  : "Selecione um estabelecimento"}
               </option>
               {lugares.map((lugar) => (
                 <option key={lugar.id} value={lugar.id}>

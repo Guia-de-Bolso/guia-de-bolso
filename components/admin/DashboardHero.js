@@ -1,13 +1,7 @@
 "use client";
 
 import Link from "next/link";
-
-const ATALHOS = [
-  { href: "/admin/avaliacoes?tab=pendente", label: "Moderar avaliações" },
-  { href: "/admin/locais", label: "Locais" },
-  { href: "/admin/locais?status=parceiros", label: "Parceiros" },
-  { href: "/admin/logs", label: "Logs" },
-];
+import { getDashboardHeroShortcuts } from "@/lib/adminDashboardShortcuts";
 
 /**
  * @param {object} props
@@ -16,11 +10,24 @@ const ATALHOS = [
  * @param {string} props.dataFormatada
  * @param {string} props.resumo
  * @param {string} [props.subtitle]
+ * @param {string} [props.role]
  * @returns {import("react").JSX.Element}
  */
-export default function DashboardHero({ saudacao, nome, dataFormatada, resumo, subtitle }) {
+export default function DashboardHero({
+  saudacao,
+  nome,
+  dataFormatada,
+  resumo,
+  subtitle,
+  role,
+}) {
+  const atalhos = getDashboardHeroShortcuts(role);
+
   return (
-    <section className="min-h-[140px] rounded-3xl bg-gradient-to-br from-[#eef8f4] via-white to-[#f0f4f3] p-6 shadow-md ring-1 ring-[#1a4a3a]/10 md:p-8" aria-labelledby="dashboard-hero-title">
+    <section
+      className="min-h-[140px] rounded-3xl bg-gradient-to-br from-[#eef8f4] via-white to-[#f0f4f3] p-6 shadow-md ring-1 ring-[#1a4a3a]/10 md:p-8"
+      aria-labelledby="dashboard-hero-title"
+    >
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div className="min-w-0">
           <p className="text-sm font-semibold uppercase tracking-wide text-[#1a4a3a]/80">
@@ -41,7 +48,7 @@ export default function DashboardHero({ saudacao, nome, dataFormatada, resumo, s
         </div>
 
         <div className="flex flex-wrap gap-2 lg:max-w-md lg:justify-end">
-          {ATALHOS.map((item) => (
+          {atalhos.map((item) => (
             <Link
               key={item.href}
               href={item.href}

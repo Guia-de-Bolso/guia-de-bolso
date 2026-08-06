@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import AdminStickySaveBar from "@/components/admin/AdminStickySaveBar";
+import { useAdminToast } from "@/components/admin/AdminToastContext";
 import EnderecoAutocomplete from "@/components/EnderecoAutocomplete";
 import PhotoUploader from "@/components/admin/PhotoUploader";
 import { getInitialPhotoItems, getPhotoEntryUrl } from "@/lib/fotos";
@@ -251,7 +252,9 @@ export default function AtrativoForm({
   editingId = null,
 }) {
   const router = useRouter();
+  const { showToast } = useAdminToast();
   const [saving, setSaving] = useState(false);
+  const [dirty, setDirty] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [photoError, setPhotoError] = useState("");
   const [tagLimitMessage, setTagLimitMessage] = useState("");
@@ -302,6 +305,7 @@ export default function AtrativoForm({
   const visibleTags = filterTagsByCategoriaAtrativo(tags, form.categoria);
 
   function toggleTag(tagId) {
+    setDirty(true);
     setTagLimitMessage("");
     setSelectedTagIds((current) => {
       if (current.includes(tagId)) {
@@ -316,6 +320,7 @@ export default function AtrativoForm({
   }
 
   function addPhotoFiles(files) {
+    setDirty(true);
     setPhotoError("");
     setPhotoItems((current) => [
       ...current,
@@ -324,6 +329,7 @@ export default function AtrativoForm({
   }
 
   function removePhotoItem(id) {
+    setDirty(true);
     setPhotoItems((current) => {
       const item = current.find((entry) => entry.id === id);
       revokePhotoItemPreview(item);
@@ -332,6 +338,7 @@ export default function AtrativoForm({
   }
 
   function setPhotoCover(id) {
+    setDirty(true);
     setPhotoItems((current) => movePhotoItemToCover(current, id));
   }
 
@@ -340,6 +347,7 @@ export default function AtrativoForm({
    * @param {-1|1} direction
    */
   function reorderPhotoItem(id, direction) {
+    setDirty(true);
     setPhotoItems((current) => movePhotoItem(current, id, direction));
   }
 
@@ -363,6 +371,7 @@ export default function AtrativoForm({
   }
 
   function updatePonto(index, field, value) {
+    setDirty(true);
     setPontos((current) =>
       current.map((ponto, itemIndex) =>
         itemIndex === index ? { ...ponto, [field]: value } : ponto
@@ -373,6 +382,7 @@ export default function AtrativoForm({
   function addDetalheToNovoPonto() {
     if (!novoPonto.novaDescricao.trim()) return;
 
+    setDirty(true);
     setNovoPonto((current) => ({
       ...current,
       detalhes: sortPontoDetalhes([
@@ -384,6 +394,7 @@ export default function AtrativoForm({
   }
 
   function removeDetalheFromNovoPonto(index) {
+    setDirty(true);
     setNovoPonto((current) => ({
       ...current,
       detalhes: sortPontoDetalhes(
@@ -395,6 +406,7 @@ export default function AtrativoForm({
   function addDetalheToPonto(pontoIndex, texto) {
     if (!texto.trim()) return;
 
+    setDirty(true);
     setPontos((current) =>
       current.map((ponto, itemIndex) =>
         itemIndex === pontoIndex
@@ -411,6 +423,7 @@ export default function AtrativoForm({
   }
 
   function updateDetalhePonto(pontoIndex, detalheIndex, texto) {
+    setDirty(true);
     setPontos((current) =>
       current.map((ponto, itemIndex) =>
         itemIndex === pontoIndex
@@ -428,6 +441,7 @@ export default function AtrativoForm({
   }
 
   function removeDetalhePonto(pontoIndex, detalheIndex) {
+    setDirty(true);
     setPontos((current) =>
       current.map((ponto, itemIndex) =>
         itemIndex === pontoIndex
@@ -443,6 +457,7 @@ export default function AtrativoForm({
   }
 
   function moveDetalhePonto(pontoIndex, detalheIndex, direction) {
+    setDirty(true);
     setPontos((current) =>
       current.map((ponto, itemIndex) => {
         if (itemIndex !== pontoIndex) return ponto;
@@ -464,6 +479,7 @@ export default function AtrativoForm({
   function addPonto() {
     if (!novoPonto.nome.trim()) return;
 
+    setDirty(true);
     setPontos((current) => [
       ...current,
       {
@@ -477,6 +493,7 @@ export default function AtrativoForm({
   }
 
   function removePonto(index) {
+    setDirty(true);
     setPontos((current) => {
       removeExpandedId(setExpandedPontoIds, current[index]?.clientId);
       return current
@@ -486,6 +503,7 @@ export default function AtrativoForm({
   }
 
   function movePonto(index, direction) {
+    setDirty(true);
     setPontos((current) => {
       const nextIndex = index + direction;
       if (nextIndex < 0 || nextIndex >= current.length) return current;
@@ -499,6 +517,7 @@ export default function AtrativoForm({
   function addDica() {
     if (!novaDica.trim()) return;
 
+    setDirty(true);
     setDicas((current) => [
       ...current,
       {
@@ -511,6 +530,7 @@ export default function AtrativoForm({
   }
 
   function updateDica(index, texto) {
+    setDirty(true);
     setDicas((current) =>
       current.map((dica, itemIndex) =>
         itemIndex === index ? { ...dica, texto } : dica
@@ -519,6 +539,7 @@ export default function AtrativoForm({
   }
 
   function removeDica(index) {
+    setDirty(true);
     setDicas((current) => {
       removeExpandedId(setExpandedDicaIds, current[index]?.clientId);
       return current
@@ -528,6 +549,7 @@ export default function AtrativoForm({
   }
 
   function moveDica(index, direction) {
+    setDirty(true);
     setDicas((current) => {
       const nextIndex = index + direction;
       if (nextIndex < 0 || nextIndex >= current.length) return current;
@@ -685,15 +707,23 @@ export default function AtrativoForm({
     } catch (error) {
       console.error(error);
       setSaveError(formatAtrativoSaveError(error));
+      showToast("Não foi possível salvar o atrativo.", { tone: "error" });
       setSaving(false);
       return;
     }
 
+    setDirty(false);
     router.push(`/admin/atrativos?success=${editingId ? "updated" : "created"}`);
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl bg-white p-5 shadow-sm">
+    <>
+    <form
+      id="admin-atrativo-form"
+      onSubmit={handleSubmit}
+      onChange={() => setDirty(true)}
+      className="rounded-2xl bg-white p-5 shadow-sm"
+    >
       {saveError && (
         <div
           className="mb-4 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700"
@@ -1203,24 +1233,22 @@ export default function AtrativoForm({
         </p>
         <EnderecoAutocomplete
           initialValue={localizacao}
-          onSave={(value) => setLocalizacao(value)}
+          onSave={(value) => {
+            setDirty(true);
+            setLocalizacao(value);
+          }}
         />
       </div>
-
-      <div className="mt-5 flex flex-col gap-2 md:flex-row md:justify-end">
-        <Link
-          href="/admin/atrativos"
-          className="rounded-xl bg-zinc-200 px-5 py-3 text-center text-sm font-semibold text-zinc-700"
-        >
-          Cancelar
-        </Link>
-        <button
-          disabled={saving}
-          className="rounded-xl bg-[#1a4a3a] px-5 py-3 text-sm font-semibold text-white disabled:opacity-60"
-        >
-          {saving ? "Salvando..." : editingId ? "Salvar alterações" : "Salvar atrativo"}
-        </button>
-      </div>
     </form>
+
+    <AdminStickySaveBar
+      formId="admin-atrativo-form"
+      dirty={dirty}
+      saving={saving}
+      requireDirty={Boolean(editingId)}
+      saveLabel={editingId ? "Salvar alterações" : "Salvar atrativo"}
+      cancelHref="/admin/atrativos"
+    />
+    </>
   );
 }

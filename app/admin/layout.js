@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import AdminProviders from "@/components/admin/AdminProviders";
 import { canAccessAdmin } from "@/lib/adminRoles";
 import { createClient } from "@/lib/supabase/server";
 import { getSessionUser } from "@/lib/supabase/session";
@@ -24,5 +25,5 @@ export default async function AdminLayout({ children }) {
     redirect("/?admin=denied");
   }
 
-  return children;
+  return <AdminProviders>{children}</AdminProviders>;
 }

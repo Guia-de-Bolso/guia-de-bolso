@@ -59,6 +59,12 @@ export default function DashboardPendentesSection({
             <p className="mt-1 text-sm text-[#5a6b66]">
               Novas avaliações dos usuários aparecerão aqui.
             </p>
+            <Link
+              href="/admin/locais"
+              className="mt-5 inline-flex text-sm font-semibold text-[#1a4a3a] underline-offset-2 hover:underline"
+            >
+              Revisar locais →
+            </Link>
           </div>
         ) : (
           pendentes.map((avaliacao) => (

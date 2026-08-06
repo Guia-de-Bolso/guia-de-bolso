@@ -6,6 +6,10 @@ import AdminNavDrawer from "@/components/admin/AdminNavDrawer";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminTopBar from "@/components/admin/AdminTopBar";
 import { canAccessAdmin, canAccessAdminSection } from "@/lib/adminRoles";
+import {
+  getAdminSidebarCollapsed,
+  setAdminSidebarCollapsed,
+} from "@/lib/adminUiPrefs";
 import { createClient } from "@/lib/supabase";
 import { getSessionUser } from "@/lib/supabase/session";
 
@@ -110,6 +114,18 @@ export default function AdminShell({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const closeMobileNav = useCallback(() => setMobileNavOpen(false), []);
 
+  const toggleSidebarCollapsed = useCallback(() => {
+    setSidebarCollapsed((value) => {
+      const next = !value;
+      setAdminSidebarCollapsed(next);
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    setSidebarCollapsed(getAdminSidebarCollapsed());
+  }, []);
+
   useEffect(() => {
     const supabase = createClient();
 
@@ -138,7 +154,7 @@ export default function AdminShell({
         <AdminSidebar
           pathname={pathname}
           collapsed={sidebarCollapsed}
-          onToggleCollapse={() => setSidebarCollapsed((value) => !value)}
+          onToggleCollapse={toggleSidebarCollapsed}
           perfil={adminPerfil}
         />
 
@@ -156,7 +172,7 @@ export default function AdminShell({
             adminRole={adminPerfil?.role}
             headerAction={headerAction}
             onOpenMobileNav={() => setMobileNavOpen(true)}
-            onToggleSidebar={() => setSidebarCollapsed((value) => !value)}
+            onToggleSidebar={toggleSidebarCollapsed}
             showSidebarToggle
           />
 

@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import AdminNavLinkItem from "@/components/admin/AdminNavLinkItem";
+import AdminNavSections from "@/components/admin/AdminNavSections";
 import Logo from "@/components/Logo";
 import {
   AdminNavIcon,
   getAdminInitials,
-  getVisibleAdminNavLinks,
 } from "@/components/admin/adminNavConfig";
+import { getRoleLabel } from "@/lib/adminRoles";
 
 /**
  * Sidebar verde fixa (desktop / notebook).
@@ -21,7 +21,7 @@ import {
 export default function AdminSidebar({ pathname, collapsed, onToggleCollapse, perfil }) {
   const displayName = perfil?.nome || "Administrador";
   const initials = getAdminInitials(displayName);
-  const navLinks = getVisibleAdminNavLinks(perfil?.role);
+  const roleLabel = getRoleLabel(perfil?.role);
 
   return (
     <aside
@@ -37,7 +37,7 @@ export default function AdminSidebar({ pathname, collapsed, onToggleCollapse, pe
         {!collapsed ? (
           <Link
             href="/admin"
-            className="flex min-w-0 items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d4ede8]/50 rounded-lg"
+            className="flex min-w-0 items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d4ede8]/50"
           >
             <Logo size="sm" variant="light" />
             <span className="min-w-0">
@@ -80,18 +80,19 @@ export default function AdminSidebar({ pathname, collapsed, onToggleCollapse, pe
         </div>
       )}
 
-      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-        {navLinks.map((link) => (
-          <AdminNavLinkItem
-            key={link.href}
-            link={link}
-            pathname={pathname}
-            collapsed={collapsed}
-          />
-        ))}
+      <nav className="flex-1 overflow-y-auto px-3 py-4" aria-label="Menu do painel">
+        <AdminNavSections
+          pathname={pathname}
+          role={perfil?.role}
+          collapsed={collapsed}
+        />
       </nav>
 
-      <div className={`mt-auto border-t border-white/10 p-3 ${collapsed ? "flex flex-col items-center gap-2" : ""}`}>
+      <div
+        className={`mt-auto border-t border-white/10 p-3 ${
+          collapsed ? "flex flex-col items-center gap-2" : ""
+        }`}
+      >
         <Link
           href="/"
           className={`flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold text-white/75 transition hover:bg-white/8 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d4ede8]/50 ${
@@ -126,7 +127,7 @@ export default function AdminSidebar({ pathname, collapsed, onToggleCollapse, pe
           {!collapsed && (
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-white">{displayName}</p>
-              <p className="text-[11px] text-white/50">Sessão admin</p>
+              <p className="truncate text-[11px] text-white/50">{roleLabel}</p>
             </div>
           )}
         </div>

@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
-import AdminNavLinkItem from "@/components/admin/AdminNavLinkItem";
+import AdminNavSections from "@/components/admin/AdminNavSections";
 import Logo from "@/components/Logo";
 import {
   AdminNavIcon,
   getAdminInitials,
-  getVisibleAdminNavLinks,
 } from "@/components/admin/adminNavConfig";
+import { getRoleLabel } from "@/lib/adminRoles";
 
 /**
  * Drawer de navegação (mobile e tablet).
@@ -22,6 +22,7 @@ import {
 export default function AdminNavDrawer({ open, onClose, pathname, perfil }) {
   const displayName = perfil?.nome || "Administrador";
   const initials = getAdminInitials(displayName);
+  const roleLabel = getRoleLabel(perfil?.role);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -75,15 +76,12 @@ export default function AdminNavDrawer({ open, onClose, pathname, perfil }) {
           </button>
         </div>
 
-        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-          {getVisibleAdminNavLinks(perfil?.role).map((link) => (
-            <AdminNavLinkItem
-              key={link.href}
-              link={link}
-              pathname={pathname}
-              onNavigate={onClose}
-            />
-          ))}
+        <nav className="flex-1 overflow-y-auto px-3 py-4" aria-label="Menu do painel">
+          <AdminNavSections
+            pathname={pathname}
+            role={perfil?.role}
+            onNavigate={onClose}
+          />
         </nav>
 
         <div className="border-t border-white/10 p-4">
@@ -113,7 +111,7 @@ export default function AdminNavDrawer({ open, onClose, pathname, perfil }) {
             )}
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold">{displayName}</p>
-              <p className="text-[11px] text-white/50">Sessão admin</p>
+              <p className="truncate text-[11px] text-white/50">{roleLabel}</p>
             </div>
           </div>
         </div>

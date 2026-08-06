@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import AdminShell, { useAdminAuth } from "@/components/admin/AdminShell";
+import { useAdminFlashToast, useAdminToast } from "@/components/admin/AdminToastContext";
 import { getCapaThumbFromAtrativo } from "@/lib/fotos";
 import { CATEGORIAS_ATRATIVO, getCategoriaAtrativoMeta, normalizeCategoriaAtrativo } from "@/lib/atrativos";
 import {
@@ -257,12 +259,13 @@ function AtrativoCard({ rota, onFixarAtrativoDoDia, onRemoverFixacao, onDeactiva
  */
 export default function AtrativosGridPage() {
   const { loading } = useAdminAuth();
+  const { showToast } = useAdminToast();
+  useAdminFlashToast({ enabled: !loading });
   const [atrativos, setAtrativos] = useState([]);
   const [search, setSearch] = useState("");
   const [categoria, setCategoria] = useState("Todas");
   const [status, setStatus] = useState("Todas");
   const [cidade, setCidade] = useState("Todas");
-  const [message, setMessage] = useState("");
 
   const loadAtrativos = useCallback(async () => {
     const supabase = createClient();
@@ -279,19 +282,10 @@ export default function AtrativosGridPage() {
 
     const timer = setTimeout(() => {
       loadAtrativos();
-      const params = new URLSearchParams(window.location.search);
-      if (params.get("success") === "created") setMessage("Atrativo criado com sucesso.");
-      if (params.get("success") === "updated") setMessage("Atrativo atualizado com sucesso.");
     }, 0);
 
     return () => clearTimeout(timer);
   }, [loading, loadAtrativos]);
-
-  useEffect(() => {
-    if (!message) return undefined;
-    const timer = setTimeout(() => setMessage(""), 5000);
-    return () => clearTimeout(timer);
-  }, [message]);
 
   /**
    * @param {object} rota
@@ -301,7 +295,9 @@ export default function AtrativosGridPage() {
     const { ate, error } = await aplicarFixacaoAtrativoDoDia(supabase, rota.id, dias);
 
     if (error) {
-      setMessage(error.message || "Não foi possível fixar o atrativo do dia.");
+      showToast(error.message || "Não foi possível fixar o atrativo do dia.", {
+        tone: "error",
+      });
       return;
     }
 
@@ -311,7 +307,7 @@ export default function AtrativosGridPage() {
         rota_do_dia_fixada_ate: item.id === rota.id ? ate : null,
       }))
     );
-    setMessage(`Atrativo do dia fixado até ${ate}.`);
+    showToast(`Atrativo do dia fixado até ${ate}.`);
   }
 
   async function removerFixacao(rota) {
@@ -319,7 +315,9 @@ export default function AtrativosGridPage() {
     const { error } = await removerFixacaoAtrativoDoDia(supabase, rota.id);
 
     if (error) {
-      setMessage(error.message || "Não foi possível remover a fixação.");
+      showToast(error.message || "Não foi possível remover a fixação.", {
+        tone: "error",
+      });
       return;
     }
 
@@ -328,7 +326,7 @@ export default function AtrativosGridPage() {
         item.id === rota.id ? { ...item, rota_do_dia_fixada_ate: null } : item
       )
     );
-    setMessage("Fixação do atrativo do dia removida.");
+    showToast("Fixação do atrativo do dia removida.");
   }
 
   /**
@@ -343,6 +341,7 @@ export default function AtrativosGridPage() {
       items.map((item) => (item.id === rota.id ? { ...item, ativa: false } : item))
     );
     await supabase.from("rotas").update({ ativa: false }).eq("id", rota.id);
+    showToast("Atrativo desativado.");
   }
 
   const stats = useMemo(() => {
@@ -405,22 +404,6 @@ export default function AtrativosGridPage() {
       subtitle="Trilhas, roteiros e percursos curados para o app"
       headerAction={novoAtrativoLink}
     >
-      {message && (
-        <div
-          className="mb-5 flex items-center justify-between gap-3 rounded-2xl border border-[#d4ede8] bg-[#eef8f4] px-4 py-3 text-sm font-semibold text-[#1a4a3a]"
-          role="status"
-        >
-          <span>✓ {message}</span>
-          <button
-            type="button"
-            onClick={() => setMessage("")}
-            className="rounded-lg px-2 py-1 text-xs text-[#5a6b66] hover:bg-white/60"
-          >
-            Fechar
-          </button>
-        </div>
-      )}
-
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard label="Total" value={stats.total} accent="text-[#1a4a3a]" />
         <StatCard
@@ -505,19 +488,30 @@ export default function AtrativosGridPage() {
       </p>
 
       {filtered.length === 0 ? (
-        <div className="rounded-2xl bg-white p-10 text-center shadow-sm ring-1 ring-black/5">
-          <p className="text-4xl">🗺️</p>
-          <h2 className="mt-3 text-lg font-bold text-[#1a2e28]">Nenhum atrativo encontrado</h2>
-          <p className="mt-2 text-sm text-[#5a6b66]">
-            Ajuste os filtros ou crie o primeiro atrativo do guia.
-          </p>
-          <Link
-            href="/admin/atrativos/nova"
-            className="mt-6 inline-flex rounded-xl bg-[#1a4a3a] px-5 py-2.5 text-sm font-semibold text-white"
-          >
-            Criar atrativo
-          </Link>
-        </div>
+        <AdminEmptyState
+          title={
+            atrativos.length === 0
+              ? "Nenhum atrativo cadastrado"
+              : "Nenhum atrativo encontrado"
+          }
+          description={
+            atrativos.length === 0
+              ? "Crie o primeiro atrativo curado do guia."
+              : "Ajuste os filtros ou a busca para ver outros resultados."
+          }
+          actionLabel={atrativos.length === 0 ? "Criar atrativo" : "Limpar filtros"}
+          actionHref={atrativos.length === 0 ? "/admin/atrativos/nova" : undefined}
+          onAction={
+            atrativos.length === 0
+              ? undefined
+              : () => {
+                  setSearch("");
+                  setCategoria("Todas");
+                  setStatus("Todas");
+                  setCidade("Todas");
+                }
+          }
+        />
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {filtered.map((rota) => (
