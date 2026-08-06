@@ -57,9 +57,7 @@ export default function HomeContextHeader({
             className="mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[13px] font-medium leading-snug text-[#5a6b66]"
             suppressHydrationWarning
           >
-            <span>
-              {saudacao} <span aria-hidden>👋</span>
-            </span>
+            <span>{saudacao}</span>
             {climaLoading && (
               <span
                 className="inline-block h-3.5 w-10 animate-pulse rounded-full bg-[#e8eeee]"
