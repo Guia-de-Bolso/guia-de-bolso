@@ -1,0 +1,6 @@
+Padrão tipográfico fixo (carrossel 1080x1350):
+- Número: 200px bold
+- Título: 56px bold
+- Subtítulo: 34px regular
+- Logo: 56px em x=90, y=64
+- Margem esquerda: 90px

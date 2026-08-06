@@ -1,0 +1,49 @@
+=== MODELO VISUAL — GUIA DE BOLSO ===
+
+FORMATOS:
+- Feed / Carrossel: 1080 x 1350 px (proporção 4:5)
+- Stories / Reels (capa): 1080 x 1920 px (proporção 9:16)
+
+LOGO:
+- Posição: topo esquerdo, margem de 64px do topo e 72px da esquerda
+- Altura fixa: 64px no feed, 72px no story — NUNCA varia
+- Ao lado da logo: texto "Guia de Bolso" em Plus Jakarta Sans, 28px feed / 32px story, peso 700
+- Regra de contraste: fundo claro → logo-dark + texto #1a4a3a | fundo escuro → logo-light + texto #ffffff
+- Safe zone stories: nada de texto/logo nos 250px do topo e 250px da base (logo fica logo abaixo dos 250px: y=260)
+
+TIPOGRAFIA:
+- Título/Headline: Plus Jakarta Sans, 64px feed / 72px story, peso 700 (bold), cor conforme contraste
+- Corpo/legenda na peça: Inter, 32px feed / 36px story, peso 400 (regular)
+- Posição do título: sempre no terço inferior da peça, alinhado à esquerda, margem 72px
+
+CORES (extraídas do app — app/globals.css):
+- Primária: #1a4a3a
+- Primária escura: #1a2e28
+- Primária clara / menta: #7fd4ae
+- Fundo app: #f0f4f3
+- Texto muted: #5a6b66
+- Overlay sobre foto (para garantir legibilidade do texto): gradiente escuro de baixo pra cima, opacidade 0% a 70%
+
+GRID:
+- Margens externas: 72px em todos os lados (feed); stories respeitam safe zone 250px topo/base
+- Espaçamento entre elementos: 16–24px consistente em todas as peças
+
+CARROSSEL:
+- Slide 1: gancho/pergunta forte + foto de impacto
+- Slides intermediários: 1 dica ou 1 atrativo por slide
+- Último slide: CTA fixo "Baixe o Guia de Bolso" + guiadebolso.app
+
+STORIES:
+- Sempre com sticker de enquete, caixinha de pergunta ou quiz (aumenta retenção/alcance)
+- CTA de arrastar pra cima ou responder no direct
+
+FOTOS PERMITIDAS:
+- Apenas /marketing/assets/fotos/natureza/ e /marketing/assets/fotos/atrativos/
+
+FONTES DO APP:
+- Display/títulos: Plus Jakarta Sans (--font-plus-jakarta / --font-display)
+- Corpo: Inter (--font-inter / --font-sans)
+
+ASSETS:
+- Logo escura: /marketing/assets/logo-dark.png
+- Logo clara: /marketing/assets/logo-light.png
