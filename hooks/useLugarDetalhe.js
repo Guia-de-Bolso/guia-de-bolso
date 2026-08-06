@@ -21,6 +21,7 @@ import {
   mergeGalleryPhotos,
 } from "@/lib/photoGallery";
 import {
+  getAcoesRapidasBloqueadas,
   getAcoesRapidasEstabelecimento,
   getAcoesRapidasLocais,
   getCtaIrAgoraText,
@@ -505,7 +506,10 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
 
   const ehParceiro = lugar ? isParceiro(lugar) : false;
   const ehCuradoria = lugar ? isConteudoCuradoria(lugar) : false;
-  const visibilidade = lugar ? getVisibilidadePerfil(ehParceiro, ehCuradoria) : null;
+  const ehEstabelecimento = lugar ? isLugarEstabelecimento(lugar) : true;
+  const visibilidade = lugar
+    ? getVisibilidadePerfil(ehParceiro, ehCuradoria, ehEstabelecimento)
+    : null;
   const capaUrl = lugar ? getCapaFromLugar(lugar) : null;
   const fotosCompletas = lugar
     ? fotos.length > 0
@@ -529,8 +533,11 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
     lugar && visibilidade
       ? getTextoSobre(lugar, visibilidade.showDescricaoLonga)
       : null;
-  const historiaCultura = lugar ? getTextoHistoriaCultura(lugar) : null;
-  const totalAvaliacoes = avaliacoes.length;
+  const historiaCultura =
+    lugar && visibilidade?.showHistoriaCultura
+      ? getTextoHistoriaCultura(lugar)
+      : null;
+  const totalAvaliacoes = visibilidade?.showAvaliacoes ? avaliacoes.length : 0;
   const mediaAvaliacoes =
     totalAvaliacoes > 0
       ? avaliacoes.reduce((sum, a) => sum + Number(a.nota || 0), 0) /
@@ -544,11 +551,11 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
   const fraseConvencimento = lugar
     ? getFraseConvencimento({ ...lugar, ehParceiro }, tagsExibidas)
     : "";
-  const resumoAvaliacoes = lugar
-    ? getResumoAvaliacoes(avaliacoes, lugar.categoria)
-    : null;
+  const resumoAvaliacoes =
+    lugar && visibilidade?.showAvaliacoes
+      ? getResumoAvaliacoes(avaliacoes, lugar.categoria)
+      : null;
   const horarioResumo = status ? getHorarioResumo(status) : "";
-  const ehEstabelecimento = lugar ? isLugarEstabelecimento(lugar) : true;
   const ctaLabel = status ? getCtaIrAgoraText(status, ehEstabelecimento) : "";
   const staticMapSrc = getStaticMapUrl(localizacao);
   const mapsLink = lugar ? googleMapsUrl(lugar, localizacao) : "";
@@ -567,11 +574,15 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
               cardapioUrl: lugar.cardapio_url?.trim() || undefined,
               siteUrl: lugar.site_url?.trim() || undefined,
             })
-          : []
+          : visibilidade.showAcoesRapidasBloqueadas
+            ? getAcoesRapidasBloqueadas()
+            : []
         : getAcoesRapidasLocais(lugar, tags, distancia)
       : [];
   const acoesRapidas = ehEstabelecimento
-    ? acoesRapidasBase.filter((acao) => acao.href)
+    ? visibilidade?.showAcoesRapidasBloqueadas
+      ? acoesRapidasBase
+      : acoesRapidasBase.filter((acao) => acao.href)
     : acoesRapidasBase;
   const modoAcoes = ehEstabelecimento ? "estabelecimento" : "publico";
   const badgeStyle = lugar
@@ -581,6 +592,15 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
   const mapCoordinates = parseMapCoordinates(localizacao);
   const offlineMapsUrls = lugar ? buildMapsUrlsForLugar(lugar, localizacao) : null;
   const mapAddressLabel = getMapAddressLabel(localizacao);
+
+  function handleClaimPerfil() {
+    if (!lugar) return;
+    registrarLog(supabase, user, "claim_perfil", {
+      lugar_id: lugar.id,
+      lugar_nome: lugar.nome,
+      lugar_slug: lugar.slug || null,
+    });
+  }
 
   return {
     id,
@@ -603,13 +623,14 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
     setSobreExpandido,
     historiaExpandido,
     setHistoriaExpandido,
-    avaliacoes,
+    avaliacoes: visibilidade?.showAvaliacoes ? avaliacoes : [],
     jaAvaliou,
     showAvaliacaoForm,
     setShowAvaliacaoForm,
     isModalOpen,
     setIsModalOpen,
     motivoModal,
+    setMotivoModal,
     localizacao,
     subcategoria,
     tags,
@@ -639,6 +660,7 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
     handleShare,
     handleOpenAvaliacao,
     handleAvaliacaoEnviada,
+    handleClaimPerfil,
     launchNavigationApp,
     openRoute,
     isOfflineView,

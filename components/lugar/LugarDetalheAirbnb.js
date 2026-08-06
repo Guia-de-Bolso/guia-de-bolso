@@ -8,6 +8,7 @@ import LugarBottomSheet from "@/components/lugar/LugarBottomSheet";
 import LugarClimaWidget from "@/components/lugar/LugarClimaWidget";
 import LugarHorariosCompact from "@/components/lugar/LugarHorariosCompact";
 import LugarLocalizacaoCard from "@/components/lugar/LugarLocalizacaoCard";
+import LugarPerfilBloqueadoCta from "@/components/lugar/LugarPerfilBloqueadoCta";
 import LugarQuickActions from "@/components/lugar/LugarQuickActions";
 import LugarCtaBarAirbnb from "@/components/lugar/airbnb/LugarCtaBarAirbnb";
 import LugarGalleryAirbnb from "@/components/lugar/airbnb/LugarGalleryAirbnb";
@@ -25,6 +26,7 @@ import { getBadgeCuradoriaLabel, getBadgeParceiroLabel } from "@/lib/lugarBadges
 import { lugarExibeClima } from "@/lib/clima";
 import { lugarExibeVideo } from "@/lib/lugarVideo";
 import { formatHorario, getDiasHorario } from "@/lib/horarios";
+import { isPerfilBasico } from "@/lib/lugarVisibilidade";
 
 /**
  * Detalhe do lugar — layout inspirado no Airbnb, paleta Guia de Bolso.
@@ -82,12 +84,15 @@ export default function LugarDetalheAirbnb(props) {
     handleShare,
     handleOpenAvaliacao,
     handleAvaliacaoEnviada,
+    handleClaimPerfil,
     launchNavigationApp,
     openRoute,
     backHref = "/",
   } = props;
 
-  const temNota = totalAvaliacoes > 0 && mediaAvaliacoes > 0;
+  const perfilBasico = isPerfilBasico(visibilidade);
+  const temNota =
+    visibilidade?.showAvaliacoes && totalAvaliacoes > 0 && mediaAvaliacoes > 0;
   const localSubtitle = [
     lugar.subcategoria,
     distancia,
@@ -205,7 +210,7 @@ export default function LugarDetalheAirbnb(props) {
             </div>
           )}
 
-          {lugarExibeVideo(lugar) && (
+          {visibilidade.showVideo && lugarExibeVideo(lugar) && (
             <>
               <div className="-mx-1 mt-5">
                 <LugarVideoSection
@@ -228,6 +233,17 @@ export default function LugarDetalheAirbnb(props) {
             <LugarSectionAirbnb title={ehEstabelecimento ? "Contato" : "Informações"}>
               <LugarQuickActions modo={modoAcoes} variant="premium" acoes={acoesRapidas} />
             </LugarSectionAirbnb>
+          )}
+
+          {perfilBasico && visibilidade.showClaimCta && (
+            <>
+              {acoesRapidas.length > 0 ? <LugarDividerAirbnb /> : null}
+              <LugarPerfilBloqueadoCta
+                lugar={lugar}
+                onClaimClick={handleClaimPerfil}
+                variant="airbnb"
+              />
+            </>
           )}
 
           {tagsExibidas.length > 0 && (
@@ -312,7 +328,9 @@ export default function LugarDetalheAirbnb(props) {
                   >
                     {descricaoLonga}
                   </p>
-                  {!sobreExpandido && descricaoLonga.length > 220 && (
+                  {!sobreExpandido &&
+                    visibilidade.showDescricaoLonga &&
+                    descricaoLonga.length > 220 && (
                     <button
                       type="button"
                       onClick={() => setSobreExpandido(true)}
@@ -352,16 +370,19 @@ export default function LugarDetalheAirbnb(props) {
             </>
           )}
 
-          <LugarDividerAirbnb />
-
-          <div className="pb-4">
-            <LugarAvaliacoesSection
-              avaliacoes={avaliacoes}
-              jaAvaliou={jaAvaliou}
-              onAvaliar={handleOpenAvaliacao}
-              toast={toast}
-            />
-          </div>
+          {visibilidade.showAvaliacoes && (
+            <>
+              <LugarDividerAirbnb />
+              <div className="pb-4">
+                <LugarAvaliacoesSection
+                  avaliacoes={avaliacoes}
+                  jaAvaliou={jaAvaliou}
+                  onAvaliar={handleOpenAvaliacao}
+                  toast={toast}
+                />
+              </div>
+            </>
+          )}
         </div>
       </div>
 

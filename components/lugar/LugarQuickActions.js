@@ -102,7 +102,9 @@ function InfoCardContato({ acao, Icon }) {
       <span className="text-center text-[15px] font-bold leading-tight tracking-tight text-[#1a2e28]">
         {acao.label}
       </span>
-      <span className="text-center text-[11px] font-medium leading-snug text-[#5a6b66]">Abrir</span>
+      <span className="text-center text-[11px] font-medium leading-snug text-[#5a6b66]">
+        {acao.href ? "Abrir" : "Bloqueado"}
+      </span>
     </>
   );
 

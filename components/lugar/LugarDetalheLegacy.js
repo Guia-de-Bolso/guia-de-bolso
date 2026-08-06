@@ -13,12 +13,14 @@ import LugarHero from "@/components/lugar/LugarHero";
 import LugarClimaWidget from "@/components/lugar/LugarClimaWidget";
 import LugarHorariosCompact from "@/components/lugar/LugarHorariosCompact";
 import LugarLocalizacaoCard from "@/components/lugar/LugarLocalizacaoCard";
+import LugarPerfilBloqueadoCta from "@/components/lugar/LugarPerfilBloqueadoCta";
 import LugarQuickActions from "@/components/lugar/LugarQuickActions";
 import LugarTags from "@/components/lugar/LugarTags";
 import { getBadgeCuradoriaLabel, getBadgeParceiroLabel } from "@/lib/lugarBadges";
 import { buildReportContext } from "@/lib/reportContext";
 import { lugarExibeClima } from "@/lib/clima";
 import { formatHorario, getDiasHorario } from "@/lib/horarios";
+import { isPerfilBasico } from "@/lib/lugarVisibilidade";
 
 /**
  * Layout legado do detalhe do lugar (pré-redesign).
@@ -77,9 +79,12 @@ export default function LugarDetalheLegacy(props) {
     handleShare,
     handleOpenAvaliacao,
     handleAvaliacaoEnviada,
+    handleClaimPerfil,
     launchNavigationApp,
     openRoute,
   } = props;
+
+  const perfilBasico = isPerfilBasico(visibilidade);
 
   return (
     <div className="min-h-screen bg-[#f0f4f3] pb-28 text-[#1a2e28]">
@@ -97,8 +102,8 @@ export default function LugarDetalheLegacy(props) {
           subcategoria={lugar.subcategoria}
           subcategoriaIcone={subcategoria?.icone}
           distancia={distancia}
-          mediaAvaliacoes={mediaAvaliacoes}
-          totalAvaliacoes={totalAvaliacoes}
+          mediaAvaliacoes={visibilidade?.showAvaliacoes ? mediaAvaliacoes : 0}
+          totalAvaliacoes={visibilidade?.showAvaliacoes ? totalAvaliacoes : 0}
           status={status}
           mostrarStatusAbertura={ehEstabelecimento}
           isFavorito={isFavorito}
@@ -139,6 +144,14 @@ export default function LugarDetalheLegacy(props) {
 
           {acoesRapidas.length > 0 && (
             <LugarQuickActions modo={modoAcoes} acoes={acoesRapidas} />
+          )}
+
+          {perfilBasico && visibilidade.showClaimCta && (
+            <LugarPerfilBloqueadoCta
+              lugar={lugar}
+              onClaimClick={handleClaimPerfil}
+              variant="default"
+            />
           )}
 
           {tagsExibidas.length > 0 && <LugarTags tags={tagsExibidas} />}
@@ -187,7 +200,9 @@ export default function LugarDetalheLegacy(props) {
                 >
                   {descricaoLonga}
                 </p>
-                {!sobreExpandido && descricaoLonga.length > 180 && (
+                {!sobreExpandido &&
+                  visibilidade.showDescricaoLonga &&
+                  descricaoLonga.length > 180 && (
                   <button
                     type="button"
                     onClick={() => setSobreExpandido(true)}
@@ -224,12 +239,14 @@ export default function LugarDetalheLegacy(props) {
             </section>
           )}
 
-          <LugarAvaliacoesSection
-            avaliacoes={avaliacoes}
-            jaAvaliou={jaAvaliou}
-            onAvaliar={handleOpenAvaliacao}
-            toast={toast}
-          />
+          {visibilidade.showAvaliacoes && (
+            <LugarAvaliacoesSection
+              avaliacoes={avaliacoes}
+              jaAvaliou={jaAvaliou}
+              onAvaliar={handleOpenAvaliacao}
+              toast={toast}
+            />
+          )}
         </div>
       </div>
 
