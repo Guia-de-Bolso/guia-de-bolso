@@ -65,13 +65,15 @@ Use a ferramenta com **155 casos de teste**, passo a passo por dispositivo, resu
 |-------|-------------------|-----------------|
 | Login | `/login`, `LoginModal`, Perfil; Capacitor iOS also Apple + native Google | — |
 | Cadastro | Primeiro login (Google/SMS/Apple iOS) + `/perfil/editar` | — |
-| Busca IA | Home `SmartSearch`, `/?busca=1`, `/?q=` | Login + limite 10/dia (free) |
-| Relatórios admin | `/admin/relatorios` | Admin/dev; lugar ativo + período |
+| Busca IA | Home / Explorar `SmartSearchExperience`, `/?busca=1`, `/?q=`; mic = voz nativa (Capacitor) | Login + limite 10/dia (free) |
+| Relatórios admin | `/admin/relatorios` | Admin/dev; estabelecimento ativo (exclui Natureza/Aventura) + período |
 | QR estabelecimento | Admin editar local → PDF; scan `/q/{slug}` | Natureza/Aventura sem QR |
 | Ver lugar | Cards → `/lugares/[id]` | Nenhuma |
 | Favoritar | Coração home/detalhe, `/favoritos` | Login |
-| Avaliar | Detalhe → `AvaliacaoForm` | Login; comentário obrigatório; moderação admin |
+| Avaliar | Detalhe → `AvaliacaoForm` | Login; nome de exibição + comentário obrigatórios; moderação admin |
 | Roteiro IA | `/atrativos` → Criar roteiro | Login + limite 2/dia (free); quota re-checked in sheet before API; excluir salvo via `DELETE /api/roteiro/[id]` |
+| Modo guia (atrativo) | `/atrativos/[id]` → percurso | Nenhuma (progresso local no device) |
+| Push | `/perfil` → Notificações push (app nativo) | Login + Capacitor |
 
 ### Capacitor native auth (manual)
 
@@ -107,7 +109,9 @@ Use a ferramenta com **155 casos de teste**, passo a passo por dispositivo, resu
 | J | Perfil | 9 |
 | K | Casos extremos | 8 |
 | L | Admin | 27 |
-| L-QR | QR codes (admin + scan) | 7 |
+| L-QR | QR codes (admin + scan) | 8 |
+| L-REV | Avaliações (nome de exibição) | 3 |
+| L-ATR | Modo guia + voz | 3 |
 | L-PAR | Parceiros CRM (dev) | 4 |
 | L-CTR | Contratos comerciais (dev) | 4 |
 | N | Feedback e erros PT | 5 |
@@ -133,8 +137,25 @@ Use a ferramenta com **155 casos de teste**, passo a passo por dispositivo, resu
 | L-QR-3 | Scan | Abrir `/q/{slug}` no browser (guest) | 302 → `/lugares/{id}?ref=qr`; banner QR uma vez/sessão |
 | L-QR-4 | Relatório | `/admin/relatorios` após scan | KPI **Escaneamentos QR** incrementa |
 | L-QR-5 | Natureza | Editar praia | Sem seção QR |
+| L-QR-5b | Relatório filtro | `/admin/relatorios` → dropdown | Praias/trilhas (Natureza/Aventura) **não** listadas |
 | L-QR-6 | Inativo | `status=desativado` → `/q/{slug}` | 404 |
 | L-QR-7 | Role admin | Login `admin` (não dev) → `/admin/contratos` | Redirect ou acesso negado no shell |
+
+## L-REV — Avaliações (manual)
+
+| ID | Caso | Passos | Esperado |
+|----|------|--------|----------|
+| L-REV-1 | Nome editável | Logado → detalhe → Avaliar → alterar “Como quer aparecer?” | Nome salvo em `perfis` + snapshot `autor_nome` na avaliação |
+| L-REV-2 | SMS / sem nome | Conta só telefone, perfil sem nome | Prefill `•••NNNN`; pode editar antes de enviar |
+| L-REV-3 | Público | Após aprovação admin | Card mostra `autor_nome` (não depende de join em `perfis` de terceiros) |
+
+## L-ATR — Modo guia (manual)
+
+| ID | Caso | Passos | Esperado |
+|----|------|--------|----------|
+| L-ATR-1 | Abrir guia | `/atrativos/[id]` com pontos → iniciar modo guia | Full-screen; bottom nav oculta |
+| L-ATR-2 | Progresso | Marcar ponto e avançar; fechar e reabrir | Progresso local restaurado |
+| L-ATR-3 | Voz na busca | App nativo → mic na home/Explorar | Transcript preenche query (permissão de microfone) |
 
 ## L-PAR — Parceiros (manual, dev)
 

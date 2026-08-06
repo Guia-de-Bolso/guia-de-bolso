@@ -111,7 +111,7 @@ guia-de-bolso/
 | id | uuid | Chave primária automática |
 | nome | text | Nome do lugar |
 | descricao | text | Descrição curta |
-| categoria | text | Natureza, Gastronomia, Noite, Serviços, Hospedagem |
+| categoria | text | Natureza, Gastronomia, Noite, Serviços, Cultura, Aventura, Bem-estar |
 | distancia | text | Ex: "2.3km de você" (estático por enquanto) |
 | imagem_url | text | URL da imagem (Supabase Storage ou Picsum) |
 | destaque | bool | legado — será substituído pela tabela destaques |
@@ -264,7 +264,7 @@ guia-de-bolso/
 ## Features implementadas ✅
 
 - [x] Home page mobile-first com layout fiel ao design original
-- [x] Chips de categoria com scroll horizontal (Natureza, Gastronomia, Noite, Serviços, Hospedagem)
+- [x] Chips de categoria com scroll horizontal (Natureza, Gastronomia, Noite, Serviços, Cultura, Aventura, Bem-estar)
 - [x] Card de destaque da semana
 - [x] Seção "Perto de você" com cards horizontais
 - [x] Bottom navigation bar (Início, Favoritos, Perfil)
@@ -306,8 +306,9 @@ guia-de-bolso/
 - [x] Favoritos reais salvos no Supabase
 - [x] Favoritos offline automáticos (IndexedDB + rotas `/favoritos/lugar|atrativo/[id]`)
 - [x] Página de favoritos com remoção de favoritos
-- [x] Bottom nav com navegação ativa por rota
+- [x] Bottom nav com navegação ativa por rota (ícones semânticos: Início, Explorar, Rotas, Favoritos, Perfil)
 - [x] Página de perfil com foto, nome, email e estatísticas
+- [x] Notificações push no app nativo (toggle em `/perfil`, FCM — `docs/push-notifications.md`)
 - [x] Editar perfil com upload de foto via `POST /api/perfil/avatar` (`lib/avatarStorage.js`)
 - [x] Upload de foto de perfil funcionando
 - [x] Tela de perfil sem login com benefícios e opções de entrada
@@ -326,13 +327,16 @@ guia-de-bolso/
 - [x] PDF premium de QR Code do estabelecimento (múltiplos formatos de impressão)
 - [x] Gestão de usuários
 - [x] Sistema de logs (login, logout, favoritos, IR AGORA, visualizou_lugar, acesso ao app)
-- [x] Relatórios por estabelecimento no admin (`/admin/relatorios`) com PDF e WhatsApp
+- [x] Relatórios por estabelecimento no admin (`/admin/relatorios`) com PDF e WhatsApp (exclui Natureza/Aventura do seletor)
 - [x] QR Code por estabelecimento — URL curta `/q/{slug}`, PDF no admin, contagem de scans nos relatórios
 - [x] Página `/baixar` — smart link para App Store / Play (`lib/appStoreLinks.js`); QR único em adesivos/cartazes (`docs/materiais/README.md`)
 - [x] Roteiro IA com timeline (`lib/roteiroParse.js`, `RoteiroItineraryView`)
 - [x] Compressão de imagem no cliente (`lib/imageCompress.js`) para avatar e fotos admin
 - [x] Entrega híbrida de imagens — `RemotePhoto` (CDN direto) + `next/image` em cards de lista; `minimumCacheTTL` em `next.config.mjs`
-- [x] Sistema de avaliações com moderação
+- [x] Sistema de avaliações com moderação — nome de exibição editável + snapshot (`autor_nome`, `lib/autorDisplayName.js`)
+- [x] Atrativos: modo guia + progresso do percurso (`AtrativoModoGuia`, `lib/atrativoPercursoProgresso.js`)
+- [x] Busca por voz nativa (Capacitor) + fallback Web Speech (`hooks/useVoiceSearch.js`)
+- [x] Explorar reutiliza `SmartSearchExperience` / `useSmartSearch` (mesma busca IA da home)
 - [x] Editor de horários com time picker (Fechado/24h, **dois turnos por dia**, fechamento após meia-noite, copiar entre dias — `HorarioEditor`, `lib/horarios.js`)
 - [x] Testes unitários em `lib/*.test.js` (`npm test`, ~40 módulos — horários, premium, visibilidade, busca, roteiro, etc.)
 - [x] Smoke E2E Playwright (`e2e/smoke.spec.js`, 10 casos; CI após build)
@@ -342,7 +346,7 @@ guia-de-bolso/
 - [x] Tags admin: até **5** por local e rota (antes 3)
 - [x] Onboarding com imagens locais (`/public/onboarding/`) e fluxo guest → login
 - [x] Página de categorias (`/categorias`)
-- [x] Novas categorias: Cultura, Aventura, Bem-estar, Compras
+- [x] Categorias ativas: Natureza, Gastronomia, Noite, Serviços, Cultura, Aventura, Bem-estar (Compras e Hospedagem removidas do produto)
 - [x] Tabela perfis com roles (user/admin)
 - [x] Deploy automático na Vercel
 
@@ -378,7 +382,9 @@ guia-de-bolso/
 - Bege: chip Gastronomia
 - Lilás: chip Noite
 - Azul claro: chip Serviços
-- Dourado: chip Hospedagem
+- Roxo: chip Cultura
+- Laranja: chip Aventura
+- Rosa: chip Bem-estar
 
 **Layout:** mobile-first, máximo ~390px de largura, centralizado no desktop
 

@@ -159,8 +159,10 @@ Antes de criar utilitário paralelo, verificar:
 | `horarios.js` | Aberto/fechado |
 | `localizacao.js` | Distância |
 | `lugarDetalhe.js` | Tipo de lugar e CTAs |
-| `destaques.js` | Parceiros vigentes |
-| `homeContext.js` | Hero e chips home |
+| `homeSelection.js` / `publicCatalog.js` | Parceiros e “Em alta” (pool `eh_parceiro`) |
+| `homeContext.js` | Chips e ordenação por distância na home |
+| `atrativoDoDia.js` | Hero / atrativo do dia |
+| `autorDisplayName.js` | Nome público em avaliações |
 | `roteiroParse.js` | Timeline roteiro |
 | `logs.js` | Analytics |
 | `adminRoles.js` | `canAccessAdmin` |

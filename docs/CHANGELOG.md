@@ -8,26 +8,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- **Review display name** — editable “Como quer aparecer?” on `AvaliacaoForm`; resolves nome → e-mail local → masked phone → Visitante (`lib/autorDisplayName.js`, trigger `resolve_autor_display_name` in `supabase/avaliacoes_autor_snapshot.sql` / `20260728120000_avaliacoes_autor_snapshot.sql`); public list uses `autor_nome` / `autor_foto_url` snapshots.
+- **Atrativo modo guia** — immersive one-point guide with local progress (`AtrativoModoGuia`, `AtrativoPercursoSection`, `AtrativoMapaIlustrado`, `hooks/useAtrativoPercursoProgresso.js`, `lib/atrativoPercursoProgresso.js`).
+- **Native voice search** — mic on home/Explorar smart search (`hooks/useVoiceSearch.js`, `lib/voiceSearchNative.js`, Web Speech fallback in `lib/voiceSearchBrowser.js`).
+- **Push notifications (native)** — FCM register + profile toggle + automations (`lib/pushNotifications.js`, `docs/push-notifications.md`, `push_tokens` / `push_campaigns` migrations).
 - **Partner program CRM** (`/admin/parceiros`) — free-period end dates, quarterly review tracking, filters and dashboard deep links (`ParceirosAdminPage`, `lib/parceiroAdmin.js`, `supabase/lugares_parceiro_programa.sql`).
 - **Commercial contracts module** (`/admin/contratos`) — `contratos_comerciais` + `contrato_documentos`, private bucket `contratos-parceiros`, document API (`app/api/admin/contratos/*`, `lib/contratoAdmin.js`, `supabase/contratos_comerciais.sql`).
 - **Premium establishment QR PDF** — print formats (mesa/A6, adesivo, display A5, A4, quadrado) via `lib/qrPdf/render.js`, `lib/qrPdf/formats.js`, `LugarQrSection`.
 
 ### Changed
 
+- **Categories** — removed **Compras** and **Hospedagem** from the product catalog (`lib/categorias.js`, taxonomia, roteiro interesses); SQL cleanup `supabase/remover_categorias_compras_hospedagem.sql`.
+- **Explorar search** — reuses `SmartSearchExperience` + `useSmartSearch` (removed standalone `ExplorarBuscaBar`).
+- **Admin establishment reports** — place dropdown lists only active non-Natureza/Aventura establishments (`RelatoriosEstabelecimentoPage.js`), aligned with QR eligibility.
+- **Home / nav polish** — compact header + marca, “Pergunte ao Guia”, suggestion card, Prefeitura footer, semantic bottom-nav icons (`HomeContextHeader`, `BottomNav`, `HomePageClient`).
+- **Push automation copy** — more natural pt-BR templates (`lib/pushAutomationRules.js`, `20260722120000_push_copy_ptbr.sql`).
+- **Place persuasion copy** — context-aware phrases for services/pets/etc. (`lib/lugarDetalhe.js`).
 - **Free tier AI search limit** — daily cap raised from **5** to **10** buscas/dia (`lib/premium.js`, RPC `increment_busca_ia` / `decrement_busca_ia` in `supabase/increment_uso_ia.sql`, migration `20260706120000_busca_ia_daily_limit_10.sql`). Onboarding, paywall and home counter use `LIMITS.busca` dynamically.
 
+- **Home “Em alta hoje”** — daily shuffle over public catalog pool (`pickEmAltaCuradoria` + `filterLugaresPublicos`); with `PUBLIC_APP_PARTNERS_ONLY = false` that is all active places (not `conteudo_curadoria` nor `lugares_populares`).
+- **Public catalog** — `PUBLIC_APP_PARTNERS_ONLY = false` (`lib/publicCatalog.js`) — consumer lists include every active place; flip to `true` to restrict to `eh_parceiro`.
 - **Admin role split** — `admin` = operational CMS (locais, atrativos, avaliações, relatórios); `dev` = full panel including parceiros, contratos, logs, taxonomia, IA, despesas, feedback, usuários (`lib/adminRoles.js`, `AdminShell`, `requireAdminOnlyApi`).
-- **Public catalog** — consumer lists use `PUBLIC_APP_PARTNERS_ONLY` (`lib/publicCatalog.js`, `queryLugaresAtivos`) — only active `eh_parceiro` places in production app feeds.
-- **Home “Em alta hoje”** — daily shuffle over partner pool (`pickEmAltaCuradoria` + `filterLugaresPublicos`), not `conteudo_curadoria` nor `lugares_populares`.
 - **Contract DOCX generator** — print-ready output strips internal instructions; 6-month preset merges annexes II/III from paid template (`scripts/generate-contrato-docx.mjs`).
 
 ### Fixed
 
+- **Review author display** — public cards show `autor_nome`; aspect chips expand on detail (`LugarAvaliacoesSection`, `lib/avaliacoes.js`).
 - **Admin contratos** — dropdown lists only active partners; “Novo contrato” button visibility (`lib/contratoAdmin.js`, `ContratosAdminPage.js`).
 - **Admin local edit** — removed stale `lib/slug` import crash on place save.
 
 ### Documentation
 
+- Synced voice search, atrativo modo guia, review display names, push profile toggle, Explorar `SmartSearchExperience`, hero via `resolveAtrativoDoDia`, reports Natureza/Aventura filter; removed stale `destaques.js` / `pickHeroRotaCiclo` / “notifications not shipped” refs across `features.md`, `architecture.md`, `database.md`, `migrations.md`, `conventions.md`, `project-structure.md`, `TESTING-CHECKLIST.md`, `CLAUDE.md`.
 - Synced partner CRM, contracts, dev-only admin routes, public catalog, Em alta criteria, QR PDF formats across `features.md`, `architecture.md`, `database.md`, `api.md`, `authentication.md`, `security-rls.md`, `TESTING-CHECKLIST.md`, `docs/materiais/README.md`.
 
 ### Removed
@@ -114,7 +126,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **Place & route photo carousels** — controlled swipe: `snap-mandatory` + `useControlledPhotoCarousel` (max ±1 slide per gesture) in `lib/horizontalCarousel.js`; `GalleryHeroAirbnb`, `LugarHero`.
 - **Opening-hours UX** — status copy includes pause between shifts and overnight close (`status.resumo`); compact row on detail; optional `title`/subtitle on cards (`PlaceCard`, `EmAltaCard`, `LugarHero`, `getHorarioResumo` in `lib/lugarDetalhe.js`).
 - **Home header** — `HomeContextHeader` shows brand + location with inline Open-Meteo temperature/emoji; contextual phrase card removed.
-- **Hero selection** — `pickHeroLugar` (`lib/homeContext.js`) scores open status, vigent partner, trending IDs, time-of-day category, and distance; documented in `docs/features.md`.
+- **Hero selection** — atrativo do dia via `resolveAtrativoDoDia` / `pickHeroAtrativoCiclo` (`lib/atrativoDoDia.js`, `lib/homeRotation.js`); documented in `docs/features.md`.
 - **AI roteiro API** — stricter markdown prompt, `max_tokens` 2400, response includes `lugaresCatalog` for UI linking (`app/api/roteiro/route.js`).
 - **Favoritos / Explorar / Perfil** — UX polish (count badge, empty states, profile edit footer, duplicate “Editar perfil” removed from settings list).
 

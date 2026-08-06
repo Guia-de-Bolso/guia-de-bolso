@@ -101,7 +101,7 @@ Core content: beaches, restaurants, trails, services, etc.
 | `nome` | `text` | Display name |
 | `descricao` | `text` | Short description |
 | `descricao_longa` | `text` | Long “about” copy |
-| `categoria` | `text` | Natureza, Gastronomia, Noite, Serviços, Hospedagem, Cultura, Aventura, Bem-estar, Compras |
+| `categoria` | `text` | Natureza, Gastronomia, Noite, Serviços, Cultura, Aventura, Bem-estar |
 | `subcategoria` | `text` | e.g. Praias, Restaurantes — must match `subcategorias.nome` for same `categoria` |
 | `status` | `text` | `ativo`, `desativado`, `em_analise` — public app only reads `ativo` |
 | `desativado_em` | `timestamptz` | Preenchido ao desativar; após **30 dias** o cron exclui o registro definitivamente *(migration: `lugares_purge_inativos.sql`)* |
@@ -262,14 +262,14 @@ User reviews with moderation.
 | `comentario` | `text` | Optional |
 | `aspectos` | `jsonb` | Selected aspect labels from structured form (default `[]`) |
 | `sugestao_ia` | `text` | Claude pre-moderation hint (`aprovar` / `rejeitar` / `revisar` + reason) |
-| `autor_nome` | `text` | Display name snapshot at insert: nome → e-mail local → telefone mascarado → Visitante *(migration: `avaliacoes_autor_snapshot.sql`)* |
+| `autor_nome` | `text` | Display name snapshot at insert: explicit form value preferred; else nome → e-mail local → telefone mascarado → Visitante *(migration: `avaliacoes_autor_snapshot.sql` / `20260728120000_avaliacoes_autor_snapshot.sql`)* |
 | `autor_foto_url` | `text` | Avatar URL snapshot at insert *(same)* |
 | `status` | `text` | `pendente`, `aprovada`, `rejeitada` |
 | `created_at` | `timestamptz` | |
 
 Public reads: `status = 'aprovada'`. Inserts default to `pendente`. After insert, client calls `POST /api/avaliacoes/analisar`. Admin approves/rejects. Migration: `supabase/avaliacoes_moderacao.sql`.
 
-Author name/photo for the public UI come from `autor_nome` / `autor_foto_url` (trigger fills from `perfis` on insert). Joining `perfis` remains useful only for the author themselves or `dev` (RLS).
+Author name/photo for the public UI come from `autor_nome` / `autor_foto_url`. `AvaliacaoForm` writes `autor_nome` and updates `perfis.nome`; the insert trigger still fills `autor_foto_url` and backfills name via `resolve_autor_display_name` when needed (reads `auth.users.phone` for SMS accounts without exposing `perfis` RLS to other users).
 
 ---
 
@@ -770,8 +770,8 @@ Quick summary for existing projects that already have base tables:
 | Use case | Query |
 |----------|--------|
 | Active places (consumer) | `queryLugaresAtivos` → `applyPublicLugarFilters` (`status = ativo`, `eh_parceiro = true` when `PUBLIC_APP_PARTNERS_ONLY`) |
-| Hero (“O que fazer agora”) | `GET /api/rotas` → `resolveAtrativoDoDia` / `pickHeroRotaCiclo` — daily atrativo with cover |
-| “Em alta hoje” | Active partners pool → `pickEmAltaCuradoria` — daily deterministic shuffle (not `lugares_populares`, not `conteudo_curadoria` filter) |
+| Hero (“O que fazer agora”) | Active atrativos → `resolveAtrativoDoDia` / `pickHeroAtrativoCiclo` (`lib/atrativoDoDia.js`, `lib/homeRotation.js`) — fixação admin or daily cover cycle |
+| “Em alta hoje” | Public catalog pool → `pickEmAltaCuradoria` — daily deterministic shuffle (`filterLugaresPublicos`; partners-only only if `PUBLIC_APP_PARTNERS_ONLY`; not `lugares_populares`, not `conteudo_curadoria` filter) |
 | Parceiros carousel | `eh_parceiro = true` → `pickParceirosPorCategoria` — one per category, `weeklySeed` |
 | “Perto de você” | Active `lugares` via API `.limit(20)`, exclude **hero id only**, `.slice(0, 6)`, sort by GPS — phase 2 |
 | Browse “Populares” (search overlay) | `fetchLugaresPopulares` (`lib/lugaresPopulares.js`) — unchanged |

@@ -110,7 +110,7 @@ Organização **por domínio**, não por tipo atômico (Button/, Card/).
 | **Supabase** | `supabase/client.js`, `server.js`, `supabase.js` (barrel + anon) |
 | **Premium / IA** | `premium.js`, `premiumServer.js`, `iaRateLimit.js`, `busca.js`, `buscaRetrieval.js` |
 | **Lugares** | `lugaresQuery.js`, `lugaresPopulares.js`, `lugarDetalhe.js`, `fetchLugaresApi.js` |
-| **Home / contexto** | `homeContext.js`, `clima.js`, `destaques.js` |
+| **Home / contexto** | `homeContext.js`, `homeSelection.js`, `homeRotation.js`, `atrativoDoDia.js`, `clima.js`, `publicCatalog.js` |
 | **Horários** | `horarios.js` (+ `horarios.test.js`) |
 | **Rotas / roteiro** | `roteiroParse.js`, `roteiroLugares.js`, `rotas.js` |
 | **Admin** | `adminRoles.js`, `adminDashboard.js`, `adminLogs.js`, `adminTaxonomia.js` |

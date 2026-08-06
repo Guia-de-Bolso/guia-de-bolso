@@ -58,6 +58,7 @@ Porta de entrada do repositório: [README.md](../README.md) (visão executiva). 
 |-----------|----------|
 | [**Features**](./features.md) | Matriz de capacidades e regras de acesso |
 | [**Taxonomia de lugares**](./taxonomia-lugares.md) | Subcategorias vs tags |
+| [**Próximos 30 cadastros**](./proximos-30-cadastros.md) | Fila prioritária de locais por categoria |
 | [**Custos**](./CUSTOS.md) | Projeções e planilha |
 | [**Changelog**](./CHANGELOG.md) | Histórico de releases |
 | [**Testes (checklist)**](./TESTING-CHECKLIST.md) | QA manual + smoke automatizado (unit + Playwright) |

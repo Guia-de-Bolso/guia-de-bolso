@@ -135,7 +135,7 @@ components/
 └── …                      # Other root-level UI (maps, autocomplete, etc.)
 ```
 
-**Home** logic: hero atrativo via `resolveAtrativoDoDia` / `pickHeroRotaCiclo` (`lib/homeSelection.js`, `lib/atrativoDoDia.js`); quick-search chips and distance sort in `lib/homeContext.js`; partner carousel + “Em alta” in `lib/homeSelection.js` + `lib/publicCatalog.js`. Header weather is inline in `HomeContextHeader`. **Place detail** uses `lib/lugarDetalhe.js` to distinguish public venues (beaches, trails) from establishments (restaurants, services) and to shape quick actions.
+**Home** logic: hero atrativo via `resolveAtrativoDoDia` / `pickHeroAtrativoCiclo` (`lib/atrativoDoDia.js`, `lib/homeRotation.js`); quick-search chips and distance sort in `lib/homeContext.js`; partner carousel + “Em alta” in `lib/homeSelection.js` + `lib/publicCatalog.js`. Smart search shell shared by home and Explorar (`SmartSearchExperience`, `hooks/useSmartSearch.js`, optional voice via `hooks/useVoiceSearch.js`). Header weather is inline in `HomeContextHeader`. **Place detail** uses `lib/lugarDetalhe.js` to distinguish public venues (beaches, trails) from establishments (restaurants, services) and to shape quick actions / persuasion copy.
 
 ### Client-side state patterns
 
@@ -272,12 +272,18 @@ Server-only secrets: `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`. These never use the
 | `logs.js` | Shared | Insert into `logs` for analytics |
 | `storageUpload.js` | Client | Admin photo upload to Storage (uses `imageCompress.js` when over 200KB) |
 | `imageCompress.js` | Client | Canvas resize/JPEG for avatars and entity photos |
-| `homeContext.js` | Shared | Quick-search chips, `sortLugaresPorDistancia`, `getMelhorHorario` (null without hours); hero scoring lives in `homeSelection.js` / `atrativoDoDia.js` |
-| `homeSelection.js` | Shared | `pickParceirosPorCategoria`, `pickEmAltaCuradoria`, `pickHeroRotaCiclo` |
+| `homeContext.js` | Shared | Quick-search chips, `sortLugaresPorDistancia`, `getMelhorHorario` (null without hours); hero scoring lives in `atrativoDoDia.js` / `homeRotation.js` |
+| `homeSelection.js` | Shared | `pickParceirosPorCategoria` / `pickParceirosCarrossel`, `pickEmAltaCuradoria` |
+| `homeRotation.js` | Shared | Daily seeds, `pickHeroAtrativoCiclo` |
+| `atrativoDoDia.js` | Shared | Resolve atrativo do dia (fixação admin + ciclo) |
+| `atrativoPercursoProgresso.js` | Client | Local progress for atrativo modo guia |
 | `publicCatalog.js` | Shared | `PUBLIC_APP_PARTNERS_ONLY` filters for production consumer lists |
 | `lugarDetalhe.js` | Shared | Establishment vs public place, quick actions, persuasion copy, `getStaticMapUrl` (Google Static Maps) |
+| `autorDisplayName.js` | Shared | Public author display name (nome → e-mail → telefone mascarado → Visitante) |
 | `lugaresPopulares.js` | Shared | Trending places by favorite count |
 | `lugaresVisitados.js` | Client | Recent places in `localStorage` for search browse |
+| `voiceSearchNative.js` / `voiceSearchBrowser.js` / `voiceSearchErrors.js` | Client | Capacitor + Web Speech for smart search mic |
+| `pushNotifications.js` / `pushMessaging.js` / `pushCampaigns.js` | Client/server | FCM register, send, automation queue |
 | `clima.js` | Shared | Open-Meteo weather/marine; `fetchClimaApisCached`, `lugarExibeClima`; home header + hero temp + `LugarClimaWidget` |
 | `fotos.js` / `photoItems.js` | Shared | Cover URL helpers for places and routes |
 | `tags.js` | Shared | Tag chips from `lugares_tags` / `rotas_tags` joins |
@@ -288,7 +294,6 @@ Server-only secrets: `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`. These never use the
 | `logIA.js` | Server/shared | Cálculo de custo Anthropic + persistência em `logs_ia` |
 | `adminTaxonomia.js` | Client | Subcategoria/tag CRUD, usage guards, `tags.aplica_em_rotas` fallback |
 | `adminAlertas.js` | Client | Aggregated admin alerts (reviews, places, destaques, account deletion) |
-| `destaques.js` | Shared | Vigent highlights, `ehParceiro` enrichment for home/search/AI |
 | `planoComercial.js` | Shared | Single Parceiro plan fetch/ensure (`PLANO_COMERCIAL_PRECO`) |
 | `categorias.js` | Shared | Explorar category catalog, sort, featured picks |
 | `perfil.js` | Shared | Profile quick-link definitions |
@@ -311,8 +316,7 @@ Middleware does **not** enforce route-level auth; pages and APIs enforce access 
 ### What is not on the server
 
 - No standalone Express/FastAPI service  
-- No Redis or message queue  
-- No edge-configured rate limiting (limits are application-level via `perfis` + RPC)  
+- No required Redis — optional **Upstash Redis** for distributed IA rate limit (`lib/iaRateLimit.js`; in-memory fallback in dev)  
 - No GraphQL layer  
 
 ---

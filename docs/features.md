@@ -302,7 +302,7 @@ Decide to go now, contact the business, or navigate.
 - One review per user per place (second attempt blocked).
 - `profiles` join failure → fallback query without author names.
 - Share: `navigator.share` or clipboard copy; user canceling share is silent.
-- **Place profile visibility** — gallery, tags, establishment quick actions, and long description are shown for **all** active places; only the Parceiro badge remains paywalled (`lib/lugarVisibilidade.js`).
+- **Place profile visibility** — establishments without `eh_parceiro` show a **basic** teaser (cover, short description, locked contact actions, claim CTA via WhatsApp, IR AGORA still works). Partners and public/nature places keep the **full** profile (`lib/lugarVisibilidade.js`).
 - Maps: first visit may open app picker sheet; preference stored in `localStorage`.
 - Visit recorded to recent list on successful load.
 

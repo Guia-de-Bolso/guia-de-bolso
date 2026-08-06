@@ -114,6 +114,7 @@ Run in order for a **new environment** that already has base tables from the Sup
 | 12 | `logs_policies.sql` | FK `logs.user_id` → `perfis`; RLS |
 | 13 | `lugares_visibilidade.sql` | `mostrar_endereco`, `mostrar_horarios` |
 | 14 | `taxonomia_lugares_cleanup.sql` | Subcategorias + tag seeds + lugar migrations |
+| 14c | `remover_categorias_compras_hospedagem.sql` | Remove Compras/Hospedagem do catálogo (desativa locais, apaga subcategorias, limpa tags) |
 | 14b | `subcategoria_piscinas_naturais.sql` | **Superseded** by #14 — reference only |
 | 15 | `lugares_qr_slug.sql` | `lugares.slug` unique + backfill |
 | 15b | `lugares_parceiro_curadoria.sql` | `eh_parceiro`, `conteudo_curadoria`; migra vigentes de `destaques` |
@@ -139,7 +140,7 @@ Run in order for a **new environment** that already has base tables from the Sup
 |---|------|---------|
 | 22 | `avaliacoes_moderacao.sql` | Moderation columns + RLS |
 | 22b | `avaliacoes_admin_policies.sql` | Admin SELECT/UPDATE/DELETE all `avaliacoes` (moderação) |
-| 22b2 | `avaliacoes_autor_snapshot.sql` | `autor_nome` / `autor_foto_url` + trigger (exibição pública sem abrir RLS de `perfis`) |
+| 22b2 | `avaliacoes_autor_snapshot.sql` (+ `20260728120000_avaliacoes_autor_snapshot.sql`) | `autor_nome` / `autor_foto_url` + trigger; fallbacks nome → e-mail → telefone mascarado → Visitante |
 | 22c | `favoritos_policies.sql` | Own-row CRUD + admin SELECT (relatórios) |
 | 22d | `destaques_planos_policies.sql` | `planos` read public / write admin; `destaques` admin only |
 | 23 | `plano_comercial_unico.sql` | Single Parceiro plan seed |
@@ -147,6 +148,7 @@ Run in order for a **new environment** that already has base tables from the Sup
 | 25 | `feedback.sql` | Support table + RLS |
 | 25b | `20260713180000_push_tokens.sql` | Tokens FCM por instalação + RLS |
 | 25c | `20260721190000_push_campaigns.sql` | Fila idempotente, triggers de conteúdo e claim das automações push |
+| 25d | `20260722120000_push_copy_ptbr.sql` | Copy pt-BR mais natural nas automações push |
 
 ### F — Security P0 (lugares + storage write)
 
