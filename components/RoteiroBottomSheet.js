@@ -43,7 +43,6 @@ const INTERESSES_OPCOES = [
   "Gastronomia",
   "Vida noturna",
   "Cultura",
-  "Compras",
   "Aventura",
   "Bem-estar",
 ];

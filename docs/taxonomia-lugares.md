@@ -30,9 +30,6 @@ Bares · Baladas · Pubs
 ### Serviços
 Farmácias · Mercados · Mecânicos · Salões · Saúde
 
-### Hospedagem
-Pousadas · Hostels · Hotéis
-
 ### Cultura
 Museus · Monumentos · Igrejas e templos · Eventos
 
@@ -42,8 +39,7 @@ Esportes radicais · Passeios de barco · Escalada · Ciclismo
 ### Bem-estar
 Spa · Yoga · Terapias
 
-### Compras
-Lojas · Feiras · Artesanato
+> **Removidas do produto:** Hospedagem (Pousadas/Hostels/Hotéis) e Compras (Lojas/Feiras/Artesanato). SQL: `supabase/remover_categorias_compras_hospedagem.sql`.
 
 ## Tags novas (detalhes)
 
