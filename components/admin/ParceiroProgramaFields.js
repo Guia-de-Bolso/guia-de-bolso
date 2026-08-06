@@ -179,8 +179,10 @@ export default function ParceiroProgramaFields({
         <span>
           <strong>Parceiro do Guia</strong>
           <span className="mt-0.5 block text-xs font-normal text-[#5a6b66]">
-            Visível no app — carrossel, badge e perfil completo (R$ 299/mês após período
-            gratuito).
+            Visível no app com perfil completo — carrossel, badge, galeria e
+            links (R$ 299/mês após período gratuito). Sem o plano, o local pode
+            aparecer só com perfil básico (capa + descrição curta + IR AGORA).
+            Contrato comercial só na modalidade paga.
           </span>
         </span>
       </label>

@@ -12,7 +12,7 @@ import {
   CONTRATO_STATUS,
   CONTRATO_STATUS_OPTIONS,
   CONTRATO_TIPO,
-  CONTRATO_TIPO_OPTIONS,
+  CONTRATO_TIPO_OPTIONS_CRIACAO,
   buildContratoPayload,
   calcularResumoContratos,
   contratoMatchesFiltro,
@@ -36,7 +36,7 @@ import { createClient } from "@/lib/supabase";
 
 const EMPTY_FORM = {
   lugar_id: "",
-  tipo: CONTRATO_TIPO.LANCAMENTO_6_MESES,
+  tipo: CONTRATO_TIPO.PARCEIRO_PAGO,
   status: CONTRATO_STATUS.RASCUNHO,
   ativo: false,
   numero_proposta: "",
@@ -367,8 +367,8 @@ export default function ContratosAdminPage() {
     >
       <div className="space-y-6 px-4 pb-8 md:px-6 lg:px-8">
         <p className="text-sm text-[#5a6b66]">
-          Controle comercial — propostas, assinaturas, valores, Asaas (referência manual) e
-          documentos. Use{" "}
+          Contratos comerciais apenas para parceiros no plano pago. Lançamento 6 meses
+          grátis e perfil básico não usam contrato. Use{" "}
           <Link href="/admin/parceiros" className="font-semibold text-[#1a4a3a] underline">
             Parceiros
           </Link>{" "}
@@ -385,12 +385,10 @@ export default function ContratosAdminPage() {
           </p>
         )}
 
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {[
             { label: "Ativos", value: resumo.ativos },
-            { label: "6 meses grátis", value: resumo.gratis },
             { label: "Pagos", value: resumo.pagos },
-            { label: "Grátis vencendo", value: resumo.vencendo, accent: "text-amber-700" },
             { label: "Sem PDF assinado", value: resumo.semDoc, accent: "text-amber-700" },
             { label: "Inadimplentes", value: resumo.inadimplentes, accent: "text-red-600" },
           ].map((item) => (
@@ -631,7 +629,7 @@ export default function ContratosAdminPage() {
         <div className="space-y-4">
           <div>
             <label className="text-xs font-semibold uppercase text-[#5a6b66]">
-              Estabelecimento (parceiro ativo)
+              Estabelecimento (parceiro pago)
             </label>
             <select
               value={form.lugar_id}
@@ -655,7 +653,16 @@ export default function ContratosAdminPage() {
                 onChange={(event) => setForm({ ...form, tipo: event.target.value })}
                 className="mt-1 w-full rounded-xl border border-[#e3e9e6] px-3 py-2.5 text-sm"
               >
-                {CONTRATO_TIPO_OPTIONS.map((item) => (
+                {(form.tipo === CONTRATO_TIPO.LANCAMENTO_6_MESES
+                  ? [
+                      {
+                        id: CONTRATO_TIPO.LANCAMENTO_6_MESES,
+                        label: "Lançamento — 6 meses grátis (legado)",
+                      },
+                      ...CONTRATO_TIPO_OPTIONS_CRIACAO,
+                    ]
+                  : CONTRATO_TIPO_OPTIONS_CRIACAO
+                ).map((item) => (
                   <option key={item.id} value={item.id}>
                     {item.label}
                   </option>
