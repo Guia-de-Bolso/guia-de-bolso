@@ -11,6 +11,7 @@ import LugarBottomSheet from "@/components/lugar/LugarBottomSheet";
 import LugarCtaFixo from "@/components/lugar/LugarCtaFixo";
 import LugarHero from "@/components/lugar/LugarHero";
 import LugarClimaWidget from "@/components/lugar/LugarClimaWidget";
+import LugarGaleriaBloqueada from "@/components/lugar/LugarGaleriaBloqueada";
 import LugarHorariosCompact from "@/components/lugar/LugarHorariosCompact";
 import LugarLocalizacaoCard from "@/components/lugar/LugarLocalizacaoCard";
 import LugarPerfilBloqueadoCta from "@/components/lugar/LugarPerfilBloqueadoCta";
@@ -56,6 +57,7 @@ export default function LugarDetalheLegacy(props) {
     subcategoria,
     visibilidade,
     imagens,
+    imagensBloqueadas,
     status,
     diaAtual,
     enderecoExibicao,
@@ -102,8 +104,8 @@ export default function LugarDetalheLegacy(props) {
           subcategoria={lugar.subcategoria}
           subcategoriaIcone={subcategoria?.icone}
           distancia={distancia}
-          mediaAvaliacoes={visibilidade?.showAvaliacoes ? mediaAvaliacoes : 0}
-          totalAvaliacoes={visibilidade?.showAvaliacoes ? totalAvaliacoes : 0}
+          mediaAvaliacoes={mediaAvaliacoes}
+          totalAvaliacoes={totalAvaliacoes}
           status={status}
           mostrarStatusAbertura={ehEstabelecimento}
           isFavorito={isFavorito}
@@ -152,6 +154,12 @@ export default function LugarDetalheLegacy(props) {
               onClaimClick={handleClaimPerfil}
               variant="default"
             />
+          )}
+
+          {perfilBasico && imagensBloqueadas.length > 0 && (
+            <div className="mt-6">
+              <LugarGaleriaBloqueada imagens={imagensBloqueadas} />
+            </div>
           )}
 
           {tagsExibidas.length > 0 && <LugarTags tags={tagsExibidas} />}
@@ -239,12 +247,16 @@ export default function LugarDetalheLegacy(props) {
             </section>
           )}
 
-          {visibilidade.showAvaliacoes && (
+          {(visibilidade.showAvaliacoes ||
+            (perfilBasico && totalAvaliacoes > 0)) && (
             <LugarAvaliacoesSection
               avaliacoes={avaliacoes}
               jaAvaliou={jaAvaliou}
               onAvaliar={handleOpenAvaliacao}
               toast={toast}
+              bloqueado={perfilBasico}
+              mediaAvaliacoes={mediaAvaliacoes}
+              totalAvaliacoes={totalAvaliacoes}
             />
           )}
         </div>

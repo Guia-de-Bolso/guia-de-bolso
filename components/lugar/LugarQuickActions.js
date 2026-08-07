@@ -91,8 +91,17 @@ const ICONS_ESTABELECIMENTO = {
  * @returns {import("react").JSX.Element}
  */
 function InfoCardContato({ acao, Icon }) {
+  const bloqueado = !acao.href;
   const content = (
     <>
+      {bloqueado && (
+        <span
+          className="absolute right-2 top-2 text-[11px] text-[#7a6520]"
+          aria-hidden
+        >
+          🔒
+        </span>
+      )}
       <span
         className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#1a4a3a] ring-1 ring-[#e8eeee]"
         aria-hidden
@@ -103,17 +112,17 @@ function InfoCardContato({ acao, Icon }) {
         {acao.label}
       </span>
       <span className="text-center text-[11px] font-medium leading-snug text-[#5a6b66]">
-        {acao.href ? "Abrir" : "Bloqueado"}
+        {acao.href ? "Abrir" : "Perfil Parceiro"}
       </span>
     </>
   );
 
-  if (!acao.href) {
+  if (bloqueado) {
     return (
       <div
-        className={`${INFO_CARD_PREMIUM_CLASS} opacity-50`}
+        className={`${INFO_CARD_PREMIUM_CLASS} relative border border-dashed border-[#c9b66f] bg-[#fffdf5]`}
         role="listitem"
-        aria-label={`${acao.label} indisponível`}
+        aria-label={`${acao.label} disponível no perfil Parceiro`}
       >
         {content}
       </div>

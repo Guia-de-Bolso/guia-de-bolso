@@ -42,14 +42,14 @@
       z-index: 2;
     }
     .brand img {
-      height: 72px;
+      height: 100px;
       width: auto;
       display: block;
     }
     .brand span {
       font-family: 'Plus Jakarta Sans', sans-serif;
       font-weight: 700;
-      font-size: 32px;
+      font-size: 42px;
       color: #ffffff;
       letter-spacing: -0.02em;
     }
@@ -120,6 +120,10 @@
     document.getElementById('eyebrow').textContent = params.get('eyebrow') || '';
     document.getElementById('title').textContent = params.get('title') || '';
     document.getElementById('body').textContent = params.get('body') || '';
+    // brand=dark → fundo claro (logo/texto escuros); brand=light → fundo escuro
+    if ((params.get('brand') || 'light') === 'dark') {
+      document.querySelector('.brand span').style.color = '#1a4a3a';
+    }
     const hint = params.get('hint') || '';
     const hintEl = document.getElementById('hint');
     if (hint) hintEl.textContent = hint;

@@ -6,8 +6,10 @@ FORMATOS:
 
 LOGO:
 - Posição: topo esquerdo, margem de 64px do topo e 72px da esquerda
-- Altura fixa: 64px no feed, 72px no story — NUNCA varia
-- Ao lado da logo: texto "Guia de Bolso" em Plus Jakarta Sans, 28px feed / 32px story, peso 700
+- Altura fixa: 92px no feed, 100px no story — NUNCA varia
+- Ao lado da logo: texto "Guia de Bolso" em Plus Jakarta Sans, 38px feed / 42px story, peso 700
+- Assets de logo: cropados ao glifo (sem padding excessivo) em logo-dark.png / logo-light.png
+- Nunca reutilizar no mesmo post as fotos do post do dia anterior (checar pasta do dia anterior)
 - Regra de contraste: fundo claro → logo-dark + texto #1a4a3a | fundo escuro → logo-light + texto #ffffff
 - Safe zone stories: nada de texto/logo nos 250px do topo e 250px da base (logo fica logo abaixo dos 250px: y=260)
 

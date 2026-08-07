@@ -6,6 +6,7 @@ import LoginModal from "@/components/LoginModal";
 import LugarAvaliacoesSection from "@/components/lugar/LugarAvaliacoesSection";
 import LugarBottomSheet from "@/components/lugar/LugarBottomSheet";
 import LugarClimaWidget from "@/components/lugar/LugarClimaWidget";
+import LugarGaleriaBloqueada from "@/components/lugar/LugarGaleriaBloqueada";
 import LugarHorariosCompact from "@/components/lugar/LugarHorariosCompact";
 import LugarLocalizacaoCard from "@/components/lugar/LugarLocalizacaoCard";
 import LugarPerfilBloqueadoCta from "@/components/lugar/LugarPerfilBloqueadoCta";
@@ -60,6 +61,7 @@ export default function LugarDetalheAirbnb(props) {
     subcategoria,
     visibilidade,
     imagens,
+    imagensBloqueadas,
     status,
     diaAtual,
     enderecoExibicao,
@@ -91,8 +93,7 @@ export default function LugarDetalheAirbnb(props) {
   } = props;
 
   const perfilBasico = isPerfilBasico(visibilidade);
-  const temNota =
-    visibilidade?.showAvaliacoes && totalAvaliacoes > 0 && mediaAvaliacoes > 0;
+  const temNota = totalAvaliacoes > 0 && mediaAvaliacoes > 0;
   const localSubtitle = [
     lugar.subcategoria,
     distancia,
@@ -246,6 +247,13 @@ export default function LugarDetalheAirbnb(props) {
             </>
           )}
 
+          {perfilBasico && imagensBloqueadas.length > 0 && (
+            <>
+              <LugarDividerAirbnb />
+              <LugarGaleriaBloqueada imagens={imagensBloqueadas} />
+            </>
+          )}
+
           {tagsExibidas.length > 0 && (
             <>
               <LugarDividerAirbnb />
@@ -370,7 +378,8 @@ export default function LugarDetalheAirbnb(props) {
             </>
           )}
 
-          {visibilidade.showAvaliacoes && (
+          {(visibilidade.showAvaliacoes ||
+            (perfilBasico && totalAvaliacoes > 0)) && (
             <>
               <LugarDividerAirbnb />
               <div className="pb-4">
@@ -379,6 +388,9 @@ export default function LugarDetalheAirbnb(props) {
                   jaAvaliou={jaAvaliou}
                   onAvaliar={handleOpenAvaliacao}
                   toast={toast}
+                  bloqueado={perfilBasico}
+                  mediaAvaliacoes={mediaAvaliacoes}
+                  totalAvaliacoes={totalAvaliacoes}
                 />
               </div>
             </>

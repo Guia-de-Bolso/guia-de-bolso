@@ -38,18 +38,18 @@
       left: 72px;
       display: flex;
       align-items: center;
-      gap: 18px;
+      gap: 16px;
       z-index: 2;
     }
     .brand img {
-      height: 64px;
+      height: 92px;
       width: auto;
       display: block;
     }
     .brand span {
       font-family: 'Plus Jakarta Sans', sans-serif;
       font-weight: 700;
-      font-size: 28px;
+      font-size: 38px;
       color: #ffffff;
       letter-spacing: -0.02em;
     }
@@ -110,7 +110,7 @@
     }
     .pager {
       position: absolute;
-      top: 78px;
+      top: 82px;
       right: 72px;
       z-index: 2;
       font-family: Inter, sans-serif;
@@ -146,6 +146,13 @@
     document.getElementById('eyebrow').textContent = params.get('eyebrow') || '';
     document.getElementById('title').textContent = params.get('title') || '';
     document.getElementById('body').textContent = params.get('body') || '';
+    // brand=dark → fundo claro (logo/texto escuros); brand=light → fundo escuro
+    const brandMode = params.get('brand') || 'light';
+    if (brandMode === 'dark') {
+      const brandColor = '#1a4a3a';
+      document.querySelector('.brand span').style.color = brandColor;
+      document.getElementById('pager').style.color = 'rgba(26, 74, 58, 0.7)';
+    }
     const page = params.get('page');
     const total = params.get('total');
     if (page && total) document.getElementById('pager').textContent = `${page}/${total}`;
