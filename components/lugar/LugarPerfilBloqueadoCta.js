@@ -1,5 +1,6 @@
 "use client";
 
+import { categoriaUsaCardapio } from "@/lib/lugarDetalhe";
 import { getClaimPerfilWhatsAppUrl } from "@/lib/lugarVisibilidade";
 
 /**
@@ -17,32 +18,61 @@ export default function LugarPerfilBloqueadoCta({
 }) {
   const href = getClaimPerfilWhatsAppUrl(lugar);
   const isAirbnb = variant === "airbnb";
+  const comCardapio = categoriaUsaCardapio(lugar);
+  const chips = comCardapio
+    ? ["Cardápio", "Instagram", "Site", "WhatsApp"]
+    : ["Facebook", "Instagram", "Site", "WhatsApp"];
+  const blurCopy = comCardapio
+    ? "Galeria de fotos, cardápio, Instagram, site, telefone e avaliações de quem já visitou — tudo no perfil completo do estabelecimento."
+    : "Galeria de fotos, Facebook, Instagram, site, telefone e avaliações de quem já visitou — tudo no perfil completo do estabelecimento.";
 
   return (
     <section
       className={
         isAirbnb
-          ? "rounded-2xl bg-[#fffdf5] p-4 ring-1 ring-[#eadcae]"
-          : "mt-6 rounded-2xl bg-[#fffdf5] p-4 shadow-sm ring-1 ring-[#eadcae]"
+          ? "relative overflow-hidden rounded-2xl bg-white ring-1 ring-[#e8eeee]"
+          : "relative mt-6 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-[#e8eeee]"
       }
       aria-label="Desbloquear perfil completo"
     >
-      <p className="text-[15px] font-bold leading-snug text-[#1a2e28]">
-        Este perfil está no guia. Contato e fotos completas só com Parceiro.
-      </p>
-      <p className="mt-2 text-[13px] leading-relaxed text-[#5a6b66]">
-        Você é o proprietário ou gerencia este local? Ative o perfil para mostrar
-        todos os canais, fotos e comentários.
-      </p>
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={onClaimClick}
-        className="mt-4 flex w-full items-center justify-center rounded-xl bg-[#1a4a3a] px-4 py-3 text-sm font-bold text-white transition-transform active:scale-[0.98]"
+      <div
+        className="pointer-events-none select-none px-4 pb-16 pt-4 opacity-40 blur-[2.5px]"
+        aria-hidden
       >
-        Ativar perfil Parceiro
-      </a>
+        <div className="mb-3 flex items-center gap-2">
+          <span className="text-sm font-semibold text-amber-500">★★★★★</span>
+          <span className="text-xs font-medium text-[#5a6b66]">4,8 · 12 avaliações</span>
+        </div>
+        <p className="text-sm leading-relaxed text-[#5a6b66]">{blurCopy}</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {chips.map((label) => (
+            <span
+              key={label}
+              className="rounded-lg bg-[#f0f4f3] px-3 py-1.5 text-xs font-semibold text-[#1a4a3a]"
+            >
+              {label}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#f0f4f3] via-[#f0f4f3]/95 to-transparent px-4 pb-4 pt-12">
+        <p className="text-center text-[15px] font-bold leading-snug text-[#1a2e28]">
+          Você é o proprietário ou gerencia este local?
+        </p>
+        <p className="mt-1 text-center text-[13px] leading-snug text-[#5a6b66]">
+          Entre em contato para desbloquear o perfil completo no Guia de Bolso.
+        </p>
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={onClaimClick}
+          className="mt-3 flex w-full items-center justify-center rounded-xl bg-[#1a4a3a] px-4 py-3 text-sm font-bold text-white transition-transform active:scale-[0.98]"
+        >
+          Falar no WhatsApp
+        </a>
+      </div>
     </section>
   );
 }

@@ -164,9 +164,6 @@ function AvaliacaoCard({ avaliacao }) {
  * @param {boolean} props.jaAvaliou
  * @param {() => void} props.onAvaliar
  * @param {string} [props.toast]
- * @param {boolean} [props.bloqueado]
- * @param {number} [props.mediaAvaliacoes]
- * @param {number} [props.totalAvaliacoes]
  * @returns {import("react").JSX.Element}
  */
 export default function LugarAvaliacoesSection({
@@ -174,60 +171,8 @@ export default function LugarAvaliacoesSection({
   jaAvaliou,
   onAvaliar,
   toast = "",
-  bloqueado = false,
-  mediaAvaliacoes,
-  totalAvaliacoes,
 }) {
   const { media, total } = getResumoNotas(avaliacoes);
-  const mediaExibida = Number.isFinite(mediaAvaliacoes)
-    ? mediaAvaliacoes
-    : media;
-  const totalExibido = Number.isFinite(totalAvaliacoes)
-    ? totalAvaliacoes
-    : total;
-
-  if (bloqueado) {
-    return (
-      <section className="mt-8" aria-label="Resumo das avaliações">
-        <h2 className="text-sm font-bold text-[#1a2e28]">Avaliações</h2>
-
-        <div className="mt-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-[#e8eeee]">
-          <div className="flex items-end gap-4">
-            <p className="text-4xl font-bold text-[#1a2e28]">
-              {mediaExibida.toFixed(1)}
-            </p>
-            <div>
-              <EstrelasNota
-                nota={Math.round(mediaExibida)}
-                className="text-lg"
-              />
-              <p className="mt-0.5 text-xs text-[#9aa8a3]">
-                {totalExibido}{" "}
-                {totalExibido === 1 ? "avaliação" : "avaliações"}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="relative mt-4 overflow-hidden rounded-2xl bg-white p-4 ring-1 ring-[#e8eeee]">
-          <div
-            className="pointer-events-none select-none space-y-3 opacity-45 blur-[3px]"
-            aria-hidden
-          >
-            <div className="h-3 w-24 rounded-full bg-[#9aa8a3]" />
-            <div className="h-3 w-full rounded-full bg-[#c4cfcb]" />
-            <div className="h-3 w-4/5 rounded-full bg-[#c4cfcb]" />
-            <div className="h-3 w-2/3 rounded-full bg-[#c4cfcb]" />
-          </div>
-          <div className="absolute inset-0 flex items-center justify-center bg-white/45 px-5">
-            <p className="rounded-full bg-[#fffdf5] px-3 py-2 text-center text-xs font-bold text-[#7a6520] ring-1 ring-[#eadcae]">
-              🔒 Comentários disponíveis no perfil Parceiro
-            </p>
-          </div>
-        </div>
-      </section>
-    );
-  }
 
   return (
     <section className="mt-8">

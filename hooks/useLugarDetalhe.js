@@ -18,7 +18,6 @@ import { AVALIACAO_STATUS_APROVADOS } from "@/lib/avaliacoes";
 import { getCapaFromLugar, getFotosFromLugar } from "@/lib/fotos";
 import {
   applyGalleryVisibility,
-  getLockedGalleryPreview,
   mergeGalleryPhotos,
 } from "@/lib/photoGallery";
 import {
@@ -116,10 +115,6 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
   const [avaliacoes, setAvaliacoes] = useState([]);
   const [jaAvaliou, setJaAvaliou] = useState(false);
   const [showAvaliacaoForm, setShowAvaliacaoForm] = useState(false);
-  const [ratingResumo, setRatingResumo] = useState(() => ({
-    media: Number(initialData?.rating?.media) || 0,
-    total: Number(initialData?.rating?.count) || 0,
-  }));
   const [toast, setToast] = useState("");
   const [motivoModal, setMotivoModal] = useState("favoritar");
   const [localizacao, setLocalizacao] = useState(() => initialData?.localizacao ?? null);
@@ -397,17 +392,7 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
         setAvaliacoes([]);
         return;
       }
-      const aprovadas = data ?? [];
-      const total = aprovadas.length;
-      const media =
-        total > 0
-          ? aprovadas.reduce(
-              (sum, avaliacao) => sum + Number(avaliacao.nota || 0),
-              0
-            ) / total
-          : 0;
-      setAvaliacoes(aprovadas);
-      setRatingResumo({ media, total });
+      setAvaliacoes(data ?? []);
     });
   }, [id, supabase]);
 
@@ -531,20 +516,13 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
       ? fotos
       : getFotosFromLugar(lugar)
     : [];
-  const fotosMescladas = lugar
-    ? mergeGalleryPhotos(lugar, fotosCompletas)
-    : [];
   const imagens =
     lugar && visibilidade
       ? applyGalleryVisibility(
-          fotosMescladas,
+          mergeGalleryPhotos(lugar, fotosCompletas),
           capaUrl,
           visibilidade.showGaleriaCompleta
         )
-      : [];
-  const imagensBloqueadas =
-    visibilidade?.showGaleriaBloqueada
-      ? getLockedGalleryPreview(fotosMescladas, capaUrl)
       : [];
   const status = lugar ? getStatusFuncionamento(lugar.horarios) : null;
   const diaAtual = getDiaAtualKey();
@@ -559,12 +537,12 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
     lugar && visibilidade?.showHistoriaCultura
       ? getTextoHistoriaCultura(lugar)
       : null;
-  const totalAvaliacoes = visibilidade?.showResumoAvaliacoes
-    ? ratingResumo.total
-    : 0;
-  const mediaAvaliacoes = visibilidade?.showResumoAvaliacoes
-    ? ratingResumo.media
-    : 0;
+  const totalAvaliacoes = visibilidade?.showAvaliacoes ? avaliacoes.length : 0;
+  const mediaAvaliacoes =
+    totalAvaliacoes > 0
+      ? avaliacoes.reduce((sum, a) => sum + Number(a.nota || 0), 0) /
+        totalAvaliacoes
+      : 0;
   const distancia = lugar
     ? getDistanciaLugar({ ...lugar, localizacoes: localizacao }, userPosition)
     : null;
@@ -661,7 +639,6 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
     ehParceiro,
     visibilidade,
     imagens,
-    imagensBloqueadas,
     status,
     diaAtual,
     enderecoExibicao,
