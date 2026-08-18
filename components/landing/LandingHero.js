@@ -7,7 +7,7 @@ import LandingAmbient from "@/components/landing/LandingAmbient";
 import LandingButton from "@/components/landing/LandingButton";
 import LandingHeroFloatingCards from "@/components/landing/LandingHeroFloatingCards";
 import LandingPhoneMockup from "@/components/landing/LandingPhoneMockup";
-import LandingWaitlistForm from "@/components/landing/LandingWaitlistForm";
+import LandingDownloadCta from "@/components/landing/LandingDownloadCta";
 import PrefeituraSupportLine from "@/components/PrefeituraSupportLine";
 import { LANDING } from "@/components/landing/landingTheme";
 import {
@@ -18,9 +18,9 @@ import {
 } from "@/components/landing/landingMotion";
 import { useLandingRichMotion } from "@/components/landing/useLandingRichMotion";
 import {
+  LANDING_DOWNLOAD_HREF,
   LANDING_HERO,
   LANDING_SECTION_IDS,
-  landingContactMailto,
 } from "@/lib/landingContent";
 
 const HERO_VIDEO_URL =
@@ -104,7 +104,7 @@ function LandingHeroBody({
   const SubtitleTag = richMotion ? motion.p : "p";
   const CtaWrap = richMotion ? motion.div : "div";
   const StatsWrap = richMotion ? motion.dl : "dl";
-  const WaitlistWrap = richMotion ? motion.div : "div";
+  const DownloadWrap = richMotion ? motion.div : "div";
   const motionChild = richMotion ? { variants: fadeUpHero } : {};
   const textWrapMotion = richMotion
     ? { initial: "hidden", animate: "visible", variants: staggerHero }
@@ -224,26 +224,17 @@ function LandingHeroBody({
               {...motionChild}
               className="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:items-center sm:gap-4"
             >
-              <LandingButton href={`#${LANDING_SECTION_IDS.categorias}`} variant="primary" size="lg">
-                {LANDING_HERO.ctaExplore}
+              <LandingButton href={LANDING_DOWNLOAD_HREF} variant="primary" size="lg">
+                {LANDING_HERO.ctaDownload}
               </LandingButton>
-              <LandingButton
-                href={landingContactMailto("Cadastrar meu negócio")}
-                variant="secondary"
-                size="lg"
-                external
-              >
-                {LANDING_HERO.ctaBusiness}
+              <LandingButton href={`#${LANDING_SECTION_IDS.categorias}`} variant="secondary" size="lg">
+                {LANDING_HERO.ctaExplore}
               </LandingButton>
             </CtaWrap>
 
-            <WaitlistWrap {...motionChild}>
-              <LandingWaitlistForm
-                variant="hero"
-                origem="landing-hero"
-                id={LANDING_SECTION_IDS.listaEspera}
-              />
-            </WaitlistWrap>
+            <DownloadWrap {...motionChild}>
+              <LandingDownloadCta variant="hero" id="baixar-app" />
+            </DownloadWrap>
 
             <StatsWrap
               {...motionChild}

@@ -20,6 +20,8 @@ export default function LandingSeoIntro() {
       <p>
         <Link href="/guia">Guias de turismo</Link>
         {" · "}
+        <Link href="/baixar">Baixar o app</Link>
+        {" · "}
         <Link href="/guia/o-que-fazer-em-imbituba">O que fazer em Imbituba</Link>
         {" · "}
         <Link href="/sobre">Sobre o guia</Link>

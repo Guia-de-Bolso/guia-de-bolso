@@ -62,8 +62,8 @@ export default function BaixarAppClient({ links }) {
 
       {!appStoreReady && !playStoreReady ? (
         <p className="pt-2 text-center text-xs leading-relaxed text-[#5a6b66]">
-          Os links das lojas serão ativados em breve. Salve esta página ou escaneie o QR novamente
-          depois do lançamento oficial.
+          Os links das lojas não estão disponíveis no momento. Explore o guia no navegador
+          ou tente de novo em instantes.
         </p>
       ) : null}
     </div>
@@ -104,7 +104,7 @@ function StoreButton({ label, sublabel, href, ready, variant, highlighted = fals
         <span
           className={`mt-0.5 block text-xs ${variant === "apple" ? "text-white/70" : "text-[#5a6b66]"}`}
         >
-          {ready ? sublabel : "Em breve"}
+          {ready ? sublabel : "Indisponível"}
         </span>
       </span>
       {ready ? (
@@ -113,7 +113,7 @@ function StoreButton({ label, sublabel, href, ready, variant, highlighted = fals
         </span>
       ) : (
         <span className="rounded-full bg-[#e8eeee] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#5a6b66]">
-          Em breve
+          Indisponível
         </span>
       )}
     </>

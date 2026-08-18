@@ -1,8 +1,8 @@
 "use client";
 
 import LandingButton from "@/components/landing/LandingButton";
+import { LANDING_DOWNLOAD_HREF, LANDING_HERO } from "@/lib/landingContent";
 import { useLandingNav } from "@/hooks/useLandingNav";
-import { LANDING_HERO } from "@/lib/landingContent";
 
 /**
  * CTAs fixos no mobile — thumb-friendly, sempre visíveis.
@@ -19,20 +19,20 @@ export default function LandingMobileCta() {
     >
       <div className="mx-auto grid max-w-lg grid-cols-2 gap-2">
         <LandingButton
-          href={exploreHref}
+          href={LANDING_DOWNLOAD_HREF}
           variant="primary"
           size="md"
           className="min-w-0 !px-4 text-[13px]"
         >
-          {LANDING_HERO.ctaExplore}
+          {LANDING_HERO.ctaDownload}
         </LandingButton>
         <LandingButton
-          href="/para-negocios"
+          href={exploreHref}
           variant="secondary"
           size="md"
           className="min-w-0 !px-4 text-[13px]"
         >
-          Anunciantes
+          {LANDING_HERO.ctaExplore}
         </LandingButton>
       </div>
     </div>

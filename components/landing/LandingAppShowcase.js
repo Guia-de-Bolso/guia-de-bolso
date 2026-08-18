@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import LandingAmbient from "@/components/landing/LandingAmbient";
+import LandingButton from "@/components/landing/LandingButton";
 import LandingPhoneMockup from "@/components/landing/LandingPhoneMockup";
 import LandingSection, { LandingSectionHeader } from "@/components/landing/LandingSection";
 import { floatDevice } from "@/components/landing/landingMotion";
@@ -9,7 +10,12 @@ import {
   useLandingRevealMotion,
   useLandingRichMotion,
 } from "@/components/landing/useLandingRichMotion";
-import { LANDING_SECTION_IDS } from "@/lib/landingContent";
+import {
+  LANDING_DOWNLOAD,
+  LANDING_DOWNLOAD_HREF,
+  LANDING_HERO,
+  LANDING_SECTION_IDS,
+} from "@/lib/landingContent";
 
 const APP_POINTS = [
   "Categorias com fotos reais da cidade",
@@ -60,15 +66,20 @@ export default function LandingAppShowcase({ categorias = [], stats }) {
             ))}
           </motion.ul>
 
-          <motion.p
+          <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={viewport}
             variants={reveal}
-            className="mt-10 inline-flex rounded-full bg-[#e8f2ee]/90 px-4 py-2 text-sm font-medium text-[#1a4a3a] backdrop-blur-sm"
+            className="mt-10 flex flex-col items-start gap-3 sm:flex-row sm:items-center"
           >
-            Lançamento nas lojas em breve
-          </motion.p>
+            <LandingButton href={LANDING_DOWNLOAD_HREF} variant="primary" size="md">
+              {LANDING_HERO.ctaDownload}
+            </LandingButton>
+            <p className="inline-flex rounded-full bg-[#e8f2ee]/90 px-4 py-2 text-sm font-medium text-[#1a4a3a] backdrop-blur-sm">
+              {LANDING_DOWNLOAD.stores}
+            </p>
+          </motion.div>
         </div>
 
         <div className="relative flex justify-center lg:justify-end">

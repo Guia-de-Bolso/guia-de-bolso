@@ -77,6 +77,7 @@ export default function SobrePage() {
         <section className="mt-8">
           <h2 className="text-lg font-bold text-[#1a2e28]">O que você encontra aqui</h2>
           <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed text-[#5a6b66]">
+            <li>App grátis na App Store e no Google Play</li>
             <li>Lugares verificados com horários, mapa e avaliações moderadas</li>
             <li>Categorias: Natureza, Gastronomia, Noite, Cultura e mais</li>
             <li>Atrativos e roteiros com IA para planejar o dia</li>
@@ -87,6 +88,11 @@ export default function SobrePage() {
         <section className="mt-8">
           <h2 className="text-lg font-bold text-[#1a2e28]">Explorar</h2>
           <ul className="mt-3 space-y-2 text-sm">
+            <li>
+              <Link href="/baixar" className="font-semibold text-[#1a4a3a] hover:underline">
+                Baixar o app (iOS e Android)
+              </Link>
+            </li>
             <li>
               <Link href="/guia" className="font-semibold text-[#1a4a3a] hover:underline">
                 Todos os guias de turismo

@@ -3,11 +3,11 @@
 import { motion } from "framer-motion";
 import LandingAmbient from "@/components/landing/LandingAmbient";
 import LandingButton from "@/components/landing/LandingButton";
-import LandingWaitlistForm from "@/components/landing/LandingWaitlistForm";
+import LandingDownloadCta from "@/components/landing/LandingDownloadCta";
 import { useLandingRevealMotion } from "@/components/landing/useLandingRichMotion";
 import {
+  LANDING_DOWNLOAD_HREF,
   LANDING_HERO,
-  LANDING_SECTION_IDS,
   landingContactMailto,
 } from "@/lib/landingContent";
 
@@ -48,29 +48,29 @@ export default function LandingFinalCta() {
             Sua próxima experiência em Imbituba começa aqui.
           </h2>
           <p className="relative mx-auto mt-5 max-w-md text-base text-white/65 sm:text-lg">
-            Explore como visitante ou coloque seu negócio no mapa da cidade.
+            Baixe o app nas lojas ou coloque seu negócio no mapa da cidade.
           </p>
 
           <div className="relative mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center sm:justify-center">
-            <LandingButton href={`#${LANDING_SECTION_IDS.categorias}`} variant="secondary" size="lg">
-              {LANDING_HERO.ctaExplore}
+            <LandingButton
+              href={LANDING_DOWNLOAD_HREF}
+              variant="primary"
+              size="lg"
+              className="!bg-white !text-[#1a4a3a] hover:!bg-[#f0f4f3]"
+            >
+              {LANDING_HERO.ctaDownload}
             </LandingButton>
             <LandingButton
               href={landingContactMailto("Cadastrar meu negócio")}
-              variant="primary"
+              variant="secondary"
               size="lg"
               external
-              className="!bg-white !text-[#1a4a3a] hover:!bg-[#f0f4f3]"
             >
               {LANDING_HERO.ctaBusiness}
             </LandingButton>
           </div>
 
-          <LandingWaitlistForm
-            variant="dark"
-            origem="landing-final"
-            id={`${LANDING_SECTION_IDS.listaEspera}-final`}
-          />
+          <LandingDownloadCta variant="dark" id="baixar-app-final" />
         </div>
       </motion.div>
     </section>

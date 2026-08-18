@@ -12,7 +12,7 @@ import {
   useLandingRichMotion,
 } from "@/components/landing/useLandingRichMotion";
 import { useLandingNav } from "@/hooks/useLandingNav";
-import { LANDING_HERO } from "@/lib/landingContent";
+import { LANDING_DOWNLOAD_HREF, LANDING_HERO } from "@/lib/landingContent";
 
 /**
  * @param {object} props
@@ -21,9 +21,8 @@ import { LANDING_HERO } from "@/lib/landingContent";
  * @param {boolean} props.overHero
  * @param {{ label: string, href: string }[]} props.navItems
  * @param {string} props.homePath
- * @param {string} props.exploreHref
  */
-function LandingNavbarLinks({ open, setOpen, overHero, navItems, homePath, exploreHref }) {
+function LandingNavbarLinks({ open, setOpen, overHero, navItems, homePath }) {
   return (
     <>
       <ul className="hidden items-center gap-9 lg:flex" role="list">
@@ -59,20 +58,20 @@ function LandingNavbarLinks({ open, setOpen, overHero, navItems, homePath, explo
       <div className="hidden items-center gap-2.5 sm:flex">
         {overHero ? (
           <>
-            <LandingButton href={exploreHref} variant="secondary" size="md">
-              {LANDING_HERO.ctaExplore}
-            </LandingButton>
-            <LandingButton href="/para-negocios" variant="primary" size="md">
+            <LandingButton href="/para-negocios" variant="secondary" size="md">
               {LANDING_HERO.ctaBusiness}
+            </LandingButton>
+            <LandingButton href={LANDING_DOWNLOAD_HREF} variant="primary" size="md">
+              {LANDING_HERO.ctaDownload}
             </LandingButton>
           </>
         ) : (
           <>
-            <LandingButton href={exploreHref} variant="ghost" size="md">
-              {LANDING_HERO.ctaExplore}
-            </LandingButton>
-            <LandingButton href="/para-negocios" variant="primary" size="md">
+            <LandingButton href="/para-negocios" variant="ghost" size="md">
               {LANDING_HERO.ctaBusiness}
+            </LandingButton>
+            <LandingButton href={LANDING_DOWNLOAD_HREF} variant="primary" size="md">
+              {LANDING_HERO.ctaDownload}
             </LandingButton>
           </>
         )}
@@ -124,7 +123,7 @@ function LandingMobileNavItem({ link, onNavigate }) {
 function LandingNavbarLite() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { homePath, navItems, exploreHref } = useLandingNav();
+  const { homePath, navItems } = useLandingNav();
 
   useEffect(() => {
     let raf = 0;
@@ -188,7 +187,6 @@ function LandingNavbarLite() {
             overHero={overHero}
             navItems={navItems}
             homePath={homePath}
-            exploreHref={exploreHref}
           />
         </nav>
       </div>
@@ -228,12 +226,12 @@ function LandingNavbarLite() {
                 ))}
                 <li className="mt-3 grid gap-2 border-t border-[#1a4a3a]/12 pt-4">
                   <LandingButton
-                    href={exploreHref}
+                    href={LANDING_DOWNLOAD_HREF}
                     variant="primary"
                     className="w-full"
                     onClick={() => setOpen(false)}
                   >
-                    {LANDING_HERO.ctaExplore}
+                    {LANDING_HERO.ctaDownload}
                   </LandingButton>
                   <LandingButton
                     href="/para-negocios"
@@ -260,7 +258,7 @@ function LandingNavbarLite() {
 function LandingNavbarRich() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { homePath, navItems, exploreHref } = useLandingNav();
+  const { homePath, navItems } = useLandingNav();
 
   useEffect(() => {
     let raf = 0;
@@ -333,7 +331,6 @@ function LandingNavbarRich() {
             overHero={overHero}
             navItems={navItems}
             homePath={homePath}
-            exploreHref={exploreHref}
           />
         </motion.nav>
       </motion.div>
@@ -373,12 +370,12 @@ function LandingNavbarRich() {
                 ))}
                 <li className="mt-3 grid gap-2 border-t border-[#1a4a3a]/12 pt-4">
                   <LandingButton
-                    href={exploreHref}
+                    href={LANDING_DOWNLOAD_HREF}
                     variant="primary"
                     className="w-full"
                     onClick={() => setOpen(false)}
                   >
-                    {LANDING_HERO.ctaExplore}
+                    {LANDING_HERO.ctaDownload}
                   </LandingButton>
                   <LandingButton
                     href="/para-negocios"

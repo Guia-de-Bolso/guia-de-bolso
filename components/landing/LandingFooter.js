@@ -60,6 +60,11 @@ export default function LandingFooter() {
           <p className="text-xs font-semibold uppercase tracking-wider text-[#8a9b94]">Explorar</p>
           <ul className="mt-4 space-y-2 text-sm" role="list">
             <li>
+              <Link href="/baixar" className="font-medium text-[#1a4a3a] hover:text-[#0d1f19]">
+                Baixar o app
+              </Link>
+            </li>
+            <li>
               <Link href="/guia" className="text-[#5c6f68] hover:text-[#0d1f19]">
                 Guias de turismo
               </Link>
