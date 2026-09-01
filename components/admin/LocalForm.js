@@ -8,6 +8,7 @@ import EnderecoAutocomplete from "@/components/EnderecoAutocomplete";
 import HorarioEditor from "@/components/admin/HorarioEditor";
 import LugarQrSection from "@/components/admin/LugarQrSection";
 import ParceiroProgramaFields from "@/components/admin/ParceiroProgramaFields";
+import PerfilPromoFields from "@/components/admin/PerfilPromoFields";
 import PhotoUploader from "@/components/admin/PhotoUploader";
 import VideoUploader from "@/components/admin/VideoUploader";
 import { getInitialPhotoItems, getPhotoEntryUrl } from "@/lib/fotos";
@@ -49,6 +50,11 @@ import {
   fetchParceiroProgramaColumnsReady,
   isMissingParceiroProgramaColumnError,
 } from "@/lib/parceiroAdmin";
+import {
+  buildPerfilPromoPayload,
+  fetchPerfilPromoColumnReady,
+  isMissingPerfilPromoColumnError,
+} from "@/lib/planoLancamento";
 import { LUGAR_STATUS, LUGAR_STATUS_FORM_OPTIONS } from "@/lib/lugarStatus";
 
 const emptyHorario = {
@@ -83,6 +89,8 @@ export const emptyLocalForm = {
   ultima_curadoria_avaliacoes_em: "",
   proxima_curadoria_avaliacoes_em: "",
   parceiro_notas_internas: "",
+  perfil_promo_ate: null,
+  perfil_promo_ativo: false,
   horarios: emptyHorario,
   mostrar_endereco: true,
   mostrar_horarios: true,
@@ -162,6 +170,7 @@ export default function LocalForm({
   const [videoError, setVideoError] = useState("");
   const [slugColumnReady, setSlugColumnReady] = useState(true);
   const [parceiroColumnReady, setParceiroColumnReady] = useState(true);
+  const [perfilPromoColumnReady, setPerfilPromoColumnReady] = useState(true);
   const { destaque: _destaqueLegado, ...initialSemDestaque } = initialData ?? {};
 
   const [form, setForm] = useState({
@@ -174,6 +183,8 @@ export default function LocalForm({
     tem_video: Boolean(initialData?.tem_video),
     slug: initialData?.slug || "",
     slug_auto: isSlugAutoFromNome(initialData?.slug, initialData?.nome),
+    perfil_promo_ate: initialData?.perfil_promo_ate || null,
+    perfil_promo_ativo: Boolean(initialData?.perfil_promo_ate),
   });
 
   const elegivelVideo = isLugarElegivelVideo(form);
@@ -191,6 +202,7 @@ export default function LocalForm({
 
     fetchTakenSlugs(supabase, editingId).then(({ ready }) => setSlugColumnReady(ready));
     fetchParceiroProgramaColumnsReady(supabase).then(setParceiroColumnReady);
+    fetchPerfilPromoColumnReady(supabase).then(setPerfilPromoColumnReady);
   }, [editingId]);
 
   useEffect(() => {
@@ -338,6 +350,7 @@ export default function LocalForm({
       ultima_curadoria_avaliacoes_em: _ultimaCuradoria,
       proxima_curadoria_avaliacoes_em: _proximaCuradoria,
       parceiro_notas_internas: _parceiroNotas,
+      perfil_promo_ativo: _perfilPromoAtivo,
       ...formFields
     } = form;
 
@@ -367,6 +380,7 @@ export default function LocalForm({
       mostrar_horarios: Boolean(form.mostrar_horarios),
       horarios: form.horarios,
       ...(parceiroColumnReady ? buildParceiroProgramaPayload(form) : {}),
+      ...(perfilPromoColumnReady ? buildPerfilPromoPayload(form) : {}),
     };
     let lugarId = editingId;
     const pendingFiles = getPendingFilesFromPhotoItems(photoItems);
@@ -394,6 +408,8 @@ export default function LocalForm({
           ? "Coluna slug ainda não existe no banco. Rode supabase/lugares_qr_slug.sql no SQL Editor do Supabase e tente de novo."
           : isMissingParceiroProgramaColumnError(error)
             ? "Colunas do programa parceiro ainda não existem. Rode supabase/lugares_parceiro_programa.sql no SQL Editor do Supabase e tente de novo."
+          : isMissingPerfilPromoColumnError(error)
+            ? "Coluna perfil_promo_ate ainda não existe. Rode supabase/lugares_plano_lancamento_bulk.sql no SQL Editor do Supabase e tente de novo."
           : message.includes("lugares_slug_unique_idx") || message.includes("duplicate key")
             ? "Este slug já está em uso. Escolha outro slug ou altere o nome."
             : message ||
@@ -633,6 +649,12 @@ export default function LocalForm({
           </p>
         </div>
       )}
+
+      <PerfilPromoFields
+        form={form}
+        setForm={setForm}
+        columnReady={perfilPromoColumnReady}
+      />
 
       <ParceiroProgramaFields
         form={form}

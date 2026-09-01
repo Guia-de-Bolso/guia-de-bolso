@@ -23,6 +23,7 @@ import {
 import {
   getAcoesRapidasBloqueadas,
   getAcoesRapidasEstabelecimento,
+  getAcoesRapidasPresenca,
   getAcoesRapidasLocais,
   getCtaIrAgoraText,
   getFraseConvencimento,
@@ -45,6 +46,7 @@ import {
   parseMapCoordinates,
 } from "@/lib/mapsCoordinates";
 import { isConteudoCuradoria, isParceiro } from "@/lib/lugarBadges";
+import { buildLugarLogDetalhes, isPerfilPromoAtivo } from "@/lib/planoLancamento";
 import {
   getTextoHistoriaCultura,
   getTextoSobre,
@@ -313,11 +315,14 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
     viewLoggedRef.current = true;
 
     getSessionUser(supabase).then((currentUser) => {
-      registrarLog(supabase, currentUser, "visualizou_lugar", {
-        lugar_id: lugar.id,
-        lugar_nome: lugar.nome,
-        pagina: lugar.slug ? `/lugares/${lugar.slug}` : `/lugares/${lugar.id}`,
-      });
+      registrarLog(
+        supabase,
+        currentUser,
+        "visualizou_lugar",
+        buildLugarLogDetalhes(lugar, {
+          pagina: lugar.slug ? `/lugares/${lugar.slug}` : `/lugares/${lugar.id}`,
+        })
+      );
     });
   }, [lugar, supabase]);
 
@@ -449,11 +454,12 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
     }
 
     setShowRotas(false);
-    registrarLog(supabase, user, "ir_agora", {
-      lugar_id: lugar.id,
-      lugar_nome: lugar.nome,
-      app: appKey,
-    });
+    registrarLog(
+      supabase,
+      user,
+      "ir_agora",
+      buildLugarLogDetalhes(lugar, { app: appKey })
+    );
 
     const urls = {
       google: googleMapsUrl(lugar, localizacao),
@@ -507,8 +513,9 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
   const ehParceiro = lugar ? isParceiro(lugar) : false;
   const ehCuradoria = lugar ? isConteudoCuradoria(lugar) : false;
   const ehEstabelecimento = lugar ? isLugarEstabelecimento(lugar) : true;
+  const perfilPromoAtivo = lugar ? isPerfilPromoAtivo(lugar.perfil_promo_ate) : false;
   const visibilidade = lugar
-    ? getVisibilidadePerfil(ehParceiro, ehCuradoria, ehEstabelecimento)
+    ? getVisibilidadePerfil(ehParceiro, ehCuradoria, ehEstabelecimento, perfilPromoAtivo)
     : null;
   const capaUrl = lugar ? getCapaFromLugar(lugar) : null;
   const fotosCompletas = lugar
@@ -576,15 +583,23 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
               categoria: lugar.categoria,
               subcategoria: lugar.subcategoria,
             })
-          : visibilidade.showAcoesRapidasBloqueadas
-            ? getAcoesRapidasBloqueadas(lugar)
-            : []
+          : visibilidade.showContatoBasico
+            ? getAcoesRapidasPresenca({
+                telefone: lugar.telefone?.trim() || undefined,
+                categoria: lugar.categoria,
+                subcategoria: lugar.subcategoria,
+              })
+            : visibilidade.showAcoesRapidasBloqueadas
+              ? getAcoesRapidasBloqueadas(lugar)
+              : []
         : getAcoesRapidasLocais(lugar, tags, distancia)
       : [];
   const acoesRapidas = ehEstabelecimento
-    ? visibilidade?.showAcoesRapidasBloqueadas
-      ? acoesRapidasBase
-      : acoesRapidasBase.filter((acao) => acao.href)
+    ? visibilidade?.showAcoesRapidasEstabelecimento
+      ? acoesRapidasBase.filter((acao) => acao.href)
+      : visibilidade?.showContatoBasico || visibilidade?.showAcoesRapidasBloqueadas
+        ? acoesRapidasBase
+        : acoesRapidasBase.filter((acao) => acao.href)
     : acoesRapidasBase;
   const modoAcoes = ehEstabelecimento ? "estabelecimento" : "publico";
   const badgeStyle = lugar
@@ -597,11 +612,12 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
 
   function handleClaimPerfil() {
     if (!lugar) return;
-    registrarLog(supabase, user, "claim_perfil", {
-      lugar_id: lugar.id,
-      lugar_nome: lugar.nome,
-      lugar_slug: lugar.slug || null,
-    });
+    registrarLog(
+      supabase,
+      user,
+      "claim_perfil",
+      buildLugarLogDetalhes(lugar, { lugar_slug: lugar.slug || null })
+    );
   }
 
   return {

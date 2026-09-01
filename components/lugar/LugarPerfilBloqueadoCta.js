@@ -19,12 +19,12 @@ export default function LugarPerfilBloqueadoCta({
   const href = getClaimPerfilWhatsAppUrl(lugar);
   const isAirbnb = variant === "airbnb";
   const comCardapio = categoriaUsaCardapio(lugar);
-  const chips = comCardapio
-    ? ["Cardápio", "Instagram", "Site", "WhatsApp"]
-    : ["Facebook", "Instagram", "Site", "WhatsApp"];
   const blurCopy = comCardapio
-    ? "Galeria de fotos, cardápio, Instagram, site, telefone e avaliações de quem já visitou — tudo no perfil completo do estabelecimento."
-    : "Galeria de fotos, Facebook, Instagram, site, telefone e avaliações de quem já visitou — tudo no perfil completo do estabelecimento.";
+    ? "Galeria de fotos, cardápio, Instagram, site e avaliações de quem já visitou — tudo no perfil completo do estabelecimento."
+    : "Galeria de fotos, Facebook, Instagram, site e avaliações de quem já visitou — tudo no perfil completo do estabelecimento.";
+  const chips = comCardapio
+    ? ["Galeria", "Cardápio", "Instagram", "Avaliações"]
+    : ["Galeria", "Facebook", "Instagram", "Avaliações"];
 
   return (
     <section

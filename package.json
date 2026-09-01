@@ -16,6 +16,7 @@
     "icons": "node scripts/refresh-brand-icons.mjs",
     "test:e2e": "playwright test",
     "db:rotas-favoritas": "node scripts/apply-rotas-favoritas.mjs",
+    "db:plano-lancamento": "node scripts/apply-plano-lancamento-lugares.mjs",
     "photos:backfill": "node scripts/backfill-photo-derivatives.mjs",
     "marketing:semana": "node scripts/marketing-semana.mjs",
     "marketing:reels": "node scripts/marketing-semana.mjs --reels-only",

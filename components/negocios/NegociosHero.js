@@ -61,7 +61,7 @@ export default function NegociosHero({ stats }) {
             <LandingButton href={NEGOCIOS_CONTACT_MAILTO} variant="secondary" external>
               {NEGOCIOS_HERO.ctaPrimary}
             </LandingButton>
-            <LandingButton href="#como-aparece" variant="ghost" className="!text-white hover:!bg-white/10">
+            <LandingButton href="#planos" variant="ghost" className="!text-white hover:!bg-white/10">
               {NEGOCIOS_HERO.ctaSecondary}
             </LandingButton>
           </div>

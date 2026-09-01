@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import AdminShell, { useAdminAuth } from "@/components/admin/AdminShell";
 import DashboardMetricCard from "@/components/admin/DashboardMetricCard";
 import {
@@ -17,6 +18,10 @@ import {
   notaParaEstrelas,
   resumirComentario,
 } from "@/lib/adminRelatorios";
+import {
+  getPlanoComercialTier,
+  getPlanoComercialTierLabel,
+} from "@/lib/planoLancamento";
 import { downloadRelatorioPdf } from "@/lib/relatorioPdf";
 import { parseSupabaseTimestamp } from "@/lib/supabaseTimestamp";
 import { createClient } from "@/lib/supabase";
@@ -42,6 +47,8 @@ function formatDataAvaliacao(iso) {
  */
 export default function RelatoriosEstabelecimentoPage() {
   const { loading: authLoading } = useAdminAuth();
+  const searchParams = useSearchParams();
+  const lugarFromUrl = searchParams.get("lugar") || "";
   const [lugares, setLugares] = useState([]);
   const [lugaresLoading, setLugaresLoading] = useState(true);
   const [lugarId, setLugarId] = useState("");
@@ -56,7 +63,7 @@ export default function RelatoriosEstabelecimentoPage() {
 
     supabase
       .from("lugares")
-      .select("id, nome, categoria")
+      .select("id, nome, categoria, eh_parceiro, perfil_promo_ate, subcategoria")
       .eq("status", "ativo")
       .not("categoria", "in", "(Natureza,Aventura)")
       .order("nome", { ascending: true })
@@ -70,6 +77,10 @@ export default function RelatoriosEstabelecimentoPage() {
         setLugaresLoading(false);
       });
   }, []);
+
+  useEffect(() => {
+    if (lugarFromUrl) setLugarId(lugarFromUrl);
+  }, [lugarFromUrl]);
 
   const handleGerar = useCallback(async () => {
     if (!lugarId) {
@@ -94,7 +105,9 @@ export default function RelatoriosEstabelecimentoPage() {
         supabase,
         lugar.id,
         lugar.nome,
-        periodo
+        periodo,
+        getPlanoComercialTierLabel(getPlanoComercialTier(lugar)),
+        lugar.categoria
       );
       setRelatorio(result);
     } catch (error) {
@@ -202,7 +215,10 @@ export default function RelatoriosEstabelecimentoPage() {
               <h2 className="font-display text-xl font-extrabold text-[#1a2e28]">
                 {relatorio.lugarNome}
               </h2>
-              <p className="mt-1 text-sm text-[#5a6b66]">{relatorio.periodoLabel}</p>
+              <p className="mt-1 text-sm text-[#5a6b66]">
+                {relatorio.periodoLabel}
+                {relatorio.planoTierLabel ? ` · ${relatorio.planoTierLabel}` : ""}
+              </p>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
               <button
@@ -273,7 +289,62 @@ export default function RelatoriosEstabelecimentoPage() {
               iconWrap="bg-amber-50"
               iconColor="text-amber-700"
             />
+            <DashboardMetricCard
+              label="Pedidos de perfil"
+              value={relatorio.claimPerfil.value}
+              hint="Interesse em upgrade comercial"
+              variation={relatorio.claimPerfil.variation}
+              icon={IconStar}
+              iconWrap="bg-violet-50"
+              iconColor="text-violet-700"
+            />
           </div>
+
+          {relatorio.comparativoCategoria && (
+            <section className="rounded-3xl border border-amber-200 bg-amber-50/50 p-5 shadow-sm md:p-6">
+              <h3 className="text-lg font-bold text-[#1a2e28]">
+                Comparativo · {relatorio.comparativoCategoria.categoria}
+              </h3>
+              <p className="mt-1 text-sm text-[#5a6b66]">
+                {relatorio.comparativoCategoria.totalEstabelecimentos} estabelecimentos ativos na
+                categoria · {relatorio.periodoLabel}
+              </p>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-2xl bg-white p-4 ring-1 ring-amber-100">
+                  <p className="text-xs font-semibold uppercase text-[#9aa8a3]">Views · posição</p>
+                  <p className="mt-1 text-xl font-bold text-[#1a4a3a]">
+                    #{relatorio.comparativoCategoria.posicaoVisualizacoes}
+                  </p>
+                  <p className="text-[11px] text-[#5a6b66]">
+                    Média da categoria: {relatorio.comparativoCategoria.mediaVisualizacoes}
+                  </p>
+                </div>
+                <div className="rounded-2xl bg-white p-4 ring-1 ring-amber-100">
+                  <p className="text-xs font-semibold uppercase text-[#9aa8a3]">IR AGORA · posição</p>
+                  <p className="mt-1 text-xl font-bold text-[#1a4a3a]">
+                    #{relatorio.comparativoCategoria.posicaoIrAgora}
+                  </p>
+                  <p className="text-[11px] text-[#5a6b66]">
+                    Média da categoria: {relatorio.comparativoCategoria.mediaIrAgora}
+                  </p>
+                </div>
+                {relatorio.comparativoCategoria.topParceiroVisualizacoes != null && (
+                  <div className="rounded-2xl bg-white p-4 ring-1 ring-amber-100 sm:col-span-2">
+                    <p className="text-xs font-semibold uppercase text-amber-800">
+                      Referência · parceiros da categoria
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-[#1a2e28]">
+                      Top parceiro: {relatorio.comparativoCategoria.topParceiroVisualizacoes}{" "}
+                      views · {relatorio.comparativoCategoria.topParceiroIrAgora} IR AGORA
+                    </p>
+                    <p className="mt-1 text-[11px] text-[#5a6b66]">
+                      Use na conversa comercial: visibilidade premium gera mais engajamento.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
 
           <section className="rounded-3xl bg-white p-5 shadow-md ring-1 ring-black/5 md:p-6">
             <h3 className="text-lg font-bold text-[#1a2e28]">

@@ -7,7 +7,10 @@ import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import AdminShell, { useAdminAuth } from "@/components/admin/AdminShell";
 import { useAdminFlashToast, useAdminToast } from "@/components/admin/AdminToastContext";
 import { isConteudoCuradoria, isParceiro } from "@/lib/lugarBadges";
-import { isLugarEstabelecimento } from "@/lib/lugarDetalhe";
+import {
+  hasPerfilCompletoGratuito,
+  isLugarPerfilPresenca,
+} from "@/lib/planoLancamento";
 import { getCapaThumbFromLugar } from "@/lib/fotos";
 import { getLugarPublicPath } from "@/lib/lugarPublicPath";
 import {
@@ -32,16 +35,21 @@ const CATEGORIAS_LUGAR = getCategoriasVisiveis().map((item) => ({
 }));
 
 /**
- * Estabelecimento ativo no app com perfil básico (sem Parceiro do Guia).
+ * Estabelecimento ativo no app com perfil básico permanente (Presença).
  * @param {object|null|undefined} lugar
  * @returns {boolean}
  */
 function isLugarPerfilBasico(lugar) {
-  return (
-    isLugarAtivo(lugar) &&
-    isLugarEstabelecimento(lugar) &&
-    !isParceiro(lugar)
-  );
+  return isLugarAtivo(lugar) && isLugarPerfilPresenca(lugar);
+}
+
+/**
+ * Estabelecimento ativo com promo de perfil completo.
+ * @param {object|null|undefined} lugar
+ * @returns {boolean}
+ */
+function isLugarPerfilLancamento(lugar) {
+  return isLugarAtivo(lugar) && hasPerfilCompletoGratuito(lugar);
 }
 
 const categoryStyles = {
@@ -178,6 +186,16 @@ function LugarCard({ lugar, onActivate, onDeactivate, onInactivate }) {
               Parceiro
             </span>
           )}
+          {lugar.ehLancamentoFlag && (
+            <span className="rounded-full bg-sky-200 px-2.5 py-1 text-xs font-bold text-sky-900 shadow-sm">
+              Lançamento
+            </span>
+          )}
+          {lugar.ehPresencaFlag && (
+            <span className="rounded-full bg-slate-200 px-2.5 py-1 text-xs font-bold text-slate-700 shadow-sm">
+              Presença
+            </span>
+          )}
           {lugar.ehCuradoriaFlag && (
             <span className="rounded-full bg-[#d4ede8] px-2.5 py-1 text-xs font-bold text-[#1a4a3a] shadow-sm">
               Curadoria
@@ -277,7 +295,8 @@ function LugarCard({ lugar, onActivate, onDeactivate, onInactivate }) {
 const STATUS_FROM_URL = {
   em_analise: "Em análise",
   pausado: "Desativados",
-  perfil_basico: "Perfil básico",
+  perfil_basico: "Presença",
+  lancamento: "Lançamento",
   parceiros: "Parceiros",
 };
 
@@ -403,6 +422,7 @@ export default function LugaresGridPage() {
     const inativos = lugares.filter((l) => isLugarInativoComPurge(l)).length;
     const parceiros = lugares.filter((l) => isLugarAtivo(l) && isParceiro(l)).length;
     const perfilBasico = lugares.filter((l) => isLugarPerfilBasico(l)).length;
+    const lancamento = lugares.filter((l) => isLugarPerfilLancamento(l)).length;
     const curadoria = lugares.filter((l) => isLugarAtivo(l) && isConteudoCuradoria(l)).length;
     return {
       total: lugares.length,
@@ -412,6 +432,7 @@ export default function LugaresGridPage() {
       emAnalise,
       parceiros,
       perfilBasico,
+      lancamento,
       curadoria,
     };
   }, [lugares]);
@@ -436,6 +457,8 @@ export default function LugaresGridPage() {
         (status === "Inativos" && isLugarInativoComPurge(lugar)) ||
         (status === "Em análise" && lugar.status === LUGAR_STATUS.EM_ANALISE) ||
         (status === "Parceiros" && ativo && isParceiro(lugar)) ||
+        (status === "Presença" && isLugarPerfilBasico(lugar)) ||
+        (status === "Lançamento" && isLugarPerfilLancamento(lugar)) ||
         (status === "Perfil básico" && isLugarPerfilBasico(lugar)) ||
         (status === "Curadoria" && ativo && isConteudoCuradoria(lugar)) ||
         (status === "Ambos" &&
@@ -472,6 +495,32 @@ export default function LugaresGridPage() {
       subtitle="Estabelecimentos e pontos do guia na região"
       headerAction={novoLugarLink}
     >
+      <section className="mb-6 rounded-2xl border border-sky-200 bg-sky-50/60 p-4">
+        <p className="text-sm text-[#1a2e28]">
+          <strong>Fase de lançamento:</strong> cadastre farmácias, mercados e utilitários em{" "}
+          <strong>Presença</strong> (básico + WhatsApp/telefone grátis para sempre). Restaurantes
+          e experiências em <strong>Lançamento</strong> (perfil completo até fev/2027). Meta: 70–100
+          locais antes do marketing.
+        </p>
+        <div className="mt-2 flex flex-wrap gap-3 text-xs font-semibold">
+          <Link href="/admin/kpis" className="text-sky-800 underline-offset-2 hover:underline">
+            KPIs agregados
+          </Link>
+          <Link
+            href="/admin/abordagem"
+            className="text-sky-800 underline-offset-2 hover:underline"
+          >
+            Fila de abordagem
+          </Link>
+          <Link
+            href="/admin/relatorios"
+            className="text-sky-800 underline-offset-2 hover:underline"
+          >
+            Relatórios por local
+          </Link>
+        </div>
+      </section>
+
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4 xl:grid-cols-8">
         <StatCard label="Total" value={stats.total} accent="text-[#1a4a3a]" />
         <StatCard
@@ -487,10 +536,16 @@ export default function LugaresGridPage() {
           accent="text-amber-700"
         />
         <StatCard
-          label="Perfil básico"
+          label="Presença"
           value={stats.perfilBasico}
-          hint="ativos sem parceiro"
+          hint="perfil básico permanente"
           accent="text-sky-700"
+        />
+        <StatCard
+          label="Lançamento"
+          value={stats.lancamento}
+          hint="perfil completo grátis"
+          accent="text-emerald-700"
         />
         <StatCard
           label="Curadoria"
@@ -563,6 +618,8 @@ export default function LugaresGridPage() {
                 "Inativos",
                 "Em análise",
                 "Parceiros",
+                "Lançamento",
+                "Presença",
                 "Perfil básico",
                 "Curadoria",
                 "Ambos",
@@ -598,12 +655,14 @@ export default function LugaresGridPage() {
             Filtro atual: <strong className="text-[#1a4a3a]">{filtered.length}</strong>{" "}
             locais · total cadastrado: {lugares.length}
             {(status === "Parceiros" ||
+              status === "Presença" ||
               status === "Perfil básico" ||
+              status === "Lançamento" ||
               status === "Curadoria" ||
               status === "Ambos") && (
               <span className="mt-1 block text-xs text-[#9aa8a3]">
-                Parceiros, perfil básico e curadoria não somam o total — um local
-                pode entrar em mais de um filtro (ou só em curadoria, no caso de
+                Planos comerciais e curadoria não somam o total — um local pode
+                entrar em mais de um filtro (ou só em curadoria, no caso de
                 praias/trilhas).
               </span>
             )}
@@ -644,6 +703,8 @@ export default function LugaresGridPage() {
               lugar={{
                 ...lugar,
                 ehParceiroFlag: isParceiro(lugar),
+                ehLancamentoFlag: isLugarPerfilLancamento(lugar),
+                ehPresencaFlag: isLugarPerfilBasico(lugar),
                 ehCuradoriaFlag: isConteudoCuradoria(lugar),
               }}
               onActivate={() => handleActivate(lugar)}

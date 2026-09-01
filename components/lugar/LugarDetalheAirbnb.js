@@ -161,6 +161,11 @@ export default function LugarDetalheAirbnb(props) {
                     {getBadgeCuradoriaLabel()}
                   </span>
                 )}
+                {visibilidade.showBadgeLancamento && (
+                  <span className="rounded-md bg-sky-100 px-2 py-0.5 text-[11px] font-bold text-sky-800">
+                    Perfil completo
+                  </span>
+                )}
                 {ehEstabelecimento && (
                   <span
                     className={`rounded-md px-2 py-0.5 text-[11px] font-bold ${

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { buildLugarLogDetalhes } from "@/lib/planoLancamento";
 import { isLugarElegivelQr } from "@/lib/lugarQr";
 import { getLugarPublicPath } from "@/lib/lugarPublicPath";
 import { getSiteUrl } from "@/lib/siteUrl";
@@ -23,7 +24,7 @@ export async function GET(request, { params }) {
 
   const { data: lugar, error } = await supabase
     .from("lugares")
-    .select("id, nome, categoria, slug, status")
+    .select("id, nome, categoria, slug, status, eh_parceiro, perfil_promo_ate")
     .eq("slug", slug)
     .eq("status", "ativo")
     .maybeSingle();
@@ -44,12 +45,7 @@ export async function GET(request, { params }) {
       user_email: null,
       user_nome: null,
       acao: "escaneou_qr",
-      detalhes: {
-        lugar_id: lugar.id,
-        lugar_nome: lugar.nome,
-        slug,
-        pagina: `/q/${slug}`,
-      },
+      detalhes: buildLugarLogDetalhes(lugar, { slug, pagina: `/q/${slug}` }),
     });
 
     if (logError) {

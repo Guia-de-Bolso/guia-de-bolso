@@ -137,6 +137,11 @@ export default function LugarDetalheLegacy(props) {
                 {getBadgeCuradoriaLabel()}
               </span>
             )}
+            {visibilidade.showBadgeLancamento && (
+              <span className="inline-flex rounded-full bg-sky-100 px-3 py-1 text-xs font-bold text-sky-800">
+                Perfil completo
+              </span>
+            )}
           </div>
           <p className="text-base font-semibold leading-snug text-[#1a4a3a]">
             {fraseConvencimento}
