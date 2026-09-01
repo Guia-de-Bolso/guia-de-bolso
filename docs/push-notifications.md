@@ -240,6 +240,7 @@ Antes do deploy, aplique no SQL Editor (nessa ordem, se ainda não rodou):
 
 1. `supabase/migrations/20260721190000_push_campaigns.sql`
 2. `supabase/migrations/20260722120000_push_copy_ptbr.sql` (copy pt-BR das campanhas de local/parceiro)
+3. `supabase/migrations/20260901120000_push_novo_local_copy.sql` (título com o nome do local; corpo sem usar a categoria como sujeito)
 
 A `event_key` única e o claim transacional impedem notificações duplicadas.
 

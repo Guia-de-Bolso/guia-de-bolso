@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **Admin establishment reports** — place dropdown lists only active non-Natureza/Aventura establishments (`RelatoriosEstabelecimentoPage.js`), aligned with QR eligibility.
 - **Home / nav polish** — compact header + marca, “Pergunte ao Guia”, suggestion card, Prefeitura footer, semantic bottom-nav icons (`HomeContextHeader`, `BottomNav`, `HomePageClient`).
 - **Push automation copy** — more natural pt-BR templates (`lib/pushAutomationRules.js`, `20260722120000_push_copy_ptbr.sql`).
+- **Push “novo local”** — title uses the place name; body uses a noun phrase per category instead of “Serviços acabou de chegar” (`lib/pushAutomationRules.js`, `20260901120000_push_novo_local_copy.sql`).
 - **Place persuasion copy** — context-aware phrases for services/pets/etc. (`lib/lugarDetalhe.js`).
 - **Free tier AI search limit** — daily cap raised from **5** to **10** buscas/dia (`lib/premium.js`, RPC `increment_busca_ia` / `decrement_busca_ia` in `supabase/increment_uso_ia.sql`, migration `20260706120000_busca_ia_daily_limit_10.sql`). Onboarding, paywall and home counter use `LIMITS.busca` dynamically.
 

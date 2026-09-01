@@ -149,6 +149,7 @@ Run in order for a **new environment** that already has base tables from the Sup
 | 25b | `20260713180000_push_tokens.sql` | Tokens FCM por instalação + RLS |
 | 25c | `20260721190000_push_campaigns.sql` | Fila idempotente, triggers de conteúdo e claim das automações push |
 | 25d | `20260722120000_push_copy_ptbr.sql` | Copy pt-BR mais natural nas automações push |
+| 25e | `20260901120000_push_novo_local_copy.sql` | Novo local: nome no título; categoria como substantivo no corpo |
 
 ### F — Security P0 (lugares + storage write)
 
