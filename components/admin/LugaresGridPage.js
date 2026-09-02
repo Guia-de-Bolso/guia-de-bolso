@@ -24,6 +24,7 @@ import {
   isLugarPausado,
   LUGAR_STATUS,
 } from "@/lib/lugarStatus";
+import { fetchSubcategoriasAdmin } from "@/lib/adminTaxonomia";
 import { getCategoriasVisiveis } from "@/lib/categorias";
 import { processPendingPushCampaigns } from "@/lib/processPendingPushCampaigns";
 import { createClient } from "@/lib/supabase";
@@ -307,8 +308,10 @@ export default function LugaresGridPage() {
   const searchParams = useSearchParams();
   const statusFromUrl = searchParams.get("status");
   const [lugares, setLugares] = useState([]);
+  const [subcategorias, setSubcategorias] = useState([]);
   const [search, setSearch] = useState("");
   const [categoria, setCategoria] = useState("Todas");
+  const [subcategoria, setSubcategoria] = useState("Todas");
   const [status, setStatus] = useState(
     STATUS_FROM_URL[statusFromUrl] || "Todos"
   );
@@ -316,16 +319,17 @@ export default function LugaresGridPage() {
 
   const loadLugares = useCallback(async () => {
     const supabase = createClient();
-    const lugaresRes = await supabase
-      .from("lugares")
-      .select("*, localizacoes(cidade)")
-      .order("nome");
+    const [lugaresRes, subs] = await Promise.all([
+      supabase.from("lugares").select("*, localizacoes(cidade)").order("nome"),
+      fetchSubcategoriasAdmin(supabase),
+    ]);
 
     if (lugaresRes.error) {
       console.error("[admin lugares]", lugaresRes.error.message);
     }
 
     setLugares(lugaresRes.data ?? []);
+    setSubcategorias(subs);
   }, []);
 
   useEffect(() => {
@@ -449,6 +453,8 @@ export default function LugaresGridPage() {
         sub.includes(term) ||
         getCidade(lugar).toLowerCase().includes(term);
       const matchesCategoria = categoria === "Todas" || lugar.categoria === categoria;
+      const matchesSubcategoria =
+        subcategoria === "Todas" || String(lugar.subcategoria || "") === subcategoria;
       const ativo = isLugarAtivo(lugar);
       const matchesStatus =
         status === "Todos" ||
@@ -467,9 +473,25 @@ export default function LugaresGridPage() {
           isConteudoCuradoria(lugar));
       const matchesCidade = cidade === "Todas" || getCidade(lugar) === cidade;
 
-      return matchesSearch && matchesCategoria && matchesStatus && matchesCidade;
+      return (
+        matchesSearch &&
+        matchesCategoria &&
+        matchesSubcategoria &&
+        matchesStatus &&
+        matchesCidade
+      );
     });
-  }, [lugares, search, categoria, status, cidade]);
+  }, [lugares, search, categoria, subcategoria, status, cidade]);
+
+  const subcategoriasDaCategoria = useMemo(() => {
+    if (categoria === "Todas") return [];
+    return subcategorias.filter((item) => item.categoria === categoria);
+  }, [subcategorias, categoria]);
+
+  function selectCategoria(nextCategoria) {
+    setCategoria(nextCategoria);
+    setSubcategoria("Todas");
+  }
 
   const novoLugarLink = (
     <Link
@@ -590,19 +612,44 @@ export default function LugaresGridPage() {
             Categoria
           </p>
           <div className="flex gap-2 overflow-x-auto pb-1">
-            <FilterChip active={categoria === "Todas"} onClick={() => setCategoria("Todas")}>
+            <FilterChip active={categoria === "Todas"} onClick={() => selectCategoria("Todas")}>
               Todas
             </FilterChip>
             {CATEGORIAS_LUGAR.map((item) => (
               <FilterChip
                 key={item.nome}
                 active={categoria === item.nome}
-                onClick={() => setCategoria(item.nome)}
+                onClick={() => selectCategoria(item.nome)}
               >
                 {item.icone} {item.nome}
               </FilterChip>
             ))}
           </div>
+          {categoria !== "Todas" && (
+            <div className="mt-3 flex flex-wrap gap-2 border-t border-[#e3e9e6] pt-3">
+              <FilterChip
+                active={subcategoria === "Todas"}
+                onClick={() => setSubcategoria("Todas")}
+              >
+                Todas subcategorias
+              </FilterChip>
+              {subcategoriasDaCategoria.map((item) => (
+                <FilterChip
+                  key={item.id}
+                  active={subcategoria === item.nome}
+                  onClick={() => setSubcategoria(item.nome)}
+                >
+                  {item.icone ? `${item.icone} ` : ""}
+                  {item.nome}
+                </FilterChip>
+              ))}
+              {subcategoriasDaCategoria.length === 0 && (
+                <p className="self-center text-xs text-[#9aa8a3]">
+                  Nenhuma subcategoria cadastrada nesta categoria.
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -646,7 +693,10 @@ export default function LugaresGridPage() {
       </div>
 
       <p className="mb-4 text-sm text-[#5a6b66]">
-        {status === "Todos" && categoria === "Todas" && !search.trim() ? (
+        {status === "Todos" &&
+        categoria === "Todas" &&
+        subcategoria === "Todas" &&
+        !search.trim() ? (
           <>
             <strong className="text-[#1a4a3a]">{filtered.length}</strong> locais
           </>
