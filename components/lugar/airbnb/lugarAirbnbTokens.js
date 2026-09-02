@@ -38,5 +38,9 @@ export const DESTAQUE_CHIP_PREMIUM_CLASS =
 export const INFO_CARD_PREMIUM_CLASS =
   "flex min-h-[108px] min-w-[5.25rem] flex-1 basis-[calc(50%-0.375rem)] flex-col items-center justify-center gap-2 rounded-2xl bg-[#f5f7f6] px-3 py-5 ring-1 ring-[#e8eeee] transition-transform active:scale-[0.98] sm:basis-[calc(25%-0.5625rem)]";
 
+/** Uma única ação comercial — linha compacta em vez do tile alto. */
+export const INFO_ROW_CONTATO_CLASS =
+  "flex h-[52px] w-full items-center gap-3 rounded-2xl bg-[#f5f7f6] px-3 ring-1 ring-[#e8eeee] transition-transform active:scale-[0.99]";
+
 export const PARCEIRO_BADGE_GRADIENT_CLASS =
   "shrink-0 rounded-lg border border-[#e8c66a]/80 bg-gradient-to-r from-[#f0a830] to-[#f5e6b8] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-[#5c4a12] shadow-sm";

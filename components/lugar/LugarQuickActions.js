@@ -3,6 +3,7 @@
 import {
   INFO_CARD_PREMIUM_CLASS,
   INFO_CHIP_PUBLIC_CLASS,
+  INFO_ROW_CONTATO_CLASS,
 } from "@/components/lugar/airbnb/lugarAirbnbTokens";
 
 /**
@@ -82,6 +83,57 @@ const ICONS_ESTABELECIMENTO = {
   cardapio: IconUtensils,
   site: IconGlobe,
 };
+
+/**
+ * Linha compacta quando o estabelecimento tem só um link comercial.
+ * @param {object} props
+ * @param {{ id: string, label: string, href?: string|null }} props.acao
+ * @param {import("react").ComponentType<{ className?: string }>} props.Icon
+ * @returns {import("react").JSX.Element}
+ */
+function InfoRowContato({ acao, Icon }) {
+  const content = (
+    <>
+      <span
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-[#1a4a3a] ring-1 ring-[#e8eeee]"
+        aria-hidden
+      >
+        <Icon className="h-5 w-5" />
+      </span>
+      <span className="min-w-0 flex-1 text-[15px] font-bold leading-tight tracking-tight text-[#1a2e28]">
+        {acao.label}
+      </span>
+      <span className="shrink-0 text-[13px] font-semibold text-[#5a6b66]">
+        {acao.href ? "Abrir" : "Bloqueado"}
+      </span>
+    </>
+  );
+
+  if (!acao.href) {
+    return (
+      <div
+        className={`${INFO_ROW_CONTATO_CLASS} opacity-50`}
+        role="listitem"
+        aria-label={`${acao.label} indisponível`}
+      >
+        {content}
+      </div>
+    );
+  }
+
+  return (
+    <a
+      href={acao.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={INFO_ROW_CONTATO_CLASS}
+      role="listitem"
+      aria-label={acao.label}
+    >
+      {content}
+    </a>
+  );
+}
 
 /**
  * Card de contato (estabelecimento) — mesmo visual dos cards de informação (praia, trilha).
@@ -264,16 +316,19 @@ export default function LugarQuickActions({
   const isAirbnb = variant === "airbnb";
   const isPremium = variant === "premium";
   const cardsPremium = isPremium || (isAirbnb && isEstabelecimento);
+  const isContatoUnico = cardsPremium && isEstabelecimento && acoes.length === 1;
 
   return (
     <section className={isAirbnb || isPremium ? "" : "mt-6"}>
       <div
         className={
-          cardsPremium
-            ? "flex flex-wrap gap-3"
-            : isEstabelecimento
-              ? "mx-auto flex w-full max-w-sm justify-center gap-2.5"
-              : `flex gap-2 overflow-x-auto pb-0.5 scrollbar-hide snap-x snap-mandatory [-webkit-overflow-scrolling:touch]${isAirbnb ? "" : ""}`
+          isContatoUnico
+            ? ""
+            : cardsPremium
+              ? "flex flex-wrap gap-3"
+              : isEstabelecimento
+                ? "mx-auto flex w-full max-w-sm justify-center gap-2.5"
+                : `flex gap-2 overflow-x-auto pb-0.5 scrollbar-hide snap-x snap-mandatory [-webkit-overflow-scrolling:touch]${isAirbnb ? "" : ""}`
         }
         role="list"
         aria-label={
@@ -285,6 +340,9 @@ export default function LugarQuickActions({
         {isEstabelecimento
           ? acoes.map((acao) => {
               const Icon = ICONS_ESTABELECIMENTO[acao.id] || IconGlobe;
+              if (isContatoUnico) {
+                return <InfoRowContato key={acao.id} acao={acao} Icon={Icon} />;
+              }
               if (cardsPremium) {
                 return <InfoCardContato key={acao.id} acao={acao} Icon={Icon} />;
               }
