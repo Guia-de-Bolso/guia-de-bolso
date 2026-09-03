@@ -19,7 +19,7 @@ export default function NegociosPlans() {
       <LandingSectionHeader
         eyebrow="Planos no guia"
         title="Presença, Lançamento ou Parceiro."
-        subtitle="O app é gratuito para turistas. Seu negócio escolhe o nível de visibilidade — utilitários ficam no básico; experiências ganham perfil completo na fase de lançamento."
+        subtitle="O app é gratuito para turistas. Utilitários entram com perfil completo; experiências ganham o mesmo na fase de lançamento — e o plano Parceiro adiciona destaque premium."
         center
       />
 

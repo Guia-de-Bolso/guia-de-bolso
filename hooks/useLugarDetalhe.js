@@ -46,7 +46,11 @@ import {
   parseMapCoordinates,
 } from "@/lib/mapsCoordinates";
 import { isConteudoCuradoria, isParceiro } from "@/lib/lugarBadges";
-import { buildLugarLogDetalhes, isPerfilPromoAtivo } from "@/lib/planoLancamento";
+import {
+  buildLugarLogDetalhes,
+  isPerfilPromoAtivo,
+  isSubcategoriaPresenca,
+} from "@/lib/planoLancamento";
 import {
   getTextoHistoriaCultura,
   getTextoSobre,
@@ -514,8 +518,15 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
   const ehCuradoria = lugar ? isConteudoCuradoria(lugar) : false;
   const ehEstabelecimento = lugar ? isLugarEstabelecimento(lugar) : true;
   const perfilPromoAtivo = lugar ? isPerfilPromoAtivo(lugar.perfil_promo_ate) : false;
+  const ehUtilitario = lugar ? isSubcategoriaPresenca(lugar.subcategoria) : false;
   const visibilidade = lugar
-    ? getVisibilidadePerfil(ehParceiro, ehCuradoria, ehEstabelecimento, perfilPromoAtivo)
+    ? getVisibilidadePerfil(
+        ehParceiro,
+        ehCuradoria,
+        ehEstabelecimento,
+        perfilPromoAtivo,
+        ehUtilitario
+      )
     : null;
   const capaUrl = lugar ? getCapaFromLugar(lugar) : null;
   const fotosCompletas = lugar

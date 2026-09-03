@@ -36,7 +36,7 @@ const CATEGORIAS_LUGAR = getCategoriasVisiveis().map((item) => ({
 }));
 
 /**
- * Estabelecimento ativo no app com perfil básico permanente (Presença).
+ * Estabelecimento ativo no app no plano Presença (utilitário ou experiência sem promo).
  * @param {object|null|undefined} lugar
  * @returns {boolean}
  */
@@ -520,9 +520,9 @@ export default function LugaresGridPage() {
       <section className="mb-6 rounded-2xl border border-sky-200 bg-sky-50/60 p-4">
         <p className="text-sm text-[#1a2e28]">
           <strong>Fase de lançamento:</strong> cadastre farmácias, mercados e utilitários em{" "}
-          <strong>Presença</strong> (básico + WhatsApp/telefone grátis para sempre). Restaurantes
-          e experiências em <strong>Lançamento</strong> (perfil completo até fev/2027). Meta: 70–100
-          locais antes do marketing.
+          <strong>Presença</strong> (perfil completo grátis para sempre, sem destaque pago).
+          Restaurantes e experiências em <strong>Lançamento</strong> (perfil completo até
+          fev/2027). Meta: 70–100 locais antes do marketing.
         </p>
         <div className="mt-2 flex flex-wrap gap-3 text-xs font-semibold">
           <Link href="/admin/kpis" className="text-sky-800 underline-offset-2 hover:underline">
@@ -554,13 +554,13 @@ export default function LugaresGridPage() {
         <StatCard
           label="Parceiros"
           value={stats.parceiros}
-          hint="perfil completo"
+          hint="destaque pago"
           accent="text-amber-700"
         />
         <StatCard
           label="Presença"
           value={stats.perfilBasico}
-          hint="perfil básico permanente"
+          hint="utilitário completo"
           accent="text-sky-700"
         />
         <StatCard

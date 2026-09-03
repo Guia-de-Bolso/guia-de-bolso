@@ -109,11 +109,11 @@ export default function AbordagemComercialPage() {
       <section className="rounded-3xl border border-sky-200 bg-sky-50/60 p-5 md:p-6">
         <h2 className="text-sm font-bold text-[#1a2e28]">Como usar na fase de lançamento</h2>
         <p className="mt-2 text-sm text-[#5a6b66]">
-          Cadastre utilitários (farmácias, mercados) em{" "}
-          <strong>Presença</strong> — perfil básico permanente. Restaurantes e
-          experiências em <strong>Lançamento</strong> — perfil completo grátis até
-          fev/2027. Depois do marketing, use esta fila para decidir quem abordar
-          primeiro com dados de visualizações, IR AGORA e pedidos de perfil.
+          Cadastre utilitários (farmácias, mercados, saúde) em{" "}
+          <strong>Presença</strong> — perfil completo permanente, sem destaque pago.
+          Restaurantes e experiências em <strong>Lançamento</strong> — perfil completo
+          grátis até fev/2027. Depois do marketing, use esta fila para decidir quem
+          abordar primeiro com dados de visualizações, IR AGORA e pedidos de perfil.
         </p>
         <div className="mt-3 flex flex-wrap gap-3 text-xs font-semibold">
           <Link
