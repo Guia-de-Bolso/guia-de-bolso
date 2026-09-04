@@ -13,6 +13,8 @@ import {
   isParceiro,
 } from "@/lib/lugarBadges";
 import { getTagsFromLugar } from "@/lib/tags";
+import LugarVideoPlayBadge from "@/components/lugar/LugarVideoPlayBadge";
+import { lugarMostraVideoPublico } from "@/lib/lugarVideo";
 
 function IconPin({ className = "h-4 w-4" }) {
   return (
@@ -69,6 +71,7 @@ export default function PlaceCard({
   const detailLinkProps = preferDocumentNavWhenOffline
     ? { preferDocumentNav: true }
     : {};
+  const mostraVideo = lugarMostraVideoPublico(lugar);
 
   return (
     <article
@@ -100,6 +103,7 @@ export default function PlaceCard({
             : "bg-gradient-to-t from-black/80 via-black/30 to-transparent"
         }`}
       />
+      {mostraVideo ? <LugarVideoPlayBadge className="inset-x-0 top-0 h-[55%]" /> : null}
 
       <div className="absolute left-4 top-4 flex flex-col items-start gap-2">
         {rating !== null && (
@@ -150,6 +154,7 @@ export default function PlaceCard({
             }`}
           >
             {lugar.nome}
+            {mostraVideo ? <span className="sr-only">, com vídeo</span> : null}
           </h3>
           <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-white/88">
             {lugar.descricao}

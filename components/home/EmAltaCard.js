@@ -6,6 +6,8 @@ import { getCapaThumbFromLugar, getCapaBlurFromLugar } from "@/lib/fotos";
 import { getLugarPublicPath } from "@/lib/lugarPublicPath";
 import { getStatusFuncionamento } from "@/lib/horarios";
 import { getTagsFromLugar } from "@/lib/tags";
+import LugarVideoPlayBadge from "@/components/lugar/LugarVideoPlayBadge";
+import { lugarMostraVideoPublico } from "@/lib/lugarVideo";
 
 /**
  * Returns aggregated rating from the place record when available.
@@ -29,6 +31,7 @@ export default function EmAltaCard({ lugar, priority = false, returnPath = "" })
   const rating = getRatingMedio(lugar);
   const imagemUrl = getCapaThumbFromLugar(lugar);
   const imagemBlur = getCapaBlurFromLugar(lugar);
+  const mostraVideo = lugarMostraVideoPublico(lugar);
 
   return (
     <PrefetchLink
@@ -53,6 +56,7 @@ export default function EmAltaCard({ lugar, priority = false, returnPath = "" })
           <div className="h-full w-full bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54]" />
         )}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 to-transparent" />
+        {mostraVideo ? <LugarVideoPlayBadge size="sm" /> : null}
         {status && (
           <span
             className={`absolute left-2.5 top-2.5 rounded-full px-2.5 py-1 text-[10px] font-bold shadow-sm backdrop-blur-sm ${
@@ -71,6 +75,7 @@ export default function EmAltaCard({ lugar, priority = false, returnPath = "" })
       <div className="flex flex-1 flex-col p-3.5">
         <h3 className="line-clamp-1 text-[15px] font-bold tracking-tight text-[#1a2e28]">
           {lugar.nome}
+          {mostraVideo ? <span className="sr-only">, com vídeo</span> : null}
         </h3>
         <p className="mt-1 line-clamp-1 text-xs font-medium text-[#5a6b66]">{distancia}</p>
         {status && (status.resumo || status.detail) && (

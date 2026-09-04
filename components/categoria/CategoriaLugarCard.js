@@ -12,6 +12,8 @@ import {
   isParceiro,
 } from "@/lib/lugarBadges";
 import { buildLugarListMeta } from "@/lib/lugarListMeta";
+import LugarVideoPlayBadge from "@/components/lugar/LugarVideoPlayBadge";
+import { lugarMostraVideoPublico } from "@/lib/lugarVideo";
 
 function IconPin({ className = "h-3.5 w-3.5" }) {
   return (
@@ -39,6 +41,7 @@ export default function CategoriaLugarCard({
 }) {
   const imagemUrl = getCapaThumbFromLugar(lugar);
   const imagemBlur = getCapaBlurFromLugar(lugar);
+  const mostraVideo = lugarMostraVideoPublico(lugar);
 
   const meta = useMemo(
     () => buildLugarListMeta(lugar, userPosition),
@@ -72,6 +75,7 @@ export default function CategoriaLugarCard({
             {(lugar.nome || "?").charAt(0).toUpperCase()}
           </div>
         )}
+        {mostraVideo ? <LugarVideoPlayBadge size="sm" /> : null}
         {meta.status ? (
           <span
             className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold text-white shadow-sm ${
@@ -88,6 +92,7 @@ export default function CategoriaLugarCard({
           <div className="min-w-0">
             <h3 className="line-clamp-2 text-[15px] font-bold leading-snug tracking-tight text-[#1a2e28]">
               {lugar.nome}
+              {mostraVideo ? <span className="sr-only">, com vídeo</span> : null}
             </h3>
             {meta.subcategoria ? (
               <p className="mt-1 inline-flex rounded-full bg-[#f0f4f3] px-2.5 py-0.5 text-[11px] font-semibold text-[#1a4a3a]">

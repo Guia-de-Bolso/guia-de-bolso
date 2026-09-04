@@ -19,6 +19,8 @@ export default function LugarGalleryAirbnb({
   immersiveScroll = true,
   mapsTipCategoria,
   categoria,
+  videoUrl = null,
+  videoPoster = null,
 }) {
   return (
     <GalleryHeroAirbnb
@@ -33,6 +35,8 @@ export default function LugarGalleryAirbnb({
       immersiveScroll={immersiveScroll}
       mapsTipCategoria={mapsTipCategoria}
       categoria={categoria}
+      videoUrl={videoUrl}
+      videoPoster={videoPoster}
     />
   );
 }

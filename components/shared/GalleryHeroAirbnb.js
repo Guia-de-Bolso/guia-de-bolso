@@ -1,11 +1,20 @@
 "use client";
 
 import { useRef } from "react";
+import GalleryMediaViewer from "@/components/shared/GalleryMediaViewer";
+import { useGalleryMediaViewer } from "@/hooks/useGalleryMediaViewer";
 import NavigationBackLink from "@/components/NavigationBackLink";
 import OfflineMapsInfoButton from "@/components/maps/OfflineMapsInfoButton";
 import GalleryPhotoCounter from "@/components/shared/GalleryPhotoCounter";
 import GallerySlidePhoto from "@/components/shared/GallerySlidePhoto";
+import GallerySlideVideo from "@/components/shared/GallerySlideVideo";
 import { useGalleryPhotoPreload } from "@/hooks/useGalleryPhotoPreload";
+import {
+  buildHeroGalleryItems,
+  getGalleryPhotoPreloadIndex,
+  getGalleryPhotosForPreload,
+  isGalleryVideoItem,
+} from "@/lib/galleryMedia";
 import {
   GALLERY_FAVORITO_ATIVO_BTN_CLASS,
   GALLERY_FLOAT_BTN_CLASS,
@@ -18,7 +27,6 @@ import {
   useControlledPhotoCarousel,
 } from "@/lib/horizontalCarousel";
 import { getCategoryPlaceholderHex } from "@/lib/imagePlaceholder";
-import { normalizeGalleryPhotos } from "@/lib/photoGallery";
 
 function FavoriteIcon({ active, className = GALLERY_FLOAT_ICON_CLASS }) {
   return (
@@ -73,15 +81,21 @@ export default function GalleryHeroAirbnb({
   immersiveScroll = false,
   mapsTipCategoria,
   categoria,
+  videoUrl = null,
+  videoPoster = null,
 }) {
   const carouselRef = useRef(null);
-  const fotos = normalizeGalleryPhotos(imagens);
-  const fotoAtual = useControlledPhotoCarousel(carouselRef, fotos.length);
+  const items = buildHeroGalleryItems(imagens, videoUrl, videoPoster);
+  const fotoAtual = useControlledPhotoCarousel(carouselRef, items.length);
   const placeholderHex = getCategoryPlaceholderHex(categoria);
+  const viewer = useGalleryMediaViewer(fotoAtual, items.length > 0);
 
-  useGalleryPhotoPreload(fotos, fotoAtual);
+  useGalleryPhotoPreload(
+    getGalleryPhotosForPreload(items),
+    getGalleryPhotoPreloadIndex(items, fotoAtual)
+  );
 
-  const temVariasFotos = fotos.length > 1;
+  const temVariasFotos = items.length > 1;
   const showFooter =
     Boolean(parceiroBadgeLabel || curadoriaBadgeLabel) || temVariasFotos;
 
@@ -102,23 +116,38 @@ export default function GalleryHeroAirbnb({
               : "absolute inset-0 h-full w-full"
           }
         >
-          {fotos.length === 0 ? (
+          {items.length === 0 ? (
             <div className="absolute inset-0 bg-gradient-to-br from-[#1a4a3a] to-[#2d6b54]" />
           ) : (
-            <div ref={carouselRef} className={`${PHOTO_GALLERY_TRACK_CLASS} h-full min-h-full w-full`}>
-              {fotos.map((foto, index) => (
-                <GallerySlidePhoto
-                  key={`${foto.url}-${index}`}
-                  src={foto.url}
-                  thumbSrc={foto.thumb}
-                  blurDataURL={foto.blur}
-                  alt={nome}
-                  categoria={categoria}
-                  index={index}
-                  activeIndex={fotoAtual}
-                  total={fotos.length}
-                />
-              ))}
+            <div
+              ref={carouselRef}
+              className={`${PHOTO_GALLERY_TRACK_CLASS} h-full min-h-full w-full cursor-zoom-in`}
+              {...viewer.carouselPointerHandlers}
+            >
+              {items.map((item, index) =>
+                isGalleryVideoItem(item) ? (
+                  <GallerySlideVideo
+                    key={`video-${item.url}`}
+                    src={item.url}
+                    poster={item.poster}
+                    alt={`Vídeo de ${nome}`}
+                    categoria={categoria}
+                    isActive={index === fotoAtual && !viewer.isOpen}
+                  />
+                ) : (
+                  <GallerySlidePhoto
+                    key={`${item.url}-${index}`}
+                    src={item.url}
+                    thumbSrc={item.thumb}
+                    blurDataURL={item.blur}
+                    alt={nome}
+                    categoria={categoria}
+                    index={index}
+                    activeIndex={fotoAtual}
+                    total={items.length}
+                  />
+                )
+              )}
             </div>
           )}
         </div>
@@ -129,7 +158,7 @@ export default function GalleryHeroAirbnb({
         />
 
         {showFooter && (
-          <div className={GALLERY_FOOTER_ROW_CLASS}>
+          <div className={GALLERY_FOOTER_ROW_CLASS} data-gallery-chrome>
             <div className="flex min-w-0 flex-wrap gap-1.5">
               {parceiroBadgeLabel ? (
                 <span className={PARCEIRO_BADGE_GRADIENT_CLASS}>{parceiroBadgeLabel}</span>
@@ -144,7 +173,11 @@ export default function GalleryHeroAirbnb({
               ) : null}
             </div>
             {temVariasFotos ? (
-              <GalleryPhotoCounter current={fotoAtual + 1} total={fotos.length} />
+              <GalleryPhotoCounter
+                current={fotoAtual + 1}
+                total={items.length}
+                labelKind={isGalleryVideoItem(items[fotoAtual]) ? "video" : "foto"}
+              />
             ) : (
               <span className="shrink-0" aria-hidden />
             )}
@@ -155,6 +188,7 @@ export default function GalleryHeroAirbnb({
           className={`absolute inset-x-0 top-[max(0.75rem,env(safe-area-inset-top))] z-20 flex items-start justify-between px-4 ${
             immersiveScroll ? "detalhe-hero-actions-fade" : ""
           }`}
+          data-gallery-chrome
         >
           <NavigationBackLink
             href={backHref}
@@ -194,6 +228,14 @@ export default function GalleryHeroAirbnb({
           </div>
         </div>
       </div>
+      <GalleryMediaViewer
+        isOpen={viewer.isOpen}
+        onClose={viewer.closeViewer}
+        items={items}
+        initialIndex={viewer.startIndex}
+        nome={nome}
+        categoria={categoria}
+      />
     </div>
   );
 }

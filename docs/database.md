@@ -143,7 +143,7 @@ Core content: beaches, restaurants, trails, services, etc.
 | Formats | MP4 (H.264), WebM |
 | Count | 1 video per place |
 
-Admin compresses before upload (client validates only). Detail page: native `<video controls playsInline>` in section **“Veja o lugar”**, below photo gallery, hidden when `video_url` is null.
+Admin compresses before upload (client validates only). Detail page: first slide of the photo hero (muted looping preview). Tap opens a fullscreen viewer (photos + video with sound; portrait clips in a 9:16 frame). Hidden when `video_url` is null or the public profile hides video.
 
 **`horarios` runtime:** parsed in `lib/horarios.js` (`parseHorarioDia`, `getStatusFuncionamento`, overnight carry-over, `America/Sao_Paulo`). Tests: `node lib/horarios.test.js`.
 

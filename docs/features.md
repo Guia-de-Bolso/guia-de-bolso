@@ -289,7 +289,7 @@ Decide to go now, contact the business, or navigate.
 **Edge cases**
 - Inactive or missing id → “Lugar não encontrado”.
 - Supabase error loading place → full-page `UserErrorAlert` with “Tentar novamente” (`router.refresh()`) and report hint.
-- No photos → placeholder/gradient from `getCapaFromLugar`; hero gallery uses **`RemotePhoto`** (`GalleryHeroAirbnb` on V2 detail) or legacy `LugarHero`, with descriptive `alt` (place name).
+- No photos → placeholder/gradient from `getCapaFromLugar`; hero gallery uses **`RemotePhoto`** (`GalleryHeroAirbnb` on V2 detail) or legacy `LugarHero`, with descriptive `alt` (place name). If `video_url` is set and the profile shows video, the clip is the **first hero slide** (muted loop; photos follow). Tap opens a fullscreen media viewer (swipe, video with sound, Escape/close). Portrait clips use a **9:16** frame; landscape stays `object-contain`. List cards show a play badge when the same video is public (`lugarMostraVideoPublico`).
 - Photo carousel uses `lib/horizontalCarousel.js` (`snap-mandatory`, `useControlledPhotoCarousel` — at most ±1 slide per gesture); used in `GalleryHeroAirbnb`, `LugarHero`.
 - **SEO (P0):** canonical place URLs `/lugares/{slug}` (301 from UUID), `generateMetadata` on place/route detail, `app/sitemap.js`, `app/robots.js`, shared helpers in `lib/seo.js` and `lib/lugarPublicPath.js`.
 - **SEO (P1):** JSON-LD (`lib/seoJsonLd.js`) on place, route, and category pages; server `h1` + intro (`LugarSeoStatic`, category SSR header); category list SSR via `CategoriaPageClient` + `queryLugaresAtivos`; visible UI titles use `h2` where `h1` is reserved for SEO shell.

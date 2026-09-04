@@ -1,17 +1,25 @@
 "use client";
 
 import GallerySlidePhoto from "@/components/shared/GallerySlidePhoto";
+import GallerySlideVideo from "@/components/shared/GallerySlideVideo";
 import OfflineMapsInfoButton from "@/components/maps/OfflineMapsInfoButton";
 import { useGalleryPhotoPreload } from "@/hooks/useGalleryPhotoPreload";
 import Link from "next/link";
 import { useRef } from "react";
 import IconBack from "@/components/IconBack";
+import GalleryMediaViewer from "@/components/shared/GalleryMediaViewer";
+import { useGalleryMediaViewer } from "@/hooks/useGalleryMediaViewer";
 import {
   PHOTO_GALLERY_TRACK_CLASS,
   useControlledPhotoCarousel,
 } from "@/lib/horizontalCarousel";
 import { getCategoryPlaceholderHex } from "@/lib/imagePlaceholder";
-import { normalizeGalleryPhotos } from "@/lib/photoGallery";
+import {
+  buildHeroGalleryItems,
+  getGalleryPhotoPreloadIndex,
+  getGalleryPhotosForPreload,
+  isGalleryVideoItem,
+} from "@/lib/galleryMedia";
 
 /**
  * Ícone de coração para favoritar ou indicar favorito ativo.
@@ -94,37 +102,56 @@ export default function LugarHero({
   isFavorito,
   onFavoritar,
   onShare,
+  videoUrl = null,
+  videoPoster = null,
 }) {
   const carouselRef = useRef(null);
-  const fotos = normalizeGalleryPhotos(imagens);
-  const fotoAtual = useControlledPhotoCarousel(carouselRef, fotos.length);
+  const items = buildHeroGalleryItems(imagens, videoUrl, videoPoster);
+  const fotoAtual = useControlledPhotoCarousel(carouselRef, items.length);
   const placeholderHex = getCategoryPlaceholderHex(categoria);
   const temNota = totalAvaliacoes > 0 && mediaAvaliacoes > 0;
+  const viewer = useGalleryMediaViewer(fotoAtual, items.length > 0);
 
-  useGalleryPhotoPreload(fotos, fotoAtual);
+  useGalleryPhotoPreload(
+    getGalleryPhotosForPreload(items),
+    getGalleryPhotoPreloadIndex(items, fotoAtual)
+  );
 
   return (
+    <>
     <div
       className="relative h-[min(52vh,380px)] min-h-[300px] overflow-hidden"
       style={{ backgroundColor: placeholderHex }}
     >
       <div
         ref={carouselRef}
-        className={PHOTO_GALLERY_TRACK_CLASS}
+        className={`${PHOTO_GALLERY_TRACK_CLASS} cursor-zoom-in`}
+        {...viewer.carouselPointerHandlers}
       >
-        {fotos.map((foto, index) => (
-          <GallerySlidePhoto
-            key={`${foto.url}-${index}`}
-            src={foto.url}
-            thumbSrc={foto.thumb}
-            blurDataURL={foto.blur}
-            alt={nome}
-            categoria={categoria}
-            index={index}
-            activeIndex={fotoAtual}
-            total={fotos.length}
-          />
-        ))}
+        {items.map((item, index) =>
+          isGalleryVideoItem(item) ? (
+            <GallerySlideVideo
+              key={`video-${item.url}`}
+              src={item.url}
+              poster={item.poster}
+              alt={`Vídeo de ${nome}`}
+              categoria={categoria}
+              isActive={index === fotoAtual && !viewer.isOpen}
+            />
+          ) : (
+            <GallerySlidePhoto
+              key={`${item.url}-${index}`}
+              src={item.url}
+              thumbSrc={item.thumb}
+              blurDataURL={item.blur}
+              alt={nome}
+              categoria={categoria}
+              index={index}
+              activeIndex={fotoAtual}
+              total={items.length}
+            />
+          )
+        )}
       </div>
 
       <div
@@ -132,7 +159,7 @@ export default function LugarHero({
         aria-hidden
       />
 
-      <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-4 pt-[max(1rem,env(safe-area-inset-top))]">
+      <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-4 pt-[max(1rem,env(safe-area-inset-top))]" data-gallery-chrome>
         <Link
           href="/"
           className="flex h-11 w-11 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-md"
@@ -171,13 +198,13 @@ export default function LugarHero({
         </div>
       </div>
 
-      {imagens.length > 1 && (
-        <div className="absolute bottom-4 right-4 z-20 rounded-full bg-black/45 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
-          {fotoAtual + 1} / {imagens.length}
+      {items.length > 1 && (
+        <div className="pointer-events-none absolute bottom-4 right-4 z-20 rounded-full bg-black/45 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
+          {fotoAtual + 1} / {items.length}
         </div>
       )}
 
-      <div className="absolute inset-x-0 bottom-0 z-20 px-4 pb-5 pt-16">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 px-4 pb-5 pt-16">
         <div className="flex flex-wrap items-center gap-2">
           <span
             className={`rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide ${categoriaStyle}`}
@@ -224,5 +251,14 @@ export default function LugarHero({
         </div>
       </div>
     </div>
+    <GalleryMediaViewer
+      isOpen={viewer.isOpen}
+      onClose={viewer.closeViewer}
+      items={items}
+      initialIndex={viewer.startIndex}
+      nome={nome}
+      categoria={categoria}
+    />
+    </>
   );
 }

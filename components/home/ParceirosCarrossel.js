@@ -6,6 +6,8 @@ import RemotePhoto from "@/components/shared/RemotePhoto";
 import { getCapaThumbFromLugar } from "@/lib/fotos";
 import { getLugarPublicPath } from "@/lib/lugarPublicPath";
 import { getBadgeParceiroLabel } from "@/lib/lugarBadges";
+import LugarVideoPlayBadge from "@/components/lugar/LugarVideoPlayBadge";
+import { lugarMostraVideoPublico } from "@/lib/lugarVideo";
 import HomeSectionHeader from "@/components/home/HomeSectionHeader";
 import { HOME_CAROUSEL_TRACK_CLASS } from "@/components/home/homeTokens";
 
@@ -42,6 +44,7 @@ export default function ParceirosCarrossel({ lugares = [] }) {
 
 function ParceiroCard({ lugar }) {
   const distancia = lugar.distancia_calculada || lugar.distancia;
+  const mostraVideo = lugarMostraVideoPublico(lugar);
 
   return (
     <PrefetchLink
@@ -57,11 +60,15 @@ function ParceiroCard({ lugar }) {
         className="object-cover transition-transform duration-500 group-hover:scale-105"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-[#061612] via-[#061612]/55 to-transparent" />
+      {mostraVideo ? <LugarVideoPlayBadge className="inset-x-0 top-0 h-[58%]" /> : null}
       <span className="absolute left-3.5 top-3.5 rounded-full bg-[#f5e6b8]/95 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-[#7a6520] shadow-sm">
         {getBadgeParceiroLabel()}
       </span>
       <div className="relative p-4 pb-5">
-        <h3 className="text-lg font-bold leading-tight text-white drop-shadow-sm">{lugar.nome}</h3>
+        <h3 className="text-lg font-bold leading-tight text-white drop-shadow-sm">
+          {lugar.nome}
+          {mostraVideo ? <span className="sr-only">, com vídeo</span> : null}
+        </h3>
         <p className="mt-1 text-xs font-medium text-white/85">{lugar.categoria}</p>
         {distancia && (
           <p className="mt-2 text-xs font-semibold tabular-nums text-white/75">{distancia}</p>

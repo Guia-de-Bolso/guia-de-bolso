@@ -12,7 +12,8 @@ import LugarPerfilBloqueadoCta from "@/components/lugar/LugarPerfilBloqueadoCta"
 import LugarQuickActions from "@/components/lugar/LugarQuickActions";
 import LugarCtaBarAirbnb from "@/components/lugar/airbnb/LugarCtaBarAirbnb";
 import LugarGalleryAirbnb from "@/components/lugar/airbnb/LugarGalleryAirbnb";
-import LugarVideoSection from "@/components/lugar/LugarVideoSection";
+import LugarHistoriaCulturaBlock from "@/components/lugar/LugarHistoriaCulturaBlock";
+import LugarProse from "@/components/lugar/LugarProse";
 import LugarSectionAirbnb, {
   LugarCardAirbnb,
   LugarDividerAirbnb,
@@ -124,6 +125,14 @@ export default function LugarDetalheAirbnb(props) {
           <LugarGalleryAirbnb
             nome={lugar.nome}
             imagens={imagens}
+            videoUrl={
+              visibilidade.showVideo && lugarExibeVideo(lugar) ? lugar.video_url : null
+            }
+            videoPoster={
+              (typeof imagens[0] === "string" ? imagens[0] : imagens[0]?.url) ||
+              lugar.imagem_url ||
+              null
+            }
             backHref={backHref}
             isFavorito={isFavorito}
             onFavoritar={handleFavoritar}
@@ -213,19 +222,6 @@ export default function LugarDetalheAirbnb(props) {
                 Fechar
               </button>
             </div>
-          )}
-
-          {visibilidade.showVideo && lugarExibeVideo(lugar) && (
-            <>
-              <div className="-mx-1 mt-5">
-                <LugarVideoSection
-                  videoUrl={lugar.video_url}
-                  posterUrl={imagens[0] || lugar.imagem_url}
-                  nome={lugar.nome}
-                />
-              </div>
-              <LugarDividerAirbnb />
-            </>
           )}
 
           <p className="mt-5 text-[15px] leading-[1.65] text-[#3d4f4a]">
@@ -326,13 +322,12 @@ export default function LugarDetalheAirbnb(props) {
               <LugarDividerAirbnb />
               <LugarSectionAirbnb title="Sobre este lugar">
                 <LugarCardAirbnb>
-                  <p
-                    className={`text-[15px] leading-relaxed text-[#5a6b66] ${
-                      sobreExpandido ? "" : "line-clamp-6"
-                    }`}
-                  >
-                    {descricaoLonga}
-                  </p>
+                  <LugarProse
+                    texto={descricaoLonga}
+                    expandido={sobreExpandido}
+                    clampClass="line-clamp-6"
+                    className="text-[15px] leading-relaxed text-[#5a6b66]"
+                  />
                   {!sobreExpandido &&
                     visibilidade.showDescricaoLonga &&
                     descricaoLonga.length > 220 && (
@@ -353,24 +348,12 @@ export default function LugarDetalheAirbnb(props) {
             <>
               <LugarDividerAirbnb />
               <LugarSectionAirbnb title="História e cultura">
-                <LugarCardAirbnb>
-                  <p
-                    className={`text-[15px] leading-relaxed text-[#5a6b66] ${
-                      historiaExpandido ? "" : "line-clamp-6"
-                    }`}
-                  >
-                    {historiaCultura}
-                  </p>
-                  {!historiaExpandido && historiaCultura.length > 220 && (
-                    <button
-                      type="button"
-                      onClick={() => setHistoriaExpandido(true)}
-                      className="mt-3 text-sm font-semibold text-[#1a4a3a] underline"
-                    >
-                      Mostrar mais
-                    </button>
-                  )}
-                </LugarCardAirbnb>
+                <LugarHistoriaCulturaBlock
+                  texto={historiaCultura}
+                  expandido={historiaExpandido}
+                  onMostrarMais={() => setHistoriaExpandido(true)}
+                  variant="airbnb"
+                />
               </LugarSectionAirbnb>
             </>
           )}

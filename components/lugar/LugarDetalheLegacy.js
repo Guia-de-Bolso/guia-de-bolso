@@ -15,10 +15,13 @@ import LugarHorariosCompact from "@/components/lugar/LugarHorariosCompact";
 import LugarLocalizacaoCard from "@/components/lugar/LugarLocalizacaoCard";
 import LugarPerfilBloqueadoCta from "@/components/lugar/LugarPerfilBloqueadoCta";
 import LugarQuickActions from "@/components/lugar/LugarQuickActions";
+import LugarHistoriaCulturaBlock from "@/components/lugar/LugarHistoriaCulturaBlock";
+import LugarProse from "@/components/lugar/LugarProse";
 import LugarTags from "@/components/lugar/LugarTags";
 import { getBadgeCuradoriaLabel, getBadgeParceiroLabel } from "@/lib/lugarBadges";
 import { buildReportContext } from "@/lib/reportContext";
 import { lugarExibeClima } from "@/lib/clima";
+import { lugarExibeVideo } from "@/lib/lugarVideo";
 import { formatHorario, getDiasHorario } from "@/lib/horarios";
 import { isPerfilBasico } from "@/lib/lugarVisibilidade";
 
@@ -97,6 +100,14 @@ export default function LugarDetalheLegacy(props) {
         <LugarHero
           nome={lugar.nome}
           imagens={imagens}
+          videoUrl={
+            visibilidade.showVideo && lugarExibeVideo(lugar) ? lugar.video_url : null
+          }
+          videoPoster={
+            (typeof imagens[0] === "string" ? imagens[0] : imagens[0]?.url) ||
+            lugar.imagem_url ||
+            null
+          }
           categoria={lugar.categoria}
           categoriaStyle={badgeStyle}
           subcategoria={lugar.subcategoria}
@@ -198,13 +209,12 @@ export default function LugarDetalheLegacy(props) {
             <section className="mt-6">
               <h2 className="mb-3 text-sm font-bold text-[#1a2e28]">Sobre</h2>
               <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-[#e8eeee]">
-                <p
-                  className={`text-sm leading-relaxed text-[#5a6b66] ${
-                    sobreExpandido ? "" : "line-clamp-4"
-                  }`}
-                >
-                  {descricaoLonga}
-                </p>
+                <LugarProse
+                  texto={descricaoLonga}
+                  expandido={sobreExpandido}
+                  clampClass="line-clamp-4"
+                  className="text-sm leading-relaxed text-[#5a6b66]"
+                />
                 {!sobreExpandido &&
                   visibilidade.showDescricaoLonga &&
                   descricaoLonga.length > 180 && (
@@ -223,24 +233,12 @@ export default function LugarDetalheLegacy(props) {
           {historiaCultura && (
             <section className="mt-6">
               <h2 className="mb-3 text-sm font-bold text-[#1a2e28]">História e cultura</h2>
-              <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-[#e8eeee]">
-                <p
-                  className={`text-sm leading-relaxed text-[#5a6b66] ${
-                    historiaExpandido ? "" : "line-clamp-4"
-                  }`}
-                >
-                  {historiaCultura}
-                </p>
-                {!historiaExpandido && historiaCultura.length > 180 && (
-                  <button
-                    type="button"
-                    onClick={() => setHistoriaExpandido(true)}
-                    className="mt-2 text-sm font-semibold text-[#1a4a3a] underline"
-                  >
-                    Mostrar mais
-                  </button>
-                )}
-              </div>
+              <LugarHistoriaCulturaBlock
+                texto={historiaCultura}
+                expandido={historiaExpandido}
+                onMostrarMais={() => setHistoriaExpandido(true)}
+                variant="legacy"
+              />
             </section>
           )}
 
