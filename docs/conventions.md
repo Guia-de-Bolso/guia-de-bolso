@@ -1,5 +1,7 @@
 # Convenções do projeto
 
+**[English](./en/conventions.md)**
+
 Padrões obrigatórios para código, SQL, copy e documentação no **Guia de Bolso**. Processo de contribuição: [`contributing.md`](./contributing.md).
 
 ---
@@ -11,7 +13,7 @@ Padrões obrigatórios para código, SQL, copy e documentação no **Guia de Bol
 | Código da aplicação | **JavaScript** (sem TypeScript) |
 | Copy de produto | **pt-BR** (tom direto, mobile-first) |
 | Comentários | Português ou inglês — **consistente dentro do arquivo** |
-| Documentação técnica | Português nos guias de handoff (`docs/onboarding.md`, etc.); referências API/schema podem estar em inglês |
+| Documentação técnica | Português em `docs/` (handoff) **e** inglês em `docs/en/` + README da raiz; API/schema/deploy já em inglês |
 
 Mensagens de erro para usuário: preferir [`lib/userMessages.js`](../lib/userMessages.js) e `buildApiErrorBody` / `mapApiErrorResponse`.
 
@@ -123,7 +125,7 @@ Checklist: [`../SECURITY_CHECKLIST.md`](../SECURITY_CHECKLIST.md).
 
 ```bash
 npm test              # lib/*.test.js (node --test)
-npm run test:e2e      # Playwright smoke — e2e/smoke.spec.js (10 casos)
+npm run test:e2e      # Playwright — e2e/smoke.spec.js + e2e/auth-gates.spec.js
 ```
 
 **E2E local (primeira vez):** `npx playwright install chromium`  

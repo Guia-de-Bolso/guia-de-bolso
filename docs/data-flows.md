@@ -1,5 +1,7 @@
 # Fluxo de dados
 
+**[English](./en/data-flows.md)**
+
 Como os dados trafegam entre **browser**, **Next.js (Vercel)** e **Supabase**. Diagramas detalhados também em [`architecture.md`](./architecture.md#data-flow).
 
 ---

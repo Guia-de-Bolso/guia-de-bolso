@@ -69,7 +69,7 @@ Periodically export production schema to `supabase/schema_baseline.sql` (read-on
 
 ## Manifest {#manifest}
 
-Run in order for a **new environment** that already has base tables from the Supabase Dashboard (`lugares`, `perfis`, `favoritos`, etc.). Skip steps already applied; never skip **`rotas_policies.sql`** after route child tables.
+Run in order for a **new environment**. Base tables (`lugares`, `perfis`, `favoritos`, …) were originally created in the Dashboard — see [database.md](./database.md). Forks: [getting-started.md](./getting-started.md). Skip steps already applied; never skip **`rotas_policies.sql`** after route child tables.
 
 ### A — Base and premium
 

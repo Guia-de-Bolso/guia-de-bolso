@@ -1,5 +1,7 @@
 # Fluxo de autenticação
 
+**[English](./en/authentication.md)**
+
 Autenticação e autorização no **Guia de Bolso**. Implementação delegada ao **Supabase Auth**; a aplicação não emite JWT próprio.
 
 Visão de sistema: [`architecture.md`](./architecture.md#authentication-flow).

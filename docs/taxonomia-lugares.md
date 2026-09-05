@@ -33,6 +33,8 @@ Farmácias · Mercados · Mecânicos · Salões · Saúde
 ### Cultura
 Museus · Monumentos · Igrejas e templos · Eventos
 
+**Presença (full profile, no paid highlight):** `SUBCATEGORIAS_PRESENCA` in `lib/planoLancamento.js` — Farmácias, Mercados, Mecânicos, Saúde, Igrejas e templos, Museus, Monumentos. Eventos and other commercial subcategories are not on that list (teaser unless partner or Lançamento promo).
+
 ### Aventura
 Esportes radicais · Passeios de barco · Escalada · Ciclismo
 

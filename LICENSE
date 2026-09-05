@@ -1,0 +1,41 @@
+Copyright (c) 2024–2026 Bruno Disliler
+
+All rights reserved.
+
+## What this license covers
+
+This repository contains the source code of **Guia de Bolso**, a production
+product operated at https://guiadebolso.app.
+
+The **Guia de Bolso** name, logo, visual identity, marketing materials, and
+production data (places, partners, contracts, user accounts) are proprietary
+and are **not** licensed for reuse.
+
+## What you may do
+
+You may:
+
+- Fork this repository to study the architecture
+- Run a **private** local or staging instance for learning, evaluation, or
+  contributing a pull request
+- Submit patches under the contribution guidelines
+
+## What you may not do
+
+You may not, without prior written permission from the copyright holder:
+
+- Use the Guia de Bolso name, logo, or trade dress
+- Deploy a public competing service that presents itself as Guia de Bolso
+- Redistribute production catalog data, partner contracts, or user data
+- Sell, sublicense, or offer this codebase as a commercial product
+
+## Contributions
+
+By submitting a pull request you grant the copyright holder a perpetual,
+worldwide, royalty-free license to use, modify, and distribute your
+contribution as part of Guia de Bolso.
+
+## Contact
+
+Bruno Disliler — https://brunodisliler.com
+Security: contato@guiadebolso.app

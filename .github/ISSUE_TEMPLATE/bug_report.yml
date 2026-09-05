@@ -1,0 +1,52 @@
+name: Bug report
+description: Something is broken in the app or in a local setup
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug.
+        Obrigado por reportar. Preencha em inglês ou português.
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Where did it happen?
+      options:
+        - Web (guiadebolso.app)
+        - iOS app
+        - Android app
+        - Local development
+        - Admin
+        - CI / deploy
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: 1. Open … 2. Tap … 3. See …
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      placeholder: "Chrome 128 / iPhone 15 / Node 20.11 / logged in / Premium?"
+  - type: textarea
+    id: extra
+    attributes:
+      label: Extra context
+      placeholder: Screenshots, console errors, network status. Do not paste secrets.

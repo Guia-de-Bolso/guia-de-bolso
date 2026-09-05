@@ -1,6 +1,8 @@
 # Features
 
-User-facing product reference for **Guia de Bolso** (Imbituba, SC). Behavior is derived from the current codebase; implementation details live in [Architecture](./architecture.md) and [API](./api.md).
+**[Português: índice](./README.md)** · Implementation: [Architecture](./architecture.md) · [API](./api.md)
+
+User-facing product reference for **Guia de Bolso** (Imbituba, SC). Behavior is derived from the current codebase.
 
 **Product question the app answers:** *“What should I do right now?”*
 
@@ -248,7 +250,7 @@ Move between main app areas with one thumb.
 ## 12. Category exploration (Explorar)
 
 **Description**  
-Dedicated **Explorar** screen at `/categorias`: sticky header with live totals, AI search entry (`ExplorarBuscaBar`), mood shortcuts (`ExplorarAtalhos`), featured category carousel (`ExplorarDestaqueCard`), and full category grid (`ExplorarCategoriaCard`). Catalog metadata in `lib/categorias.js`.
+Dedicated **Explorar** screen at `/categorias`: sticky header with live totals, AI search via `SmartSearchExperience` / `useSmartSearch`, shortcuts (`ExplorarAtalhos`), and category grid (`ExplorarCategoriaCard`). Catalog metadata in `lib/categorias.js`.
 
 **User goal**  
 Browse by type (Nature, Food, Night, etc.) when not using AI search.
@@ -302,7 +304,7 @@ Decide to go now, contact the business, or navigate.
 - One review per user per place (second attempt blocked).
 - `profiles` join failure → fallback query without author names.
 - Share: `navigator.share` or clipboard copy; user canceling share is silent.
-- **Place profile visibility** — utilitários (Farmácias, Mercados, Mecânicos, Saúde), partners, launch-promo places and public/nature spots show the **full** profile (gallery, links, reviews, history). Other commercial places without `eh_parceiro` or `perfil_promo_ate` show a **basic** teaser (cover, short description, WhatsApp, claim CTA). Paid extras (home carousel, badge, AI priority, QR, reports) stay on Parceiro (`lib/lugarVisibilidade.js`, `lib/planoLancamento.js`).
+- **Place profile visibility** — **Presença** subcategories (`SUBCATEGORIAS_PRESENCA` in `lib/planoLancamento.js`: Farmácias, Mercados, Mecânicos, Saúde, **Igrejas e templos**, **Museus**, **Monumentos**), partners (`eh_parceiro`), launch-promo places (`perfil_promo_ate`) and public/nature spots show the **full** profile (gallery, links, reviews, `historia_cultura`). Other commercial places without partner/promo show a **basic** teaser (cover, short description, WhatsApp, claim CTA). Paid extras (home carousel, badge, AI priority, QR, reports) stay on Parceiro (`lib/lugarVisibilidade.js`). Admin presets: `PerfilPromoFields`.
 - Maps: first visit may open app picker sheet; preference stored in `localStorage`.
 - Visit recorded to recent list on successful load.
 
@@ -331,7 +333,7 @@ Build a personal shortlist for the trip — including trails and beaches usable 
 - Unfavoriting removes IndexedDB row; desfavoritar atrativo idem.
 - **Not offline:** IA search, live weather, new reviews, admin — require network.
 - **Capacitor** remote URL: online abre em `/` (Início); offline redireciona para `/favoritos` (`OfflineModeProvider` + `@capacitor/network`); bottom nav bloqueia outras abas com mensagem.
-- **Mapas offline:** online, banner preventivo em favoritos/atrativos e lugares Natureza/Aventura (`OfflineMapsPrepareBanner`); offline, IR AGORA / Navegar no Maps abre `OfflineMapsSheet` com opção de abrir Google/Apple/Waze (se mapa baixado), copiar coordenadas e dicas de download (`lib/offlineMaps.js`, `lib/mapsCoordinates.js`).
+- **Mapas offline:** online, botão informativo em favoritos/atrativos e lugares Natureza/Aventura (`OfflineMapsInfoButton`); offline, IR AGORA / Navegar no Maps abre `OfflineMapsSheet` com opção de abrir Google/Apple/Waze (se mapa baixado), copiar coordenadas e dicas de download (`lib/offlineMaps.js`, `lib/mapsCoordinates.js`).
 - Favorite state on home resets when session ends.
 - Place list rendered as semantic `<ul>` / `<li>`.
 
@@ -627,7 +629,6 @@ Understand when content failed vs. is empty; navigate with keyboard/screen reade
 | **Home header** | Inline regional temperature + weather emoji (`HomeContextHeader`) |
 | **Hero card** | Regional temperature in the 2×2 metrics grid (`temperaturaClima` from the same fetch) |
 | **Place detail** | `LugarClimaWidget` for **Natureza** / **Aventura** with coordinates — mini summary for everyone; **`ClimaSheet`** (UV, waves chart, sea temp, moon) for **logged-in** users |
-| **Not mounted** | `ClimaCard` beach picker on home (component exists; use detail widget instead) |
 
 **User goal**  
 Plan beach/outdoor time with local weather awareness at decision time (especially on place pages).
@@ -698,7 +699,7 @@ Not for tourists. Requires `perfis.role` ∈ `admin`, `dev` (`canAccessAdmin`). 
 | Area | Access | Description | User goal (operator) |
 |------|--------|-------------|----------------------|
 | Dashboard (`/admin`) | admin, dev | Hero + KPIs (pending reviews, active places, live partners, new users, IR AGORA in period); moderation queue; operational sidebar (partners expiring, curadoria overdue); activity timeline; week/month period | Monitor health and clear the moderation queue |
-| Locais (`/admin/locais`) | admin, dev | CRUD, photos, video, hours (`HorarioEditor`), tags (max **5**), address autocomplete, `eh_parceiro` / `conteudo_curadoria`, partner program fields (`ParceiroProgramaFields`), QR section | Keep catalog accurate |
+| Locais (`/admin/locais`) | admin, dev | CRUD, photos, video, hours (`HorarioEditor`), tags (max **5**), address autocomplete, `eh_parceiro` / `conteudo_curadoria`, launch-plan presets (`PerfilPromoFields`: Presença vs Lançamento), partner program fields (`ParceiroProgramaFields`), QR section | Keep catalog accurate |
 | Atrativos (`/admin/atrativos`) | admin, dev | Curated route CRUD; tags max **5**; `/admin/rotas` → 301 | Publish trails |
 | Avaliações (`/admin/avaliacoes`) | admin, dev | Approve/reject/delete pending; deep links from alerts (`?tab=`) | Moderate UGC |
 | Relatórios (`/admin/relatorios`) | admin, dev | Per-establishment KPIs (views, **QR scans**, IR AGORA, favorites, reviews), WhatsApp copy, PDF | Share performance with partners |
@@ -837,7 +838,6 @@ Track proposal numbers, signature dates, free-period end, Asaas IDs, and store s
 | Asaas billing & establishment self-service portal | Documented in business model, not built |
 | Legacy multi-plan destaques carousel | Replaced by **Parceiros** carousel (`ParceirosCarrossel`) for vigent highlights only |
 | In-app notifications | Profile row placeholder only |
-| `ClimaCard` on home | Component exists; weather on detail via `LugarClimaWidget` instead |
 
 ---
 

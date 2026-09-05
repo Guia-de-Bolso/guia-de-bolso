@@ -70,7 +70,7 @@ O projeto separa bem segredos de servidor (`ANTHROPIC_API_KEY`, `SUPABASE_SERVIC
 | OK | `ANTHROPIC_API_KEY` só em Route Handlers | OK | |
 | OK | RPC `increment_*_ia` valida `auth.uid()` | OK | `supabase/increment_uso_ia.sql` |
 | OK | DELETE roteiro filtra `user_id` | OK | API + RLS `roteiros_policies.sql` |
-| OK | Markdown roteiro com `escapeHtml` | OK | `lib/roteiroMarkdown.js` |
+| OK | Roteiro IA renderizado como estrutura (não HTML) | OK | `lib/roteiroParse.js` + `RoteiroItineraryView` |
 
 ---
 
@@ -329,7 +329,7 @@ O projeto separa bem segredos de servidor (`ANTHROPIC_API_KEY`, `SUPABASE_SERVIC
 | `/api/roteiro/[id]` DELETE | Filtra `user_id` |
 | OAuth Google | `redirectTo` fixo para `/auth/callback` (sem open redirect no sign-in) |
 | Avatar storage | Policy amarrada a `auth.uid()` na pasta (`storage-policies.sql`) |
-| XSS roteiro | `escapeHtml` em `lib/roteiroMarkdown.js` |
+| XSS roteiro | Timeline via `lib/roteiroParse.js` (texto em React, sem `dangerouslySetInnerHTML`) |
 
 ---
 

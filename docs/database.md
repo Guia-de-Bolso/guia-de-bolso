@@ -117,7 +117,7 @@ Core content: beaches, restaurants, trails, services, etc.
 | `fotos` | `jsonb` | Array of public image URLs *(migration: `fotos_migration.sql`)* |
 | `destaque` | `boolean` | Legacy highlight flag on row (unused in app) |
 | `eh_parceiro` | `boolean` NOT NULL DEFAULT false | Plano Parceiro do Guia (R$ 299) — carrossel e badge *(migration: `lugares_parceiro_curadoria.sql`)* |
-| `perfil_promo_ate` | `date` | Fim da promo de perfil completo gratuito (Lançamento). Após a data, experiências voltam ao perfil teaser salvo `eh_parceiro`. Utilitários (Presença) mantêm perfil completo. *(migration: `lugares_perfil_promo.sql`)* |
+| `perfil_promo_ate` | `date` | End of free full-profile promo (Lançamento). After the date, experiences revert to the teaser profile unless `eh_parceiro`. **Presença** places (subcategories in `SUBCATEGORIAS_PRESENCA`, not a DB column) keep the full profile. *(migration: `lugares_perfil_promo.sql`)* |
 | `conteudo_curadoria` | `boolean` NOT NULL DEFAULT false | Editorial badge “Curadoria do Guia” — **not** the home “Em alta” filter when `PUBLIC_APP_PARTNERS_ONLY` *(migration)* |
 | `parceiro_modalidade` | `text` | `lancamento_gratis` \| `pago` *(migration: `lugares_parceiro_programa.sql`)* |
 | `parceiro_inicio_em` | `date` | Partner program start |

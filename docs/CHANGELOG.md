@@ -6,8 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Documentation
+
+- GitHub handbook: bilingual READMEs, `docs/en/`, fork guide (`getting-started.md`), LICENSE, Code of Conduct, issue/PR templates; README screenshots restored from `docs/materiais/`.
+- Synced Premium AI search cap (**10/day**), native apps / IAP, `/rotas` → atrativos, Upstash rate limit (ADR-014), duplicate ADR-010 → ADR-017.
+
 ### Added
 
+- **Editorial place copy scripts** — `scripts/apply-lugar-copy.mjs` writes `descricao` / `descricao_longa` / `historia_cultura` via service role (`slug`, then exact `nome`); lotes in `scripts/data/lugar-copy-lote-1.js` … `lote-5.js`.
 - **Review display name** — editable “Como quer aparecer?” on `AvaliacaoForm`; resolves nome → e-mail local → masked phone → Visitante (`lib/autorDisplayName.js`, trigger `resolve_autor_display_name` in `supabase/avaliacoes_autor_snapshot.sql` / `20260728120000_avaliacoes_autor_snapshot.sql`); public list uses `autor_nome` / `autor_foto_url` snapshots.
 - **Atrativo modo guia** — immersive one-point guide with local progress (`AtrativoModoGuia`, `AtrativoPercursoSection`, `AtrativoMapaIlustrado`, `hooks/useAtrativoPercursoProgresso.js`, `lib/atrativoPercursoProgresso.js`).
 - **Native voice search** — mic on home/Explorar smart search (`hooks/useVoiceSearch.js`, `lib/voiceSearchNative.js`, Web Speech fallback in `lib/voiceSearchBrowser.js`).
@@ -18,6 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- **Presença subcategories** — full permanent profile also for **Igrejas e templos**, **Museus**, **Monumentos** (`SUBCATEGORIAS_PRESENCA` in `lib/planoLancamento.js`, `lib/lugarVisibilidade.js`, admin copy in `PerfilPromoFields`, FAQ in `lib/negociosContent.js`).
 - **Categories** — removed **Compras** and **Hospedagem** from the product catalog (`lib/categorias.js`, taxonomia, roteiro interesses); SQL cleanup `supabase/remover_categorias_compras_hospedagem.sql`.
 - **Explorar search** — reuses `SmartSearchExperience` + `useSmartSearch` (removed standalone `ExplorarBuscaBar`).
 - **Admin establishment reports** — place dropdown lists only active non-Natureza/Aventura establishments (`RelatoriosEstabelecimentoPage.js`), aligned with QR eligibility.
@@ -40,6 +47,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Documentation
 
+- Synced Presença (igrejas/museus/monumentos), editorial copy apply scripts, and L-PRE checklist cases across `features.md`, `architecture.md`, `database.md`, `taxonomia-lugares.md`, `contributing.md`, `project-structure.md`, `TESTING-CHECKLIST.md`, `CLAUDE.md`.
 - Synced voice search, atrativo modo guia, review display names, push profile toggle, Explorar `SmartSearchExperience`, hero via `resolveAtrativoDoDia`, reports Natureza/Aventura filter; removed stale `destaques.js` / `pickHeroRotaCiclo` / “notifications not shipped” refs across `features.md`, `architecture.md`, `database.md`, `migrations.md`, `conventions.md`, `project-structure.md`, `TESTING-CHECKLIST.md`, `CLAUDE.md`.
 - Synced partner CRM, contracts, dev-only admin routes, public catalog, Em alta criteria, QR PDF formats across `features.md`, `architecture.md`, `database.md`, `api.md`, `authentication.md`, `security-rls.md`, `TESTING-CHECKLIST.md`, `docs/materiais/README.md`.
 

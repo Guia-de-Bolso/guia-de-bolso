@@ -1,5 +1,7 @@
 # Decisões arquiteturais
 
+**[English](./en/architectural-decisions.md)**
+
 Registro das decisões técnicas principais do **Guia de Bolso** (formato ADR simplificado). Novas decisões devem ser acrescentadas no topo com data e status.
 
 | Status | Significado |
@@ -143,13 +145,13 @@ Registro das decisões técnicas principais do **Guia de Bolso** (formato ADR si
 
 ---
 
-## ADR-014 — Rate limit IA em memória (processo)
+## ADR-014 — Rate limit IA (Upstash + fallback)
 
 | | |
 |---|---|
-| **Status** | Aceito |
-| **Decisão** | `lib/iaRateLimit.js` por instância serverless |
-| **Consequências** | Proteção básica; escala multi-região pode precisar Redis/KV (comentado no código) |
+| **Status** | Aceito (atualizado) |
+| **Decisão** | `lib/iaRateLimit.js` usa **Upstash Redis** quando `UPSTASH_REDIS_REST_*` existem; senão, limite em memória por instância serverless |
+| **Consequências** | Produção com Redis cobre multi-instância; dev local funciona sem Upstash |
 
 ---
 
@@ -173,7 +175,7 @@ Registro das decisões técnicas principais do **Guia de Bolso** (formato ADR si
 
 ---
 
-## ADR-010 — Favoritos offline automáticos (fase 1)
+## ADR-017 — Favoritos offline automáticos (fase 1)
 
 | Campo | Valor |
 |-------|--------|
@@ -192,7 +194,7 @@ Registro das decisões técnicas principais do **Guia de Bolso** (formato ADR si
 | P-001 | Cobrança Asaas | Portal estabelecimento + `premium_ativo` automatizado |
 | P-002 | PWA / offline | **Entregue (favoritos):** IndexedDB + SW `/favoritos*`. **Futuro:** catálogo regional ou bundle Capacitor local |
 | P-003 | Schema baseline export | `supabase/schema_baseline.sql` do projeto produção |
-| P-004 | Rate limit distribuído | Vercel KV ou Redis para IA e feedback |
+| P-004 | Rate limit distribuído | **Parcial:** Upstash na IA (`ADR-014`). Feedback / outras rotas ainda podem evoluir |
 | P-005 | Role `estabelecimento` | Painel self-service separado do admin municipal |
 
 ---

@@ -1,5 +1,7 @@
 # Estrutura de pastas
 
+**[English](./en/project-structure.md)**
+
 Mapa do repositório **Guia de Bolso**. Convenções de colocação de código: [`conventions.md`](./conventions.md).
 
 ---
@@ -13,18 +15,22 @@ guia-de-bolso/
 ├── hooks/                  # Hooks compartilhados (detalhe lugar, GPS, premium)
 ├── lib/                    # Lógica de negócio, Supabase, integrações
 ├── supabase/               # Migrations SQL (aplicação manual no Dashboard)
-├── docs/                   # Documentação técnica (fonte única)
+├── docs/                   # Documentação técnica (fonte única; `docs/en/` em inglês)
 ├── public/                 # Assets estáticos, onboarding, checklist QA
 ├── e2e/                    # Testes Playwright
-├── .github/workflows/      # CI (lint, test, build)
+├── scripts/                # One-off ops (copy apply, contratos, checklist data)
+├── .github/                # CI + issue/PR templates
 ├── middleware.js           # Refresh de sessão Supabase
 ├── next.config.mjs         # Imagens remotas, guard de env no build
-├── vercel.json             # Headers de segurança HTTP
+├── vercel.json             # Headers de segurança HTTP + crons
 ├── .env.example            # Template de variáveis → docs/environment.md
+├── README.md               # Porta de entrada (EN)
+├── README.pt-BR.md         # Porta de entrada (PT)
+├── CONTRIBUTING.md         # Contribuição (GitHub, EN)
+├── LICENSE                 # Source available; marca reservada
 ├── CLAUDE.md               # Contexto para agentes IA
 ├── AGENTS.md               # Regras Next.js 16 para Cursor
-├── ENGINEERING_GUIDE.md    # Atalho → docs/ (não duplicar conteúdo)
-└── README.md               # Porta de entrada do repositório
+└── ENGINEERING_GUIDE.md    # Atalho → docs/ (não duplicar conteúdo)
 ```
 
 ---
@@ -109,7 +115,7 @@ Organização **por domínio**, não por tipo atômico (Button/, Card/).
 |-------|----------|
 | **Supabase** | `supabase/client.js`, `server.js`, `supabase.js` (barrel + anon) |
 | **Premium / IA** | `premium.js`, `premiumServer.js`, `iaRateLimit.js`, `busca.js`, `buscaRetrieval.js` |
-| **Lugares** | `lugaresQuery.js`, `lugaresPopulares.js`, `lugarDetalhe.js`, `fetchLugaresApi.js` |
+| **Lugares** | `lugaresQuery.js`, `lugaresPopulares.js`, `lugarDetalhe.js`, `lugarVisibilidade.js`, `planoLancamento.js`, `fetchLugaresApi.js` |
 | **Home / contexto** | `homeContext.js`, `homeSelection.js`, `homeRotation.js`, `atrativoDoDia.js`, `clima.js`, `publicCatalog.js` |
 | **Horários** | `horarios.js` (+ `horarios.test.js`) |
 | **Rotas / roteiro** | `roteiroParse.js`, `roteiroLugares.js`, `rotas.js` |
@@ -141,7 +147,7 @@ Ordem de aplicação: [`migrations.md`](./migrations.md#manifest).
 
 ## `docs/` — documentação
 
-Índice mestre: [`README.md`](./README.md). Não criar cópias da mesma informação na raiz do repo (exceto `README.md` enxuto e `CLAUDE.md`).
+Índice mestre: [`README.md`](./README.md) · inglês: [`en/README.md`](./en/README.md). Fork: [`getting-started.md`](./getting-started.md). Não criar cópias da mesma informação na raiz do repo (exceto READMEs, LICENSE, CONTRIBUTING e `CLAUDE.md`).
 
 ---
 
@@ -157,7 +163,7 @@ Ordem de aplicação: [`migrations.md`](./migrations.md#manifest).
 
 ## `e2e/`
 
-- `smoke.spec.js` — 10 smoke tests Playwright (health, home, login, explorar, atrativos, favoritos, perfil, admin redirect, bottom nav)
+- `smoke.spec.js` + `auth-gates.spec.js` — Playwright (health, home, login, explorar, atrativos, favoritos, perfil, admin redirect, nav; gates de API sem sessão)
 - Config: `playwright.config.js` na raiz (Chromium; CI usa `npm run start` após build; local sobe `npm run dev`)
 - Helper `skipOnboarding()` no spec define `localStorage.onboarding_visto` para não bloquear a home
 

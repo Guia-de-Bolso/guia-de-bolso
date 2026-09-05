@@ -14,7 +14,7 @@ Pirâmide de QA do projeto:
 
 **Primeira vez local (E2E):** `npx playwright install chromium`
 
-**CI:** [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — `lint` → `npm test` → `build` → `playwright install` → `test:e2e` (servidor `npm run start`).
+**CI:** [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — `lint` → `check:api-security` → `npm test` → `build` → `playwright install` → `test:e2e`.
 
 ### Casos cobertos pelo smoke E2E
 
@@ -47,10 +47,9 @@ Regras de código e quando adicionar testes: [`CODING_STANDARDS.md`](../CODING_S
 
 ## Checklist interativo (recomendado)
 
-Use a ferramenta com **155 casos de teste**, passo a passo por dispositivo, resultado esperado, avisos e botões **Passou / Falhou / Resetar**:
+Use a ferramenta com **158 casos de teste**, passo a passo por dispositivo, resultado esperado, avisos e botões **Passou / Falhou / Resetar**:
 
-**[Abrir checklist interativo](/checklist-testes.html)**  
-(produção: `https://guiadebolso.app/checklist-testes.html` · local: `http://localhost:3000/checklist-testes.html`)
+**[Abrir no GitHub](../public/checklist-testes.html)** · **[Produção](https://guiadebolso.app/checklist-testes.html)** · local: `http://localhost:3000/checklist-testes.html`
 
 - Contador global no topo (total, passou, falhou, pendente) e barra de progresso
 - Estado salvo no navegador (`localStorage`, chave `guia_checklist_v1`)
@@ -114,6 +113,7 @@ Use a ferramenta com **155 casos de teste**, passo a passo por dispositivo, resu
 | L-ATR | Modo guia + voz | 3 |
 | L-PAR | Parceiros CRM (dev) | 4 |
 | L-CTR | Contratos comerciais (dev) | 4 |
+| L-PRE | Presença (perfil completo) | 3 |
 | N | Feedback e erros PT | 5 |
 | M | Smoke pós-release | 6 |
 
@@ -174,6 +174,14 @@ Use a ferramenta com **155 casos de teste**, passo a passo por dispositivo, resu
 | L-CTR-2 | Upload | Anexar PDF assinado | `POST /api/admin/contratos/[id]/documentos` → download assinado |
 | L-CTR-3 | Ativar | Marcar contrato ativo | Desativa outros do mesmo `lugar_id`; sync parceiro |
 | L-CTR-4 | Role admin | Login `admin` → upload doc | 403 na API |
+
+## L-PRE — Presença (manual)
+
+| ID | Caso | Passos | Esperado |
+|----|------|--------|----------|
+| L-PRE-1 | Igreja / museu | Abrir detalhe de lugar Cultura com subcategoria Igrejas e templos, Museus ou Monumentos (não parceiro) | Perfil **completo**: galeria, Sobre longo, avaliações, bloco de história se `historia_cultura` preenchido |
+| L-PRE-2 | Teaser vs Presença | Comparar restaurante sem `eh_parceiro` / promo vs farmácia ou capela | Restaurante em teaser (links premium bloqueados); Presença com perfil completo |
+| L-PRE-3 | Admin preset | `/admin/locais` → editar local Cultura igreja | Preset **Utilitário (Presença)**; `shouldLugarDefaultPresenca` aplica a Igrejas e templos / Museus / Monumentos (`PerfilPromoFields`) |
 
 ## L-BAIXAR — Download do app (manual)
 

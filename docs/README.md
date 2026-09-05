@@ -1,8 +1,18 @@
-# Documentação técnica — Guia de Bolso
+# Technical documentation — Guia de Bolso
 
-**Fonte única** de documentação para equipes de engenharia, DevOps, QA e produto. Aplicação em produção: [guiadebolso.app](https://guiadebolso.app).
+**[English handbook](./en/README.md)** · **Português nesta página**
 
-Porta de entrada do repositório: [README.md](../README.md) (visão executiva). Contexto para agentes de IA: [CLAUDE.md](../CLAUDE.md).
+Fonte única para engenharia, DevOps, QA e produto. Produção: [guiadebolso.app](https://guiadebolso.app).
+
+| Documento | Idioma |
+|-----------|--------|
+| [README.md](../README.md) | English (GitHub) |
+| [README.pt-BR.md](../README.pt-BR.md) | Português |
+| [Fork / ambiente próprio](./getting-started.md) | Português |
+| [Fork from zero](./en/getting-started.md) | English |
+| [Onboarding técnico](./onboarding.md) | Português |
+
+Contexto para agentes de IA: [CLAUDE.md](../CLAUDE.md) (não substitui este handbook).
 
 ---
 
@@ -10,76 +20,97 @@ Porta de entrada do repositório: [README.md](../README.md) (visão executiva). 
 
 | Perfil | Rota de leitura |
 |--------|-----------------|
-| **Desenvolvedor novo** | [Onboarding técnico](./onboarding.md) → [Estrutura de pastas](./project-structure.md) → [Arquitetura](./architecture.md) → [Convenções](./conventions.md) |
-| **DevOps / release** | [Deploy](./deployment.md) → [Variáveis de ambiente](./environment.md) → [Migrations](./migrations.md) |
-| **Backend / dados** | [Banco de dados](./database.md) → [Arquitetura do banco](./DATABASE_ARCHITECTURE.md) → [Fluxo de dados](./data-flows.md) → [RLS](./security-rls.md) |
-| **API / integrações** | [APIs HTTP](./api.md) → [Autenticação](./authentication.md) → [Decisões arquiteturais](./architectural-decisions.md) |
-| **Produto / QA** | [Features](./features.md) → [Checklist e testes](./TESTING-CHECKLIST.md) |
+| **Desenvolvedor novo** | [Onboarding](./onboarding.md) → [Estrutura](./project-structure.md) → [Arquitetura](./architecture.md) → [Convenções](./conventions.md) |
+| **Fork / ambiente próprio** | [Getting started (PT)](./getting-started.md) · [Getting started (EN)](./en/getting-started.md) → [Migrations](./migrations.md) → [Ambiente](./environment.md) |
+| **DevOps / release** | [Deploy](./deployment.md) → [Variáveis](./environment.md) → [Staging](./staging.md) |
+| **Backend / dados** | [Banco](./database.md) → [Arquitetura do banco](./DATABASE_ARCHITECTURE.md) → [Fluxo de dados](./data-flows.md) → [RLS](./security-rls.md) |
+| **API / integrações** | [APIs](./api.md) → [Autenticação](./authentication.md) → [ADRs](./architectural-decisions.md) |
+| **Produto / QA** | [Features](./features.md) → [Checklist](./TESTING-CHECKLIST.md) |
 
 ---
 
-## Índice completo
+## Índice
 
 ### Fundamentos
 
 | Documento | Conteúdo |
 |-----------|----------|
-| [**Onboarding técnico**](./onboarding.md) | Primeiros dias: setup, leituras, fluxos para validar |
-| [**Estrutura de pastas**](./project-structure.md) | `app/`, `components/`, `lib/`, `supabase/`, `e2e/` |
-| [**Arquitetura do sistema**](./architecture.md) | Stack, frontend/backend, integrações, diagramas |
-| [**Fluxo de autenticação**](./authentication.md) | OAuth, SMS, sessão, admin, Premium |
-| [**Push notifications**](./push-notifications.md) | FCM/APNs, tokens, envio admin |
-| [**Fluxo de dados**](./data-flows.md) | Leituras, IA, writes, admin, analytics |
-| [**Convenções**](./conventions.md) | Código, SQL, API, UI, Git, testes |
-| [**Decisões arquiteturais**](./architectural-decisions.md) | ADRs aceitas e roadmap técnico |
+| [Onboarding técnico](./onboarding.md) | Setup, leituras, fluxos para validar |
+| [Getting started (EN)](./en/getting-started.md) | Fork, Supabase próprio, o que o repo não inclui |
+| [Estrutura de pastas](./project-structure.md) | `app/`, `components/`, `lib/`, `supabase/`, `e2e/` |
+| [Arquitetura](./architecture.md) | Stack, rotas, diagramas |
+| [Autenticação](./authentication.md) | OAuth, SMS, nativo, sessão, admin, Premium |
+| [Push](./push-notifications.md) | FCM/APNs, tokens, envio |
+| [Fluxo de dados](./data-flows.md) | Leituras, IA, writes, admin |
+| [Convenções](./conventions.md) | Código, SQL, API, Git, testes |
+| [ADRs](./architectural-decisions.md) | Decisões aceitas e propostas |
 
 ### Dados e APIs
 
 | Documento | Conteúdo |
 |-----------|----------|
-| [**APIs HTTP**](./api.md) | Route Handlers, códigos de erro, premium |
-| [**Banco de dados**](./database.md) | Tabelas, colunas, RLS, RPC, queries comuns |
-| [**Arquitetura do banco**](./DATABASE_ARCHITECTURE.md) | Modelagem, performance, índices, evolução |
-| [**Migrations**](./migrations.md) | Ordem dos SQL em `/supabase` |
-| [**Segurança RLS**](./security-rls.md) | Resumo de políticas |
+| [APIs HTTP](./api.md) | Route Handlers, erros, premium |
+| [Banco de dados](./database.md) | Tabelas, RLS, RPC |
+| [Arquitetura do banco](./DATABASE_ARCHITECTURE.md) | Modelagem, índices, evolução |
+| [Migrations](./migrations.md) | Ordem dos SQL em `/supabase` |
+| [Segurança RLS](./security-rls.md) | Policies versionadas |
 
 ### Operações
 
 | Documento | Conteúdo |
 |-----------|----------|
-| [**Deploy**](./deployment.md) | Vercel, Supabase, CI, checklist produção |
-| [**Variáveis de ambiente**](./environment.md) | Referência `.env` / Vercel / GitHub Actions |
-| [**Staging**](./staging.md) | Preview e ambiente de homologação |
-| [**Contribuição**](./contributing.md) | PR, scripts, áreas sensíveis |
+| [Deploy](./deployment.md) | Vercel, Supabase, CI |
+| [Variáveis de ambiente](./environment.md) | `.env`, Vercel, Actions |
+| [Staging](./staging.md) | Preview e homologação |
+| [Contribuição](./contributing.md) | PR, scripts, áreas sensíveis |
 
 ### Produto e negócio
 
 | Documento | Conteúdo |
 |-----------|----------|
-| [**Features**](./features.md) | Matriz de capacidades e regras de acesso |
-| [**Taxonomia de lugares**](./taxonomia-lugares.md) | Subcategorias vs tags |
-| [**Próximos 30 cadastros**](./proximos-30-cadastros.md) | Fila prioritária de locais por categoria |
-| [**Custos**](./CUSTOS.md) | Projeções e planilha |
-| [**Changelog**](./CHANGELOG.md) | Histórico de releases |
-| [**Testes (checklist)**](./TESTING-CHECKLIST.md) | QA manual + smoke automatizado (unit + Playwright) |
-| [**Materiais impressos**](./materiais/README.md) | Apresentação parceiro A4, QR `/baixar`, adesivos |
-| [**Legal (rascunho)**](./legal/) | Termos e privacidade |
+| [Features](./features.md) | Capacidades e regras de acesso |
+| [Taxonomia](./taxonomia-lugares.md) | Subcategorias vs tags |
+| [Próximos cadastros](./proximos-30-cadastros.md) | Fila de locais |
+| [Custos](./CUSTOS.md) | Projeções |
+| [Changelog](./CHANGELOG.md) | Releases |
+| [Testes](./TESTING-CHECKLIST.md) | QA manual + smoke |
+| [Materiais](./materiais/README.md) | QR `/baixar`, apresentação parceiro |
+| [Legal](./legal/) | Termos e privacidade (rascunho) |
 
-### Segurança (raiz do repo)
+### Inglês (handbook)
+
+Traduções dos guias que originalmente estão em português. Contratos de API, schema, deploy e features já estão em inglês na raiz de `docs/`.
+
+| Documento | Original PT |
+|-----------|-------------|
+| [en/README.md](./en/README.md) | Este índice |
+| [en/getting-started.md](./en/getting-started.md) | — |
+| [en/onboarding.md](./en/onboarding.md) | [onboarding.md](./onboarding.md) |
+| [en/environment.md](./en/environment.md) | [environment.md](./environment.md) |
+| [en/authentication.md](./en/authentication.md) | [authentication.md](./authentication.md) |
+| [en/data-flows.md](./en/data-flows.md) | [data-flows.md](./data-flows.md) |
+| [en/project-structure.md](./en/project-structure.md) | [project-structure.md](./project-structure.md) |
+| [en/conventions.md](./en/conventions.md) | [conventions.md](./conventions.md) |
+| [en/architectural-decisions.md](./en/architectural-decisions.md) | [architectural-decisions.md](./architectural-decisions.md) |
+| [en/staging.md](./en/staging.md) | [staging.md](./staging.md) |
+
+### Segurança (raiz)
 
 | Arquivo | Conteúdo |
 |---------|----------|
 | [SECURITY.md](../SECURITY.md) | Como reportar vulnerabilidades |
 | [SECURITY_CHECKLIST.md](../SECURITY_CHECKLIST.md) | Auditoria RLS/API |
+| [LICENSE](../LICENSE) | Source available; marca e dados de produção reservados |
 
 ---
 
-## Mapa de dependência entre documentos
+## Mapa de dependência
 
 ```mermaid
 flowchart TB
   HUB[docs/README.md]
   HUB --> ONB[onboarding.md]
+  HUB --> GS[en/getting-started.md]
   HUB --> STRUCT[project-structure.md]
   HUB --> ARCH[architecture.md]
   HUB --> AUTH[authentication.md]
@@ -88,68 +119,38 @@ flowchart TB
   HUB --> DB[database.md]
   HUB --> ENV[environment.md]
   HUB --> DEP[deployment.md]
-  HUB --> ADR[architectural-decisions.md]
-  HUB --> CONV[conventions.md]
   ARCH --> AUTH
   ARCH --> DATA
-  ARCH --> API
   DB --> MIG[migrations.md]
   DEP --> ENV
   API --> AUTH
-  ONB --> CONV
-  CONV --> CONTRIB[contributing.md]
 ```
 
 ---
 
-## Ordem de leitura recomendada
-
-**Handoff completo para nova equipe:**
-
-```text
-README (raiz)
-  → onboarding.md
-  → project-structure.md
-  → architecture.md
-  → authentication.md
-  → data-flows.md
-  → api.md
-  → database.md + DATABASE_ARCHITECTURE.md
-  → migrations.md
-  → environment.md
-  → deployment.md
-  → conventions.md + contributing.md
-  → architectural-decisions.md
-  → features.md
-```
-
----
-
-## Arquivos relacionados (fora de `docs/`)
+## Arquivos fora de `docs/`
 
 | Arquivo | Uso |
 |---------|-----|
 | `.env.example` | Template de variáveis |
 | `/supabase/*.sql` | DDL, RLS, RPC |
 | `ENGINEERING_GUIDE.md` | Atalho para esta pasta |
-| `CODING_STANDARDS.md` | Estilo linha a linha (complementa convenções) |
+| `CODING_STANDARDS.md` | Estilo linha a linha |
+| `CONTRIBUTING.md` | Contribuição (GitHub) |
 | `AGENTS.md` | Regras Cursor / Next.js 16 |
-
----
 
 ## Assets
 
 | Pasta | Uso |
 |-------|-----|
-| [`screenshots/`](./screenshots/) | Capturas para README (390×844) |
-
----
+| [`screenshots/`](./screenshots/) | Capturas do README |
+| [`materiais/`](./materiais/) | Logo, QR, apresentação parceiro |
 
 ## Links rápidos
 
 | Recurso | URL |
 |---------|-----|
-| App produção | https://guiadebolso.app |
+| App | https://guiadebolso.app |
 | Repositório | https://github.com/BrunoDislilerDev/guia-de-bolso |
-| Health check | `/api/health` |
-| Supabase (região) | `us-west-2` |
+| Health | `/api/health` |
+| Supabase | região `us-west-2` |

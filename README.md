@@ -1,20 +1,25 @@
-<h1 align="center">Guia de Bolso</h1>
+<h1 align="center">
+  <img src="docs/materiais/logo.png" alt="Guia de Bolso" width="72" /><br />
+  Guia de Bolso
+</h1>
 
 <p align="center">
-  <strong>AI-powered local discovery for Brazil’s southern coast</strong><br />
-  Real-time recommendations for Imbituba, Santa Catarina
-</p><br>
-
-<p align="center">
-  <a href="https://guiadebolso.app"><strong>Live application</strong></a>
-  &nbsp;·&nbsp;
-  <a href="./docs/README.md"><strong>Documentação técnica</strong></a>
-  &nbsp;·&nbsp;
-  <a href="https://github.com/BrunoDislilerDev/guia-de-bolso/issues">Report an issue</a>
+  <strong>AI-powered local discovery for Imbituba, Santa Catarina</strong><br />
+  Mobile-first web + native apps that answer <em>what should I do right now?</em>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Status-Production-success?style=flat-square" alt="Production" />
+  <a href="README.pt-BR.md"><strong>Português (Brasil)</strong></a>
+  &nbsp;·&nbsp;
+  <a href="https://guiadebolso.app"><strong>Live app</strong></a>
+  &nbsp;·&nbsp;
+  <a href="docs/en/README.md"><strong>Technical handbook</strong></a>
+  &nbsp;·&nbsp;
+  <a href="docs/README.md"><strong>Documentação técnica</strong></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/BrunoDislilerDev/guia-de-bolso/actions/workflows/ci.yml"><img src="https://github.com/BrunoDislilerDev/guia-de-bolso/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
   <img src="https://img.shields.io/badge/Next.js-16-000?style=flat-square&logo=next.js&logoColor=white" alt="Next.js 16" />
   <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=white" alt="React 19" />
   <img src="https://img.shields.io/badge/Supabase-PostgreSQL-3FCF8E?style=flat-square&logo=supabase&logoColor=white" alt="Supabase" />
@@ -27,375 +32,204 @@
 ## Table of contents
 
 - [Overview](#overview)
-- [Product capabilities](#product-capabilities)
+- [Product](#product)
 - [Screenshots](#screenshots)
-- [Technology stack](#technology-stack)
+- [Architecture](#architecture)
 - [Getting started](#getting-started)
-- [Environment variables](#environment-variables)
-- [Production deployment](#production-deployment)
-- [Project structure](#project-structure)
 - [Documentation](#documentation)
 - [Security](#security)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
-- [Author](#author)
+- [License](#license)
 
 ---
 
 ## Overview
 
-**Guia de Bolso** is a mobile-first web application that helps residents and visitors decide **what to do right now**—not merely where to go.
-
-The product combines a curated place catalog, live context (opening hours, geolocation, time-of-day messaging), moderated social proof, and **Anthropic Claude**–powered natural-language search and trip planning. An internal admin console supports content operations, review moderation, and commercial placement for partner businesses.
+**Guia de Bolso** is the official-style city guide for **Imbituba, SC**. It combines a curated catalog (beaches, restaurants, trails, services), live context (opening hours, distance, weather), moderated reviews, and **Anthropic Claude** for natural-language search and trip itineraries.
 
 | | |
 |---|---|
-| **Production URL** | https://guiadebolso.app |
-| **Service region** | Imbituba, SC, Brazil |
-| **Primary interface** | Portuguese (pt-BR) |
-| **Target devices** | Mobile web (optimized ~390px viewport) |
+| **Production** | [guiadebolso.app](https://guiadebolso.app) |
+| **Stores** | [App Store](https://apps.apple.com/br/app/guia-de-bolso-imbituba/id6784377524) · [Google Play](https://play.google.com/store/apps/details?id=app.guiadebolso) · smart link [`/baixar`](https://guiadebolso.app/baixar) |
+| **UI language** | Portuguese (pt-BR) |
+| **Target viewport** | Mobile-first (~390px), centered on desktop |
 
-### Problem & solution
+### Who it is for
 
-| Audience | Need | How Guia de Bolso addresses it |
-|----------|------|--------------------------------|
-| Tourists | Low-friction discovery without heavy planning | Contextual home, AI search, ready-made “plans,” turn-by-turn handoff |
-| Residents | Know what is open and nearby, immediately | Live hours, distance, filters (open / closed / all) |
-| Local businesses | Visibility in the official regional guide | Listings, highlights, commercial tiers (roadmap: self-service portal) |
+| Audience | Need | How the product responds |
+|----------|------|--------------------------|
+| Visitors | Decide without planning | Home, AI search, curated atrativos, maps handoff |
+| Residents | What is open nearby | Live hours, GPS distance, category filters |
+| Local businesses | Presence in the city guide | Listings, partner carousel, QR, reports |
+| Operators | Run the catalog | Role-gated `/admin` CMS |
 
 ---
 
-## Product capabilities
+## Product
 
-### Consumer experience
+### Consumer
 
-- **Decision-oriented home** — contextual header, AI search with quick prompts, hero suggestion (“what to do now”), **Parceiros** carousel (active commercial highlights), trending places, preset itineraries, nearby discovery; two-phase loading with per-section fallback when data fails
-- **Explorar** (`/categorias`) — category discovery with mood shortcuts, featured categories, and AI search entry
-- **Conversion-focused place pages** — immersive hero, persuasive copy, quick actions (establishments vs. public venues), reviews summary, fixed navigation CTA
-- **Category exploration** — full taxonomy via `/categorias` and filtered listings
-- **Authentication** — Google OAuth and SMS OTP (Supabase Auth + Twilio)
-- **Engagement** — favorites, moderated reviews, share, onboarding flow
-- **Resilient UX** — skeleton loaders, visible error banners, hybrid image delivery (`RemotePhoto` + `next/image`), shared design tokens and focus styles (see [`docs/features.md`](./docs/features.md) §26)
+- Contextual home (weather, AI search, hero atrativo, partners, trending, nearby)
+- Explorar (`/categorias`) with the same smart search as home
+- Place detail: gallery, hours (two shifts / overnight), quick actions, reviews, IR AGORA (Google / Apple / Waze)
+- Curated **atrativos** with guide mode and trail progress
+- Favorites with offline cache (IndexedDB + service worker on favorite routes)
+- Auth: Google (web + native), SMS OTP, Sign in with Apple (iOS native)
+- Voice search (native + Web Speech fallback)
+- Push notifications on native apps (opt-in in profile)
 
-### Guia Premium (subscription)
+### Guia Premium
 
-| Capability | Free (signed in) | Premium |
+| Capability | Signed-in (free) | Premium |
 |------------|------------------|---------|
-| AI place search | 5 / day (resets at midnight, Brasília) | Unlimited |
-| AI trip itinerary | 2 / day (resets at midnight, Brasília) | Unlimited |
-| `ClimaCard` beach weather UI | Not on home (header uses Open-Meteo phrase only) | Full sheet when component is mounted |
+| AI place search | **10 / day** (resets midnight, Brasília) | Unlimited |
+| AI itinerary | **2 / day** | Unlimited |
 
-*Billing integration (Asaas) is on the roadmap; paywall UI is implemented.*
+Store billing: Google Play + App Store IAP (`/api/premium/verify-*`). Asaas self-serve for establishments remains on the roadmap.
 
-### Operations & admin
+### Operations
 
-Role-gated console at `/admin`: operational dashboard, place and route CRUD, review moderation, commercial highlights (Parceiro plan), user roles, **activity logs** (`/admin/logs`), and **taxonomy** CRUD for subcategorias/tags (`/admin/taxonomia`). Responsive shell: sidebar (desktop), drawer (mobile/tablet), alert bell.
+`/admin` is gated by `perfis.role`:
+
+- **admin** — locais, atrativos, review moderation, establishment reports
+- **dev** — partners, contracts, users, logs, taxonomy, IA costs, expenses, push
 
 ---
 
 ## Screenshots
 
-Place exported images under `docs/screenshots/` using the filenames below.
-
 <table>
   <tr>
-    <td align="center" width="50%">
-      <img src="docs/screenshots/home.png" alt="Home screen" width="280" /><br />
-      <sub><b>Home</b> — contextual assistant, AI search, hero recommendation</sub>
+    <td align="center" width="25%">
+      <img src="docs/screenshots/home.png" alt="Home" width="200" /><br />
+      <sub><b>Home</b></sub>
     </td>
-    <td align="center" width="50%">
-      <img src="docs/screenshots/lugar-detalhe.png" alt="Place detail" width="280" /><br />
-      <sub><b>Place detail</b> — immersive hero, actions, fixed CTA</sub>
+    <td align="center" width="25%">
+      <img src="docs/screenshots/lugar-detalhe.png" alt="Place detail" width="200" /><br />
+      <sub><b>Place detail</b></sub>
     </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <img src="docs/screenshots/busca-ia.png" alt="AI search" width="280" /><br />
-      <sub><b>AI search</b> — natural language + open/closed filters</sub>
+    <td align="center" width="25%">
+      <img src="docs/screenshots/explorar.png" alt="Explorar" width="200" /><br />
+      <sub><b>Explorar</b></sub>
     </td>
-    <td align="center">
-      <img src="docs/screenshots/rotas.png" alt="Routes" width="280" /><br />
-      <sub><b>Routes</b> — curated trails + AI-generated itineraries</sub>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <img src="docs/screenshots/login.png" alt="Login" width="280" /><br />
-      <sub><b>Authentication</b> — OAuth & SMS</sub>
-    </td>
-    <td align="center">
-      <img src="docs/screenshots/admin.png" alt="Admin" width="280" /><br />
-      <sub><b>Admin</b> — content & moderation</sub>
+    <td align="center" width="25%">
+      <img src="docs/screenshots/atrativos.png" alt="Atrativos" width="200" /><br />
+      <sub><b>Atrativos</b></sub>
     </td>
   </tr>
 </table>
 
-Recommended capture size: **390×844** (mobile viewport). See `docs/screenshots/.gitkeep` for file naming.
-
 ---
 
-## Technology stack
+## Architecture
 
-| Layer | Technology | Responsibility |
-|-------|------------|----------------|
-| Application | **Next.js 16** (App Router) | Routing, SSR/CSR, API route handlers |
-| UI | **React 19**, **Tailwind CSS 4** | Component layer, design system |
-| Data | **Supabase** (PostgreSQL) | Persistence, RLS, SQL migrations |
-| Identity | **Supabase Auth** | Sessions, OAuth, phone OTP |
-| Assets | **Supabase Storage** | Place, route, and profile media |
-| AI | **Anthropic Claude** | Semantic search ranking, itinerary generation |
-| Maps | Google / Apple / Waze (deep links) | End-user navigation |
-| Weather | **Open-Meteo** | Forecast data (no API key required) |
-| Hosting | **Vercel** | Build, deploy, edge delivery |
-| Runtime | **Node.js 20+**, **JavaScript** | Application language (no TypeScript) |
+```text
+Browser / Capacitor  →  Next.js 16 (Vercel)  →  Supabase (Postgres + Auth + Storage)
+                                      ↘ Anthropic Claude (search & itineraries)
+                                      ↘ Open-Meteo, FCM, Play / App Store IAP
+```
 
-### Server API surface
+| Layer | Stack |
+|-------|--------|
+| App | Next.js 16 App Router, React 19, Tailwind CSS 4, **JavaScript** (no TypeScript) |
+| Data | Supabase PostgreSQL (`us-west-2`), RLS on every exposed table |
+| Identity | Supabase Auth (Google, phone OTP, Apple on iOS) |
+| Native | Capacitor 8 (`android/`, `ios/`), bundle `app.guiadebolso` |
+| Quality | `node --test` on `lib/*.test.js`, Playwright smoke, GitHub Actions CI |
 
-| Endpoint | Method | Purpose |
-|----------|--------|---------|
-| `/api/health` | `GET` | Deploy smoke check |
-| `/api/lugares` | `GET` | Public catalog (CDN-cacheable) |
-| `/api/buscar` | `POST` | AI-powered place search |
-| `/api/roteiro` | `POST` | Generate multi-day itinerary |
-| `/api/roteiro/salvar` | `POST` | Persist user itinerary |
-| `/api/uso-premium` | `GET` | Subscription usage quotas |
+Secrets (`ANTHROPIC_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) never ship to the browser. AI quotas are reserved with `SECURITY DEFINER` RPCs before Claude is called.
 
-Full contracts: [`docs/api.md`](./docs/api.md).
+Full diagrams: [`docs/architecture.md`](docs/architecture.md).
 
 ---
 
 ## Getting started
 
-### Prerequisites
-
-- Node.js **20+**
-- npm
-- Git
-- Supabase project (database + auth configured)
-- Anthropic API key
-
-### Local setup
+**Prerequisites:** Node.js **20+** (`engines`: `>=20 <26`), npm, Git. Your own Supabase project and Anthropic key if you are **forking** (production keys are not in the repo).
 
 ```bash
 git clone https://github.com/BrunoDislilerDev/guia-de-bolso.git
 cd guia-de-bolso
 npm install
 cp .env.example .env.local
-# Edit .env.local with your credentials
+# Fill NEXT_PUBLIC_SUPABASE_* and ANTHROPIC_API_KEY
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
-### Database migrations
-
-Apply SQL scripts in the Supabase **SQL Editor** using the ordered manifest in [`docs/migrations.md`](./docs/migrations.md#manifest). Architecture and performance notes: [`docs/DATABASE_ARCHITECTURE.md`](./docs/DATABASE_ARCHITECTURE.md).
-
-### NPM scripts
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Development server |
-| `npm run build` | Production build |
-| `npm run start` | Run production build locally |
+| Command | Purpose |
+|---------|---------|
+| `npm run dev` | Local server |
 | `npm run lint` | ESLint |
-| `npm test` | Unit tests (`lib/*.test.js`) |
-| `npm run test:e2e` | Playwright smoke (`e2e/smoke.spec.js`; first run: `npx playwright install chromium`) |
+| `npm test` | Unit tests |
+| `npm run check:api-security` | API docs vs handlers |
+| `npm run build` | Production build |
+| `npm run test:e2e` | Playwright smoke (`npx playwright install chromium` once) |
 
----
+**Fork / new Supabase:** schema is documented in [`docs/database.md`](docs/database.md); apply SQL in [`docs/migrations.md`](docs/migrations.md#manifest). There is no one-click dump of production data — that is intentional. Step-by-step: [`docs/en/getting-started.md`](docs/en/getting-started.md) · [`docs/onboarding.md`](docs/onboarding.md).
 
-## Environment variables
-
-Copy [`.env.example`](./.env.example) to `.env.local`. Full reference (scopes, Vercel, CI): **[`docs/environment.md`](./docs/environment.md)**.
-
-| Variable | Required | Scope |
-|----------|:--------:|-------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Client + server |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Client + server |
-| `ANTHROPIC_API_KEY` | Yes | Server only |
-| `ANTHROPIC_MODEL` | Recommended | Server only |
-
-**Auth redirect URLs** (Supabase Dashboard → Authentication): see [`docs/authentication.md`](./docs/authentication.md).
-
----
-
-## Production deployment
-
-The application deploys to **Vercel** on push to the default branch.
-
-### 1. Vercel project
-
-| Setting | Value |
-|---------|--------|
-| Framework | Next.js |
-| Build command | `npm run build` |
-| Install command | `npm install` |
-| Node.js version | 20.x |
-
-### 2. Environment configuration
-
-Mirror all variables from `.env.local` in **Vercel → Settings → Environment Variables** for Production (and Preview environments if used).
-
-### 3. Supabase (production)
-
-- Run migrations from `/supabase` on the production project
-- Register production domain in Auth redirect allowlist
-- Verify Storage buckets and RLS policies
-
-### 4. Post-deploy verification
-
-- [ ] Home loads with place data
-- [ ] Sign-in (Google / SMS) completes callback
-- [ ] Authenticated AI search returns results and increments usage
-- [ ] Place detail navigation CTA opens maps provider
-- [ ] Admin routes reject non-admin roles
-
-Detailed runbook: [`docs/deployment.md`](./docs/deployment.md).
-
-### Release pipeline
-
-```text
-git push / PR → GitHub Actions (lint, test, build, Playwright smoke) → merge main → Vercel production
-```
-
----
-
-## Project structure
-
-Full tree: **[`docs/project-structure.md`](./docs/project-structure.md)**.
-
-```text
-guia-de-bolso/
-├── app/                 # Next.js routes & API handlers
-├── components/          # UI by domain (home/, lugar/, admin/, …)
-├── hooks/               # Shared React hooks
-├── lib/                 # Domain logic & Supabase clients
-├── supabase/            # SQL migrations (manual apply)
-├── docs/                # ← Technical documentation (single source)
-├── e2e/                 # Playwright smoke tests
-└── .env.example         # Environment template
-```
+Env reference: [`.env.example`](.env.example) · [`docs/environment.md`](docs/environment.md) · [`docs/en/environment.md`](docs/en/environment.md).
 
 ---
 
 ## Documentation
 
-**Índice mestre (handoff para equipe):** **[docs/README.md](./docs/README.md)**
+| Audience | Start here |
+|----------|------------|
+| New engineer (EN) | [`docs/en/README.md`](docs/en/README.md) |
+| New engineer (PT) | [`docs/README.md`](docs/README.md) → [`docs/onboarding.md`](docs/onboarding.md) |
+| Fork from zero | [`docs/en/getting-started.md`](docs/en/getting-started.md) |
+| APIs | [`docs/api.md`](docs/api.md) |
+| Database | [`docs/database.md`](docs/database.md) |
+| Deploy | [`docs/deployment.md`](docs/deployment.md) |
+| Product behavior | [`docs/features.md`](docs/features.md) |
+| ADRs | [`docs/architectural-decisions.md`](docs/architectural-decisions.md) |
 
-| Documento | Conteúdo |
-|-----------|----------|
-| [onboarding.md](./docs/onboarding.md) | Onboarding técnico |
-| [architecture.md](./docs/architecture.md) | Arquitetura do sistema |
-| [project-structure.md](./docs/project-structure.md) | Estrutura de pastas |
-| [authentication.md](./docs/authentication.md) | Fluxo de autenticação |
-| [data-flows.md](./docs/data-flows.md) | Fluxo de dados |
-| [api.md](./docs/api.md) | APIs HTTP |
-| [database.md](./docs/database.md) | Banco de dados |
-| [conventions.md](./docs/conventions.md) | Convenções do projeto |
-| [environment.md](./docs/environment.md) | Variáveis de ambiente |
-| [architectural-decisions.md](./docs/architectural-decisions.md) | Decisões arquiteturais |
-| [deployment.md](./docs/deployment.md) | Deploy e CI |
-| [CODING_STANDARDS.md](./CODING_STANDARDS.md) | Estilo linha a linha |
+Coding rules: [`CODING_STANDARDS.md`](CODING_STANDARDS.md) · shortcut [`ENGINEERING_GUIDE.md`](ENGINEERING_GUIDE.md).
 
 ---
 
 ## Security
 
-- **Row Level Security (RLS)** enforced on Supabase tables
-- AI keys and usage increments run **server-side only** (`app/api/*`)
-- User-generated reviews require moderation before public display
-- Administrative functions gated by `perfis.role`
-- Atomic AI quota via `SECURITY DEFINER` SQL (`increment_*_ia` reserve before Claude, `decrement_*_ia` release on failure)
+- RLS on catalog, profiles, favorites, reviews, logs, storage
+- Admin UI + APIs gated by `admin` / `dev` roles (never client-only)
+- Reviews public only after moderation
+- Vulnerability reports: **contato@guiadebolso.app** — see [`SECURITY.md`](SECURITY.md)
 
-Report security concerns via [GitHub Issues](https://github.com/BrunoDislilerDev/guia-de-bolso/issues) (private disclosure process can be defined as the project matures).
+Do not open public issues with exploit details.
 
 ---
 
 ## Roadmap
 
-| Phase | Theme | Highlights |
-|-------|-------|------------|
-| **Q1** | Monetization | Recurring billing (Asaas), establishment self-service portal |
-| **Q2** | Growth | Push notifications, voice search, PWA / offline fase 2 (service worker) |
-| **Q3** | Platform | Public-venue metadata in admin, local events, check-in feature |
-| **Q4** | Enterprise | Municipal partnerships, Apple / WhatsApp auth, dark mode |
+Shipped (do not treat as TODO): native push, voice search, establishment QR, offline favorites, Play/App Store Premium.
+
+| Theme | Next |
+|-------|------|
+| Commerce | Establishment self-serve portal; Asaas billing |
+| Platform | Broader offline / PWA; WhatsApp auth (Meta) |
+| Product | Local events, check-in, city history layer, dark mode |
 
 ---
 
 ## Contributing
 
-Contributions are welcome. Please read [`docs/contributing.md`](./docs/contributing.md) before opening a pull request.
+Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) ([português](CONTRIBUTING.pt-BR.md)) and the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-1. Fork the repository  
-2. Create a feature branch  
-3. Ensure `npm run build` passes  
-4. Submit a PR with a clear description and screenshots for UI changes  
+1. Fork → feature branch (`feat/…`, `fix/…`, `docs/…`)
+2. `npm run lint && npm test && npm run build`
+3. Open a PR using the template (screenshots for UI)
 
 ---
 
 ## Author
 
-**Bruno Disliler** — Full-stack developer building AI-powered consumer products.
-
-- Website: [brunodisliler.com](https://brunodisliler.com)  
-- GitHub: [@BrunoDislilerDev](https://github.com/BrunoDislilerDev)
+**Bruno Disliler** — [brunodisliler.com](https://brunodisliler.com) · [@BrunoDislilerDev](https://github.com/BrunoDislilerDev)
 
 ---
 
-<p align="center">
-  <sub>Guia de Bolso · Local discovery infrastructure for the Litoral Catarinense</sub>
-</p>
+## License
 
----
-
-## Planejamento V2
-
-### História e Cultura
-Transformar o Guia de Bolso na memória digital de Imbituba,
-oferecendo contexto histórico e cultural que nenhum guia local digital tem.
-Foco em Imbituba como guia oficial da cidade.
-
-**Estrutura planejada:**
-
-História dentro do Explorar:
-- [ ] Redesenhar a tela Explorar para incluir seção "Conheça a região" 
-      no topo, além das categorias existentes
-- [ ] Card "História de Imbituba" abrindo página dedicada com texto rico, 
-      fotos históricas e linha do tempo
-- [ ] Página de história com seções: Origens, Influência Açoriana, 
-      O Porto, A Pesca Artesanal, Crescimento do Turismo
-
-História dentro do detalhe de cada local:
-- [ ] Campo `historia` e `curiosidades` na tabela lugares (banco + admin)
-- [ ] Seção "História e curiosidades" colapsável na página de detalhe 
-      de cada lugar, com visual diferenciado (fundo levemente diferente, 
-      ícone de livro)
-- [ ] Integração com roteiro de IA — filtro "Monte um roteiro histórico 
-      de Imbituba"
-- [ ] Áudio guia futuro — narração gerada a partir do campo história 
-      via Text-to-Speech
-
-**Conteúdo prioritário para cadastrar:**
-- Farol de Imbituba
-- Porto de Imbituba  
-- Centro histórico
-- Praias com lendas e histórias locais
-- Influência açoriana na arquitetura e culinária local
-
-**Impacto esperado:**
-Diferencial único — o app como memória digital viva de Imbituba.
-Potencial de parceria com prefeitura, secretaria de cultura e 
-historiadores locais.
-
-### Outras features planejadas
-- [ ] Notificações Push
-- [ ] Busca por voz (Web Speech API + Claude API)
-- [x] Favoritos offline automáticos (IndexedDB — lugares e atrativos favoritos)
-- [ ] Modo offline ampliado (PWA service worker, catálogo regional)
-- [ ] QR Code do estabelecimento
-- [ ] Check-in "Estou aqui agora" com contagem em tempo real
-- [ ] Eventos locais (shows, feiras, festivais)
-- [ ] Dark mode completo (CSS variables)
-- [ ] Dark mode no admin
-- [ ] Role "estabelecimento" com painel próprio
-- [ ] WhatsApp Auth (pós aprovação Meta)
+See [`LICENSE`](LICENSE). Source is available to study and to contribute; the **Guia de Bolso** brand and production data are not licensed for reuse.

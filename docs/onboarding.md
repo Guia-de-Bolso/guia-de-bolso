@@ -1,5 +1,7 @@
 # Onboarding técnico
 
+**[English](./en/onboarding.md)** · Fork com Supabase próprio: [getting-started.md](./getting-started.md)
+
 Guia para desenvolvedores, DevOps e QA que entram no **Guia de Bolso**. Leia nesta ordem no primeiro dia.
 
 ---
@@ -30,8 +32,9 @@ Abra [http://localhost:3000](http://localhost:3000).
 ## Dia 1 — Leitura obrigatória
 
 ```text
-README (raiz)           → visão do produto e links
+README.md / README.pt-BR.md
 docs/README.md          → índice completo
+docs/getting-started.md → fork / ambiente próprio
 docs/project-structure.md
 docs/architecture.md    → stack, rotas, integrações
 docs/authentication.md  → OAuth, SMS, sessão
@@ -76,7 +79,7 @@ Documentação de segurança: [`security-rls.md`](./security-rls.md), [`../SECUR
 | Catálogo público | `/`, `/categorias` | Lugares `ativo`, sem login |
 | Busca IA | Home → busca (logado) | `POST /api/buscar`, contador 10/dia |
 | Detalhe | `/lugares/[id]` | Horários, mapa, favorito (login) |
-| Roteiro IA | `/rotas` | `POST /api/roteiro`, limite 2/dia |
+| Roteiro IA | `/atrativos` (`/rotas` redireciona 301) | `POST /api/roteiro`, limite 2/dia |
 | Auth Google | `/login` | Redirect `/auth/callback` |
 | Auth SMS | `/login` | OTP Twilio via Supabase |
 | Admin CMS | `/admin/locais` | CRUD + upload Storage |
@@ -94,9 +97,10 @@ Checklist manual completo: [`TESTING-CHECKLIST.md`](./TESTING-CHECKLIST.md) e [`
 | `npm run build` | Obrigatório antes de PR |
 | `npm run lint` | ESLint |
 | `npm test` | Testes unitários `lib/*.test.js` (~40 arquivos) |
-| `npm run test:e2e` | Playwright smoke — `e2e/smoke.spec.js` (10 casos; `npx playwright install chromium` na 1ª vez) |
+| `npm run check:api-security` | Handlers vs `docs/api.md` |
+| `npm run test:e2e` | Playwright — `e2e/smoke.spec.js` + `e2e/auth-gates.spec.js` (`npx playwright install chromium` na 1ª vez) |
 
-CI no GitHub: `.github/workflows/ci.yml` — lint → `npm test` → build → Playwright em PRs/push para `main`.
+CI no GitHub: `.github/workflows/ci.yml` — lint → check API docs → `npm test` → build → Playwright em PRs/push para `main`.
 
 ---
 
@@ -124,7 +128,7 @@ CI no GitHub: `.github/workflows/ci.yml` — lint → `npm test` → build → P
 ## Contatos e governança
 
 - Issues: [GitHub Issues](https://github.com/BrunoDislilerDev/guia-de-bolso/issues)
-- Contribuição: [`contributing.md`](./contributing.md)
+- Contribuição: [`../CONTRIBUTING.pt-BR.md`](../CONTRIBUTING.pt-BR.md) · [`contributing.md`](./contributing.md)
 - Segurança: [`../SECURITY.md`](../SECURITY.md)
 - Maintainer: Bruno Disliler — [brunodisliler.com](https://brunodisliler.com)
 

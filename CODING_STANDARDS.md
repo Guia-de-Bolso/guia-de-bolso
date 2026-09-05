@@ -323,7 +323,7 @@ Cada arquivo novo deve começar com:
 | Tipo | Onde | Quando obrigatório |
 |------|------|-------------------|
 | Unitário | `lib/*.test.js` | Lógica pura (horários, premium, redirect, parse) |
-| E2E smoke | `e2e/smoke.spec.js` | Fluxos críticos de deploy (CI após `build`, 10 casos Chromium) |
+| E2E smoke | `e2e/smoke.spec.js`, `e2e/auth-gates.spec.js` | Fluxos críticos + gates de auth (CI após `build`, Chromium) |
 | Manual | `docs/TESTING-CHECKLIST.md` | UI, auth, premium 1→2→3→paywall, Capacitor |
 
 **CI** (`.github/workflows/ci.yml`): `lint` → `npm test` → `build` → `playwright install` → `test:e2e`.

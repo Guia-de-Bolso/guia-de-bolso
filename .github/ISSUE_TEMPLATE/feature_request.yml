@@ -1,0 +1,35 @@
+name: Feature request
+description: Suggest an improvement to Guia de Bolso
+title: "[feat] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: Describe the problem first, then the proposed change. English or Portuguese.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      placeholder: Who is blocked today, and in which flow?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: dropdown
+    id: audience
+    attributes:
+      label: Primary audience
+      options:
+        - Visitor / tourist
+        - Resident
+        - Partner business
+        - Admin / operations
+        - Developer tooling

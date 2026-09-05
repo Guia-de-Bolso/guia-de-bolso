@@ -284,7 +284,7 @@ guia-de-bolso/
 - [x] Google Sign-In nativo Android/iOS — `@capgo/capacitor-social-login` + `signInWithIdToken` (`lib/nativeGoogleAuth.js`, `lib/nativeSocialLoginInit.js`)
 - [x] Fluxo de verificação SMS com contador de reenvio e tratamento de erros
 - [x] Carrossel de parceiros na home (`ParceirosCarrossel`, `eh_parceiro`, `lib/homeSelection.js`)
-- [x] Sistema de planos (Básico, Padrão, Premium) com badges visuais
+- [x] Planos de lançamento: **Presença** (perfil completo permanente para farmácias, mercados, mecânicos, saúde, igrejas, museus e monumentos — `SUBCATEGORIAS_PRESENCA` em `lib/planoLancamento.js`), **Lançamento** (`perfil_promo_ate`) e **Parceiro** (`eh_parceiro`)
 - [x] Clima regional via Open-Meteo (home header + hero + detalhe Natureza/Aventura)
 - [x] Geolocalização dinâmica com distância real calculada
 - [x] Endereço estruturado com Google Places Autocomplete no admin
@@ -339,8 +339,8 @@ guia-de-bolso/
 - [x] Explorar reutiliza `SmartSearchExperience` / `useSmartSearch` (mesma busca IA da home)
 - [x] Editor de horários com time picker (Fechado/24h, **dois turnos por dia**, fechamento após meia-noite, copiar entre dias — `HorarioEditor`, `lib/horarios.js`)
 - [x] Testes unitários em `lib/*.test.js` (`npm test`, ~40 módulos — horários, premium, visibilidade, busca, roteiro, etc.)
-- [x] Smoke E2E Playwright (`e2e/smoke.spec.js`, 10 casos; CI após build)
-- [x] Checklist manual interativo (`docs/TESTING-CHECKLIST.md`, 153 casos)
+- [x] Smoke E2E Playwright (`e2e/smoke.spec.js` + `e2e/auth-gates.spec.js`; CI após build)
+- [x] Checklist manual interativo (`docs/TESTING-CHECKLIST.md`)
 - [x] Carrossel de fotos menos sensível a swipes acidentais (`lib/horizontalCarousel.js`, `LugarHero`, `RotaGaleria`)
 - [x] Exclusão persistente de roteiros salvos (`DELETE /api/roteiro/[id]`, `supabase/roteiros_policies.sql`)
 - [x] Tags admin: até **5** por local e rota (antes 3)

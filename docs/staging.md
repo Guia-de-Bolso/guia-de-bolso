@@ -1,5 +1,7 @@
 # Ambiente de staging
 
+**[English](./en/staging.md)**
+
 ## Supabase Preview
 
 1. Crie um segundo projeto no Supabase (ex.: `guia-de-bolso-staging`).

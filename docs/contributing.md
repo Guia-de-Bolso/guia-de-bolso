@@ -1,8 +1,8 @@
 # Contributing
 
-Thank you for contributing to Guia de Bolso. This guide covers local setup, conventions, and how to propose changes.
+Thank you for contributing to Guia de Bolso. GitHub entry points: [CONTRIBUTING.md](../CONTRIBUTING.md) (EN) · [CONTRIBUTING.pt-BR.md](../CONTRIBUTING.pt-BR.md).
 
-> **Convenções detalhadas:** [conventions.md](./conventions.md) · **Onboarding:** [onboarding.md](./onboarding.md) · **Variáveis:** [environment.md](./environment.md)
+> **Convenções:** [conventions.md](./conventions.md) · **Onboarding:** [onboarding.md](./onboarding.md) · **Fork:** [getting-started.md](./getting-started.md) · **Variáveis:** [environment.md](./environment.md)
 
 ## Getting started
 
@@ -46,8 +46,10 @@ Open http://localhost:3000
 ### Verify your setup
 
 ```bash
+npm run lint
+npm test
+npm run check:api-security
 npm run build   # must pass before PR
-npm run lint    # ESLint
 ```
 
 ---
@@ -84,8 +86,11 @@ npm run lint    # ESLint
 
 ## Pull request checklist
 
+- [ ] `npm run lint`
+- [ ] `npm test`
+- [ ] `npm run check:api-security`
 - [ ] `npm run build` passes locally
-- [ ] No secrets in diff
+- [ ] No secrets in the diff
 - [ ] UI tested on mobile viewport (~390px)
 - [ ] Auth flows tested if touching login/favorites/search
 - [ ] SQL migrations documented if added
@@ -104,6 +109,7 @@ npm run lint    # ESLint
 | Admin | Confirm `role` is `admin` or `dev`; test operational routes (`/admin/locais`, `/admin/relatorios`). Sensitive routes (`/admin/parceiros`, `/admin/contratos`, `/admin/logs`, `/admin/taxonomia`) require **`dev`** — run `lugares_parceiro_programa.sql` and `contratos_comerciais.sql` before testing CRM |
 | Reviews IA | `POST /api/avaliacoes/analisar` needs `ANTHROPIC_API_KEY`; run `avaliacoes_moderacao.sql` for `aspectos` / `sugestao_ia` |
 | Opening hours | Multi-shift / overnight strings — run `node lib/horarios.test.js` after changes to `lib/horarios.js` |
+| Editorial place copy | `scripts/apply-lugar-copy.mjs` + `scripts/data/lugar-copy-lote-*.js` — service role; match `slug` then exact `nome`. Needs `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`. Do not run against prod without review. |
 
 ---
 
@@ -121,14 +127,15 @@ npm run test:e2e      # Playwright smoke (sobe dev localmente ou start no CI)
 GitHub Actions ([`.github/workflows/ci.yml`](../.github/workflows/ci.yml)) em PRs e pushes para `main`:
 
 1. `npm run lint`
-2. `npm test`
-3. `npm run build` (placeholders de env se secrets não estiverem no GitHub)
-4. `npx playwright install --with-deps chromium`
-5. `npm run test:e2e` (10 smoke tests em `e2e/smoke.spec.js`)
+2. `npm run check:api-security`
+3. `npm test`
+4. `npm run build` (placeholders de env se secrets não estiverem no GitHub)
+5. `npx playwright install --with-deps chromium`
+6. `npm run test:e2e` (`e2e/smoke.spec.js` + `e2e/auth-gates.spec.js`)
 
 Vercel faz o deploy; Actions valida qualidade. Secrets opcionais no GitHub — fallbacks permitem compilar sem Supabase real.
 
-Checklist manual (153 casos): [`TESTING-CHECKLIST.md`](./TESTING-CHECKLIST.md).
+Manual checklist: [`TESTING-CHECKLIST.md`](./TESTING-CHECKLIST.md).
 
 ---
 
@@ -172,8 +179,8 @@ Central index: **[docs/README.md](./README.md)**. When adding features, update a
 
 ## License & contact
 
-This is a private/portfolio project by [Bruno Disliler](https://brunodisliler.com).  
-For questions about contributing, open a GitHub issue or contact the maintainer.
+See [LICENSE](../LICENSE). Maintainer: [Bruno Disliler](https://brunodisliler.com).  
+Questions: GitHub Issues. Security: [SECURITY.md](../SECURITY.md).
 
 ## Related docs
 

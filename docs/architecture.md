@@ -4,7 +4,7 @@ Guia de Bolso is a **mobile-first web application** for local discovery in Imbit
 
 This document describes how the frontend, backend, data plane, authentication, and external services fit together in production.
 
-> **Documentação em português (handoff):** [Fluxo de autenticação](./authentication.md) · [Fluxo de dados](./data-flows.md) · [Estrutura de pastas](./project-structure.md) · [Decisões arquiteturais](./architectural-decisions.md) · [Índice](./README.md)
+> **Documentação em português (handoff):** [Índice](./README.md) · [Onboarding](./onboarding.md) · [Getting started](./getting-started.md) · [Autenticação](./authentication.md) · [English handbook](./en/README.md)
 
 ---
 
@@ -124,18 +124,17 @@ components/
 ├── perfil/                # Profile hero, stats, settings groups, sheets
 ├── lugar/                 # Place detail (hero, actions, climate widget, reviews, CTA)
 ├── admin/                 # CMS: shell (sidebar/drawer/top bar), dashboard, grids, taxonomia, logs
-├── rotas/                 # RoteiroSection, RoteiroContent, bottom sheet
+├── rotas/                 # RoteiroSection, RoteiroItineraryView, bottom sheet
 ├── BottomNav.js           # Consumer bottom navigation
 ├── LoginModal.js
 ├── Onboarding.js
 ├── PremiumPaywallSheet.js
 ├── DailyLimitCountdown.js
 ├── AuthFlow.js
-├── ClimaCard.js           # Beach weather (not mounted on home today)
 └── …                      # Other root-level UI (maps, autocomplete, etc.)
 ```
 
-**Home** logic: hero atrativo via `resolveAtrativoDoDia` / `pickHeroAtrativoCiclo` (`lib/atrativoDoDia.js`, `lib/homeRotation.js`); quick-search chips and distance sort in `lib/homeContext.js`; partner carousel + “Em alta” in `lib/homeSelection.js` + `lib/publicCatalog.js`. Smart search shell shared by home and Explorar (`SmartSearchExperience`, `hooks/useSmartSearch.js`, optional voice via `hooks/useVoiceSearch.js`). Header weather is inline in `HomeContextHeader`. **Place detail** uses `lib/lugarDetalhe.js` to distinguish public venues (beaches, trails) from establishments (restaurants, services) and to shape quick actions / persuasion copy.
+**Home** logic: hero atrativo via `resolveAtrativoDoDia` / `pickHeroAtrativoCiclo` (`lib/atrativoDoDia.js`, `lib/homeRotation.js`); quick-search chips and distance sort in `lib/homeContext.js`; partner carousel + “Em alta” in `lib/homeSelection.js` + `lib/publicCatalog.js`. Smart search shell shared by home and Explorar (`SmartSearchExperience`, `hooks/useSmartSearch.js`, optional voice via `hooks/useVoiceSearch.js`). Header weather is inline in `HomeContextHeader`. **Place detail** uses `lib/lugarDetalhe.js` to distinguish public venues (beaches, trails) from establishments (restaurants, services) and to shape quick actions / persuasion copy. **Full vs teaser profile** is `hasPerfilCompletoPublico` / `isLugarPerfilPresenca` (`lib/lugarVisibilidade.js` + `lib/planoLancamento.js`, list `SUBCATEGORIAS_PRESENCA`).
 
 ### Client-side state patterns
 
@@ -279,6 +278,8 @@ Server-only secrets: `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`. These never use the
 | `atrativoPercursoProgresso.js` | Client | Local progress for atrativo modo guia |
 | `publicCatalog.js` | Shared | `PUBLIC_APP_PARTNERS_ONLY` filters for production consumer lists |
 | `lugarDetalhe.js` | Shared | Establishment vs public place, quick actions, persuasion copy, `getStaticMapUrl` (Google Static Maps) |
+| `lugarVisibilidade.js` | Shared | Full vs basic (teaser) profile on place detail |
+| `planoLancamento.js` | Shared | Launch tiers Presença / Lançamento / Parceiro; `SUBCATEGORIAS_PRESENCA` |
 | `autorDisplayName.js` | Shared | Public author display name (nome → e-mail → telefone mascarado → Visitante) |
 | `lugaresPopulares.js` | Shared | Trending places by favorite count |
 | `lugaresVisitados.js` | Client | Recent places in `localStorage` for search browse |
@@ -298,8 +299,8 @@ Server-only secrets: `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`. These never use the
 | `categorias.js` | Shared | Explorar category catalog, sort, featured picks |
 | `perfil.js` | Shared | Profile quick-link definitions |
 | `avaliacaoAspectos.js` | Shared | Aspect chip options per place category |
-| `roteiroParse.js` | Shared | Markdown → days/periods/stops for timeline UI |
-| `roteiroMarkdown.js` / `roteiroLugares.js` | Server/shared | Legacy markdown helpers and catalog filtering for AI |
+| `roteiroParse.js` | Shared | Markdown → days/periods/stops for timeline UI (`RoteiroItineraryView`; no HTML injection) |
+| `roteiroLugares.js` | Server/shared | Catalog filtering for AI itineraries |
 | `usePremiumUsage.js` | Client | Premium quota hook + `localStorage` cache |
 | `googleMaps.js` | Client | Admin map picker helpers |
 

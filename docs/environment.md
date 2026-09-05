@@ -1,5 +1,7 @@
 # Variáveis de ambiente
 
+**[English](./en/environment.md)**
+
 Referência única para configuração local, Vercel e CI. Template versionado: [`.env.example`](../.env.example).
 
 **Nunca** commitar `.env.local` ou chaves reais.
