@@ -104,7 +104,8 @@ export default function PerfilPromoFields({ form, setForm, columnReady, showPres
           <h3 className="text-sm font-bold text-[#1a2e28]">Plano de lançamento</h3>
           <p className="mt-1 text-xs text-[#5a6b66]">
             <strong>Presença</strong> (padrão): perfil completo permanente para farmácias,
-            mercados, mecânicos e saúde — sem cobrança e sem CTA de upgrade.{" "}
+            mercados, mecânicos, saúde, igrejas, museus e monumentos — sem cobrança e
+            sem CTA de upgrade.{" "}
             <strong>Lançamento</strong>: perfil completo grátis até a data abaixo — use
             em restaurantes e experiências que você quer destacar antes de cobrar.
           </p>
