@@ -1,5 +1,7 @@
 "use client";
 
+import { STICKY_CTA_ABOVE_NAV_CLASS } from "@/lib/appChrome";
+
 function NavigateIcon({ className = "h-4 w-4 shrink-0" }) {
   return (
     <svg
@@ -24,8 +26,8 @@ function NavigateIcon({ className = "h-4 w-4 shrink-0" }) {
  */
 export default function LugarCtaBarAirbnb({ label, onClick }) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#e8eeee]/90 bg-white/92 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-md justify-center px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+    <div className={`${STICKY_CTA_ABOVE_NAV_CLASS} border-t border-[#e8eeee]/90 bg-white/92 backdrop-blur-xl`}>
+      <div className="mx-auto flex max-w-md justify-center px-4 py-3">
         <button
           type="button"
           onClick={onClick}

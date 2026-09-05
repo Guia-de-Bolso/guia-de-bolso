@@ -28,7 +28,7 @@ export default function AtrativosPageClient({ initialData }) {
     <div className="min-h-screen overflow-x-hidden bg-[#f0f4f3] text-[#1a2e28]">
       <div className="mx-auto box-border w-full min-w-0 max-w-md overflow-x-hidden px-4 pb-28 pt-safe-top">
         <header className="pb-5">
-          <h1 className="text-2xl font-bold tracking-tight text-[#1a2e28]">Atrativos</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-[#1a2e28]">Roteiros</h1>
           <p className="mt-1 text-sm text-[#5a6b66]">Trilhas e experiências selecionadas</p>
         </header>
 
@@ -53,10 +53,10 @@ export default function AtrativosPageClient({ initialData }) {
                 <IconMapEmpty />
               </div>
               <h2 className="mt-4 text-lg font-bold text-[#1a2e28]">
-                Nenhum atrativo cadastrado ainda
+                Nenhum roteiro cadastrado ainda
               </h2>
               <p className="mt-2 text-sm text-[#5a6b66]">
-                Em breve novos atrativos aparecerão aqui.
+                Em breve novos roteiros aparecerão aqui.
               </p>
             </section>
           ) : (

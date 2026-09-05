@@ -413,7 +413,7 @@ Use this list for **first launch** and **each major release**.
 - [ ] Login (Google + SMS) → redirect to `/` via `/auth/callback`
 - [ ] Logged-in user: favorite, review submit (pending moderation)
 - [ ] AI search (`POST /api/buscar`) — success and limit/paywall when applicable
-- [ ] AI roteiro on `/atrativos` — generate and save
+- [ ] AI roteiro on `/roteiros` — generate and save
 - [ ] Maps CTA on place detail opens Google / Apple / Waze
 - [ ] Admin `/admin` — dashboard, edit place, moderate review
 - [ ] Admin `/admin/logs` and `/admin/taxonomia` (admin role)
@@ -451,7 +451,7 @@ Use this list for **first launch** and **each major release**.
 | 3 | Open `/lugares/<id>` | Detail, photos, CTA |
 | 4 | `/login` → Google or SMS | Session + avatar on home |
 | 5 | `/favoritos` | List or empty state when logged in |
-| 6 | `/atrativos` → create roteiro | Sheet works; save appears in list |
+| 6 | `/roteiros` → create roteiro | Sheet works; save appears in list |
 | 7 | `/admin` as admin | Dashboard metrics load |
 | 8 | `/admin/logs` | Filter logs; open place from `ir_agora` row |
 | 9 | `/categorias` | Explorar grid; submit review → pending + IA hint in admin |

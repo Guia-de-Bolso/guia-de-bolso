@@ -48,7 +48,7 @@ guia-de-bolso/
 | `app/categoria/[slug]/page.js` | Page | Listagem filtrada |
 | `app/favoritos/page.js` | Page | Favoritos (auth + offline sync) |
 | `app/favoritos/lugar/[id]/page.js` | Page | Detalhe offline-capable de lugar favorito |
-| `app/favoritos/atrativo/[id]/page.js` | Page | Detalhe offline-capable de atrativo favorito |
+| `app/(tabs)/favoritos/roteiro/[id]/page.js` | Page | Detalhe offline-capable de roteiro favorito |
 | `app/rotas/page.js`, `app/rotas/[id]/page.js` | Page | Rotas curadas + roteiro IA |
 | `app/perfil/`, `app/perfil/editar/` | Page | Perfil e edição |
 | `app/admin/**` | Pages + `layout.js` | CMS — **guard server** em `admin/layout.js` |

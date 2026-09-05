@@ -301,7 +301,7 @@ export default function PerfilPageClient({ initialData }) {
           <p className="mt-1 text-sm text-[#5a6b66]">
             {user
               ? "Sua conta e preferências na região"
-              : "Entre para salvar favoritos e avaliar lugares"}
+              : "Entre para personalizar o Guia."}
           </p>
         </div>
       </header>

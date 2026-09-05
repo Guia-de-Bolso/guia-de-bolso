@@ -88,7 +88,7 @@ There is no global React Context for auth or premium; each page or hook loads se
 | `/lugares/[id]` | `app/lugares/[id]/page.js` | Conversion-focused place detail |
 | `/categorias`, `/categoria/[slug]` | Category discovery |
 | `/favoritos` | Saved places (auth) |
-| `/atrativos`, `/atrativos/[id]` | Curated atrativos + AI roteiro (`/rotas` → 301 redirect) |
+| `/roteiros`, `/roteiros/[id]` | Curated roteiros + AI itinerary (`/atrativos` and `/rotas` → 301) |
 | `/perfil`, `/perfil/editar` | User profile |
 | `/login` | `app/login/page.js` | Auth entry |
 | `/auth/callback` | `app/auth/callback/route.js` | OAuth code exchange (Route Handler) |
@@ -101,7 +101,7 @@ Requires `perfis.role` ∈ `admin`, `dev` (`lib/adminRoles.js` → `canAccessAdm
 |-------|--------|---------|
 | `/admin` | admin, dev | Dashboard (hero, KPI grid, moderation queue, partner ops sidebar, activity timeline) |
 | `/admin/locais`, `/admin/locais/novo`, `/admin/locais/[id]/editar` | admin, dev | Place CRUD (+ partner program fields, QR PDF) |
-| `/admin/atrativos`, `/admin/atrativos/nova`, `/admin/atrativos/[id]/editar` | admin, dev | Curated atrativo CRUD (`/admin/rotas` → 301 redirect) |
+| `/admin/roteiros`, `/admin/roteiros/nova`, `/admin/roteiros/[id]/editar` | admin, dev | Curated roteiro CRUD (`/admin/atrativos` and `/admin/rotas` → 301) |
 | `/admin/avaliacoes` | admin, dev | Review moderation (`?tab=` for filter chips) |
 | `/admin/relatorios` | admin, dev | Establishment performance reports |
 | `/admin/parceiros` | **dev** | Partner program CRM (deadlines, curadoria) |
@@ -431,7 +431,7 @@ flowchart LR
 
 ### 6. Roteiro (itinerary) path
 
-1. User completes form on `/atrativos` (logged in).  
+1. User completes form on `/roteiros` (logged in).  
 2. `POST /api/roteiro` — premium check, filtered place list (`lib/roteiroLugares.js`), Claude returns strict markdown + `lugaresCatalog`.  
 3. `lib/roteiroParse.js` → `RoteiroItineraryView` in `RoteiroBottomSheet` / `RoteiroViewModal`.  
 4. Optional `POST /api/roteiro/salvar` — persists to `roteiros` table.  
@@ -521,7 +521,7 @@ On first login, Supabase creates `auth.users`. The app expects a matching row in
 | **Premium features** | `perfis.premium_ativo`; daily counters `buscas_ia` / `roteiros_ia` in `uso_ia_mes` (day key `YYYY-MM-DD`, SP); limits 10 buscas + 2 roteiros/day; Premium unlimited |
 | **Admin** | `perfis.role` ∈ `admin`, `dev` (`canAccessAdmin`); sensitive CMS + contracts: **`dev` only** (`canAccessDevAdmin`, `is_admin_only()` in SQL) |
 | **Public content** | RLS: active places; consumer catalog may further restrict to `eh_parceiro` (`lib/publicCatalog.js`, `PUBLIC_APP_PARTNERS_ONLY`) |
-| **Gated UI** | `LoginModal` for favorites, reviews, **AI search**, and **AI roteiro**; curated `/atrativos` list and detail are public |
+| **Gated UI** | `LoginModal` for favorites, reviews, **AI search**, and **AI roteiro**; curated `/roteiros` list and detail are public |
 
 API returns machine-readable codes: `LOGIN_REQUIRED` (401), `LIMIT_REACHED` (403).
 
@@ -531,7 +531,7 @@ API returns machine-readable codes: `LOGIN_REQUIRED` (401), `LIMIT_REACHED` (403
 
 1. `supabase.auth.getUser()` on mount.  
 2. `onAuthStateChange` to update user + clear favorites on sign-out.  
-3. Premium hook `usePremiumUsage(user)` hydrates same-day cache, then fetches `/api/uso-premium`; home search and `/atrativos` show usage + `DailyLimitCountdown` when limit reached.
+3. Premium hook `usePremiumUsage(user)` hydrates same-day cache, then fetches `/api/uso-premium`; home search and `/roteiros` show usage + `DailyLimitCountdown` when limit reached.
 
 ---
 

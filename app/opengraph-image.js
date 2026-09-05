@@ -56,7 +56,7 @@ export default function OpenGraphImage() {
             maxWidth: 880,
           }}
         >
-          Praias · Gastronomia · Atrativos · Busca com IA
+          Praias · Gastronomia · Roteiros · Busca com IA
         </div>
         <div
           style={{

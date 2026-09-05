@@ -5,7 +5,7 @@ import RemotePhoto from "@/components/shared/RemotePhoto";
 import { useLandingRevealMotion } from "@/components/landing/useLandingRichMotion";
 import { PREFETURA_SUPPORT_LINE } from "@/lib/institutionalSupport";
 import { LANDING_TESTIMONIALS } from "@/lib/landingContent";
-import { formatParceirosCadastrados } from "@/lib/landingPartnerCopy";
+import { formatParceirosCadastrados, socialProofMetrics } from "@/lib/landingPartnerCopy";
 
 /**
  * Prova social — métricas e depoimento em destaque (sem identificar parceiros).
@@ -20,6 +20,7 @@ export default function LandingSocialProof({ stats, showcase = [], hasLiveData }
   const featured = LANDING_TESTIMONIALS[0];
   const faces = showcase.filter((p) => p.capa).slice(0, 5);
   const parceirosLabel = formatParceirosCadastrados(stats?.parceirosCount);
+  const metrics = socialProofMetrics(stats);
 
   if (!hasLiveData && !parceirosLabel) return null;
 
@@ -52,28 +53,28 @@ export default function LandingSocialProof({ stats, showcase = [], hasLiveData }
           </p>
         </motion.div>
 
-        <motion.dl
-          className="mt-10 grid grid-cols-3 gap-4 sm:gap-8"
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewport}
-          variants={stagger}
-        >
-          {[
-            { label: "Lugares verificados", value: stats?.totalLugares || "—" },
-            { label: "Parceiros oficiais", value: stats?.parceirosCount || "—" },
-            { label: "Avaliações aprovadas", value: stats?.avaliacoesCount || "—" },
-          ].map((item) => (
-            <motion.div key={item.label} variants={reveal} className="text-center">
-              <dd className="landing-display text-2xl font-semibold tabular-nums text-[#1a4a3a] sm:text-3xl">
-                {item.value}
-              </dd>
-              <dt className="mt-1 text-[10px] font-medium uppercase tracking-[0.12em] text-[#8a9b94] sm:text-xs">
-                {item.label}
-              </dt>
-            </motion.div>
-          ))}
-        </motion.dl>
+        {metrics.length > 0 ? (
+          <motion.dl
+            className={`mt-10 grid gap-4 sm:gap-8 ${
+              metrics.length >= 3 ? "grid-cols-3" : metrics.length === 2 ? "grid-cols-2" : "grid-cols-1"
+            }`}
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewport}
+            variants={stagger}
+          >
+            {metrics.map((item) => (
+              <motion.div key={item.label} variants={reveal} className="text-center">
+                <dd className="landing-display text-2xl font-semibold tabular-nums text-[#1a4a3a] sm:text-3xl">
+                  {item.value}
+                </dd>
+                <dt className="mt-1 text-[10px] font-medium uppercase tracking-[0.12em] text-[#8a9b94] sm:text-xs">
+                  {item.label}
+                </dt>
+              </motion.div>
+            ))}
+          </motion.dl>
+        ) : null}
 
         {faces.length > 0 && (
           <motion.div

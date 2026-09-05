@@ -14,7 +14,7 @@ export default function HomeSeoStatic({ lugaresCount = 0 }) {
     <section className="sr-only" aria-label="Guia de Bolso — Imbituba">
       <h1>Guia de Bolso — o que fazer em Imbituba, SC</h1>
       <p>
-        Descubra praias, trilhas, restaurantes, atrativos e serviços em Imbituba com busca
+        Descubra praias, trilhas, restaurantes, roteiros e serviços em Imbituba com busca
         inteligente e curadoria local.
         {lugaresCount > 0 ? ` ${lugaresCount} lugares ativos no guia.` : ""}
       </p>
@@ -27,7 +27,7 @@ export default function HomeSeoStatic({ lugaresCount = 0 }) {
           ))}
         </ul>
         <Link href="/categorias">Ver todas as categorias</Link>
-        <Link href="/atrativos">Atrativos e trilhas</Link>
+        <Link href="/roteiros">Roteiros e trilhas</Link>
         <Link href="/imbituba">Sobre Imbituba</Link>
       </nav>
     </section>

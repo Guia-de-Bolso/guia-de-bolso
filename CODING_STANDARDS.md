@@ -58,7 +58,7 @@ Padrões **obrigatórios** de implementação. Visão de arquitetura e fluxos: *
 
 ### Rotas URL
 
-- Públicas: português ou termo de produto — `/lugares/[id]`, `/categorias`, `/rotas`.
+- Públicas: português ou termo de produto — `/lugares/[id]`, `/categorias`, `/roteiros`.
 - Admin: `/admin/locais` (canônico); `/admin/lugares` e `/admin/destaques` redirecionam 301.
 - API: inglês técnico — `/api/buscar`, `/api/uso-premium`.
 

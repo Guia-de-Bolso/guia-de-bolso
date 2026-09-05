@@ -132,7 +132,7 @@ export default function LugarLocalizacaoCard({
             type="button"
             onClick={onAbrirMapa}
             className="relative block w-full"
-            aria-label="Abrir no mapa"
+            aria-label="Ver no mapa"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -171,7 +171,7 @@ export default function LugarLocalizacaoCard({
             }`}
           >
             {isAirbnb && <ExternalLinkIcon />}
-            Abrir no mapa
+            Ver no mapa
           </button>
           {mapUrl && (
             <a

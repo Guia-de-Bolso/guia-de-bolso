@@ -534,7 +534,7 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
       <LoginModal
         isOpen={loginOpen}
         motivo="atrativos"
-        redirectAfterLogin="/atrativos"
+        redirectAfterLogin="/roteiros"
         onClose={() => {
           setPendingCriar(false);
           setLoginOpen(false);

@@ -359,14 +359,14 @@ export default function AdminDashboard() {
             />
             <DashboardMetricCard
               className="sm:col-span-1 lg:col-span-3"
-              label="Atrativos publicados"
+              label="Roteiros publicados"
               hint="Status publicado"
               value={metrics.atrativosPublicados.total}
               icon={IconMap}
               iconWrap="bg-[#d4ede8]"
               iconColor="text-[#1a4a3a]"
               variation={metrics.atrativosPublicados.variation}
-              href="/admin/atrativos"
+              href="/admin/roteiros"
             />
             {devAccess && (
               <DashboardMetricCard

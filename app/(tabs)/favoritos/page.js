@@ -187,7 +187,7 @@ export default function FavoritosPage() {
     if (!supabase) return;
 
     const anteriores = atrativos;
-    const nome = rota.nome || rota.titulo || "Atrativo";
+    const nome = rota.nome || rota.titulo || "Roteiro";
 
     setAtrativos((atuais) => atuais.filter((item) => String(item.id) !== String(rota.id)));
 
@@ -226,9 +226,11 @@ export default function FavoritosPage() {
             <h1 className="font-display text-2xl font-extrabold tracking-tight text-[#1a2e28]">
               Favoritos
             </h1>
-            <p className="mt-1 text-sm leading-relaxed text-[#5a6b66]">
-              Seus lugares e atrativos salvos — disponíveis offline automaticamente.
-            </p>
+            {!showEmptyState ? (
+              <p className="mt-1 text-sm leading-relaxed text-[#5a6b66]">
+                Seus lugares e roteiros salvos — disponíveis offline automaticamente.
+              </p>
+            ) : null}
           </div>
           {showCount && (
             <span
@@ -249,7 +251,7 @@ export default function FavoritosPage() {
 
         {fetchAtrativosError && user && !loadingFavoritos && (
           <UserErrorAlert
-            message="Não foi possível carregar seus atrativos favoritos. Tente novamente."
+            message="Não foi possível carregar seus roteiros favoritos. Tente novamente."
             reportContext={buildReportContext({ code: "SERVER", route: "/favoritos" })}
             action={
               <button
@@ -310,27 +312,22 @@ export default function FavoritosPage() {
           </div>
         ) : showEmptyState ? (
           <section className="rounded-3xl bg-white p-6 text-center shadow-[0_2px_14px_-4px_rgba(26,46,40,0.08)]">
-            <EmptyIllustration />
-            <h2 className="mt-5 font-display text-xl font-extrabold text-[#1a4a3a]">
+            <p className="text-4xl" aria-hidden>
+              ❤️
+            </p>
+            <h2 className="mt-4 font-display text-xl font-extrabold text-[#1a4a3a]">
               Nenhum favorito ainda
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-[#5a6b66]">
-              Explore o guia e toque no coração para salvar lugares e atrativos.
+              Salve praias, restaurantes e roteiros para encontrar tudo rapidamente — mesmo
+              offline.
             </p>
-            <div className="mt-6 grid gap-3">
-              <Link
-                href="/categorias"
-                className="block w-full rounded-xl bg-[#1a4a3a] py-3.5 text-sm font-semibold text-white transition-colors hover:bg-[#153d30] active:bg-[#123528]"
-              >
-                Explorar categorias
-              </Link>
-              <Link
-                href="/atrativos"
-                className="block w-full rounded-xl border border-[#1a4a3a]/20 bg-white py-3.5 text-sm font-semibold text-[#1a4a3a] transition-colors hover:bg-[#eef5f2]"
-              >
-                Ver atrativos
-              </Link>
-            </div>
+            <Link
+              href="/"
+              className="mt-6 block w-full rounded-xl bg-[#1a4a3a] py-3.5 text-sm font-semibold text-white transition-colors hover:bg-[#153d30] active:bg-[#123528]"
+            >
+              Explorar lugares
+            </Link>
           </section>
         ) : (
           <div className="grid min-w-0 gap-8">
@@ -363,7 +360,7 @@ export default function FavoritosPage() {
               <section className="min-w-0">
                 {lugares.length > 0 ? (
                   <h2 className="mb-4 text-sm font-bold uppercase tracking-[0.12em] text-[#5a6b66]">
-                    Atrativos
+                    Roteiros
                   </h2>
                 ) : null}
                 <ul className="grid min-w-0 list-none gap-4 p-0">

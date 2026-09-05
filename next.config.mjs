@@ -93,13 +93,23 @@ const nextConfig = {
     : {}),
   async redirects() {
     return [
-      { source: "/rotas", destination: "/atrativos", permanent: true },
-      { source: "/rotas/:id", destination: "/atrativos/:id", permanent: true },
-      { source: "/admin/rotas", destination: "/admin/atrativos", permanent: true },
-      { source: "/admin/rotas/nova", destination: "/admin/atrativos/nova", permanent: true },
+      { source: "/rotas", destination: "/roteiros", permanent: true },
+      { source: "/rotas/:id", destination: "/roteiros/:id", permanent: true },
+      { source: "/atrativos", destination: "/roteiros", permanent: true },
+      { source: "/atrativos/:id", destination: "/roteiros/:id", permanent: true },
+      { source: "/favoritos/atrativo/:id", destination: "/favoritos/roteiro/:id", permanent: true },
+      { source: "/admin/rotas", destination: "/admin/roteiros", permanent: true },
+      { source: "/admin/rotas/nova", destination: "/admin/roteiros/nova", permanent: true },
       {
         source: "/admin/rotas/:id/editar",
-        destination: "/admin/atrativos/:id/editar",
+        destination: "/admin/roteiros/:id/editar",
+        permanent: true,
+      },
+      { source: "/admin/atrativos", destination: "/admin/roteiros", permanent: true },
+      { source: "/admin/atrativos/nova", destination: "/admin/roteiros/nova", permanent: true },
+      {
+        source: "/admin/atrativos/:id/editar",
+        destination: "/admin/roteiros/:id/editar",
         permanent: true,
       },
       { source: "/api/rotas", destination: "/api/atrativos", permanent: true },

@@ -79,7 +79,7 @@ Documentação de segurança: [`security-rls.md`](./security-rls.md), [`../SECUR
 | Catálogo público | `/`, `/categorias` | Lugares `ativo`, sem login |
 | Busca IA | Home → busca (logado) | `POST /api/buscar`, contador 10/dia |
 | Detalhe | `/lugares/[id]` | Horários, mapa, favorito (login) |
-| Roteiro IA | `/atrativos` (`/rotas` redireciona 301) | `POST /api/roteiro`, limite 2/dia |
+| Roteiro IA | `/roteiros` (`/atrativos` e `/rotas` redirecionam 301) | `POST /api/roteiro`, limite 2/dia |
 | Auth Google | `/login` | Redirect `/auth/callback` |
 | Auth SMS | `/login` | OTP Twilio via Supabase |
 | Admin CMS | `/admin/locais` | CRUD + upload Storage |

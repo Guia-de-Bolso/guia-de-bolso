@@ -8,7 +8,7 @@ import { resolveBottomNavTab } from "@/lib/tabShell";
 
 /**
  * Layout das abas principais — mantém painéis visitados montados em memória
- * para troca instantânea entre Início, Explorar, Atrativos, Favoritos e Perfil.
+ * para troca instantânea entre Início, Explorar, Roteiros, Favoritos e Perfil.
  * @param {{ children: import("react").ReactNode }} props
  * @returns {import("react").ReactElement}
  */

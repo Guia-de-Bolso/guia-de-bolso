@@ -33,9 +33,9 @@ test.describe("smoke", () => {
     await expect(page.getByText("Descoberta local")).toBeVisible();
   });
 
-  test("atrativos page renders header", async ({ page }) => {
-    await page.goto(`${baseURL}/atrativos`);
-    await expect(page.getByRole("heading", { name: "Atrativos", exact: true })).toBeVisible();
+  test("roteiros page renders header", async ({ page }) => {
+    await page.goto(`${baseURL}/roteiros`);
+    await expect(page.getByRole("heading", { name: "Roteiros", exact: true })).toBeVisible();
   });
 
   test("favoritos guest sees login gate", async ({ page }) => {
@@ -53,7 +53,7 @@ test.describe("smoke", () => {
 
   test("perfil guest sees benefits and auth", async ({ page }) => {
     await page.goto(`${baseURL}/perfil`);
-    await expect(page.getByRole("heading", { name: "Entre e personalize sua viagem" })).toBeVisible();
+    await expect(page.getByText("Entre para personalizar o Guia.")).toBeVisible();
     await expect(page.getByRole("button", { name: "Entrar com Google" })).toBeVisible();
   });
 

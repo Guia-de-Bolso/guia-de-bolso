@@ -1,4 +1,6 @@
-import AtrativosGridPage from "@/components/admin/AtrativosGridPage";
+import { permanentRedirect } from "next/navigation";
+import { ADMIN_ROTEIROS_PATH } from "@/lib/roteirosPaths";
 
-/** Admin atrativos listing — card grid with filters and stats. */
-export default AtrativosGridPage;
+export default function LegacyAdminAtrativosRedirect() {
+  permanentRedirect(ADMIN_ROTEIROS_PATH);
+}

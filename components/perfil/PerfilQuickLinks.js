@@ -5,7 +5,7 @@ import Link from "next/link";
 const LINKS = [
   { href: "/favoritos", emoji: "❤️", label: "Favoritos" },
   { href: "/categorias", emoji: "🧭", label: "Explorar" },
-  { href: "/atrativos", emoji: "🗺️", label: "Atrativos" },
+  { href: "/roteiros", emoji: "🗺️", label: "Roteiros" },
   { href: "/?busca=1", emoji: "✨", label: "Busca IA" },
 ];
 

@@ -13,6 +13,7 @@ import {
   DETALHE_CARD_OVERLAP_CLASS,
 } from "@/components/lugar/airbnb/lugarAirbnbTokens";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { ROTEIROS_PATH } from "@/lib/roteirosPaths";
 import { toggleRotasFavorita, createFavoritosSyncGuard, FAVORITO_OFFLINE_SAVED_MESSAGE } from "@/lib/rotasFavoritas";
 import {
   FAVORITO_OFFLINE_TYPES,
@@ -55,7 +56,7 @@ export default function AtrativoDetalhePremium({
   infoCards,
   pontos,
   dicas,
-  backHref = "/atrativos",
+  backHref = ROTEIROS_PATH,
   offlinePreferred = false,
   isOfflineView = false,
 }) {
@@ -210,53 +211,68 @@ export default function AtrativoDetalhePremium({
         </div>
 
         <main className={`${DETALHE_CARD_OVERLAP_CLASS} px-7 pb-28 pt-8`}>
-          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#1a4a3a]">
-            <span className="mr-1.5" aria-hidden>
-              {categoria.icone}
-            </span>
-            {categoria.nome}
-          </p>
-
-          <div className="mt-3 flex items-start gap-2">
-            <h2 className="font-display min-w-0 flex-1 text-[28px] font-bold leading-[1.12] tracking-tight text-[#1a2e28]">
-              {nome}
-            </h2>
-            <VerifiedIcon />
-          </div>
-
-          {tags.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {tags.map((tag) => (
-                <span key={tag.id} className={DESTAQUE_CHIP_PREMIUM_CLASS}>
-                  {tag.icone && (
-                    <span className="shrink-0 text-base leading-none" aria-hidden>
-                      {tag.icone}
-                    </span>
-                  )}
-                  <span className="text-[#5a6b66]">{tag.nome}</span>
-                </span>
-              ))}
-            </div>
-          )}
-
-          <AtrativoMetrics duracao={duracao} distancia={distancia} dificuldade={dificuldade} />
-
-          <AtrativoMapsCta
-            href={mapsHref}
-            subtitulo={mapsSubtitulo}
-            rota={rota}
-            localizacao={localizacao}
-          />
-
-          <AtrativoSobreSection descricao={descricao} infoCards={infoCards} />
-
           <AtrativoPercursoSection
             rotaId={rotaId}
             nome={nome}
             pontos={pontos}
             dicas={dicas}
             onGuiaOpenChange={setGuiaOpen}
-          />
+          >
+            {({ cta, progress }) => (
+              <>
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#1a4a3a]">
+                  <span className="mr-1.5" aria-hidden>
+                    {categoria.icone}
+                  </span>
+                  {categoria.nome}
+                </p>
+
+                <div className="mt-3 flex items-start gap-2">
+                  <h2 className="font-display min-w-0 flex-1 text-[28px] font-bold leading-[1.12] tracking-tight text-[#1a2e28]">
+                    {nome}
+                  </h2>
+                  <VerifiedIcon />
+                </div>
+
+                <AtrativoMetrics
+                  compact
+                  duracao={duracao}
+                  distancia={distancia}
+                  dificuldade={dificuldade}
+                />
+
+                {cta}
+
+                <AtrativoMapsCta
+                  href={mapsHref}
+                  subtitulo={mapsSubtitulo}
+                  rota={rota}
+                  localizacao={localizacao}
+                  variant={pontos.length ? "secondary" : "primary"}
+                  label="Como chegar"
+                />
+
+                {tags.length > 0 && (
+                  <div className="mt-6 flex flex-wrap gap-2">
+                    {tags.map((tag) => (
+                      <span key={tag.id} className={DESTAQUE_CHIP_PREMIUM_CLASS}>
+                        {tag.icone && (
+                          <span className="shrink-0 text-base leading-none" aria-hidden>
+                            {tag.icone}
+                          </span>
+                        )}
+                        <span className="text-[#5a6b66]">{tag.nome}</span>
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <AtrativoSobreSection descricao={descricao} infoCards={infoCards} />
+
+                {progress}
+              </>
+            )}
+          </AtrativoPercursoSection>
         </main>
       </div>
 

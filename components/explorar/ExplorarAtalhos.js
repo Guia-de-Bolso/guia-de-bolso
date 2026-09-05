@@ -56,9 +56,9 @@ export default function ExplorarAtalhos() {
     <section className="home-reveal mb-4 space-y-3" style={{ animationDelay: "160ms" }}>
       <HomeSectionHeader eyebrow="Descoberta" title="Mais formas de descobrir" />
       <AtalhoCard
-        href="/atrativos"
+        href="/roteiros"
         emoji="🗺️"
-        titulo="Atrativos guiados"
+        titulo="Roteiros guiados"
         descricao="Trilhas e percursos com etapas e dicas"
         destaque
       />

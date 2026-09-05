@@ -24,7 +24,7 @@ Pirâmide de QA do projeto:
 | 2 | Home (onboarding pulado via `localStorage`) | Busca IA + bottom nav |
 | 3 | `/login` | Hero + Google + “Continuar sem login” |
 | 4 | `/categorias` | Heading Explorar + categoria Natureza |
-| 5 | `/atrativos` | Header da página |
+| 5 | `/roteiros` | Header da página |
 | 6 | `/favoritos` (guest) | Gate “Faça login para ver seus favoritos” |
 | 7 | Favoritos → Fazer login | Modal com auth; subtítulo menciona offline |
 | 8 | `/perfil` (guest) | Benefícios + Google |
@@ -70,8 +70,8 @@ Use a ferramenta com **158 casos de teste**, passo a passo por dispositivo, resu
 | Ver lugar | Cards → `/lugares/[id]` | Nenhuma |
 | Favoritar | Coração home/detalhe, `/favoritos` | Login |
 | Avaliar | Detalhe → `AvaliacaoForm` | Login; nome de exibição + comentário obrigatórios; moderação admin |
-| Roteiro IA | `/atrativos` → Criar roteiro | Login + limite 2/dia (free); quota re-checked in sheet before API; excluir salvo via `DELETE /api/roteiro/[id]` |
-| Modo guia (atrativo) | `/atrativos/[id]` → percurso | Nenhuma (progresso local no device) |
+| Roteiro IA | `/roteiros` → Criar roteiro | Login + limite 2/dia (free); quota re-checked in sheet before API; excluir salvo via `DELETE /api/roteiro/[id]` |
+| Modo guia (atrativo) | `/roteiros/[id]` → percurso | Nenhuma (progresso local no device) |
 | Push | `/perfil` → Notificações push (app nativo) | Login + Capacitor |
 
 ### Capacitor native auth (manual)
@@ -83,7 +83,7 @@ Use a ferramenta com **158 casos de teste**, passo a passo por dispositivo, resu
 | N-05 | Android app → Google | Native flow with `NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID` |
 | N-06 | iOS Google fails to return | Verify `ios/GoogleAuth.xcconfig` reversed ID + Vercel `NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID` |
 
-| Atrativos curados | `/atrativos`, `/atrativos/[id]` | Nenhuma (só listagem) |
+| Atrativos curados | `/roteiros`, `/roteiros/[id]` | Nenhuma (só listagem) |
 | Avatar | `/perfil/editar` → upload foto | Login; `POST /api/perfil/avatar` + `SUPABASE_SERVICE_ROLE_KEY` no servidor |
 | Clima | Hero home; `LugarClimaWidget` no detalhe | Sheet completo = login |
 | Perfil | `/perfil`, `/perfil/editar` | Stats só logado |
@@ -123,7 +123,7 @@ Use a ferramenta com **158 casos de teste**, passo a passo por dispositivo, resu
 |----|------|--------|----------|
 | H-OFF-1 | Cache ao favoritar | Logado, favorite lugar + trilha online | Toast “Disponível offline”; banner em `/favoritos` |
 | H-OFF-2 | Lista offline | DevTools → Offline → `/favoritos` | Lista e banner “Modo offline” |
-| H-OFF-3 | Detalhe offline | Offline → toque item | `/favoritos/lugar/[id]` ou `/favoritos/atrativo/[id]` abre com badge |
+| H-OFF-3 | Detalhe offline | Offline → toque item | `/favoritos/lugar/[id]` ou `/favoritos/roteiro/[id]` abre com badge |
 | H-OFF-4 | Desfavoritar | Offline ou online, remova coração | Some da lista; cache limpo ao voltar online |
 
 ---
@@ -153,7 +153,7 @@ Use a ferramenta com **158 casos de teste**, passo a passo por dispositivo, resu
 
 | ID | Caso | Passos | Esperado |
 |----|------|--------|----------|
-| L-ATR-1 | Abrir guia | `/atrativos/[id]` com pontos → iniciar modo guia | Full-screen; bottom nav oculta |
+| L-ATR-1 | Abrir guia | `/roteiros/[id]` com pontos → iniciar modo guia | Full-screen; bottom nav oculta |
 | L-ATR-2 | Progresso | Marcar ponto e avançar; fechar e reabrir | Progresso local restaurado |
 | L-ATR-3 | Voz na busca | App nativo → mic na home/Explorar | Transcript preenche query (permissão de microfone) |
 

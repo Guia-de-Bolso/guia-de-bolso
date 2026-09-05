@@ -1,5 +1,7 @@
 "use client";
 
+import { STICKY_CTA_ABOVE_NAV_CLASS } from "@/lib/appChrome";
+
 /**
  * Barra fixa inferior com botão principal (ex.: "IR AGORA").
  * @param {object} props
@@ -9,7 +11,7 @@
  */
 export default function LugarCtaFixo({ label, onClick }) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
+    <div className={`${STICKY_CTA_ABOVE_NAV_CLASS} px-4 py-2`}>
       <div className="mx-auto max-w-md">
         <button
           type="button"

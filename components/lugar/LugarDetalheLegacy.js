@@ -90,7 +90,7 @@ export default function LugarDetalheLegacy(props) {
   const perfilBasico = isPerfilBasico(visibilidade);
 
   return (
-    <div className="min-h-screen bg-[#f0f4f3] pb-28 text-[#1a2e28]">
+    <div className="min-h-screen bg-[#f0f4f3] pb-44 text-[#1a2e28]">
       {toast && (
         <div className="fixed left-4 right-4 top-4 z-[60] mx-auto max-w-md rounded-2xl bg-[#1a4a3a] px-4 py-3 text-center text-sm font-semibold text-white shadow-lg">
           {toast}
@@ -212,12 +212,12 @@ export default function LugarDetalheLegacy(props) {
                 <LugarProse
                   texto={descricaoLonga}
                   expandido={sobreExpandido}
-                  clampClass="line-clamp-4"
+                  clampClass="line-clamp-3"
                   className="text-sm leading-relaxed text-[#5a6b66]"
                 />
                 {!sobreExpandido &&
                   visibilidade.showDescricaoLonga &&
-                  descricaoLonga.length > 180 && (
+                  descricaoLonga.length > 120 && (
                   <button
                     type="button"
                     onClick={() => setSobreExpandido(true)}

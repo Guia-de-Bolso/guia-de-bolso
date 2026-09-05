@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { ATRATIVO_INFO_MINI_CARD_CLASS, ATRATIVO_SECTION_TITLE_CLASS } from "@/components/atrativos/atrativoDetalheTokens";
 
-const PREVIEW_CHARS = 160;
+const PREVIEW_CHARS = 110;
 
 /**
- * Seção "Sobre este atrativo" com mini cards e descrição expansível.
+ * Seção "Sobre este roteiro" com mini cards e descrição expansível.
  * @param {object} props
  * @param {string} props.descricao
  * @param {Array<{ titulo: string, icone: string, accent: string, texto: string }>} props.infoCards
@@ -19,14 +19,14 @@ export default function AtrativoSobreSection({ descricao, infoCards = [] }) {
   return (
     <section className="mt-9">
       <div className="flex items-center justify-between gap-3">
-        <h2 className={ATRATIVO_SECTION_TITLE_CLASS}>Sobre este atrativo</h2>
+        <h2 className={ATRATIVO_SECTION_TITLE_CLASS}>Sobre este roteiro</h2>
         {precisaExpandir && (
           <button
             type="button"
             onClick={() => setExpandido((v) => !v)}
             className="shrink-0 text-sm font-semibold text-[#1a4a3a] transition-opacity active:opacity-70"
           >
-            {expandido ? "ver menos" : "ver mais"}
+            {expandido ? "Mostrar menos" : "Mostrar mais"}
           </button>
         )}
       </div>
@@ -50,7 +50,7 @@ export default function AtrativoSobreSection({ descricao, infoCards = [] }) {
 
       <p
         className={`mt-4 text-[15px] leading-[1.7] text-[#5a6b66] ${
-          expandido || !precisaExpandir ? "" : "line-clamp-4"
+          expandido || !precisaExpandir ? "" : "line-clamp-2"
         }`}
       >
         {texto}

@@ -101,11 +101,13 @@ function cleanPhone(value) {
  * @param {object} props
  * @param {boolean} [props.compact] - Modal LoginModal.
  * @param {"default" | "immersive"} [props.variant] - Visual da página /login.
+ * @param {boolean} [props.hideCopy] - Oculta título e subtítulo (ex.: perfil já explica o contexto).
  * @returns {import('react').ReactElement}
  */
 export default function AuthFlow({
   compact = false,
   variant = "default",
+  hideCopy = false,
   redirectAfterLogin = "/",
   onLoginSuccess,
 }) {
@@ -479,7 +481,7 @@ export default function AuthFlow({
 
   return (
     <div>
-      {immersive ? (
+      {hideCopy ? null : immersive ? (
         <>
           <h2 className={titleClass}>Entre e desbloqueie tudo</h2>
           <p className={subtitleClass}>
@@ -512,7 +514,7 @@ export default function AuthFlow({
         </>
       )}
 
-      <div className={`flex flex-col gap-3 ${immersive ? "mt-5" : "mt-6"}`}>
+      <div className={`flex flex-col gap-3 ${hideCopy ? "" : immersive ? "mt-5" : "mt-6"}`}>
         <button
           type="button"
           disabled={socialLoading}

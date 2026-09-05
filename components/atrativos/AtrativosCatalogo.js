@@ -11,6 +11,7 @@ import {
   getCategoriaAtrativoMeta,
   normalizeCategoriaAtrativo,
 } from "@/lib/atrativos";
+import { roteiroDetalhePath } from "@/lib/roteirosPaths";
 import { resolveAtrativoDoDia } from "@/lib/atrativoDoDia";
 import { getTagsFromAtrativo } from "@/lib/tags";
 
@@ -40,7 +41,7 @@ function IconBolt({ className = "h-4 w-4" }) {
 }
 
 function getAtrativoNome(rota) {
-  return rota.nome || rota.titulo || "Atrativo sem nome";
+  return rota.nome || rota.titulo || "Roteiro sem nome";
 }
 
 function formatDuracao(rota) {
@@ -145,11 +146,11 @@ function AtrativoTags({ rota }) {
 
 function AtrativoDoDiaCard({ rota, modo }) {
   const categoria = getCategoriaAtrativoMeta(rota.categoria);
-  const badgeLabel = modo === "fixada" ? "📌 Atrativo do dia" : "🗓️ Atrativo do dia";
+  const badgeLabel = modo === "fixada" ? "📌 Roteiro do dia" : "🗓️ Roteiro do dia";
 
   return (
     <PrefetchLink
-      href={`/atrativos/${rota.id}`}
+      href={roteiroDetalhePath(rota.id)}
       className="box-border block w-full min-w-0 max-w-full overflow-hidden rounded-2xl bg-white shadow-sm"
     >
       <div className="relative h-48 w-full min-w-0 overflow-hidden">
@@ -182,7 +183,7 @@ function CompactRouteCard({ rota }) {
 
   return (
     <PrefetchLink
-      href={`/atrativos/${rota.id}`}
+      href={roteiroDetalhePath(rota.id)}
       className="box-border flex w-full min-w-0 max-w-full gap-3 overflow-hidden rounded-2xl bg-white p-3 shadow-sm"
     >
       <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl">
@@ -271,7 +272,7 @@ export default function AtrativosCatalogo({ atrativos }) {
       {atrativosFiltrados.length === 0 ? (
         <section className="rounded-2xl bg-white p-6 text-center shadow-sm">
           <h2 className="text-lg font-bold text-[#1a2e28]">
-            Nenhum atrativo nesta categoria
+            Nenhum roteiro nesta categoria
           </h2>
           <p className="mt-2 text-sm text-[#5a6b66]">
             Tente outro filtro ou volte em breve.

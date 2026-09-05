@@ -1,16 +1,7 @@
-import AtrativosPageClient from "@/components/atrativos/AtrativosPageClient";
-import { fetchAtrativosPageData } from "@/lib/atrativosPageData";
-import { createPageServerClient } from "@/lib/supabase/pageServer";
+import { permanentRedirect } from "next/navigation";
+import { ROTEIROS_PATH } from "@/lib/roteirosPaths";
 
-/**
- * Routes listing with featured route, AI roteiro section, and saved roteiros.
- * @returns {Promise<import("react").ReactElement>}
- */
-export default async function AtrativosPage() {
-  const supabase = await createPageServerClient();
-  const initialData = supabase
-    ? await fetchAtrativosPageData(supabase)
-    : { atrativos: [], roteiros: [] };
-
-  return <AtrativosPageClient initialData={initialData} />;
+/** URL legada — redireciona para `/roteiros` (Capacitor export não usa next.config redirects). */
+export default function LegacyAtrativosRedirect() {
+  permanentRedirect(ROTEIROS_PATH);
 }

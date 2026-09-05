@@ -369,7 +369,7 @@ export default function RoteiroBottomSheet({
         setErroContext(
           buildReportContext({
             code: mapped.code ?? data.code,
-            route: "/atrativos",
+            route: "/roteiros",
             message: mapped.message,
           })
         );
@@ -396,7 +396,7 @@ export default function RoteiroBottomSheet({
       onUsageRefresh?.(data.usage ?? null);
     } catch {
       setErro(getNetworkErrorMessage());
-      setErroContext(buildReportContext({ code: "NETWORK", route: "/atrativos" }));
+      setErroContext(buildReportContext({ code: "NETWORK", route: "/roteiros" }));
       onUsageRefresh?.(null);
       setView("form");
     } finally {
@@ -440,7 +440,7 @@ export default function RoteiroBottomSheet({
         setErroContext(
           buildReportContext({
             code: mapped.code ?? data.code,
-            route: "/atrativos",
+            route: "/roteiros",
             message: mapped.message,
           })
         );
@@ -466,7 +466,7 @@ export default function RoteiroBottomSheet({
       onClose();
     } catch {
       setErro(getUserMessage("SERVER"));
-      setErroContext(buildReportContext({ code: "NETWORK", route: "/atrativos" }));
+      setErroContext(buildReportContext({ code: "NETWORK", route: "/roteiros" }));
     } finally {
       setSalvando(false);
     }

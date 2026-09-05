@@ -1,148 +1,17 @@
-"use client";
+import { permanentRedirect } from "next/navigation";
+import { fetchCapacitorAtrativoIds } from "@/lib/capacitorStaticParams";
+import { isCapacitorBuild } from "@/lib/capacitorBuild";
+import { favoritoRoteiroPath } from "@/lib/roteirosPaths";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
-import AtrativoDetalhePremium from "@/components/atrativos/AtrativoDetalhePremium";
-import OfflineFavoritoBadge from "@/components/favoritos/OfflineFavoritoBadge";
-import OfflineFavoritoDetailShell from "@/components/favoritos/OfflineFavoritoDetailShell";
-import { useNetworkStatus } from "@/hooks/useNetworkStatus";
-import {
-  formatAtrativoDistancia,
-  formatAtrativoDuracao,
-  getAtrativoMapsSubtitulo,
-  getAtrativoNome,
-} from "@/lib/atrativoDetalheDisplay";
-import { getGoogleMapsDirectionsUrlForAtrativo } from "@/lib/atrativoMaps";
-import { getCategoriaAtrativoMeta } from "@/lib/atrativos";
-import {
-  FAVORITO_OFFLINE_TYPES,
-  getOfflineFavorito,
-} from "@/lib/favoritosOffline";
-import {
-  cacheAtrativoFavoritoFromServer,
-  fetchAtrativoOfflineBundle,
-} from "@/lib/favoritosOfflineFetch";
-import { getFotosFromAtrativo } from "@/lib/fotos";
-import { createClient } from "@/lib/supabase";
+export const generateStaticParams = isCapacitorBuild()
+  ? async () => fetchCapacitorAtrativoIds()
+  : undefined;
 
 /**
- * Detalhe de atrativo favorito — cache offline com refresh opcional online.
- * @returns {import("react").ReactElement}
+ * URL legada `/favoritos/atrativo/[id]` → `/favoritos/roteiro/[id]`.
+ * @param {{ params: Promise<{ id: string }> }} props
  */
-export default function FavoritoAtrativoPage() {
-  const params = useParams();
-  const rotaId = String(params.id ?? "");
-  const { isOnline, ready: networkReady } = useNetworkStatus();
-  const [bundle, setBundle] = useState(null);
-  const [savedAt, setSavedAt] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [isOfflineView, setIsOfflineView] = useState(false);
-
-  useEffect(() => {
-    if (!rotaId || !networkReady) return;
-
-    let cancelled = false;
-
-    async function load() {
-      setLoading(true);
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const user = session?.user;
-
-      if (!user?.id) {
-        if (!cancelled) {
-          setBundle(null);
-          setLoading(false);
-        }
-        return;
-      }
-
-      async function applyCached() {
-        const cached = await getOfflineFavorito(
-          user.id,
-          FAVORITO_OFFLINE_TYPES.ATIVO,
-          rotaId
-        );
-        if (!cached?.payload?.rota || cancelled) return false;
-        setBundle(cached.payload);
-        setSavedAt(cached.savedAt);
-        setIsOfflineView(true);
-        return true;
-      }
-
-      const offlineNow = !isOnline;
-      const hadCache = await applyCached();
-
-      if (offlineNow) {
-        if (!cancelled) setLoading(false);
-        if (!hadCache && !cancelled) setBundle(null);
-        return;
-      }
-
-      const fresh = await fetchAtrativoOfflineBundle(supabase, rotaId);
-      if (cancelled) return;
-
-      if (fresh?.rota) {
-        setBundle(fresh);
-        setIsOfflineView(false);
-        setSavedAt(null);
-        await cacheAtrativoFavoritoFromServer(supabase, user.id, rotaId);
-      } else if (!hadCache) {
-        setBundle(null);
-      }
-
-      setLoading(false);
-    }
-
-    load();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [rotaId, isOnline, networkReady]);
-
-  const rota = bundle?.rota;
-  const nome = rota ? getAtrativoNome(rota) : "";
-  const categoria = rota ? getCategoriaAtrativoMeta(rota.categoria) : { nome: "", icone: "" };
-  const tags = (bundle?.tags ?? []).map((tag) => ({
-    id: tag.id,
-    nome: tag.nome,
-    icone: tag.icone,
-  }));
-  const fotos = bundle?.fotos?.length ? bundle.fotos : getFotosFromAtrativo(rota);
-
-  return (
-    <OfflineFavoritoDetailShell
-      loading={loading}
-      notFound={!loading && !rota}
-      backHref="/favoritos"
-    >
-      {isOfflineView ? <OfflineFavoritoBadge savedAt={savedAt} /> : null}
-      {rota ? (
-        <AtrativoDetalhePremium
-          rotaId={rotaId}
-          rota={rota}
-          localizacao={bundle?.localizacao}
-          nome={nome}
-          descricao={rota.descricao || ""}
-          fotos={fotos}
-          categoria={{ nome: categoria.nome, icone: categoria.icone }}
-          tags={tags}
-          duracao={formatAtrativoDuracao(rota)}
-          distancia={formatAtrativoDistancia(rota)}
-          dificuldade={rota.dificuldade || "Fácil"}
-          mapsHref={getGoogleMapsDirectionsUrlForAtrativo(rota, bundle?.localizacao)}
-          mapsSubtitulo={getAtrativoMapsSubtitulo(rota, bundle?.localizacao)}
-          infoCards={[]}
-          pontos={bundle?.pontos ?? []}
-          dicas={bundle?.dicas ?? []}
-          backHref="/favoritos"
-          offlinePreferred
-          isOfflineView={isOfflineView}
-        />
-      ) : null}
-    </OfflineFavoritoDetailShell>
-  );
+export default async function LegacyFavoritoAtrativoRedirect({ params }) {
+  const { id } = await params;
+  permanentRedirect(favoritoRoteiroPath(id));
 }

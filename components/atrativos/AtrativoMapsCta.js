@@ -38,7 +38,14 @@ function NavigateIcon() {
  * @param {object|null} [props.localizacao]
  * @returns {import("react").ReactElement}
  */
-export default function AtrativoMapsCta({ href, subtitulo, rota, localizacao }) {
+export default function AtrativoMapsCta({
+  href,
+  subtitulo,
+  rota,
+  localizacao,
+  variant = "primary",
+  label = "Como chegar",
+}) {
   const { offlineLimited } = useOfflineMode();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [toast, setToast] = useState("");
@@ -60,13 +67,27 @@ export default function AtrativoMapsCta({ href, subtitulo, rota, localizacao }) 
     <>
       {offlineLimited ? <OfflineCoordinatesCard coordinates={coordinates} /> : null}
 
-      <button type="button" onClick={openMaps} className={`${ATRATIVO_MAPS_CTA_CLASS} w-full text-left`}>
+      <button
+        type="button"
+        onClick={openMaps}
+        className={
+          variant === "secondary"
+            ? "mt-3 flex w-full flex-col items-center justify-center gap-0.5 rounded-2xl border border-[#1a4a3a]/20 bg-white px-5 py-3.5 text-[#1a4a3a] shadow-sm transition-transform active:scale-[0.98]"
+            : `${ATRATIVO_MAPS_CTA_CLASS} w-full text-left`
+        }
+      >
         <span className="flex items-center gap-2 text-[15px] font-bold">
           <NavigateIcon />
-          Navegar no Maps
+          {label}
         </span>
         {subtitulo ? (
-          <span className="text-xs font-medium text-white/75">{subtitulo}</span>
+          <span
+            className={`text-xs font-medium ${
+              variant === "secondary" ? "text-[#5a6b66]" : "text-white/75"
+            }`}
+          >
+            {subtitulo}
+          </span>
         ) : null}
       </button>
 

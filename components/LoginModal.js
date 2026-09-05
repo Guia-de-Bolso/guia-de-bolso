@@ -7,8 +7,8 @@ import { FAVORITO_OFFLINE_BENEFIT_BODY } from "@/lib/favoritosOffline";
 const subtitles = {
   favoritar: FAVORITO_OFFLINE_BENEFIT_BODY,
   avaliar: "Compartilhe sua experiência e ajude outros viajantes",
-  rotas: "Acesse atrativos detalhados com dicas exclusivas para chegar lá",
-  atrativos: "Acesse atrativos detalhados com dicas exclusivas para chegar lá",
+  rotas: "Acesse roteiros detalhados com dicas exclusivas para chegar lá",
+  atrativos: "Acesse roteiros detalhados com dicas exclusivas para chegar lá",
   busca: "Faça login para buscar lugares com inteligência artificial",
   clima: "Faça login para ver o clima das praias da região",
   premium: "Entre na sua conta para assinar o Guia Premium",
@@ -50,7 +50,7 @@ function IconLock({ className = "h-9 w-9" }) {
  * @param {boolean} props.isOpen - Whether the modal is visible.
  * @param {() => void} props.onClose - Called when the user dismisses the modal.
  * @param {string} [props.motivo] - Context key for subtitle copy (e.g. favoritar, rotas).
- * @param {string} [props.redirectAfterLogin] - Path pós-OAuth/SMS (padrão: `/atrativos` se motivo=atrativos).
+ * @param {string} [props.redirectAfterLogin] - Path pós-OAuth/SMS (padrão: `/roteiros` se motivo=atrativos/rotas).
  * @param {() => void} [props.onLoginSuccess] - Chamado após login SMS no modal (sem navegar).
  * @returns {import('react').ReactElement|null}
  */
@@ -62,7 +62,7 @@ export default function LoginModal({
   onLoginSuccess,
 }) {
   const postLoginPath =
-    redirectAfterLogin ?? (motivo === "atrativos" || motivo === "rotas" ? "/atrativos" : "/");
+    redirectAfterLogin ?? (motivo === "atrativos" || motivo === "rotas" || motivo === "roteiros" ? "/roteiros" : "/");
   const MainIcon = motivo === "favoritar" ? IconHeart : IconLock;
   const subtitle =
     subtitles[motivo] ??

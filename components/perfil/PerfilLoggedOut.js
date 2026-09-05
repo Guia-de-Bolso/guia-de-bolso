@@ -4,10 +4,7 @@ import Link from "next/link";
 import AppDeveloperCredit from "@/components/AppDeveloperCredit";
 import PrefeituraSupportLine from "@/components/PrefeituraSupportLine";
 import AuthFlow from "@/components/AuthFlow";
-import Logo from "@/components/Logo";
-import PerfilSettingsGroup from "@/components/perfil/PerfilSettingsGroup";
 import { useFeedback } from "@/components/FeedbackProvider";
-import { PERFIL_BENEFICIOS } from "@/lib/perfil";
 import {
   SITE_CONTACT_EMAIL,
   SITE_CONTACT_PHONE_DISPLAY,
@@ -15,6 +12,13 @@ import {
   SOCIAL_LINKS,
   getSiteTelHref,
 } from "@/lib/siteContact";
+
+const PERFIL_ATALHOS = [
+  { id: "favoritos", emoji: "❤️", titulo: "Favoritos" },
+  { id: "avaliar", emoji: "⭐", titulo: "Avaliações" },
+  { id: "roteiros", emoji: "🗺️", titulo: "Roteiros" },
+  { id: "perto", emoji: "📍", titulo: "Recomendações próximas" },
+];
 
 /**
  * Estado deslogado da aba Perfil.
@@ -25,70 +29,21 @@ export default function PerfilLoggedOut() {
 
   return (
     <div className="space-y-6">
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#1a4a3a] via-[#1a4a3a] to-[#0f3028] px-6 py-8 text-center text-white shadow-md">
-        <div
-          className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10"
-          aria-hidden
-        />
-        <div
-          className="pointer-events-none absolute -bottom-10 -left-6 h-28 w-28 rounded-full bg-white/5"
-          aria-hidden
-        />
-        <div className="relative mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-white/15 p-3 ring-4 ring-white/20">
-          <Logo size="md" variant="light" />
-        </div>
-        <h2 className="relative mt-5 text-xl font-bold leading-tight">
-          Entre e personalize sua viagem
-        </h2>
-        <p className="relative mt-2 text-sm leading-relaxed text-white/85">
-          Favoritos, avaliações, atrativos, roteiros com IA e preferências salvas na sua conta.
-        </p>
-      </div>
+      <ul className="space-y-2">
+        {PERFIL_ATALHOS.map((item) => (
+          <li
+            key={item.id}
+            className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-sm ring-1 ring-[#e8eeee]"
+          >
+            <span className="text-lg" aria-hidden>
+              {item.emoji}
+            </span>
+            <span className="text-sm font-semibold text-[#1a2e28]">{item.titulo}</span>
+          </li>
+        ))}
+      </ul>
 
-      <section aria-labelledby="perfil-beneficios-title">
-        <h2
-          id="perfil-beneficios-title"
-          className="mb-3 text-xs font-bold uppercase tracking-[0.12em] text-[#5a6b66]"
-        >
-          O que você ganha
-        </h2>
-        <div className="grid grid-cols-2 gap-3">
-          {PERFIL_BENEFICIOS.map((item) => (
-            <div
-              key={item.id}
-              className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-[#e8eeee]"
-            >
-              <span className="text-2xl" aria-hidden>
-                {item.emoji}
-              </span>
-              <p className="mt-2 text-sm font-bold text-[#1a2e28]">{item.titulo}</p>
-              <p className="mt-1 text-xs leading-snug text-[#5a6b66]">
-                {item.descricao}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-[#e8eeee]">
-        <p className="mb-4 text-center text-sm font-semibold text-[#1a2e28]">
-          Criar conta ou entrar
-        </p>
-        <AuthFlow compact />
-      </div>
-
-      <PerfilSettingsGroup
-        title="Ajuda e feedback"
-        items={[
-          {
-            key: "feedback",
-            icon: "💬",
-            label: "Enviar sugestão ou reportar problema",
-            onClick: () =>
-              feedback?.openFeedback({ pagina_origem: "/perfil" }),
-          },
-        ]}
-      />
+      <AuthFlow compact hideCopy />
 
       <Link
         href="/"
@@ -106,6 +61,15 @@ export default function PerfilLoggedOut() {
           Privacidade
         </Link>
       </p>
+
+      <button
+        type="button"
+        onClick={() => feedback?.openFeedback({ pagina_origem: "/perfil" })}
+        className="block w-full text-center text-[11px] font-medium text-[#9aa8a3] underline-offset-2 hover:text-[#1a4a3a] hover:underline"
+      >
+        Enviar sugestão
+      </button>
+
       <p className="text-center text-[11px] leading-relaxed text-[#9aa8a3]">
         <a
           href={getSiteTelHref()}

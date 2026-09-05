@@ -10,6 +10,7 @@ import {
   sanitizeCardDescription,
 } from "@/lib/atrativoDetalheDisplay";
 import { formatCategoriaAtrativoLabel } from "@/lib/atrativos";
+import { roteiroDetalhePath } from "@/lib/roteirosPaths";
 import { HOME_SECTION_EYEBROW_CLASS } from "@/components/home/homeTokens";
 
 /**
@@ -20,7 +21,7 @@ export default function OQueFazerAgora({ rota }) {
     return <HeroSkeleton />;
   }
 
-  const href = `/atrativos/${rota.id}`;
+  const href = roteiroDetalhePath(rota.id);
   const nome = getAtrativoNome(rota);
   const capa = getCapaThumbFromAtrativo(rota);
   const dificuldade = rota.dificuldade || "Fácil";

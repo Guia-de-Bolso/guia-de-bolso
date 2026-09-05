@@ -104,7 +104,7 @@ function IconPerson({ className = "h-5 w-5", active = false }) {
 const NAV_ICONS = {
   "/": IconHome,
   "/categorias": IconCompass,
-  "/atrativos": IconLandscape,
+  "/roteiros": IconLandscape,
   "/favoritos": IconHeart,
   "/perfil": IconPerson,
 };

@@ -27,7 +27,7 @@ export default function LugarHistoriaCulturaBlock({
   variant = "airbnb",
 }) {
   const isAirbnb = variant === "airbnb";
-  const previewChars = isAirbnb ? 220 : 180;
+  const previewChars = isAirbnb ? 110 : 100;
   const showMais = !expandido && texto.length > previewChars;
 
   return (
@@ -44,7 +44,7 @@ export default function LugarHistoriaCulturaBlock({
         <LugarProse
           texto={texto}
           expandido={expandido}
-          clampClass={isAirbnb ? "line-clamp-6" : "line-clamp-4"}
+          clampClass={isAirbnb ? "line-clamp-3" : "line-clamp-3"}
           className={
             isAirbnb
               ? "text-[15px] leading-relaxed text-[#4a3f32]"

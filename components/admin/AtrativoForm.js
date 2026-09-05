@@ -26,6 +26,7 @@ import {
   MAX_TAGS_ATRATIVO,
   normalizeCategoriaAtrativo,
 } from "@/lib/atrativos";
+import { ADMIN_ROTEIROS_PATH } from "@/lib/roteirosPaths";
 import {
   ATRATIVO_DO_DIA_FIXAR_OPCOES,
   aplicarFixacaoAtrativoDoDia,
@@ -217,7 +218,7 @@ function formatAtrativoSaveError(error) {
     }
   }
 
-  return message || "Não foi possível salvar o atrativo. Tente novamente.";
+  return message || "Não foi possível salvar o roteiro. Tente novamente.";
 }
 
 function normalizeAtrativo(rota) {
@@ -597,7 +598,7 @@ export default function AtrativoForm({
         rotaId = data?.id;
       }
 
-      if (!rotaId) throw new Error("Não foi possível salvar o atrativo.");
+      if (!rotaId) throw new Error("Não foi possível salvar o roteiro.");
 
       const pendingFiles = getPendingFilesFromPhotoItems(photoItems);
       const uploadedUrls = await uploadEntityPhotos(
@@ -707,13 +708,13 @@ export default function AtrativoForm({
     } catch (error) {
       console.error(error);
       setSaveError(formatAtrativoSaveError(error));
-      showToast("Não foi possível salvar o atrativo.", { tone: "error" });
+      showToast("Não foi possível salvar o roteiro.", { tone: "error" });
       setSaving(false);
       return;
     }
 
     setDirty(false);
-    router.push(`/admin/atrativos?success=${editingId ? "updated" : "created"}`);
+    router.push(`${ADMIN_ROTEIROS_PATH}?success=${editingId ? "updated" : "created"}`);
   }
 
   return (
@@ -765,7 +766,7 @@ export default function AtrativoForm({
           </select>
         </Field>
 
-        <Field label="Tipo de atrativo">
+        <Field label="Tipo de roteiro">
           <select
             value={form.categoria}
             onChange={(event) => setForm({ ...form, categoria: event.target.value })}
@@ -825,9 +826,9 @@ export default function AtrativoForm({
 
         {editingId && (
           <div className="md:col-span-2 rounded-2xl border border-amber-200 bg-amber-50/80 p-4">
-            <p className="text-sm font-bold text-[#1a2e28]">Atrativo do dia</p>
+            <p className="text-sm font-bold text-[#1a2e28]">Roteiro do dia</p>
             <p className="mt-1 text-xs text-[#5a6b66]">
-              Sem fixação, o app alterna um atrativo publicado por dia. Fixar substitui a rotação
+              Sem fixação, o app alterna um roteiro publicado por dia. Fixar substitui a rotação
               automática até a data indicada.
             </p>
             {isAtrativoFixadoHoje(initialData) ? (
@@ -901,7 +902,7 @@ export default function AtrativoForm({
           <p className="mb-2 text-xs font-semibold text-[#d9534f]">{tagLimitMessage}</p>
         )}
         <p className="mb-2 text-xs text-[#5a6b66]">
-          Máximo de {MAX_TAGS_ATRATIVO} tags por atrativo, filtradas pelo tipo selecionado.
+          Máximo de {MAX_TAGS_ATRATIVO} tags por roteiro, filtradas pelo tipo selecionado.
         </p>
         <div className="grid gap-2 rounded-2xl bg-[#f7faf9] p-3 md:grid-cols-3">
           {visibleTags.length === 0 ? (
@@ -1139,7 +1140,7 @@ export default function AtrativoForm({
 
       <CollapsibleFormSection
         title="Dicas"
-        description="Orientações práticas exibidas ao final da página do atrativo no app."
+        description="Orientações práticas exibidas ao final da página do roteiro no app."
         count={dicas.length}
         countLabel={dicas.length === 1 ? "dica" : "dicas"}
         expanded={dicasExpanded}
@@ -1228,8 +1229,8 @@ export default function AtrativoForm({
           Ponto de partida no mapa
         </p>
         <p className="mb-3 text-xs text-[#5a6b66]">
-          Usado pelo botão &quot;Abrir no Maps&quot; no app. O endereço não aparece
-          na página do atrativo — só abre a navegação.
+          Usado pelo botão &quot;Como chegar&quot; no app. O endereço não aparece
+          na página do roteiro — só abre a navegação.
         </p>
         <EnderecoAutocomplete
           initialValue={localizacao}
@@ -1246,8 +1247,8 @@ export default function AtrativoForm({
       dirty={dirty}
       saving={saving}
       requireDirty={Boolean(editingId)}
-      saveLabel={editingId ? "Salvar alterações" : "Salvar atrativo"}
-      cancelHref="/admin/atrativos"
+      saveLabel={editingId ? "Salvar alterações" : "Salvar roteiro"}
+      cancelHref={ADMIN_ROTEIROS_PATH}
     />
     </>
   );

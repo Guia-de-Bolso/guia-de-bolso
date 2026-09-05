@@ -54,7 +54,19 @@ function MetricCell({ label, value, Icon, valueClassName = "text-[#1a2e28]" }) {
  * Métricas da rota (duração, distância, dificuldade).
  * @param {object} props
  */
-export default function AtrativoMetrics({ duracao, distancia, dificuldade }) {
+export default function AtrativoMetrics({ duracao, distancia, dificuldade, compact = false }) {
+  if (compact) {
+    const parts = [duracao, distancia, dificuldade].filter(
+      (part) => part && part !== "—"
+    );
+    if (parts.length === 0) return null;
+    return (
+      <p className="mt-3 text-[15px] font-medium leading-snug text-[#5a6b66]">
+        {parts.join(" · ")}
+      </p>
+    );
+  }
+
   return (
     <div className={ATRATIVO_METRICS_SHELL_CLASS}>
       <MetricCell label="Duração" value={duracao} Icon={IconClock} />

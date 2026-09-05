@@ -14,6 +14,7 @@ import {
   removerFixacaoAtrativoDoDia,
 } from "@/lib/atrativoDoDia";
 import { createClient } from "@/lib/supabase";
+import { ADMIN_ROTEIROS_NOVA_PATH, adminRoteiroEditarPath, roteiroDetalhePath } from "@/lib/roteirosPaths";
 
 /**
  * @param {number|null|undefined} minutos
@@ -33,7 +34,7 @@ function formatDuracao(minutos) {
  * @returns {string}
  */
 function getAtrativoNome(rota) {
-  return rota.nome || rota.titulo || "Atrativo sem nome";
+  return rota.nome || rota.titulo || "Roteiro sem nome";
 }
 
 /**
@@ -156,7 +157,7 @@ function AtrativoCard({ rota, onFixarAtrativoDoDia, onRemoverFixacao, onDeactiva
           </span>
           {isAtrativoFixadoHoje(rota) && (
             <span className="rounded-full bg-amber-400 px-2.5 py-1 text-xs font-bold text-amber-950 shadow-sm">
-              📌 Atrativo do dia
+              📌 Roteiro do dia
             </span>
           )}
         </div>
@@ -223,7 +224,7 @@ function AtrativoCard({ rota, onFixarAtrativoDoDia, onRemoverFixacao, onDeactiva
             )}
             {ativa && (
               <Link
-                href={`/atrativos/${rota.id}`}
+                href={roteiroDetalhePath(rota.id)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-xl bg-[#f0f4f3] px-3 py-1.5 text-xs font-semibold text-[#1a4a3a] hover:bg-[#e3e9e6]"
@@ -232,7 +233,7 @@ function AtrativoCard({ rota, onFixarAtrativoDoDia, onRemoverFixacao, onDeactiva
               </Link>
             )}
             <Link
-              href={`/admin/atrativos/${rota.id}/editar`}
+              href={adminRoteiroEditarPath(rota.id)}
               className="rounded-xl bg-[#1a4a3a] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#153d31]"
             >
               Editar
@@ -295,7 +296,7 @@ export default function AtrativosGridPage() {
     const { ate, error } = await aplicarFixacaoAtrativoDoDia(supabase, rota.id, dias);
 
     if (error) {
-      showToast(error.message || "Não foi possível fixar o atrativo do dia.", {
+      showToast(error.message || "Não foi possível fixar o roteiro do dia.", {
         tone: "error",
       });
       return;
@@ -307,7 +308,7 @@ export default function AtrativosGridPage() {
         rota_do_dia_fixada_ate: item.id === rota.id ? ate : null,
       }))
     );
-    showToast(`Atrativo do dia fixado até ${ate}.`);
+    showToast(`Roteiro do dia fixado até ${ate}.`);
   }
 
   async function removerFixacao(rota) {
@@ -326,14 +327,14 @@ export default function AtrativosGridPage() {
         item.id === rota.id ? { ...item, rota_do_dia_fixada_ate: null } : item
       )
     );
-    showToast("Fixação do atrativo do dia removida.");
+    showToast("Fixação do roteiro do dia removida.");
   }
 
   /**
    * @param {object} rota
    */
   async function softDelete(rota) {
-    const confirmed = window.confirm(`Desativar o atrativo "${getAtrativoNome(rota)}"?`);
+    const confirmed = window.confirm(`Desativar o roteiro "${getAtrativoNome(rota)}"?`);
     if (!confirmed) return;
 
     const supabase = createClient();
@@ -341,7 +342,7 @@ export default function AtrativosGridPage() {
       items.map((item) => (item.id === rota.id ? { ...item, ativa: false } : item))
     );
     await supabase.from("rotas").update({ ativa: false }).eq("id", rota.id);
-    showToast("Atrativo desativado.");
+    showToast("Roteiro desativado.");
   }
 
   const stats = useMemo(() => {
@@ -382,11 +383,11 @@ export default function AtrativosGridPage() {
 
   const novoAtrativoLink = (
     <Link
-      href="/admin/atrativos/nova"
+      href={ADMIN_ROTEIROS_NOVA_PATH}
       className="inline-flex items-center gap-2 rounded-xl bg-[#1a4a3a] px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-[#1a4a3a]/25 transition hover:bg-[#153d31]"
     >
       <span className="text-lg leading-none">+</span>
-      Novo atrativo
+      Novo roteiro
     </Link>
   );
 
@@ -400,7 +401,7 @@ export default function AtrativosGridPage() {
 
   return (
     <AdminShell
-      title="Atrativos"
+      title="Roteiros"
       subtitle="Trilhas, roteiros e percursos curados para o app"
       headerAction={novoAtrativoLink}
     >
@@ -436,7 +437,7 @@ export default function AtrativosGridPage() {
 
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#9aa8a3]">
-            Tipo de atrativo
+            Tipo de roteiro
           </p>
           <div className="flex gap-2 overflow-x-auto pb-1">
             <FilterChip active={categoria === "Todas"} onClick={() => setCategoria("Todas")}>
@@ -484,23 +485,23 @@ export default function AtrativosGridPage() {
 
       <p className="mb-4 text-sm text-[#5a6b66]">
         Exibindo <strong className="text-[#1a4a3a]">{filtered.length}</strong> de{" "}
-        {atrativos.length} atrativos
+        {atrativos.length} roteiros
       </p>
 
       {filtered.length === 0 ? (
         <AdminEmptyState
           title={
             atrativos.length === 0
-              ? "Nenhum atrativo cadastrado"
-              : "Nenhum atrativo encontrado"
+              ? "Nenhum roteiro cadastrado"
+              : "Nenhum roteiro encontrado"
           }
           description={
             atrativos.length === 0
-              ? "Crie o primeiro atrativo curado do guia."
+              ? "Crie o primeiro roteiro curado do guia."
               : "Ajuste os filtros ou a busca para ver outros resultados."
           }
-          actionLabel={atrativos.length === 0 ? "Criar atrativo" : "Limpar filtros"}
-          actionHref={atrativos.length === 0 ? "/admin/atrativos/nova" : undefined}
+          actionLabel={atrativos.length === 0 ? "Criar roteiro" : "Limpar filtros"}
+          actionHref={atrativos.length === 0 ? ADMIN_ROTEIROS_NOVA_PATH : undefined}
           onAction={
             atrativos.length === 0
               ? undefined

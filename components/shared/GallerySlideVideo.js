@@ -92,9 +92,9 @@ export default function GallerySlideVideo({
           type="button"
           onClick={() => setMuted((current) => !current)}
           className="absolute left-4 top-[max(4.75rem,calc(env(safe-area-inset-top)+3.25rem))] z-10 flex h-9 items-center rounded-full bg-black/55 px-3 text-xs font-semibold text-white backdrop-blur-sm"
-          aria-label={muted ? "Ativar som do vídeo" : "Silenciar vídeo"}
+          aria-label={muted ? "Ativar áudio" : "Silenciar vídeo"}
         >
-          {muted ? "Som" : "Mudo"}
+          {muted ? "🔊 Ativar áudio" : "🔇 Sem áudio"}
         </button>
       ) : null}
     </div>

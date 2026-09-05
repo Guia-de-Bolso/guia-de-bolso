@@ -798,7 +798,7 @@ Quick summary for existing projects that already have base tables:
 |----------|----------------|
 | List (online) | `syncAllFavoritosOffline` — `favoritos` join + `fetchRotasFavoritas`; writes IndexedDB |
 | List (offline) | `listOfflineFavoritos(userId)` — IndexedDB only |
-| Detail offline | `/favoritos/lugar/[id]`, `/favoritos/atrativo/[id]` — read cache; refresh if online |
+| Detail offline | `/favoritos/lugar/[id]`, `/favoritos/roteiro/[id]` — read cache; refresh if online |
 | Add favorite | insert + `cacheLugarFavoritoFromServer` / `cacheAtrativoFavoritoFromServer` |
 | Remove | `favoritos` or `rotas_favoritas` `.delete()` + `purgeOfflineFavorito` |
 

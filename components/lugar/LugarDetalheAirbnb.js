@@ -28,6 +28,7 @@ import { lugarExibeClima } from "@/lib/clima";
 import { lugarExibeVideo } from "@/lib/lugarVideo";
 import { formatHorario, getDiasHorario } from "@/lib/horarios";
 import { isPerfilBasico } from "@/lib/lugarVisibilidade";
+import { DETALHE_PAGE_PAD_WITH_CTA } from "@/lib/appChrome";
 
 /**
  * Detalhe do lugar — layout inspirado no Airbnb, paleta Guia de Bolso.
@@ -103,7 +104,7 @@ export default function LugarDetalheAirbnb(props) {
     .join(" · ");
 
   return (
-    <div className="min-h-screen bg-[#f0f4f3] pb-28 text-[#1a2e28]">
+    <div className={`min-h-screen bg-[#f0f4f3] ${DETALHE_PAGE_PAD_WITH_CTA} text-[#1a2e28]`}>
       {toast && (
         <div className="fixed left-4 right-4 top-4 z-[60] mx-auto max-w-md rounded-xl bg-[#1a4a3a] px-4 py-3 text-center text-sm font-semibold text-white shadow-lg">
           {toast}
@@ -325,12 +326,12 @@ export default function LugarDetalheAirbnb(props) {
                   <LugarProse
                     texto={descricaoLonga}
                     expandido={sobreExpandido}
-                    clampClass="line-clamp-6"
-                    className="text-[15px] leading-relaxed text-[#5a6b66]"
-                  />
+                  clampClass="line-clamp-3"
+                  className="text-[15px] leading-relaxed text-[#5a6b66]"
+                />
                   {!sobreExpandido &&
                     visibilidade.showDescricaoLonga &&
-                    descricaoLonga.length > 220 && (
+                    descricaoLonga.length > 120 && (
                     <button
                       type="button"
                       onClick={() => setSobreExpandido(true)}

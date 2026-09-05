@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import LandingSection, { LandingSectionHeader } from "@/components/landing/LandingSection";
 import { useLandingRevealMotion } from "@/components/landing/useLandingRichMotion";
 import { LANDING_SECTION_IDS, LANDING_TESTIMONIALS } from "@/lib/landingContent";
+import { formatAvaliacoesAprovadas } from "@/lib/landingPartnerCopy";
 
 /**
  * Depoimentos — editorial, carrossel centralizado.
@@ -13,6 +14,7 @@ import { LANDING_SECTION_IDS, LANDING_TESTIMONIALS } from "@/lib/landingContent"
  */
 export default function LandingTestimonials({ stats }) {
   const { reveal, stagger, viewport } = useLandingRevealMotion();
+  const avaliacoesLabel = formatAvaliacoesAprovadas(stats?.avaliacoesCount);
 
   return (
     <LandingSection id={LANDING_SECTION_IDS.depoimentos} tone="white" bridge={false}>
@@ -29,9 +31,11 @@ export default function LandingTestimonials({ stats }) {
         viewport={viewport}
         variants={reveal}
       >
-        <span className="rounded-full bg-[#e8f2ee] px-3 py-1 font-semibold text-[#1a4a3a]">
-          {stats?.avaliacoesCount || 0}+ avaliações aprovadas
-        </span>
+        {avaliacoesLabel ? (
+          <span className="rounded-full bg-[#e8f2ee] px-3 py-1 font-semibold text-[#1a4a3a]">
+            {avaliacoesLabel}
+          </span>
+        ) : null}
         <span className="rounded-full bg-[#f3f6f5] px-3 py-1 font-medium">Depoimentos verificados</span>
         <span className="rounded-full bg-[#f3f6f5] px-3 py-1 font-medium">Base local em crescimento</span>
       </motion.div>

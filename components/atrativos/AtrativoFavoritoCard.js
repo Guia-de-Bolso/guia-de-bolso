@@ -4,6 +4,7 @@ import FavoritoDetailLink from "@/components/favoritos/FavoritoDetailLink";
 import RemotePhoto from "@/components/shared/RemotePhoto";
 import { getCapaThumbFromAtrativo } from "@/lib/fotos";
 import { getCategoriaAtrativoMeta } from "@/lib/atrativos";
+import { favoritoRoteiroPath } from "@/lib/roteirosPaths";
 
 function FavoriteIcon({ active, className = "h-5 w-5" }) {
   return (
@@ -21,7 +22,7 @@ function FavoriteIcon({ active, className = "h-5 w-5" }) {
 }
 
 function getAtrativoNome(rota) {
-  return rota.nome || rota.titulo || "Atrativo sem nome";
+  return rota.nome || rota.titulo || "Roteiro sem nome";
 }
 
 /**
@@ -39,7 +40,7 @@ export default function AtrativoFavoritoCard({ rota, onRemover }) {
   return (
     <article className="relative box-border w-full min-w-0 max-w-full overflow-hidden rounded-2xl bg-white shadow-[0_2px_14px_-4px_rgba(26,46,40,0.08)] ring-1 ring-[#e8eeee]">
       <FavoritoDetailLink
-        href={`/favoritos/atrativo/${rota.id}`}
+        href={favoritoRoteiroPath(rota.id)}
         preferDocumentNav
         className="box-border flex w-full min-w-0 gap-3 overflow-hidden p-3 pr-14"
       >

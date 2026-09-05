@@ -605,7 +605,7 @@ const items = [
     expected: "11-15 + 18-04 salva; status aberto/fechado correto no detalhe e busca abertos.",
     tags: ["admin", "horarios"],
   }),
-  mk("l-12b", "L", "Atrativos admin CRUD completo", { route: "/admin/atrativos", roles: ["admin"], expected: "Tipo tags pontos mapa destaque.", tags: ["admin"] }),
+  mk("l-12b", "L", "Atrativos admin CRUD completo", { route: "/admin/roteiros", roles: ["admin"], expected: "Tipo tags pontos mapa destaque.", tags: ["admin"] }),
   mk("l-13", "L", "Avaliações pendentes e badge IA", { route: "/admin/avaliacoes", roles: ["admin"], expected: "Fila pendentes com sugestão IA.", tags: ["admin"] }),
   mk("l-14", "L", "Aprovar público / rejeitar oculto", { route: "/admin/avaliacoes", roles: ["admin"], expected: "Aprovada no app; rejeitada oculta.", tags: ["admin"] }),
   mk("l-15", "L", "Parceiro: toggle eh_parceiro em locais", { route: "/admin/locais", roles: ["admin"], expected: "Badge e carrossel após salvar parceiro ativo.", tags: ["admin"] }),

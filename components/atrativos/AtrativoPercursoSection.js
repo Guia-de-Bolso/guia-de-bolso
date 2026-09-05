@@ -6,13 +6,14 @@ import { ATRATIVO_SECTION_TITLE_CLASS } from "@/components/atrativos/atrativoDet
 import { useAtrativoPercursoProgresso } from "@/hooks/useAtrativoPercursoProgresso";
 
 /**
- * Entrada do percurso interativo — CTA + progresso; mapa, pontos e dicas só no modo guia.
+ * Entrada do percurso interativo — CTA no hero + progresso abaixo das infos.
  * @param {object} props
  * @param {string|number} props.rotaId
  * @param {string} props.nome
  * @param {Array<object>} props.pontos
  * @param {Array<{ id?: string, texto?: string, ordem?: number }>} [props.dicas]
  * @param {(open: boolean) => void} [props.onGuiaOpenChange]
+ * @param {(slots: { cta: import("react").ReactNode, progress: import("react").ReactNode }) => import("react").ReactNode} [props.children]
  */
 export default function AtrativoPercursoSection({
   rotaId,
@@ -20,6 +21,7 @@ export default function AtrativoPercursoSection({
   pontos = [],
   dicas = [],
   onGuiaOpenChange,
+  children,
 }) {
   const [guiaOpen, setGuiaOpen] = useState(false);
   const [guiaIndex, setGuiaIndex] = useState(0);
@@ -41,8 +43,6 @@ export default function AtrativoPercursoSection({
     return () => onGuiaOpenChange?.(false);
   }, [guiaOpen, onGuiaOpenChange]);
 
-  if (!pontos.length) return null;
-
   function openGuia(index) {
     setGuiaIndex(typeof index === "number" ? index : proximoIndex);
     setGuiaSession((current) => current + 1);
@@ -55,7 +55,22 @@ export default function AtrativoPercursoSection({
       ? "Continuar percurso"
       : "Começar percurso";
 
-  return (
+  const hasPontos = pontos.length > 0;
+
+  const cta = hasPontos ? (
+    <button
+      type="button"
+      onClick={() => openGuia(proximoIndex)}
+      className="mt-6 flex w-full flex-col items-center justify-center gap-0.5 rounded-2xl bg-[#1a4a3a] px-5 py-4 text-white shadow-[0_8px_28px_rgba(26,74,58,0.28)] transition-transform active:scale-[0.98]"
+    >
+      <span className="text-[15px] font-bold tracking-wide">{ctaLabel}</span>
+      <span className="text-[11px] font-medium text-white/70">
+        Mapa, pontos e dicas no modo interativo
+      </span>
+    </button>
+  ) : null;
+
+  const progress = hasPontos ? (
     <section className="mt-10">
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
@@ -83,29 +98,39 @@ export default function AtrativoPercursoSection({
           style={{ width: `${percentual}%` }}
         />
       </div>
-
-      <button
-        type="button"
-        onClick={() => openGuia(proximoIndex)}
-        className="mt-4 flex w-full flex-col items-center justify-center gap-0.5 rounded-2xl bg-[#1a4a3a] px-5 py-4 text-white shadow-[0_8px_28px_rgba(26,74,58,0.28)] transition-transform active:scale-[0.98]"
-      >
-        <span className="text-[15px] font-bold tracking-wide">{ctaLabel}</span>
-        <span className="text-[11px] font-medium text-white/70">
-          Mapa, pontos e dicas no modo interativo
-        </span>
-      </button>
-
-      <AtrativoModoGuia
-        key={guiaSession}
-        isOpen={guiaOpen}
-        onClose={() => setGuiaOpen(false)}
-        pontos={pontos}
-        dicas={dicas}
-        initialIndex={guiaIndex}
-        isPontoDone={isPontoDone}
-        setPontoDone={setPontoDone}
-        nomeAtrativo={nome}
-      />
     </section>
+  ) : null;
+
+  const guia = (
+    <AtrativoModoGuia
+      key={guiaSession}
+      isOpen={guiaOpen}
+      onClose={() => setGuiaOpen(false)}
+      pontos={pontos}
+      dicas={dicas}
+      initialIndex={guiaIndex}
+      isPontoDone={isPontoDone}
+      setPontoDone={setPontoDone}
+      nomeAtrativo={nome}
+    />
+  );
+
+  if (typeof children === "function") {
+    return (
+      <>
+        {children({ cta, progress })}
+        {guia}
+      </>
+    );
+  }
+
+  if (!hasPontos) return null;
+
+  return (
+    <>
+      {progress}
+      {cta}
+      {guia}
+    </>
   );
 }

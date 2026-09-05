@@ -122,11 +122,11 @@ export function useAdminFlashToast(options = {}) {
     let message = null;
     if (saved === "1" || success === "created") message = "Salvo com sucesso.";
     if (success === "updated") message = "Alterações salvas.";
-    if (success === "created" && url.pathname.includes("atrativos")) {
-      message = "Atrativo criado com sucesso.";
+    if (success === "created" && url.pathname.includes("roteiros")) {
+      message = "Roteiro criado com sucesso.";
     }
-    if (success === "updated" && url.pathname.includes("atrativos")) {
-      message = "Atrativo atualizado com sucesso.";
+    if (success === "updated" && url.pathname.includes("roteiros")) {
+      message = "Roteiro atualizado com sucesso.";
     }
     if (success === "created" && url.pathname.includes("locais")) {
       message = "Local criado com sucesso.";

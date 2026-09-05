@@ -139,7 +139,7 @@ Get a single strong recommendation without searching.
 **Main flows**
 1. Phase 1 loads active routes via `GET /api/rotas` → `pickHeroRotaCiclo` picks **one** route per day (round-robin: no repeat until all eligible routes shown, then restarts). Pool: `ativa !== false` + valid cover (`getCapaFromRota`). TZ: America/Sao_Paulo via `dailySeed`.
 2. Secondary home load fetches Open-Meteo for Imbituba → `temperaturaClima` passed into the hero.
-3. Metrics: duration, distance, difficulty (+ temperature). CTA → `/atrativos/[id]`.
+3. Metrics: duration, distance, difficulty (+ temperature). CTA → `/roteiros/[id]`.
 
 **Selection criteria**  
 Stable order by route `id`; index = `daysSinceEpoch(dailySeed) % pool.length`. Not places/curadoria.
@@ -321,7 +321,7 @@ Build a personal shortlist for the trip — including trails and beaches usable 
 **Main flows**
 1. Logged in → heart on cards/detail → `favoritos` or `rotas_favoritas` insert/delete + log + **cache offline** (`lib/favoritosOfflineFetch.js`).
 2. `/favoritos` — online: `syncAllFavoritosOffline` refreshes cache; offline: `listOfflineFavoritos` from IndexedDB; banner “Disponível offline” / “Modo offline”.
-3. Tap place → `/favoritos/lugar/[id]` (client-only, `offlinePreferred` in `useLugarDetalhe`); tap atrativo → `/favoritos/atrativo/[id]`.
+3. Tap place → `/favoritos/lugar/[id]` (client-only, `offlinePreferred` in `useLugarDetalhe`); tap roteiro → `/favoritos/roteiro/[id]`.
 4. Remove from list → Supabase delete + `purgeOfflineFavorito` + optimistic UI revert on error.
 5. Toast on add: *“Salvo! Disponível offline quando não houver sinal.”*
 
@@ -473,13 +473,13 @@ Personalize account appearance.
 ## 21. Curated atrativos (admin-published trails)
 
 **Description**  
-Editorial atrativos at **`/atrativos`** and **`/atrativos/[id]`** (`/rotas` redirects 301): cover, **tipo de experiência** (fixed categories in `lib/atrativos.js`), **tags**, difficulty, duration, distance, ordered **pontos** with optional link to a **lugar**. “Atrativo do dia” featured card; list supports filter chips by experience type (`AtrativosCatalogo`).
+Editorial roteiros at **`/roteiros`** and **`/roteiros/[id]`** (`/atrativos` and `/rotas` redirect 301): cover, **tipo de experiência** (fixed categories in `lib/atrativos.js`), **tags**, difficulty, duration, distance, ordered **pontos** with optional link to a **lugar**. “Roteiro do dia” featured card; list supports filter chips by experience type (`AtrativosCatalogo`).
 
 **User goal**  
 Follow a predefined trail or city walk with guidance.
 
 **Main flows**
-1. `/atrativos` lists atrativos with app palette (`#f0f4f3` / `#1a4a3a`); compact rows use **`RemotePhoto`**; featured “Atrativo do dia” cover uses **`next/image`** (`quality={60}`); horizontal chips filter by category when multiple types exist.
+1. `/roteiros` lists roteiros with app palette (`#f0f4f3` / `#1a4a3a`); compact rows use **`RemotePhoto`**; featured “Roteiro do dia” cover uses **`next/image`** (`quality={60}`); horizontal chips filter by category when multiple types exist.
 2. Tap route → detail with category icon, tag chips, step list with **ordered description lines per point**, **ordered tips** at the bottom, and metrics.
 3. Admin `RotaForm`: route type, tags, multiple descriptions per step (no place link), map start point, dicas.
 4. No login required to **view** list/detail (public read).
@@ -501,9 +501,9 @@ Multi-step form (days, traveler profile, interests) → Claude generates markdow
 Get a custom day-by-day plan for the region.
 
 **Main flows**
-1. `/atrativos` → “Roteiro personalizado com IA” → login check → quota check → `RoteiroBottomSheet`.
+1. `/roteiros` → “Roteiro personalizado com IA” → login check → quota check → `RoteiroBottomSheet`.
 2. Submit → `onValidateBeforeGenerate` re-checks login/quota (`validarRoteiroPermitido` in `RoteiroSection.js`) → `POST /api/roteiro` → `lib/roteiroParse.js` builds day/period/stop timeline → `RoteiroItineraryView` (accordion); footer **Salvar** fixed on scroll.
-3. “Salvar” → `POST /api/roteiro/salvar` → list on `/atrativos`.
+3. “Salvar” → `POST /api/roteiro/salvar` → list on `/roteiros`.
 4. Saved list → tap → `RoteiroViewModal` with the same timeline UI (`components/atrativos/RoteiroSection.js`).
 5. Delete saved item → `DELETE /api/roteiro/[id]` (server verifies row removed; requires `supabase/roteiros_policies.sql` on Supabase).
 
@@ -511,7 +511,7 @@ Get a custom day-by-day plan for the region.
 - Parser drops empty period blocks; stops link to catalog names when `lugaresCatalog` from API matches.
 - Guest → login modal.
 - No saved roteiros yet → empty state in `RoteiroSection` (“Nenhum roteiro salvo ainda”).
-- Daily limit 2/day → paywall (`roteiro`) with countdown; compact `DailyLimitCountdown` on `/atrativos` card when blocked (`Novos roteiros em HH:MM:SS`, light text on dark gradient).
+- Daily limit 2/day → paywall (`roteiro`) with countdown; compact `DailyLimitCountdown` on `/roteiros` card when blocked (`Novos roteiros em HH:MM:SS`, light text on dark gradient).
 - Usage counter: same hydrate → sync pattern as search (`usePremiumUsage`); label `X/2 roteiros gratuitos hoje`.
 - Incomplete form blocked client-side.
 - Save without login impossible (API 401).
@@ -530,14 +530,14 @@ Understand the daily free quota, when it renews, or upgrade for unlimited use.
 
 **Main flows**
 1. Hit daily limit → paywall with feature copy (busca/roteiro) + countdown + plan benefits.
-2. While blocked on home (search open) or `/atrativos` → countdown visible before/at paywall.
+2. While blocked on home (search open) or `/roteiros` → countdown visible before/at paywall.
 3. “Assinar” / CTA → may open login if needed (`premium` motivo) — **payment not integrated** (Asaas planned).
 
 **Edge cases**
 - `premium_ativo` + `premium_ate` enforced server-side and in RPC.
 - Paywall is informational today — no in-app purchase flow.
 - Premium users see unlimited counters in UI (`null` remaining).
-- Countdown (`DailyLimitCountdown`): ticks every second via `getMsUntilDailyReset()`; may seed from `usage.msUntilReset` after API/RPC. Compact mode on `/atrativos` inherits parent text color (timer visible on dark card).
+- Countdown (`DailyLimitCountdown`): ticks every second via `getMsUntilDailyReset()`; may seed from `usage.msUntilReset` after API/RPC. Compact mode on `/roteiros` inherits parent text color (timer visible on dark card).
 - Legacy `uso_ia_mes` (`YYYY-MM`) or a previous day’s key: UI shows **0/N** for the new day; server realigns counters on read/increment so limits are not blocked by stale rows. After quota is used, UI and API both show `used === limit`.
 
 ---
@@ -700,7 +700,7 @@ Not for tourists. Requires `perfis.role` ∈ `admin`, `dev` (`canAccessAdmin`). 
 |------|--------|-------------|----------------------|
 | Dashboard (`/admin`) | admin, dev | Hero + KPIs (pending reviews, active places, live partners, new users, IR AGORA in period); moderation queue; operational sidebar (partners expiring, curadoria overdue); activity timeline; week/month period | Monitor health and clear the moderation queue |
 | Locais (`/admin/locais`) | admin, dev | CRUD, photos, video, hours (`HorarioEditor`), tags (max **5**), address autocomplete, `eh_parceiro` / `conteudo_curadoria`, launch-plan presets (`PerfilPromoFields`: Presença vs Lançamento), partner program fields (`ParceiroProgramaFields`), QR section | Keep catalog accurate |
-| Atrativos (`/admin/atrativos`) | admin, dev | Curated route CRUD; tags max **5**; `/admin/rotas` → 301 | Publish trails |
+| Roteiros (`/admin/roteiros`) | admin, dev | Curated route CRUD; tags max **5**; `/admin/atrativos` and `/admin/rotas` → 301 | Publish trails |
 | Avaliações (`/admin/avaliacoes`) | admin, dev | Approve/reject/delete pending; deep links from alerts (`?tab=`) | Moderate UGC |
 | Relatórios (`/admin/relatorios`) | admin, dev | Per-establishment KPIs (views, **QR scans**, IR AGORA, favorites, reviews), WhatsApp copy, PDF | Share performance with partners |
 | Parceiros (`/admin/parceiros`) | **dev** | CRM for `eh_parceiro` places: 6-month free vs paid modality, end dates, quarterly review due dates, filters (`?filtro=vencendo`, `curadoria`, …); quick actions (`ParceirosAdminPage`, `lib/parceiroAdmin.js`) | Track launch program deadlines |
@@ -852,8 +852,8 @@ Track proposal numbers, signature dates, free-period end, Asaas IDs, and store s
 | QR short link | `/q/[slug]` → `/lugares/[id]?ref=qr` |
 | App download (marketing QR) | `/baixar` → App Store / Play (env) |
 | Favorites | `/favoritos` |
-| Curated atrativos | `/atrativos`, `/atrativos/[id]` (`/rotas` → 301) |
-| AI roteiro | `/atrativos` (sheet) |
+| Curated roteiros | `/roteiros`, `/roteiros/[id]` (`/atrativos` and `/rotas` → 301) |
+| AI roteiro | `/roteiros` (sheet) |
 | Profile | `/perfil`, `/perfil/editar` |
 | Login | `/login`, modal, `/auth/callback` |
 | Admin | `/admin`, `/admin/locais`, `/admin/parceiros` (dev), `/admin/contratos` (dev), `/admin/relatorios`, … |

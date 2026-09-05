@@ -10,7 +10,7 @@ import { truncateMetaDescription } from "@/lib/seo";
  */
 export default function AtrativoSeoStatic({ nome, descricao, categoria }) {
   const texto = truncateMetaDescription(
-    descricao || `Atrativo curado em Imbituba: ${nome}`
+    descricao || `Roteiro curado em Imbituba: ${nome}`
   );
 
   return (

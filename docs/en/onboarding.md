@@ -74,7 +74,7 @@ Security: [security-rls.md](../security-rls.md), [SECURITY_CHECKLIST.md](../../S
 | Public catalog | `/`, `/categorias` | Active places, no login |
 | AI search | Home search (signed in) | `POST /api/buscar`, **10/day** |
 | Place detail | `/lugares/[id]` | Hours, maps, favorite |
-| AI itinerary | `/atrativos` (`/rotas` 301) | `POST /api/roteiro`, **2/day** |
+| AI itinerary | `/roteiros` (`/atrativos` and `/rotas` 301) | `POST /api/roteiro`, **2/day** |
 | Google auth | `/login` | `/auth/callback` |
 | SMS auth | `/login` | Twilio OTP via Supabase |
 | Admin CMS | `/admin/locais` | CRUD + Storage |
