@@ -2,8 +2,9 @@
  * Renderiza artes Instagram a partir dos templates HTML fixos (Playwright).
  * Uso: node marketing/scripts/render.mjs
  *
- * Edite o bloco POST do dia abaixo (data, pilar, slides, stories).
- * Regra: não reutilizar fotos do post do dia anterior.
+ * Formato: carrossel + 1 story (teaser). Sem Reels, sem enquete.
+ * O 2º story é automático ao publicar o carrossel no Instagram.
+ * Horário: noite, após 19h. Regra: não reutilizar fotos do post anterior.
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -44,91 +45,69 @@ async function renderOne(browser, job) {
 }
 
 async function main() {
-  // === POST DO DIA — 2026-08-07 (sexta) — REVISÃO ===
-  // Pilar 2 — Dica/utilidade
-  // Fotos NOVAS do banco (não usar onboarding: praia/lagoa/montanha/cachoeira.jpg)
-  const date = "2026-08-07";
+  // === POST DO DIA — 2026-09-02 (quarta) ===
+  // Pilar 1 — Atrativo em destaque (ontem 31/08 foi pilar 2)
+  const date = "2026-09-02";
   const outDir = path.join(MARKETING, "posts", date);
   fs.mkdirSync(outDir, { recursive: true });
 
   const logoLight = assetUrl("logo-light.png");
   const logoDark = assetUrl("logo-dark.png");
 
-  const porto = assetUrl("fotos", "natureza", "praia-porto.jpg");
-  const vila = assetUrl("fotos", "natureza", "praia-vila.jpg");
-  const ribanceira = assetUrl("fotos", "natureza", "praia-ribanceira.jpg");
-  const lagoaTimbe = assetUrl("fotos", "natureza", "lagoa-quintino.jpg");
-  const mirantePorto = assetUrl("fotos", "atrativos", "mirante-da-praia-do-porto.jpg");
+  const bento1 = assetUrl("fotos", "atrativos", "mirante-bento-1.jpg");
+  const bento2 = assetUrl("fotos", "atrativos", "mirante-bento-2.jpg");
+  const vista = assetUrl("fotos", "atrativos", "mirante-vista.jpg");
+  const ibiraquera = assetUrl("fotos", "natureza", "praia-ibiraquera.jpg");
 
-  // brand=dark → fundo claro (logo escura); brand=light → fundo escuro (logo clara)
-  // Topos com céu claro → brand dark
   const slides = [
     {
       file: "carrossel-01-gancho.png",
-      bg: porto,
-      brand: "light",
-      eyebrow: "Fim de semana",
-      title: "Vento mudou? A praia também muda.",
-      body: "Em Imbituba, o plano certo depende do vento.",
+      bg: bento1,
+      brand: "dark",
+      eyebrow: "Imbituba",
+      title: "A costa inteira num olhar.",
+      body: "Do Mirante Bento você enxerga Imbituba de cima.",
       page: "1",
     },
     {
-      file: "carrossel-02-praia.png",
-      bg: vila,
+      file: "carrossel-02-o-que-e.png",
+      bg: bento2,
       brand: "dark",
-      eyebrow: "1 · Praia",
-      title: "Mar agitado? Troca de canto.",
-      body: "Porto, Vila, Ribanceira… cada uma se comporta diferente com o vento.",
+      eyebrow: "Mirante Bento",
+      title: "Panorama sem esforço",
+      body: "Trilha curta, vista aberta — praia, morro e horizonte.",
       page: "2",
     },
     {
-      file: "carrossel-03-lagoa.png",
-      bg: lagoaTimbe,
+      file: "carrossel-03-horario.png",
+      bg: vista,
       brand: "dark",
-      eyebrow: "2 · Lagoa",
-      title: "Vento forte = dia de lagoa",
-      body: "Quintino, Timbé e Ibiraquera — kite e fim de tarde sem pressa.",
+      eyebrow: "Melhor horário",
+      title: "Manhã clara ou fim de tarde",
+      body: "Luz boa pra foto e vento na cara sem pressa.",
       page: "3",
     },
     {
-      file: "carrossel-04-trilha.png",
-      bg: mirantePorto,
-      brand: "dark",
-      eyebrow: "3 · Vista",
-      title: "Quer panorama? Sobe o mirante.",
-      body: "Do alto você enxerga a costa inteira — e qual lado da praia está mais calmo.",
-      page: "4",
-    },
-    {
-      file: "carrossel-05-cta.png",
-      bg: ribanceira,
+      file: "carrossel-04-cta.png",
+      bg: ibiraquera,
       brand: "dark",
       eyebrow: "Guia de Bolso",
-      title: "O fim de semana sem improvisar",
-      body: "Abre o app, diz o que quer — e sai com o plano pronto.",
-      page: "5",
+      title: "Como chegar sem chute",
+      body: "Acesso, mapa e dicas no app — favorita e vai.",
+      page: "4",
       cta: "1",
     },
   ];
 
   const stories = [
     {
-      file: "story-1-enquete.png",
-      bg: porto,
-      brand: "light",
-      eyebrow: "Enquete",
-      title: "Sexta: praia, lagoa ou trilha?",
-      body: "Responde no sticker — a gente te ajuda a escolher.",
-      hint: "Sticker: Praia / Lagoa / Trilha",
-    },
-    {
-      file: "story-2-divulga.png",
-      bg: mirantePorto,
+      file: "story-1-teaser.png",
+      bg: bento1,
       brand: "dark",
-      eyebrow: "Novo no feed",
-      title: "Vento mudou? Muda o plano.",
-      body: "Salva o carrossel de hoje antes do fim de semana.",
-      hint: "Arrasta pra cima · ver o post",
+      eyebrow: "Guia de Bolso",
+      title: "Mirante Bento no feed",
+      body: "A vista que mostra a costa inteira — carrossel daqui a pouco.",
+      hint: "Fica de olho no feed",
     },
   ];
 

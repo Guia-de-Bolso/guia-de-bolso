@@ -39,6 +39,10 @@ STORIES:
 - Sempre com sticker de enquete, caixinha de pergunta ou quiz (aumenta retenção/alcance)
 - CTA de arrastar pra cima ou responder no direct
 
+FORMATO A PARTIR DE 2026-08-12:
+- Apenas posts (carrossel e/ou feed + stories). Sem Reels / vídeo.
+- Legenda: entregar no chat, pronta pra copiar (não só no LEGENDAS.md)
+
 FOTOS PERMITIDAS:
 - Apenas /marketing/assets/fotos/natureza/ e /marketing/assets/fotos/atrativos/
 

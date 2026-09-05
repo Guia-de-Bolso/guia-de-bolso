@@ -28,7 +28,7 @@ O projeto separa bem segredos de servidor (`ANTHROPIC_API_KEY`, `SUPABASE_SERVIC
 | `/api/atrativos` | GET | Pública | — | Não | Lista atrativos curados |
 | `/api/atrativos/catalogo` | GET | Pública | — | Não | Catálogo leve para clientes |
 | `/api/waitlist` | POST | Pública | — | Sim (`waitlistRateLimit`) | Insert waitlist + e-mail Resend |
-| `/api/planos-rapidos` | POST | Obrigatória | — | Não | Atalhos de plano comercial (admin flow) |
+| `/api/planos-rapidos` | POST | Obrigatória (`getAuthUser`) | — | Não | Planos rápidos da home; catálogo via `queryAllLugaresAtivos` |
 | `/api/perfil/avatar` | POST | Obrigatória | — | Não | Upload via service role; MIME/tamanho validados |
 | `/api/conta` | DELETE | Obrigatória | — | Não | Exclusão de conta (App Store / Play) |
 | `/api/auth/logout` | POST | Opcional | — | Não | Encerra sessão Supabase |

@@ -41,6 +41,3 @@ export function useStickyShellRef() {
     };
   }, []);
 }
-
-/** @deprecated Use useStickyShellRef */
-export const useHomeHeaderShellRef = useStickyShellRef;

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { FILTRO_STATUS_BUSCA } from "@/lib/busca";
 import { filterLugaresForPlano, getPlanoRapidoById } from "@/lib/planosRapidos";
 import { enrichLugarFlags } from "@/lib/lugarBadges";
-import { applyPublicLugarFilters } from "@/lib/publicCatalog";
+import { LUGAR_SELECT_LIST, queryAllLugaresAtivos } from "@/lib/lugaresQuery";
 import { getAuthUser } from "@/lib/premiumServer";
 import { reportError } from "@/lib/observability";
 import { supabase } from "@/lib/supabase/anon";
@@ -42,9 +42,9 @@ export async function POST(request) {
         ? { latitude, longitude }
         : null;
 
-    const { data: lugares, error } = await applyPublicLugarFilters(
-      supabase.from("lugares").select("*, localizacoes(*), lugares_tags(tags(*))")
-    );
+    const { data: lugares, error } = await queryAllLugaresAtivos(supabase, {
+      select: LUGAR_SELECT_LIST,
+    });
 
     if (error) {
       console.error("Planos rápidos — erro Supabase:", error);
