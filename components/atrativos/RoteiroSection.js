@@ -1,12 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import BottomSheetShell from "@/components/BottomSheetShell";
 import LoginModal from "@/components/LoginModal";
 import DailyLimitCountdown from "@/components/DailyLimitCountdown";
 import PremiumPaywallSheet from "@/components/PremiumPaywallSheet";
 import RoteiroBottomSheet from "@/components/RoteiroBottomSheet";
+import HomeSectionHeader from "@/components/home/HomeSectionHeader";
+import { HOME_SURFACE_CLASS } from "@/components/home/homeTokens";
 import { canUseRoteiro, isDailyRoteiroLimitReached } from "@/lib/premium";
 import RoteiroItineraryView from "@/components/atrativos/RoteiroItineraryView";
 import { fetchLugaresFromApi } from "@/lib/fetchLugaresApi";
@@ -16,6 +18,7 @@ import { createClient } from "@/lib/supabase";
 import { getSessionUser } from "@/lib/supabase/session";
 import { LIMITS } from "@/lib/premium";
 import {
+  ROTEIRO_MONTAR_DIA_PATH,
   clearRoteiroDraft,
   hasRoteiroDraft,
   loadRoteiroDraft,
@@ -155,16 +158,20 @@ function RoteiroViewModal({ roteiro, onClose, onExcluir, lugaresCatalog = [] }) 
   );
 }
 
+const ROTEIROS_SELECT = "id, titulo, dias, perfil, interesses, conteudo, created_at";
+
 /**
- * Seção da home de rotas: CTA de roteiro com IA, lista de roteiros salvos e modais de login/paywall.
- * @param {object} props
- * @param {Array<{ id?: string, titulo: string, created_at?: string, conteudo?: string }>} [props.roteirosIniciais=[]] - Roteiros pré-carregados do servidor.
+ * CTA de roteiro com IA na home: lista de dias salvos e modais de login/paywall.
+ * @param {object} [props]
+ * @param {Array<{ id?: string, titulo: string, created_at?: string, conteudo?: string }>} [props.roteirosIniciais=[]]
  * @returns {import("react").JSX.Element}
  */
 export default function RoteiroSection({ roteirosIniciais = [] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const queryHandledRef = useRef(false);
   const [pendingCriar, setPendingCriar] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
   const [user, setUser] = useState(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
@@ -187,6 +194,7 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
   const loggedIn = Boolean(user);
 
   useEffect(() => {
+    if (roteirosIniciais.length === 0) return;
     setRoteiros(roteirosIniciais);
   }, [roteirosIniciais]);
 
@@ -200,6 +208,23 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
     }
   }, [searchParams]);
 
+  useEffect(() => {
+    if (!authReady || queryHandledRef.current) return;
+    if (searchParams.get("montarDia") !== "1") return;
+
+    queryHandledRef.current = true;
+    document.getElementById("montar-dia")?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    if (!user) {
+      setPendingCriar(true);
+      setLoginOpen(true);
+    } else {
+      setPendingCriar(true);
+    }
+
+    router.replace("/", { scroll: false });
+  }, [authReady, searchParams, user, router]);
+
   function refreshDraftState() {
     setDraftPendente(hasRoteiroDraft());
   }
@@ -209,6 +234,7 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
 
     getSessionUser(supabase).then((currentUser) => {
       setUser(currentUser ?? null);
+      setAuthReady(true);
     });
 
     const {
@@ -218,7 +244,6 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
 
       if (event === "SIGNED_IN" && session?.user) {
         setLoginOpen(false);
-        router.refresh();
       }
     });
 
@@ -226,6 +251,32 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
   }, [router]);
 
   useEffect(() => {
+    if (!user) {
+      if (authReady) setRoteiros([]);
+      return undefined;
+    }
+
+    let cancelled = false;
+    const supabase = createClient();
+
+    supabase
+      .from("roteiros")
+      .select(ROTEIROS_SELECT)
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        if (!cancelled) setRoteiros(data ?? []);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, authReady]);
+
+  useEffect(() => {
+    if (!sheetOpen && !roteiroVisualizando) return undefined;
+    if (lugaresCatalog.length > 0) return undefined;
+
     let cancelled = false;
 
     fetchLugaresFromApi({ limit: 120 })
@@ -248,7 +299,7 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [sheetOpen, roteiroVisualizando, lugaresCatalog.length]);
 
   /**
    * Insere ou atualiza um roteiro no topo da lista local após salvar no sheet.
@@ -263,7 +314,7 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
       ...atual.filter((item) => item.id !== novoRoteiro.id),
     ]);
     setSheetOpen(false);
-    setSavedToast("Roteiro salvo! Toque em Meus roteiros para abrir.");
+    setSavedToast("Roteiro salvo! Toque em Dias que eu montei para abrir.");
     window.setTimeout(() => setSavedToast(""), 3500);
   }
 
@@ -378,7 +429,7 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
   const mostrarCtaCompacto = roteiros.length > 0 || draftPendente;
 
   return (
-    <div className="box-border min-w-0 max-w-full overflow-hidden">
+    <div id="montar-dia" className="box-border min-w-0 max-w-full overflow-hidden">
       {savedToast ? (
         <div
           className="fixed left-4 right-4 top-4 z-[60] mx-auto max-w-md rounded-xl bg-[#1a4a3a] px-4 py-3 text-center text-sm font-semibold text-white shadow-lg"
@@ -425,10 +476,23 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
         </section>
       )}
 
-      {mostrarCtaCompacto ? (
-        <section className="mb-4 box-border w-full min-w-0 max-w-full overflow-hidden">
+      <section className="mb-7 home-reveal">
+        <HomeSectionHeader eyebrow="Com IA" title="Montar um dia" />
+        <div className={`${HOME_SURFACE_CLASS} p-4`}>
+          <p className="text-sm leading-relaxed text-[#5a6b66]">
+            Não é trilha guiada. A IA combina lugares do catálogo — praia, comida, o que fizer sentido no seu dia.
+          </p>
+          {loggedIn && (
+            <p className="mt-2 text-xs text-[#5a6b66]">
+              {usageLoading && !usage
+                ? "Carregando uso de IA…"
+                : usage?.premium
+                  ? "Premium — roteiros com IA ilimitados"
+                  : `${usage?.roteiros?.used ?? 0}/${usage?.roteiros?.limit ?? LIMITS.roteiro} roteiros gratuitos hoje`}
+            </p>
+          )}
           {roteiroLimiteDiarioAtingido && (
-            <div className="mb-2 rounded-xl bg-white px-3 py-2 shadow-sm ring-1 ring-[#e8eeee]">
+            <div className="mt-3 rounded-xl bg-[#f0f4f3] px-3 py-2">
               <DailyLimitCountdown
                 compact
                 prefix="Novos roteiros em"
@@ -440,52 +504,16 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
           <button
             type="button"
             onClick={handleAbrirCriar}
-            className="w-full rounded-xl bg-[#1a4a3a] py-3 text-sm font-semibold text-white transition-colors hover:bg-[#153d30]"
-          >
-            Criar novo roteiro
-          </button>
-        </section>
-      ) : (
-        <section className="mb-6 box-border w-full min-w-0 max-w-full overflow-hidden rounded-3xl bg-gradient-to-br from-gray-900 to-emerald-900 p-5 text-white shadow-sm">
-          <span className="text-2xl" aria-hidden>
-            ✨
-          </span>
-          <h2 className="mt-2 text-xl font-bold leading-tight">Roteiro personalizado com IA</h2>
-          <p className="mt-1 text-sm text-emerald-100/90">
-            Monte seu roteiro ideal em segundos
-          </p>
-          {loggedIn && (
-            <p className="mt-2 text-xs text-emerald-100/80">
-              {usageLoading && !usage
-                ? "Carregando uso de IA…"
-                : usage?.premium
-                  ? "✨ Premium — roteiros com IA ilimitados"
-                  : `${usage?.roteiros?.used ?? 0}/${usage?.roteiros?.limit ?? LIMITS.roteiro} roteiros gratuitos hoje`}
-            </p>
-          )}
-          {roteiroLimiteDiarioAtingido && (
-            <div className="mt-3 rounded-xl bg-white/10 px-3 py-2">
-              <DailyLimitCountdown
-                compact
-                prefix="Novos roteiros em"
-                className="text-xs text-emerald-50"
-                initialMs={usage?.msUntilReset}
-              />
-            </div>
-          )}
-          <button
-            type="button"
-            onClick={handleAbrirCriar}
             className="mt-4 w-full rounded-xl bg-[#1a4a3a] py-3.5 text-sm font-semibold text-white transition-colors hover:bg-[#153d30]"
           >
-            Criar roteiro
+            {mostrarCtaCompacto ? "Criar novo dia com IA" : "Montar meu dia"}
           </button>
-        </section>
-      )}
+        </div>
+      </section>
 
       {loggedIn && roteiros.length > 0 && (
         <section className="mb-6 min-w-0 max-w-full overflow-hidden">
-          <h2 className="mb-3 text-lg font-bold text-[#1a2e28]">Meus roteiros</h2>
+          <h2 className="mb-3 text-lg font-bold text-[#1a2e28]">Dias que eu montei</h2>
           <div className="grid min-w-0 gap-3">
             {roteiros.map((roteiro) => (
               <article
@@ -533,8 +561,8 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
 
       <LoginModal
         isOpen={loginOpen}
-        motivo="atrativos"
-        redirectAfterLogin="/roteiros"
+        motivo="roteiro"
+        redirectAfterLogin={ROTEIRO_MONTAR_DIA_PATH}
         onClose={() => {
           setPendingCriar(false);
           setLoginOpen(false);

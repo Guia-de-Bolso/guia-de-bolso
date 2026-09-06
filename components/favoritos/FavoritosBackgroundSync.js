@@ -29,23 +29,19 @@ export default function FavoritosBackgroundSync() {
       if (cancelled || !user?.id) return;
 
       await runFavoritosBackgroundSync(supabase, user.id);
-      if (!cancelled) {
-        const currentUser = await getSessionUser(supabase);
-        if (currentUser?.id) {
-          const cached = await listOfflineFavoritos(currentUser.id);
-          const paths = buildFavoritosPrecachePaths(cached.lugares, cached.atrativos);
-          await precacheFavoritosShell(paths);
-        } else {
-          await precacheFavoritosShell(["/favoritos"]);
-        }
-      }
+      if (cancelled) return;
+      const cached = await listOfflineFavoritos(user.id);
+      const paths = buildFavoritosPrecachePaths(cached.lugares, cached.atrativos);
+      void precacheFavoritosShell(paths.length ? paths : ["/favoritos"]);
     }
 
-    syncNow();
+    const start = window.setTimeout(() => {
+      void syncNow();
+    }, 2500);
 
     function onVisible() {
       if (document.visibilityState === "visible") {
-        syncNow();
+        void syncNow();
       }
     }
 
@@ -55,7 +51,7 @@ export default function FavoritosBackgroundSync() {
 
     if (Capacitor.isNativePlatform()) {
       App.addListener("appStateChange", ({ isActive }) => {
-        if (isActive) syncNow();
+        if (isActive) void syncNow();
       }).then((handle) => {
         appListener = handle;
       });
@@ -63,6 +59,7 @@ export default function FavoritosBackgroundSync() {
 
     return () => {
       cancelled = true;
+      window.clearTimeout(start);
       document.removeEventListener("visibilitychange", onVisible);
       appListener?.remove();
     };

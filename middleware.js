@@ -5,6 +5,7 @@ import {
   getRequestHostname,
   isMarketingHost,
 } from "@/lib/marketingHost";
+import { shouldRefreshAuthWithServer } from "@/lib/sessionRefresh";
 import { SITE_DOMAIN } from "@/lib/siteContact";
 
 /**
@@ -19,7 +20,8 @@ function applyPreviewRobots(response) {
 }
 
 /**
- * Middleware: dominio de marketing (guiadebolso.app) so landing + legal; demais hosts = app completo.
+ * Middleware: dominio de marketing (guiadebolso.app) = landing, legal, SEO
+ * (lugares, categorias, lista e detalhe de roteiros). Demais hosts = app completo.
  * @param {import("next/server").NextRequest} request - Incoming request.
  * @returns {Promise<import("next/server").NextResponse>} Response with updated session cookies.
  */
@@ -70,7 +72,13 @@ export async function middleware(request) {
     }
   );
 
-  await supabase.auth.getUser();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (shouldRefreshAuthWithServer(request.nextUrl.pathname, session)) {
+    await supabase.auth.getUser();
+  }
 
   if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production") {
     supabaseResponse.headers.set("X-Robots-Tag", "noindex, nofollow");

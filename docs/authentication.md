@@ -15,7 +15,7 @@ Visão de sistema: [`architecture.md`](./architecture.md#authentication-flow).
 | Transporte | Cookies HTTP gerenciados por `@supabase/ssr` |
 | Cliente browser | `lib/supabase/client.js` → `createBrowserClient` |
 | Server (Route Handlers, layouts) | `lib/supabase/server.js` → `createServerClient` |
-| Refresh de sessão | **Somente** `middleware.js` (`getUser`). Cliente/server leem com `getSessionUser()` (`lib/supabase/session.js`); browser com `autoRefreshToken: false` |
+| Refresh de sessão | **Somente** `middleware.js`. `getUser()` só quando o JWT está perto de expirar ou em rotas admin/IA (`lib/sessionRefresh.js`). Demais navegações leem o cookie local (`getSession`). Cliente com `autoRefreshToken: false` |
 | Expiração | Política padrão Supabase (refresh automático via middleware) |
 
 **Não há** Context global React de auth — cada página/hook chama `getUser()` ou `onAuthStateChange` conforme necessário.

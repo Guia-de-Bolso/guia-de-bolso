@@ -23,6 +23,7 @@ import {
 import {
   CATEGORIA_ATRATIVO_PADRAO,
   CATEGORIAS_ATRATIVO,
+  CATEGORIAS_ATRATIVO_RESERVADAS,
   MAX_TAGS_ATRATIVO,
   normalizeCategoriaAtrativo,
 } from "@/lib/atrativos";
@@ -775,6 +776,9 @@ export default function AtrativoForm({
             {CATEGORIAS_ATRATIVO.map((item) => (
               <option key={item.nome} value={item.nome}>
                 {item.icone} {item.nome}
+                {CATEGORIAS_ATRATIVO_RESERVADAS.has(item.nome)
+                  ? " — ainda sem roteiros na aba"
+                  : ""}
               </option>
             ))}
           </select>

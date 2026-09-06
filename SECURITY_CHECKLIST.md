@@ -265,7 +265,7 @@ O projeto separa bem segredos de servidor (`ANTHROPIC_API_KEY`, `SUPABASE_SERVIC
 | **Risco** | Low |
 | **Impacto** | Depende 100% de RLS + UI; sessão expirada ainda carrega HTML admin brevemente. |
 | **Probabilidade** | Unlikely |
-| **Evidência** | `middleware.js` — apenas `getUser()`. |
+| **Evidência** | `middleware.js` — `getUser()` só se `shouldRefreshAuthWithServer`. |
 | **Solução** | Matcher `/admin/:path*` com redirect se não admin. |
 
 ---

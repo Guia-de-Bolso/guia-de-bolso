@@ -1,6 +1,5 @@
 "use client";
 
-import RoteiroSection from "@/components/atrativos/RoteiroSection";
 import AtrativosCatalogo from "@/components/atrativos/AtrativosCatalogo";
 import { useAtrativosPageData } from "@/hooks/useAtrativosPageData";
 
@@ -15,26 +14,25 @@ function IconMapEmpty() {
 }
 
 /**
- * Aba Atrativos — lista e roteiros com cache client-side.
- * @param {{ initialData: { atrativos: object[], roteiros: object[] } }} props
+ * Aba Roteiros — trilhas curadas com cache client-side.
+ * @param {{ initialData: { atrativos: object[] } }} props
  * @returns {import("react").ReactElement}
  */
 export default function AtrativosPageClient({ initialData }) {
   const { data, loading } = useAtrativosPageData(initialData);
   const atrativos = data?.atrativos ?? [];
-  const roteiros = data?.roteiros ?? [];
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#f0f4f3] text-[#1a2e28]">
       <div className="mx-auto box-border w-full min-w-0 max-w-md overflow-x-hidden px-4 pb-28 pt-safe-top">
         <header className="pb-5">
           <h1 className="text-2xl font-bold tracking-tight text-[#1a2e28]">Roteiros</h1>
-          <p className="mt-1 text-sm text-[#5a6b66]">Trilhas e experiências selecionadas</p>
+          <p className="mt-1 text-sm text-[#5a6b66]">
+            Trilhas e praias para ir a pé — com o passo a passo no app
+          </p>
         </header>
 
         <div className="min-w-0 space-y-0 pt-5">
-          <RoteiroSection roteirosIniciais={roteiros} />
-
           {loading && atrativos.length === 0 ? (
             <section className="animate-pulse space-y-3" aria-hidden>
               {[1, 2, 3].map((item) => (

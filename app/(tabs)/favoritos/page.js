@@ -93,26 +93,32 @@ export default function FavoritosPage() {
 
     let cancelled = false;
     const supabase = createClient();
-    const loadingTimer = setTimeout(() => {
-      if (!cancelled) setLoadingFavoritos(true);
-    }, 0);
 
-    async function loadFromOfflineCache() {
+    async function applyOfflineCache() {
       const cached = await listOfflineFavoritos(user.id);
-      if (cancelled) return;
+      if (cancelled) return false;
       setLugares(cached.lugares);
       setAtrativos(cached.atrativos);
       setLastSyncedLabel(formatOfflineSavedAt(cached.lastSyncedAt));
       setFetchError(false);
       setFetchAtrativosError(false);
-      setLoadingFavoritos(false);
+      return cached.lugares.length > 0 || cached.atrativos.length > 0;
     }
 
     async function loadFavoritos() {
-      if (!isOnline) {
-        await loadFromOfflineCache();
+      const hasCache = await applyOfflineCache();
+      if (cancelled) return;
+
+      if (hasCache) {
+        setLoadingFavoritos(false);
+      } else if (isOnline) {
+        setLoadingFavoritos(true);
+      } else {
+        setLoadingFavoritos(false);
         return;
       }
+
+      if (!isOnline) return;
 
       try {
         const synced = await syncAllFavoritosOffline(supabase, user.id);
@@ -123,12 +129,12 @@ export default function FavoritosPage() {
         setLastSyncedLabel(formatOfflineSavedAt(synced.syncedAt));
         setFetchError(false);
         setFetchAtrativosError(false);
-        await precacheFavoritosShell(
+        void precacheFavoritosShell(
           buildFavoritosPrecachePaths(synced.lugares, synced.atrativos)
         );
       } catch {
         if (cancelled) return;
-        await loadFromOfflineCache();
+        await applyOfflineCache();
       } finally {
         if (!cancelled) setLoadingFavoritos(false);
       }
@@ -138,7 +144,6 @@ export default function FavoritosPage() {
 
     return () => {
       cancelled = true;
-      clearTimeout(loadingTimer);
     };
   }, [user, isOnline, networkReady]);
 

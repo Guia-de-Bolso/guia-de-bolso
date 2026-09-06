@@ -501,9 +501,9 @@ Multi-step form (days, traveler profile, interests) → Claude generates markdow
 Get a custom day-by-day plan for the region.
 
 **Main flows**
-1. `/roteiros` → “Roteiro personalizado com IA” → login check → quota check → `RoteiroBottomSheet`.
+1. Home → “Montar meu dia” → login check → quota check → `RoteiroBottomSheet`.
 2. Submit → `onValidateBeforeGenerate` re-checks login/quota (`validarRoteiroPermitido` in `RoteiroSection.js`) → `POST /api/roteiro` → `lib/roteiroParse.js` builds day/period/stop timeline → `RoteiroItineraryView` (accordion); footer **Salvar** fixed on scroll.
-3. “Salvar” → `POST /api/roteiro/salvar` → list on `/roteiros`.
+3. “Salvar” → `POST /api/roteiro/salvar` → list “Dias que eu montei” on the home.
 4. Saved list → tap → `RoteiroViewModal` with the same timeline UI (`components/atrativos/RoteiroSection.js`).
 5. Delete saved item → `DELETE /api/roteiro/[id]` (server verifies row removed; requires `supabase/roteiros_policies.sql` on Supabase).
 
@@ -511,7 +511,7 @@ Get a custom day-by-day plan for the region.
 - Parser drops empty period blocks; stops link to catalog names when `lugaresCatalog` from API matches.
 - Guest → login modal.
 - No saved roteiros yet → empty state in `RoteiroSection` (“Nenhum roteiro salvo ainda”).
-- Daily limit 2/day → paywall (`roteiro`) with countdown; compact `DailyLimitCountdown` on `/roteiros` card when blocked (`Novos roteiros em HH:MM:SS`, light text on dark gradient).
+- Daily limit 2/day → paywall (`roteiro`) with countdown; compact `DailyLimitCountdown` on the home IA card when blocked.
 - Usage counter: same hydrate → sync pattern as search (`usePremiumUsage`); label `X/2 roteiros gratuitos hoje`.
 - Incomplete form blocked client-side.
 - Save without login impossible (API 401).
@@ -530,14 +530,14 @@ Understand the daily free quota, when it renews, or upgrade for unlimited use.
 
 **Main flows**
 1. Hit daily limit → paywall with feature copy (busca/roteiro) + countdown + plan benefits.
-2. While blocked on home (search open) or `/roteiros` → countdown visible before/at paywall.
+2. While blocked on home (search or IA card) → countdown visible before/at paywall.
 3. “Assinar” / CTA → may open login if needed (`premium` motivo) — **payment not integrated** (Asaas planned).
 
 **Edge cases**
 - `premium_ativo` + `premium_ate` enforced server-side and in RPC.
 - Paywall is informational today — no in-app purchase flow.
 - Premium users see unlimited counters in UI (`null` remaining).
-- Countdown (`DailyLimitCountdown`): ticks every second via `getMsUntilDailyReset()`; may seed from `usage.msUntilReset` after API/RPC. Compact mode on `/roteiros` inherits parent text color (timer visible on dark card).
+- Countdown (`DailyLimitCountdown`): ticks every second via `getMsUntilDailyReset()`; may seed from `usage.msUntilReset` after API/RPC. Compact mode on the home IA card inherits parent text color.
 - Legacy `uso_ia_mes` (`YYYY-MM`) or a previous day’s key: UI shows **0/N** for the new day; server realigns counters on read/increment so limits are not blocked by stale rows. After quota is used, UI and API both show `used === limit`.
 
 ---
@@ -853,7 +853,7 @@ Track proposal numbers, signature dates, free-period end, Asaas IDs, and store s
 | App download (marketing QR) | `/baixar` → App Store / Play (env) |
 | Favorites | `/favoritos` |
 | Curated roteiros | `/roteiros`, `/roteiros/[id]` (`/atrativos` and `/rotas` → 301) |
-| AI roteiro | `/roteiros` (sheet) |
+| AI roteiro | `/` (sheet) |
 | Profile | `/perfil`, `/perfil/editar` |
 | Login | `/login`, modal, `/auth/callback` |
 | Admin | `/admin`, `/admin/locais`, `/admin/parceiros` (dev), `/admin/contratos` (dev), `/admin/relatorios`, … |

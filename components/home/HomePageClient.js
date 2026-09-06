@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import LoginModal from "@/components/LoginModal";
 import Onboarding from "@/components/Onboarding";
@@ -40,7 +41,6 @@ import { IMBITUBA_COORDS, sortLugaresPorDistancia } from "@/lib/homeContext";
 import { enrichLugaresFlags } from "@/lib/lugarBadges";
 import { pickEmAltaCuradoria, pickParceirosCarrossel } from "@/lib/homeSelection";
 import { resolveAtrativoDoDia } from "@/lib/atrativoDoDia";
-import { fetchLugaresFromApi } from "@/lib/fetchLugaresApi";
 import { fetchLugaresPopulares } from "@/lib/lugaresPopulares";
 import { isSupabasePublicConfigured } from "@/lib/supabase/publicEnv";
 import { getLugaresVisitados } from "@/lib/lugaresVisitados";
@@ -55,6 +55,10 @@ import { LIMITS, canUseBusca, isDailyBuscaLimitReached } from "@/lib/premium";
 import { usePremiumUsage } from "@/lib/usePremiumUsage";
 import { createClient } from "@/lib/supabase";
 import { registrarLog } from "@/lib/logs";
+
+const RoteiroSection = dynamic(() => import("@/components/atrativos/RoteiroSection"), {
+  ssr: false,
+});
 
 /** Timeout de segurança se `getSession`/`getUser` não responder (ex.: OAuth no tablet). */
 const AUTH_RESOLVE_TIMEOUT_MS = 8000;
@@ -99,15 +103,6 @@ function applyHomePrimaryFeed(feed, actions) {
 }
 
 /**
- * Loads nearby candidates for "Perto de você".
- * @returns {Promise<object[]>}
- */
-async function fetchLugaresProximos() {
-  const data = await fetchLugaresFromApi({ limit: 20 });
-  return data.slice(0, 6);
-}
-
-/**
  * Discreet placeholder when a home section fails to load.
  * @param {object} props
  * @param {string} [props.title] - Optional section heading.
@@ -136,7 +131,7 @@ function Home({ initialHomeData = null }) {
   const { data: primaryFeed, loading: primaryFeedLoading } = useHomePrimaryFeed(initialHomeData);
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [onboardingChecked, setOnboardingChecked] = useState(false);
+  const [onboardingChecked, setOnboardingChecked] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   const [atrativosAtivos, setAtrativosAtivos] = useState(initialHomeData?.atrativosAtivos ?? []);
@@ -226,11 +221,8 @@ function Home({ initialHomeData = null }) {
   }, [lugaresProximos, userPosition]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowOnboarding(!localStorage.getItem("onboarding_visto"));
-      setOnboardingChecked(true);
-    }, 0);
-    return () => clearTimeout(timer);
+    setShowOnboarding(!localStorage.getItem("onboarding_visto"));
+    setOnboardingChecked(true);
   }, []);
 
   useEffect(() => {
@@ -324,43 +316,33 @@ function Home({ initialHomeData = null }) {
     if (homeLoading) return undefined;
 
     let cancelled = false;
-    setPertoLoading(true);
 
-    async function loadSecondary() {
+    async function loadClima() {
       try {
-        const [proximosResult, climaResult] = await Promise.allSettled([
-          fetchLugaresProximos(),
-          fetchClimaApisCached(IMBITUBA_COORDS.latitude, IMBITUBA_COORDS.longitude),
-        ]);
-
+        const clima = await fetchClimaApisCached(
+          IMBITUBA_COORDS.latitude,
+          IMBITUBA_COORDS.longitude
+        );
         if (cancelled) return;
-
-        if (proximosResult.status === "fulfilled") {
-          setLugaresProximos(enrichLugaresFlags(proximosResult.value));
-          setSectionErrors((prev) => ({ ...prev, perto: false }));
-        } else {
-          setSectionErrors((prev) => ({ ...prev, perto: true }));
-        }
-
-        if (climaResult.status === "fulfilled") {
-          const temp = Number(climaResult.value?.temperature);
-          setTemperaturaClima(Number.isFinite(temp) ? temp : null);
-          setClimaEmoji(climaResult.value?.weatherEmoji ?? null);
-          setSectionErrors((prev) => ({ ...prev, clima: false }));
-        } else {
-          setTemperaturaClima(null);
-          setClimaEmoji(null);
-          setSectionErrors((prev) => ({ ...prev, clima: true }));
-        }
-      } finally {
-        if (!cancelled) setPertoLoading(false);
+        const temp = Number(clima?.temperature);
+        setTemperaturaClima(Number.isFinite(temp) ? temp : null);
+        setClimaEmoji(clima?.weatherEmoji ?? null);
+        setSectionErrors((prev) => ({ ...prev, clima: false }));
+      } catch {
+        if (cancelled) return;
+        setTemperaturaClima(null);
+        setClimaEmoji(null);
+        setSectionErrors((prev) => ({ ...prev, clima: true }));
       }
     }
 
-    loadSecondary();
+    const timer = window.setTimeout(() => {
+      void loadClima();
+    }, 400);
 
     return () => {
       cancelled = true;
+      window.clearTimeout(timer);
     };
   }, [homeLoading]);
 
@@ -888,6 +870,11 @@ function Home({ initialHomeData = null }) {
               ) : (
                 <OQueFazerAgora rota={heroRota} />
               )}
+            </>
+          )}
+          <RoteiroSection />
+          {!homeLoading && (
+            <>
               {BALEIAS_CARD_ENABLED ? <BaleiasTemporadaCard /> : null}
               <ParceirosCarrossel
                 lugares={lugaresParceiros.map((l) =>

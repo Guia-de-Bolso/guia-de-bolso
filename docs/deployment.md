@@ -413,7 +413,7 @@ Use this list for **first launch** and **each major release**.
 - [ ] Login (Google + SMS) → redirect to `/` via `/auth/callback`
 - [ ] Logged-in user: favorite, review submit (pending moderation)
 - [ ] AI search (`POST /api/buscar`) — success and limit/paywall when applicable
-- [ ] AI roteiro on `/roteiros` — generate and save
+- [ ] AI roteiro on home — generate and save
 - [ ] Maps CTA on place detail opens Google / Apple / Waze
 - [ ] Admin `/admin` — dashboard, edit place, moderate review
 - [ ] Admin `/admin/logs` and `/admin/taxonomia` (admin role)

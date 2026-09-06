@@ -17,6 +17,7 @@ test.describe("smoke", () => {
     await expect(page.getByPlaceholder("O que você quer descobrir hoje?")).toBeVisible();
     await expect(page.getByRole("navigation", { name: "Navegação principal" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Explorar" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Montar meu dia" })).toBeVisible();
   });
 
   test("login page renders auth options", async ({ page }) => {

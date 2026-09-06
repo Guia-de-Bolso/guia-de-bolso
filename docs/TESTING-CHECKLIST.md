@@ -70,7 +70,7 @@ Use a ferramenta com **158 casos de teste**, passo a passo por dispositivo, resu
 | Ver lugar | Cards → `/lugares/[id]` | Nenhuma |
 | Favoritar | Coração home/detalhe, `/favoritos` | Login |
 | Avaliar | Detalhe → `AvaliacaoForm` | Login; nome de exibição + comentário obrigatórios; moderação admin |
-| Roteiro IA | `/roteiros` → Criar roteiro | Login + limite 2/dia (free); quota re-checked in sheet before API; excluir salvo via `DELETE /api/roteiro/[id]` |
+| Roteiro IA | Home → Montar meu dia | Login + limite 2/dia (free); quota re-checked in sheet before API; excluir salvo via `DELETE /api/roteiro/[id]` |
 | Modo guia (atrativo) | `/roteiros/[id]` → percurso | Nenhuma (progresso local no device) |
 | Push | `/perfil` → Notificações push (app nativo) | Login + Capacitor |
 

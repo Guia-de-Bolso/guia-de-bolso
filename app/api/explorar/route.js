@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { lugaresApiCacheHeaders } from "@/lib/apiCacheHeaders";
 import { fetchExplorarCategoryCounts } from "@/lib/explorarCategoryCounts";
 import { reportError } from "@/lib/observability";
 import { getAnonServerClient } from "@/lib/supabaseAnonServer";
@@ -24,9 +25,7 @@ export async function GET() {
       { data },
       {
         status: 200,
-        headers: {
-          "Cache-Control": "private, no-cache, no-store, must-revalidate",
-        },
+        headers: lugaresApiCacheHeaders(),
       }
     );
   } catch (err) {

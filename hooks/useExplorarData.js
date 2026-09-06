@@ -18,7 +18,7 @@ export function useExplorarData(initialData = null) {
     fetchExplorarFromApi,
     {
       fallbackData: initialData ?? undefined,
-      revalidateOnMount: true,
+      revalidateOnMount: !initialData,
       dedupingInterval: 30_000,
     }
   );

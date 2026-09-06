@@ -6,9 +6,9 @@ import RemotePhoto from "@/components/shared/RemotePhoto";
 import { useMemo, useState } from "react";
 import { getCapaThumbFromAtrativo } from "@/lib/fotos";
 import {
-  CATEGORIAS_ATRATIVO,
   formatCategoriaAtrativoLabel,
   getCategoriaAtrativoMeta,
+  listCategoriasAtrativoEmUso,
   normalizeCategoriaAtrativo,
 } from "@/lib/atrativos";
 import { roteiroDetalhePath } from "@/lib/roteirosPaths";
@@ -214,10 +214,10 @@ function CompactRouteCard({ rota }) {
 export default function AtrativosCatalogo({ atrativos }) {
   const [categoriaFiltro, setCategoriaFiltro] = useState(null);
 
-  const categoriasPresentes = useMemo(() => {
-    const nomes = new Set(atrativos.map((item) => normalizeCategoriaAtrativo(item.categoria)));
-    return CATEGORIAS_ATRATIVO.filter((item) => nomes.has(item.nome));
-  }, [atrativos]);
+  const categoriasPresentes = useMemo(
+    () => listCategoriasAtrativoEmUso(atrativos),
+    [atrativos]
+  );
 
   const atrativosFiltrados = useMemo(() => {
     if (!categoriaFiltro) return atrativos;

@@ -1,16 +1,18 @@
 import AtrativosPageClient from "@/components/atrativos/AtrativosPageClient";
 import { fetchAtrativosPageData } from "@/lib/atrativosPageData";
-import { createPageServerClient } from "@/lib/supabase/pageServer";
+import { createPublicPageServerClient } from "@/lib/supabase/pageServer";
+
+export const revalidate = 60;
 
 /**
- * Routes listing with featured route, AI roteiro section, and saved roteiros.
+ * Lista pública de trilhas curadas (`rotas`).
  * @returns {Promise<import("react").ReactElement>}
  */
 export default async function AtrativosPage() {
-  const supabase = await createPageServerClient();
+  const supabase = await createPublicPageServerClient();
   const initialData = supabase
     ? await fetchAtrativosPageData(supabase)
-    : { atrativos: [], roteiros: [] };
+    : { atrativos: [] };
 
   return <AtrativosPageClient initialData={initialData} />;
 }

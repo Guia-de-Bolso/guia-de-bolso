@@ -6,7 +6,11 @@ import AdminEmptyState from "@/components/admin/AdminEmptyState";
 import AdminShell, { useAdminAuth } from "@/components/admin/AdminShell";
 import { useAdminFlashToast, useAdminToast } from "@/components/admin/AdminToastContext";
 import { getCapaThumbFromAtrativo } from "@/lib/fotos";
-import { CATEGORIAS_ATRATIVO, getCategoriaAtrativoMeta, normalizeCategoriaAtrativo } from "@/lib/atrativos";
+import {
+  getCategoriaAtrativoMeta,
+  listCategoriasAtrativoEmUso,
+  normalizeCategoriaAtrativo,
+} from "@/lib/atrativos";
 import {
   ATRATIVO_DO_DIA_FIXAR_OPCOES,
   aplicarFixacaoAtrativoDoDia,
@@ -443,7 +447,7 @@ export default function AtrativosGridPage() {
             <FilterChip active={categoria === "Todas"} onClick={() => setCategoria("Todas")}>
               Todas
             </FilterChip>
-            {CATEGORIAS_ATRATIVO.map((item) => (
+            {listCategoriasAtrativoEmUso(atrativos).map((item) => (
               <FilterChip
                 key={item.nome}
                 active={categoria === item.nome}

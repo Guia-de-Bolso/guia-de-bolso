@@ -12,6 +12,7 @@ const subtitles = {
   busca: "Faça login para buscar lugares com inteligência artificial",
   clima: "Faça login para ver o clima das praias da região",
   premium: "Entre na sua conta para assinar o Guia Premium",
+  roteiro: "Faça login para montar um dia com inteligência artificial",
   onboarding:
     "Entre com Google ou SMS para salvar favoritos offline e usar a busca com IA",
 };
@@ -50,7 +51,7 @@ function IconLock({ className = "h-9 w-9" }) {
  * @param {boolean} props.isOpen - Whether the modal is visible.
  * @param {() => void} props.onClose - Called when the user dismisses the modal.
  * @param {string} [props.motivo] - Context key for subtitle copy (e.g. favoritar, rotas).
- * @param {string} [props.redirectAfterLogin] - Path pós-OAuth/SMS (padrão: `/roteiros` se motivo=atrativos/rotas).
+ * @param {string} [props.redirectAfterLogin] - Path pós-OAuth/SMS (padrão: `/roteiros` se motivo=atrativos/rotas; `/?montarDia=1` se motivo=roteiro).
  * @param {() => void} [props.onLoginSuccess] - Chamado após login SMS no modal (sem navegar).
  * @returns {import('react').ReactElement|null}
  */
@@ -62,7 +63,12 @@ export default function LoginModal({
   onLoginSuccess,
 }) {
   const postLoginPath =
-    redirectAfterLogin ?? (motivo === "atrativos" || motivo === "rotas" || motivo === "roteiros" ? "/roteiros" : "/");
+    redirectAfterLogin ??
+    (motivo === "roteiro"
+      ? "/?montarDia=1"
+      : motivo === "atrativos" || motivo === "rotas" || motivo === "roteiros"
+        ? "/roteiros"
+        : "/");
   const MainIcon = motivo === "favoritar" ? IconHeart : IconLock;
   const subtitle =
     subtitles[motivo] ??

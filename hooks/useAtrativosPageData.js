@@ -6,9 +6,9 @@ import { fetchAtrativosPageFromApi } from "@/lib/fetchAtrativosPageApi";
 import { isSupabasePublicConfigured } from "@/lib/supabase/publicEnv";
 
 /**
- * Lista de atrativos + roteiros salvos com cache SWR (5 min).
- * @param {{ atrativos?: object[], roteiros?: object[] }|null} [initialData]
- * @returns {{ data: { atrativos: object[], roteiros: object[] }|null, loading: boolean, error: unknown, mutate: import('swr').KeyedMutator<{ atrativos: object[], roteiros: object[] }> }}
+ * Lista de trilhas curadas com cache SWR (5 min).
+ * @param {{ atrativos?: object[] }|null} [initialData]
+ * @returns {{ data: { atrativos: object[] }|null, loading: boolean, error: unknown, mutate: import('swr').KeyedMutator<{ atrativos: object[] }> }}
  */
 export function useAtrativosPageData(initialData = null) {
   const enabled = isSupabasePublicConfigured();
@@ -18,7 +18,7 @@ export function useAtrativosPageData(initialData = null) {
     fetchAtrativosPageFromApi,
     {
       fallbackData: initialData ?? undefined,
-      revalidateOnMount: true,
+      revalidateOnMount: !initialData,
     }
   );
 

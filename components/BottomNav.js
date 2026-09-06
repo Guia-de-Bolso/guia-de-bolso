@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useOfflineMode } from "@/components/OfflineModeProvider";
 import { BOTTOM_NAV_ROUTES } from "@/lib/bottomNavRoutes";
 import { resolveBottomNavTab } from "@/lib/tabShell";
@@ -140,10 +140,6 @@ export default function BottomNav() {
     [router, offlineLimited]
   );
 
-  useEffect(() => {
-    items.forEach(({ href }) => prefetchRoute(href));
-  }, [prefetchRoute]);
-
   function showOfflineMessage() {
     setOfflineToast(OFFLINE_NAV_BLOCKED_MESSAGE);
     window.setTimeout(() => setOfflineToast(""), 4500);
@@ -192,7 +188,7 @@ export default function BottomNav() {
               <Link
                 key={href}
                 href={href}
-                prefetch
+                prefetch={false}
                 aria-label={label}
                 className={navItemClass(active, false)}
                 aria-current={active ? "page" : undefined}

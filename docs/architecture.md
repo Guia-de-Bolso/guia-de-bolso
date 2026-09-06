@@ -88,7 +88,7 @@ There is no global React Context for auth or premium; each page or hook loads se
 | `/lugares/[id]` | `app/lugares/[id]/page.js` | Conversion-focused place detail |
 | `/categorias`, `/categoria/[slug]` | Category discovery |
 | `/favoritos` | Saved places (auth) |
-| `/roteiros`, `/roteiros/[id]` | Curated roteiros + AI itinerary (`/atrativos` and `/rotas` → 301) |
+| `/roteiros`, `/roteiros/[id]` | Curated trail list and detail (`/atrativos` and `/rotas` → 301) |
 | `/perfil`, `/perfil/editar` | User profile |
 | `/login` | `app/login/page.js` | Auth entry |
 | `/auth/callback` | `app/auth/callback/route.js` | OAuth code exchange (Route Handler) |
@@ -309,7 +309,7 @@ Server-only secrets: `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL`. These never use the
 `middleware.js` runs on almost all routes (excluding static assets). It:
 
 1. Creates a Supabase server client bound to request/response cookies.
-2. Calls `supabase.auth.getUser()` to **refresh the session** if needed.
+2. Calls `supabase.auth.getUser()` only when the JWT is near expiry or on admin/IA routes (`lib/sessionRefresh.js`). Public navigations skip the Auth round-trip.
 3. Returns `NextResponse.next()` with updated cookies.
 
 Middleware does **not** enforce route-level auth; pages and APIs enforce access themselves.
@@ -431,7 +431,7 @@ flowchart LR
 
 ### 6. Roteiro (itinerary) path
 
-1. User completes form on `/roteiros` (logged in).  
+1. User taps **Montar meu dia** on the home (`RoteiroSection`, logged in).  
 2. `POST /api/roteiro` — premium check, filtered place list (`lib/roteiroLugares.js`), Claude returns strict markdown + `lugaresCatalog`.  
 3. `lib/roteiroParse.js` → `RoteiroItineraryView` in `RoteiroBottomSheet` / `RoteiroViewModal`.  
 4. Optional `POST /api/roteiro/salvar` — persists to `roteiros` table.  
@@ -531,7 +531,7 @@ API returns machine-readable codes: `LOGIN_REQUIRED` (401), `LIMIT_REACHED` (403
 
 1. `supabase.auth.getUser()` on mount.  
 2. `onAuthStateChange` to update user + clear favorites on sign-out.  
-3. Premium hook `usePremiumUsage(user)` hydrates same-day cache, then fetches `/api/uso-premium`; home search and `/roteiros` show usage + `DailyLimitCountdown` when limit reached.
+3. Premium hook `usePremiumUsage(user)` hydrates same-day cache, then fetches `/api/uso-premium`; home search and the home IA card show usage + `DailyLimitCountdown` when limit reached.
 
 ---
 
