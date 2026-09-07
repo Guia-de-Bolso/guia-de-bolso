@@ -231,6 +231,10 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
 
   useEffect(() => {
     const supabase = createClient();
+    if (!supabase) {
+      setAuthReady(true);
+      return undefined;
+    }
 
     getSessionUser(supabase).then((currentUser) => {
       setUser(currentUser ?? null);
@@ -372,9 +376,15 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
     if (!access.allowed) {
       if (access.code === "LIMIT_REACHED") {
         setPaywallOpen(true);
-      } else if (access.code === "LOGIN_REQUIRED") {
+        return false;
+      }
+      if (access.code === "LOGIN_REQUIRED") {
         setPendingCriar(true);
         setLoginOpen(true);
+        return false;
+      }
+      if (access.code === "USAGE_PENDING") {
+        return true;
       }
       return false;
     }
@@ -429,7 +439,7 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
   const mostrarCtaCompacto = roteiros.length > 0 || draftPendente;
 
   return (
-    <div id="montar-dia" className="box-border min-w-0 max-w-full overflow-hidden">
+    <div id="montar-dia" className="box-border min-w-0 max-w-full">
       {savedToast ? (
         <div
           className="fixed left-4 right-4 top-4 z-[60] mx-auto max-w-md rounded-xl bg-[#1a4a3a] px-4 py-3 text-center text-sm font-semibold text-white shadow-lg"

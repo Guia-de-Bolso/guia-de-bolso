@@ -860,7 +860,7 @@ function Home({ initialHomeData = null }) {
           className={`space-y-0 transition-all duration-300 ease-out ${
             searchMode
               ? "pointer-events-none max-h-0 -translate-y-3 overflow-hidden opacity-0"
-              : "translate-y-0 opacity-100"
+              : "opacity-100"
           }`}
         >
           {!homeLoading && (
