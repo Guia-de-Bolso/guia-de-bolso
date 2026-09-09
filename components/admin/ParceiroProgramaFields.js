@@ -358,7 +358,8 @@ export default function ParceiroProgramaFields({
         <span>
           <strong>Curadoria do Guia</strong>
           <span className="mt-0.5 block text-xs font-normal text-[#5a6b66]">
-            Conteúdo curado pela equipe (praia, trilha…) — hero e Em alta hoje.
+            Conteúdo curado pela equipe — perfil completo (galeria, vídeo, avaliações)
+            e badge Curadoria do Guia.
           </span>
         </span>
       </label>
