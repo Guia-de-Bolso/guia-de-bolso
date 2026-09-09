@@ -158,7 +158,7 @@ function SmartSearch({
                     ? "Fale o que você quer descobrir…"
                     : "O que você quer descobrir hoje?"
                 }
-                className={`mt-0.5 w-full appearance-none border-0 bg-transparent text-[15px] leading-snug text-[#1a2e28] shadow-none outline-none ring-0 placeholder:text-[#9aa8a3] focus:outline-none focus-visible:outline-none ${
+                className={`mt-0.5 w-full appearance-none border-0 bg-transparent text-base leading-snug text-[#1a2e28] shadow-none outline-none ring-0 placeholder:text-[#9aa8a3] focus:outline-none focus-visible:outline-none ${
                   searchMode ? "pr-8" : ""
                 }`}
               />
