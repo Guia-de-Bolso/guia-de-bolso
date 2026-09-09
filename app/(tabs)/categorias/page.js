@@ -6,6 +6,9 @@ import { buildCategoriaJsonLd } from "@/lib/seoJsonLd";
 
 export const metadata = buildExplorarMetadata();
 
+/** ISR — catálogo muda no admin; evita Full Route Cache com contagem eterna. */
+export const revalidate = 60;
+
 /**
  * Explorar — categorias com dados iniciais no servidor.
  * @returns {Promise<import('react').ReactElement>}
