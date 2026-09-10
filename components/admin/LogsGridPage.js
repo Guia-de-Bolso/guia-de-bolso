@@ -360,7 +360,7 @@ export default function LogsGridPage() {
           type="search"
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
-          placeholder="Buscar por nome, e-mail ou local…"
+          placeholder="Buscar por nome, e-mail ou nome do local…"
           className="w-full rounded-xl border border-[#e3e9e6] bg-[#f7faf9] px-4 py-3 text-sm text-[#1a2e28] placeholder:text-[#9aa8a3] focus:border-[#1a4a3a] focus:outline-none focus:ring-2 focus:ring-[#1a4a3a]/20"
         />
 

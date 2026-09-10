@@ -235,7 +235,7 @@ export default function AbordagemComercialPage() {
                   <th className="py-2 pr-4">IR AGORA</th>
                   <th className="py-2 pr-4">Favoritos</th>
                   <th className="py-2 pr-4">QR</th>
-                  <th className="py-2 pr-4">Claim</th>
+                  <th className="py-2 pr-4">Pedidos perfil</th>
                   <th className="py-2 pr-4">Total</th>
                   <th className="py-2">Ações</th>
                 </tr>
