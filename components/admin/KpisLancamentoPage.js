@@ -15,6 +15,46 @@ import { buildKpisLancamento } from "@/lib/adminKpis";
 import { createClient } from "@/lib/supabase";
 
 /**
+ * Tabela compacta de ranking de engajamento.
+ * @param {{ items: Array<{ id: string, nome: string, categoria: string, visualizacoes: number, irAgora: number, engajamento: number }>, emptyLabel: string }} props
+ * @returns {import("react").JSX.Element}
+ */
+function TopEngajamentoTable({ items, emptyLabel }) {
+  if (!items.length) {
+    return <p className="mt-3 text-sm text-[#5a6b66]">{emptyLabel}</p>;
+  }
+
+  return (
+    <div className="mt-3 overflow-x-auto">
+      <table className="min-w-full text-left text-sm">
+        <thead>
+          <tr className="border-b border-[#eef3f1] text-xs uppercase text-[#9aa8a3]">
+            <th className="py-2 pr-3">Local</th>
+            <th className="py-2 pr-3">Categoria</th>
+            <th className="py-2 pr-3">Views</th>
+            <th className="py-2 pr-3">IR AGORA</th>
+            <th className="py-2">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.map((item) => (
+            <tr key={item.id} className="border-b border-[#f7faf9]">
+              <td className="py-2.5 pr-3 font-semibold text-[#1a2e28]">{item.nome}</td>
+              <td className="py-2.5 pr-3 text-[#5a6b66]">{item.categoria}</td>
+              <td className="py-2.5 pr-3 tabular-nums">{item.visualizacoes}</td>
+              <td className="py-2.5 pr-3 tabular-nums">{item.irAgora}</td>
+              <td className="py-2.5 tabular-nums font-semibold text-[#1a4a3a]">
+                {item.engajamento}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/**
  * Dashboard de KPIs da fase de lançamento (uso real antes da cobrança).
  * @returns {import("react").JSX.Element}
  */
@@ -57,6 +97,10 @@ export default function KpisLancamentoPage() {
       </div>
     );
   }
+
+  const temTopEngajamento =
+    kpis &&
+    (kpis.topLugaresComerciais.length > 0 || kpis.topLugaresCuradoria.length > 0);
 
   return (
     <AdminShell
@@ -187,36 +231,35 @@ export default function KpisLancamentoPage() {
             </div>
           </section>
 
-          {kpis.topLugares.length > 0 && (
+          {temTopEngajamento && (
             <section className="mt-6 rounded-3xl bg-white p-5 shadow-md ring-1 ring-black/5 md:p-6">
               <h2 className="text-sm font-bold uppercase tracking-wide text-[#5a6b66]">
                 Top locais por engajamento
               </h2>
-              <div className="mt-4 overflow-x-auto">
-                <table className="min-w-full text-left text-sm">
-                  <thead>
-                    <tr className="border-b border-[#eef3f1] text-xs uppercase text-[#9aa8a3]">
-                      <th className="py-2 pr-4">Local</th>
-                      <th className="py-2 pr-4">Categoria</th>
-                      <th className="py-2 pr-4">Views</th>
-                      <th className="py-2 pr-4">IR AGORA</th>
-                      <th className="py-2">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {kpis.topLugares.map((item) => (
-                      <tr key={item.id} className="border-b border-[#f7faf9]">
-                        <td className="py-2.5 pr-4 font-semibold text-[#1a2e28]">{item.nome}</td>
-                        <td className="py-2.5 pr-4 text-[#5a6b66]">{item.categoria}</td>
-                        <td className="py-2.5 pr-4 tabular-nums">{item.visualizacoes}</td>
-                        <td className="py-2.5 pr-4 tabular-nums">{item.irAgora}</td>
-                        <td className="py-2.5 tabular-nums font-semibold text-[#1a4a3a]">
-                          {item.engajamento}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <p className="mt-1 text-xs text-[#5a6b66]">
+                Separado entre quem pode gerar receita e conteúdo curado (nunca cobrado)
+              </p>
+              <div className="mt-4 grid gap-6 lg:grid-cols-2">
+                <div className="rounded-2xl bg-[#f7faf9] p-4 ring-1 ring-black/5">
+                  <h3 className="text-sm font-bold text-[#1a2e28]">Estabelecimentos comerciais</h3>
+                  <p className="mt-0.5 text-[11px] text-[#5a6b66]">
+                    Potencial de renda — podem vir a pagar
+                  </p>
+                  <TopEngajamentoTable
+                    items={kpis.topLugaresComerciais}
+                    emptyLabel="Nenhum estabelecimento com engajamento no período."
+                  />
+                </div>
+                <div className="rounded-2xl bg-[#f7faf9] p-4 ring-1 ring-black/5">
+                  <h3 className="text-sm font-bold text-[#1a2e28]">Curadoria do guia</h3>
+                  <p className="mt-0.5 text-[11px] text-[#5a6b66]">
+                    Natureza, locais públicos e curadoria — nunca pago
+                  </p>
+                  <TopEngajamentoTable
+                    items={kpis.topLugaresCuradoria}
+                    emptyLabel="Nenhum local de curadoria com engajamento no período."
+                  />
+                </div>
               </div>
             </section>
           )}
