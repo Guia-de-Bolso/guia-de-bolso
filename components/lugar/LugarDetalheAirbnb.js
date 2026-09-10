@@ -176,7 +176,7 @@ export default function LugarDetalheAirbnb(props) {
                     Perfil completo
                   </span>
                 )}
-                {ehEstabelecimento && (
+                {ehEstabelecimento && status && (
                   <span
                     className={`rounded-md px-2 py-0.5 text-[11px] font-bold ${
                       status.aberto
@@ -268,7 +268,7 @@ export default function LugarDetalheAirbnb(props) {
             </>
           )}
 
-          {lugar.mostrar_horarios && (
+          {lugar.mostrar_horarios && status && (
             <>
               <LugarDividerAirbnb />
               <LugarSectionAirbnb title="Horários">

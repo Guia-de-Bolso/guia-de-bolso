@@ -233,7 +233,7 @@ export default function LugarHero({
               </span>
             </span>
           )}
-          {mostrarStatusAbertura && (
+          {mostrarStatusAbertura && status && (
             <span
               className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
                 status.aberto

@@ -33,6 +33,8 @@ import {
   filterTagIdsBySubcategoria,
   filterTagsBySubcategoria,
   getTagIds,
+  normalizeSelectedTagIds,
+  toggleSelectedTagId,
 } from "@/lib/tags";
 import { processPendingPushCampaigns } from "@/lib/processPendingPushCampaigns";
 import { isLugarElegivelQr } from "@/lib/lugarQr";
@@ -158,8 +160,8 @@ export default function LocalForm({
   const [localizacao, setLocalizacao] = useState(initialLocalizacao);
   const [subcategorias, setSubcategorias] = useState([]);
   const [tags, setTags] = useState([]);
-  const [selectedTagIds, setSelectedTagIds] = useState(
-    () => getTagIds(initialTags).slice(0, MAX_TAGS)
+  const [selectedTagIds, setSelectedTagIds] = useState(() =>
+    normalizeSelectedTagIds(getTagIds(initialTags)).slice(0, MAX_TAGS)
   );
   const [tagLimitMessage, setTagLimitMessage] = useState("");
   const [photoItems, setPhotoItems] = useState(() => getInitialPhotoItems(initialData));
@@ -232,11 +234,13 @@ export default function LocalForm({
     }
 
     setSelectedTagIds((current) =>
-      filterTagIdsBySubcategoria(
-        current,
-        tags,
-        form.categoria,
-        form.subcategoria
+      normalizeSelectedTagIds(
+        filterTagIdsBySubcategoria(
+          current,
+          tags,
+          form.categoria,
+          form.subcategoria
+        )
       ).slice(0, MAX_TAGS)
     );
     setTagLimitMessage("");
@@ -246,6 +250,14 @@ export default function LocalForm({
   const visibleTags = tagsProntas
     ? filterTagsBySubcategoria(tags, form.categoria, form.subcategoria)
     : [];
+  const selectedVisibleTagIds = tagsProntas
+    ? filterTagIdsBySubcategoria(
+        selectedTagIds,
+        tags,
+        form.categoria,
+        form.subcategoria
+      )
+    : [];
 
   /**
    * Alterna seleção de tag respeitando o limite de {@link MAX_TAGS}.
@@ -253,18 +265,16 @@ export default function LocalForm({
    */
   function toggleTag(tagId) {
     setDirty(true);
-    setSelectedTagIds((current) => {
-      if (current.includes(tagId)) {
-        setTagLimitMessage("");
-        return current.filter((id) => id !== tagId);
-      }
-      if (current.length >= MAX_TAGS) {
-        setTagLimitMessage(`Você pode selecionar no máximo ${MAX_TAGS} tags.`);
-        return current;
-      }
-      setTagLimitMessage("");
-      return [...current, tagId];
+    const { next, limitReached } = toggleSelectedTagId(selectedTagIds, tagId, {
+      tags,
+      categoria: form.categoria,
+      subcategoria: form.subcategoria,
+      max: MAX_TAGS,
     });
+    setSelectedTagIds(next);
+    setTagLimitMessage(
+      limitReached ? `Você pode selecionar no máximo ${MAX_TAGS} tags.` : ""
+    );
   }
 
   /**
@@ -517,9 +527,15 @@ export default function LocalForm({
     if (lugarId) {
       await supabase.from("lugares_tags").delete().eq("lugar_id", lugarId);
 
-      if (selectedTagIds.length > 0) {
+      const validTagIds = getTagIds(
+        visibleTags.filter((tag) =>
+          selectedTagIds.includes(String(tag.id))
+        )
+      ).slice(0, MAX_TAGS);
+
+      if (validTagIds.length > 0) {
         await supabase.from("lugares_tags").insert(
-          selectedTagIds.map((tagId) => ({
+          validTagIds.map((tagId) => ({
             lugar_id: lugarId,
             tag_id: Number(tagId),
           }))
@@ -725,7 +741,7 @@ export default function LocalForm({
         <div className="mb-2 flex items-center justify-between gap-2">
           <p className="text-sm font-semibold text-[#1a2e28]">Tags</p>
           <span className="text-xs font-semibold text-[#5a6b66]">
-            {selectedTagIds.length}/{MAX_TAGS} selecionadas
+            {selectedVisibleTagIds.length} de {MAX_TAGS} selecionadas
           </span>
         </div>
         {tagLimitMessage && (

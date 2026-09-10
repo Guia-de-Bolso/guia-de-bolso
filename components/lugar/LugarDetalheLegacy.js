@@ -116,7 +116,7 @@ export default function LugarDetalheLegacy(props) {
           mediaAvaliacoes={visibilidade?.showAvaliacoes ? mediaAvaliacoes : 0}
           totalAvaliacoes={visibilidade?.showAvaliacoes ? totalAvaliacoes : 0}
           status={status}
-          mostrarStatusAbertura={ehEstabelecimento}
+          mostrarStatusAbertura={ehEstabelecimento && Boolean(status)}
           isFavorito={isFavorito}
           onFavoritar={handleFavoritar}
           onShare={handleShare}
@@ -172,7 +172,7 @@ export default function LugarDetalheLegacy(props) {
 
           {tagsExibidas.length > 0 && <LugarTags tags={tagsExibidas} />}
 
-          {lugar.mostrar_horarios && (
+          {lugar.mostrar_horarios && status && (
             <LugarHorariosCompact
               resumo={props.horarioResumo}
               aberto={status.aberto}
