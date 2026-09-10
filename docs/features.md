@@ -303,7 +303,8 @@ Decide to go now, contact the business, or navigate.
 - Reviews: only `aprovada` shown; user’s pending review shows “awaiting approval” UX via `jaAvaliou`.
 - One review per user per place (second attempt blocked).
 - `profiles` join failure → fallback query without author names.
-- Share: `navigator.share` or clipboard copy; user canceling share is silent.
+- Share: `shareContent` (`lib/shareContent.js`) — URL canônica `https://guiadebolso.app/...`, sheet nativo (`@capacitor/share`), Web Share API ou clipboard; cancelamento silencioso.
+- Universal / App Links: toque no link compartilhado abre o app (`lib/appLinks.js`, `CapacitorAppLinks`); ver [deployment.md](./deployment.md#universal-links--app-links-abrir-link-compartilhado-no-app).
 - **Place profile visibility** — **Presença** subcategories (`SUBCATEGORIAS_PRESENCA` in `lib/planoLancamento.js`: Farmácias, Mercados, Mecânicos, Saúde, **Igrejas e templos**, **Museus**, **Monumentos**), partners (`eh_parceiro`), launch-promo places (`perfil_promo_ate`) and public/nature spots show the **full** profile (gallery, links, reviews, `historia_cultura`). Other commercial places without partner/promo show a **basic** teaser (cover, short description, WhatsApp, claim CTA). Paid extras (home carousel, badge, AI priority, QR, reports) stay on Parceiro (`lib/lugarVisibilidade.js`). Admin presets: `PerfilPromoFields`.
 - Maps: first visit may open app picker sheet; preference stored in `localStorage`.
 - Visit recorded to recent list on successful load.
@@ -365,17 +366,19 @@ Share experience and read social proof.
 ## 16. Share place
 
 **Description**  
-Share current place URL via native share sheet or copy link.
+Share current place/roteiro URL via native share sheet or copy link. Shared links use the marketing host (`https://guiadebolso.app/...`) so Universal Links / App Links open the installed app.
 
 **User goal**  
 Send a place to friends or save for later.
 
 **Main flows**
-1. Hero share button → `navigator.share` or clipboard → toast “Link copiado!”.
+1. Hero share button → `shareContent` (Capacitor Share / Web Share / clipboard) → toast “Link copiado!” when copied.
+2. Recipient with app installed taps the HTTPS link → OS opens Guia de Bolso on that route.
 
 **Edge cases**
 - Non-HTTPS or unsupported share → clipboard path.
 - User dismisses native share → no error shown.
+- Without the app → link opens in the browser as usual.
 
 ---
 

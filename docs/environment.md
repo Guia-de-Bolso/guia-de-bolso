@@ -118,6 +118,13 @@ O projeto valida presença de `NEXT_PUBLIC_SUPABASE_*` no build (`next.config.mj
 - Obrigatório em **Production** se o cron estiver ativo (`vercel.json`)
 - Gere valor aleatório longo; não usar `NEXT_PUBLIC_`
 
+### `ANDROID_APP_LINK_SHA256_EXTRA`
+
+- Opcional, **runtime** (server) — fingerprints SHA-256 extras no `assetlinks.json` (App Links)
+- Use o SHA-256 da **App signing key** da Play Console (e o de debug se quiser testar sideload)
+- Formato: `AA:BB:CC:...` — vários separados por vírgula
+- Ver [deployment.md](./deployment.md#universal-links--app-links-abrir-link-compartilhado-no-app)
+
 ### `NEXT_PUBLIC_SENTRY_DSN`
 
 - Quando preenchido, erros podem ser enviados via `reportError()` (evolução contínua)

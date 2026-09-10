@@ -34,6 +34,11 @@ export async function middleware(request) {
     return applyPreviewRobots(NextResponse.redirect(apex, 308));
   }
 
+  // Universal Links / App Links — não redirecionar no domínio de marketing.
+  if (request.nextUrl.pathname.startsWith("/.well-known/")) {
+    return applyPreviewRobots(NextResponse.next());
+  }
+
   if (isMarketingHost(host)) {
     const action = getMarketingRouteAction(request.nextUrl.pathname);
 

@@ -70,6 +70,11 @@ import { createClient } from "@/lib/supabase";
 import { getSessionUser } from "@/lib/supabase/session";
 import { getDiaAtualKey, getStatusFuncionamento } from "@/lib/horarios";
 import { getReturnPathFromSearch } from "@/lib/navigationReturn";
+import {
+  getLugarShareUrl,
+  shareContent,
+  SHARE_COPIED_MESSAGE,
+} from "@/lib/shareContent";
 
 /**
  * Estado e ações compartilhados entre layout legado e redesign Airbnb.
@@ -494,23 +499,20 @@ export function useLugarDetalhe(lugarIdFromServer, options = {}) {
   async function handleShare() {
     if (!lugar) return;
 
-    const shareData = {
-      title: lugar.nome,
-      text: lugar.descricao,
-      url: window.location.href,
-    };
+    const url = getLugarShareUrl(lugar);
 
     try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-        return;
+      const outcome = await shareContent({
+        title: lugar.nome,
+        text: lugar.descricao,
+        url,
+      });
+      if (outcome === "copied") {
+        setToast(SHARE_COPIED_MESSAGE);
+        setTimeout(() => setToast(""), 2500);
       }
-
-      await navigator.clipboard.writeText(window.location.href);
-      setToast("Link copiado!");
-      setTimeout(() => setToast(""), 2500);
     } catch {
-      // Cancelamento do share nativo.
+      // Cancelamento do share nativo ou falha silenciosa.
     }
   }
 

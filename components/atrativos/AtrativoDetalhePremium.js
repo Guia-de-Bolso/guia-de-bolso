@@ -16,6 +16,11 @@ import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { ROTEIROS_PATH } from "@/lib/roteirosPaths";
 import { toggleRotasFavorita, createFavoritosSyncGuard, FAVORITO_OFFLINE_SAVED_MESSAGE } from "@/lib/rotasFavoritas";
 import {
+  getRoteiroShareUrl,
+  shareContent,
+  SHARE_COPIED_MESSAGE,
+} from "@/lib/shareContent";
+import {
   FAVORITO_OFFLINE_TYPES,
   getOfflineFavorito,
 } from "@/lib/favoritosOffline";
@@ -156,23 +161,22 @@ export default function AtrativoDetalhePremium({
   }
 
   async function handleShare() {
-    const shareData = {
-      title: nome,
-      text: descricao || undefined,
-      url: window.location.href,
-    };
+    if (!rotaId) return;
+
+    const url = getRoteiroShareUrl(rotaId);
 
     try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-        return;
+      const outcome = await shareContent({
+        title: nome,
+        text: descricao || undefined,
+        url,
+      });
+      if (outcome === "copied") {
+        setToast(SHARE_COPIED_MESSAGE);
+        setTimeout(() => setToast(""), 2500);
       }
-
-      await navigator.clipboard.writeText(window.location.href);
-      setToast("Link copiado!");
-      setTimeout(() => setToast(""), 2500);
     } catch {
-      // Cancelamento do share nativo.
+      // Cancelamento do share nativo ou falha silenciosa.
     }
   }
 

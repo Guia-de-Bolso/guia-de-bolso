@@ -127,6 +127,30 @@ Native social login does **not** use `/auth/callback`.
 
 Setup details: [authentication.md](./authentication.md#native-login-capacitor).
 
+### Universal Links / App Links (abrir link compartilhado no app)
+
+Links públicos (`https://guiadebolso.app/lugares/...`, `/roteiros/...`, `/q/...`) abrem o app nativo quando instalado:
+
+| Peça | Onde |
+|------|------|
+| `apple-app-site-association` | `/.well-known/apple-app-site-association` (`lib/appLinks.js`) |
+| `assetlinks.json` | `/.well-known/assetlinks.json` |
+| iOS Associated Domains | `App.entitlements` / `AppRelease.entitlements` (`applinks:guiadebolso.app`, `applinks:app.guiadebolso.app`) |
+| Android intent-filters | `AndroidManifest.xml` (`android:autoVerify="true"`) |
+| Router no WebView | `components/CapacitorAppLinks.js` |
+
+**Play Store:** se a Google assina o app (Play App Signing), configure na Vercel `ANDROID_APP_LINK_SHA256_EXTRA` com o SHA-256 da **App signing key** (Play Console → Integridade do app). Sem isso, App Links falham em builds da loja.
+
+**Apple Developer:** marque Associated Domains no App ID `app.guiadebolso` e faça um build novo após alterar entitlements.
+
+**Validação rápida após deploy:**
+
+```bash
+curl -sI https://guiadebolso.app/.well-known/apple-app-site-association
+curl -s https://guiadebolso.app/.well-known/assetlinks.json
+# Android: adb shell pm get-app-links app.guiadebolso
+```
+
 **Symptom:** home / Explorar show no places, empty sections, or an amber “Supabase não configurado no deploy” banner.
 
 **Cause:** `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` were missing at **build time** (the production JS bundle will not contain your project URL).
