@@ -27,7 +27,7 @@ WHERE eh_parceiro = false
       'Praias', 'Trilhas', 'Cachoeiras', 'Mirantes', 'Lagoas', 'Parques',
       'Piscinas naturais', 'Dunas', 'Ilhas',
       'Museus', 'Monumentos', 'Igrejas e templos', 'Eventos',
-      'Esportes radicais', 'Passeios de barco', 'Escalada', 'Ciclismo'
+      'Esportes radicais', 'Surf', 'Passeios de barco', 'Escalada', 'Ciclismo'
     )
     OR subcategoria IS NULL
   );

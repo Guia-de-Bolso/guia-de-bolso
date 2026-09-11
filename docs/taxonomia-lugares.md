@@ -8,7 +8,7 @@
 | **Subcategoria** | **Tipo** do lugar (filtro na página da categoria) | Praias, Trilhas, Cachoeiras |
 | **Tags** (máx. 5) | **Atributos** e experiência | Surfe, Pôr do sol imperdível, Mar agitado |
 
-Não crie subcategoria para coisas que já são tag (Surfe, pôr do sol, mergulho, romântico, pet friendly, etc.).
+Não crie subcategoria para atributos de experiência (pôr do sol, mergulho, romântico, pet friendly, etc.). **Surfe** (com e) é tag de Praias; **Surf** (sem e) é subcategoria de Aventura para escolas/aulas/aluguel.
 
 ## Subcategorias canônicas
 
@@ -36,7 +36,9 @@ Museus · Monumentos · Igrejas e templos · Eventos
 **Presença (full profile, no paid highlight):** `SUBCATEGORIAS_PRESENCA` in `lib/planoLancamento.js` — Farmácias, Mercados, Mecânicos, Saúde, Igrejas e templos, Museus, Monumentos. Eventos and other commercial subcategories are not on that list (teaser unless partner or Lançamento promo).
 
 ### Aventura
-Esportes radicais · Passeios de barco · Escalada · Ciclismo
+Esportes radicais · Surf · Passeios de barco · Escalada · Ciclismo
+
+**Surf (escolas / aulas / aluguel):** subcategoria própria — não use “Surf” como subcategoria de Praias. Praias usam a tag **Surfe**. Seed: `supabase/subcategoria_aventura_surf.sql` + `supabase/tags_aventura_surf.sql`.
 
 ### Bem-estar
 Spa · Yoga · Terapias
@@ -58,8 +60,14 @@ Tags que já existiam e cobrem o caso: **Pôr do sol imperdível**, **Nascer do 
 **Formulário de lugar** (`/admin/locais`):
 
 1. Categoria → ex. Natureza  
-2. Subcategoria → ex. **Praias** (não “Surf”)  
+2. Subcategoria → ex. **Praias** (não use “Surf” aqui — Surf é subcategoria de **Aventura** para escolas)  
 3. Tags → só então aparecem checkboxes; ex. **Surfe** + **Pôr do sol imperdível** + **Mar agitado** (máx. **5** selecionadas)
+
+**Escola de surf** (`/admin/locais`):
+
+1. Categoria → **Aventura**  
+2. Subcategoria → **Surf**  
+3. Tags → ex. **Aulas de surf** + **Ideal para iniciantes** + **Aluguel de prancha** (máx. **5**)
 
 **Taxonomia → Tags:** vincule a tag às **subcategorias** (não só à categoria ampla).
 

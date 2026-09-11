@@ -39,6 +39,7 @@ FROM (VALUES
   ('Cultura', 'Igrejas e templos', '⛪'),
   ('Cultura', 'Eventos', '🎭'),
   ('Aventura', 'Esportes radicais', '🪂'),
+  ('Aventura', 'Surf', '🏄'),
   ('Aventura', 'Passeios de barco', '⛵'),
   ('Aventura', 'Escalada', '🧗'),
   ('Aventura', 'Ciclismo', '🚴'),
@@ -171,9 +172,13 @@ WHERE categoria = 'Cultura'
   AND subcategoria IN ('Igreja', 'Templo', 'Capela', 'Santuário', 'Santuario');
 
 -- Aventura
+UPDATE lugares SET subcategoria = 'Surf'
+WHERE categoria = 'Aventura'
+  AND subcategoria IN ('Surfe', 'Escola de surf', 'Aulas de surf', 'Aula de surf');
+
 UPDATE lugares SET subcategoria = 'Esportes radicais'
 WHERE categoria = 'Aventura'
-  AND subcategoria IN ('Surf', 'Surfe', 'Rafting', 'Parapente', 'Asa delta');
+  AND subcategoria IN ('Rafting', 'Parapente', 'Asa delta');
 
 UPDATE lugares SET subcategoria = 'Passeios de barco'
 WHERE categoria = 'Aventura'
@@ -223,6 +228,7 @@ WHERE NOT EXISTS (
     ('Cultura', 'Igrejas e templos'),
     ('Cultura', 'Eventos'),
     ('Aventura', 'Esportes radicais'),
+    ('Aventura', 'Surf'),
     ('Aventura', 'Passeios de barco'),
     ('Aventura', 'Escalada'),
     ('Aventura', 'Ciclismo'),

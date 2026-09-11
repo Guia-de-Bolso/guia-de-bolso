@@ -107,6 +107,8 @@ Run in order for a **new environment**. Base tables (`lugares`, `perfis`, `favor
 | 9f | `tags_gastronomia_tipos_comida.sql` | Tags de especialidade (Pizza, Sushi, Hambúrguer, Massas, etc.) em **Gastronomia → Restaurantes** |
 | 9g | `subcategoria_gastronomia_emporio_gourmet.sql` | Subcategoria **Gastronomia → Empório Gourmet** + vínculo de tags comuns |
 | 9h | `tags_gastronomia_emporio_gourmet.sql` | Tags de emporium (Vinhos, Delicatessen, Degustação, etc.) em **Gastronomia → Empório Gourmet** |
+| 9i | `subcategoria_aventura_surf.sql` | Subcategoria **Aventura → Surf** + vínculo de tags comuns (Surfe, Stand-up, iniciantes, etc.) |
+| 9j | `tags_aventura_surf.sql` | Tags de escola/aula/aluguel (Aulas de surf, Aluguel de prancha, etc.) em **Aventura → Surf** |
 | 15c | `lugares_purge_inativos.sql` | `lugares.desativado_em` + trigger; retenção 30 dias e alertas no admin |
 | 10 | `fotos_migration.sql` | `lugares.fotos`, `rotas.fotos`; public storage read |
 | 11 | `storage-policies.sql` | Avatar policies on `imagens` |

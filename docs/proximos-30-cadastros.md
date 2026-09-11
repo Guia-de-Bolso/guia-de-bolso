@@ -51,8 +51,8 @@ Sugestões abaixo são **tipos + exemplos locais** — confirme nome comercial, 
 
 | # | Subcategoria | Sugestão / tipo | Região | Notas |
 |--:|--------------|-----------------|--------|-------|
-| 17 | Esportes radicais | Escola de surf | Rosa / Ibiraquera | |
-| 18 | Esportes radicais | Aluguel stand-up / kayak | Lagoa / Rosa | |
+| 17 | Surf | Escola de surf | Rosa / Ibiraquera | |
+| 18 | Surf | Aluguel stand-up / kayak | Lagoa / Rosa | |
 | 19 | Passeios de barco | Passeio de barco / observação de baleias (temporada) | Porto / Vila | |
 | 20 | Passeios de barco | Passeio pela lagoa / mangrove | Ibiraquera | |
 | 21 | Ciclismo | Aluguel de bike / bike tour | Rosa / Vila | |
