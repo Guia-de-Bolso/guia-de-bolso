@@ -15,6 +15,11 @@ const plugins = {
   PushNotifications: {
     presentationOptions: ["badge", "sound", "alert"],
   },
+  // Mantém o splash até CapacitorShell decidir (ex.: cold start por tap em push).
+  SplashScreen: {
+    launchAutoHide: false,
+    backgroundColor: "#0b1f18",
+  },
 };
 
 /**

@@ -252,6 +252,7 @@ A `event_key` única e o claim transacional impedem notificações duplicadas.
 4. Toggle no Perfil só para o usuário desligar (ou religar).
 5. Logout → `DELETE /api/push/register`.
 6. Tap → path interno em `data.url` (`safeRedirectPath`).
+7. **Cold start (app morto):** `CapacitorShell` registra o listener cedo, espera até ~500ms o `pushNotificationActionPerformed` e só então esconde o splash — se houver `url`, faz `location.replace` direto no destino (sem passar pela home). App já aberto: soft-nav via `router.replace`.
 
 ## Envio (admin)
 

@@ -8,10 +8,17 @@ import { useEffect } from "react";
 import { FAVORITOS_OFFLINE_NAV_HREF, isFavoritosOfflineAllowedPath } from "@/lib/offlineNavigation";
 import { initNativeSafeAreaInsets } from "@/lib/nativeSafeArea";
 import { ensureSocialLoginInitialized } from "@/lib/nativeSocialLoginInit";
-import { ensurePushNotificationListeners } from "@/lib/pushNotifications";
+import {
+  isSamePushAppPath,
+  markPushLaunchCheckDone,
+  openPushNotificationPath,
+  resolvePushNotificationColdStart,
+} from "@/lib/pushNotifications";
 
 /**
  * Inicializa status bar, splash e classe no document para safe areas no app nativo.
+ * No cold start por tap em push, espera o path antes de esconder o splash —
+ * evita home → delay → destino.
  * @returns {null}
  */
 export default function CapacitorShell() {
@@ -34,6 +41,24 @@ export default function CapacitorShell() {
         }
       } catch {
         /* Network plugin indisponível */
+      }
+
+      try {
+        const launchPath = await resolvePushNotificationColdStart();
+        if (
+          !cancelled &&
+          launchPath &&
+          !isSamePushAppPath(
+            `${window.location.pathname || "/"}${window.location.search || ""}`,
+            launchPath
+          )
+        ) {
+          markPushLaunchCheckDone();
+          openPushNotificationPath(launchPath, { forceHard: true });
+          return;
+        }
+      } catch (error) {
+        console.warn("push cold start:", error);
       }
 
       try {
@@ -60,8 +85,6 @@ export default function CapacitorShell() {
       ensureSocialLoginInitialized().catch((error) => {
         console.warn("SocialLogin.initialize:", error);
       });
-
-      ensurePushNotificationListeners();
     })();
 
     window.addEventListener("resize", applySafeArea);
