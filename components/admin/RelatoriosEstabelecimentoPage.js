@@ -22,6 +22,7 @@ import {
   getPlanoComercialTier,
   getPlanoComercialTierLabel,
 } from "@/lib/planoLancamento";
+import { REPORT_AUDIENCE_NOTE } from "@/lib/reportAudience";
 import { downloadRelatorioPdf } from "@/lib/relatorioPdf";
 import { parseSupabaseTimestamp } from "@/lib/supabaseTimestamp";
 import { createClient } from "@/lib/supabase";
@@ -197,6 +198,8 @@ export default function RelatoriosEstabelecimentoPage() {
             {erro}
           </p>
         )}
+
+        <p className="mt-4 text-sm text-[#5a6b66]">{REPORT_AUDIENCE_NOTE}</p>
 
         <button
           type="button"

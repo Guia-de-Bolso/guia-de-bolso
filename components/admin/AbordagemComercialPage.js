@@ -8,6 +8,7 @@ import {
   buildFilaAbordagemComercial,
   formatFilaAbordagemCsv,
 } from "@/lib/adminKpis";
+import { REPORT_AUDIENCE_NOTE } from "@/lib/reportAudience";
 import { createClient } from "@/lib/supabase";
 
 /** @type {Record<string, string>} */
@@ -113,7 +114,8 @@ export default function AbordagemComercialPage() {
           <strong>Presença</strong> — perfil completo permanente, sem destaque pago.
           Restaurantes e experiências em <strong>Lançamento</strong> — perfil completo
           grátis até fev/2027. Depois do marketing, use esta fila para decidir quem
-          abordar primeiro com dados de visualizações, IR AGORA e pedidos de perfil.
+          abordar primeiro com dados de visualizações, IR AGORA e pedidos de perfil.{" "}
+          {REPORT_AUDIENCE_NOTE}
         </p>
         <div className="mt-3 flex flex-wrap gap-3 text-xs font-semibold">
           <Link

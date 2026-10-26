@@ -12,6 +12,7 @@ import {
 } from "@/components/admin/dashboardIcons";
 import { PERIODO_RELATORIO_OPTIONS } from "@/lib/adminRelatorios";
 import { buildKpisLancamento } from "@/lib/adminKpis";
+import { REPORT_AUDIENCE_NOTE } from "@/lib/reportAudience";
 import { createClient } from "@/lib/supabase";
 
 /**
@@ -133,6 +134,8 @@ export default function KpisLancamentoPage() {
             {gerando ? "Atualizando…" : "Atualizar KPIs"}
           </button>
         </div>
+
+        <p className="mt-4 text-sm text-[#5a6b66]">{REPORT_AUDIENCE_NOTE}</p>
 
         {erro && <p className="mt-4 text-sm font-semibold text-red-600">{erro}</p>}
       </section>
