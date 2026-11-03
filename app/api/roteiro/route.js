@@ -6,8 +6,10 @@ import { checkIaRateLimit } from "@/lib/iaRateLimit";
 import { logIA } from "@/lib/logIA";
 import { reportError } from "@/lib/observability";
 import { checkRoteiroAccess, getAuthUser, releaseRoteiroIaUsage, reserveRoteiroIaUsage } from "@/lib/premiumServer";
+import { toRoteiroCatalogItem } from "@/lib/roteiroCatalog";
 import { parseDiasViagem } from "@/lib/roteiroDias";
 import { selecionarLugaresParaRoteiro } from "@/lib/roteiroLugares";
+import { buildTituloRoteiro, sanitizePerfilRoteiro } from "@/lib/roteiroPerfil";
 import { supabase } from "@/lib/supabase/anon";
 import { buildApiErrorBody } from "@/lib/userMessages";
 
@@ -41,6 +43,7 @@ Regras obrigatórias:
 - Monte EXATAMENTE o número de dias pedido no prompt (Dia 1 até Dia N). Não adicione dias a mais nem a menos.
 - Se houver preferências gastronômicas (ex.: Pizza, Sushi), priorize restaurantes com essas especialidades nas refeições.
 - Não deixe períodos vazios: se não houver lugar à noite, omita o bloco ## daquele período.
+- O perfil pode ser um texto livre. Adapte o ritmo e as sugestões a esse perfil, sem inventar lugares.
 - Não invente lugares. Não use parágrafos soltos fora do formato.
 - NÃO escreva introdução, conclusão, "bom passeio", "aproveite" nem qualquer texto após o último bloco de período.
 - Tom direto, português do Brasil, emojis apenas nos títulos ## de período.`;
@@ -53,8 +56,9 @@ Regras obrigatórias:
 export async function POST(request) {
   try {
     const { dias, perfil, interesses, tiposGastronomia } = await request.json();
+    const perfilLimpo = sanitizePerfilRoteiro(perfil);
 
-    if (!dias?.trim() || !perfil?.trim() || !interesses?.length) {
+    if (!dias?.trim() || perfilLimpo.length < 2 || !interesses?.length) {
       return NextResponse.json(buildApiErrorBody("VALIDATION"), { status: 400 });
     }
 
@@ -101,7 +105,7 @@ export async function POST(request) {
       supabase
         .from("lugares")
         .select(
-          "id, nome, slug, descricao, categoria, subcategoria, eh_parceiro, conteudo_curadoria, imagem_url, fotos, lugares_tags(tags(nome))"
+          "id, nome, slug, descricao, categoria, subcategoria, eh_parceiro, conteudo_curadoria, imagem_url, fotos, localizacoes(latitude, longitude, endereco_completo), lugares_tags(tags(nome))"
         )
     );
 
@@ -175,7 +179,7 @@ export async function POST(request) {
                 },
                 {
                   type: "text",
-                  text: `Roteiro de ${diasPrompt} | Perfil: ${perfil} | Interesses: ${interessesTexto}${gastronomiaTexto}`,
+                  text: `Roteiro de ${diasPrompt} | Perfil: ${perfilLimpo} | Interesses: ${interessesTexto}${gastronomiaTexto}`,
                 },
               ],
             },
@@ -239,21 +243,17 @@ export async function POST(request) {
     });
     const conteudo = claudeData.content?.[0]?.text?.trim() ?? "";
 
-    const parceiroPorId = new Map(
-      lugaresComParceiro.map((lugar) => [String(lugar.id), Boolean(lugar.ehParceiro)])
+    const brutoPorId = new Map(
+      lugaresComParceiro.map((lugar) => [String(lugar.id), lugar])
     );
 
-    const lugaresCatalog = lugares.map((lugar) => ({
-      id: String(lugar.id),
-      nome: lugar.nome,
-      ehParceiro: parceiroPorId.get(String(lugar.id)) ?? false,
-      imagem_url: lugar.imagem_url ?? null,
-      fotos: lugar.fotos ?? null,
-    }));
+    const lugaresCatalog = lugares
+      .map((lugar) => toRoteiroCatalogItem(brutoPorId.get(String(lugar.id)) ?? lugar, { apenasCapa: true }))
+      .filter(Boolean);
 
     return NextResponse.json({
       conteudo,
-      titulo: `Roteiro ${dias} - ${perfil}`,
+      titulo: buildTituloRoteiro(dias, perfilLimpo),
       lugaresCatalog,
       usage: reservedUsage,
     });

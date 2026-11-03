@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { reportError } from "@/lib/observability";
 import { getAuthUser } from "@/lib/premiumServer";
 import { parseDiasViagem } from "@/lib/roteiroDias";
+import { sanitizePerfilRoteiro } from "@/lib/roteiroPerfil";
 import { buildApiErrorBody } from "@/lib/userMessages";
 
 /**
@@ -23,6 +24,8 @@ export async function POST(request) {
     const { titulo, dias, perfil, interesses, conteudo, tiposGastronomia } = await request.json();
 
     const diasNumero = parseDiasViagem(dias);
+    const perfilLimpo = sanitizePerfilRoteiro(perfil);
+    const tituloLimpo = String(titulo ?? "").replace(/\s+/g, " ").trim().slice(0, 160);
     const interessesLista = Array.isArray(interesses) ? interesses : [];
     const tiposLista = Array.isArray(tiposGastronomia) ? tiposGastronomia : [];
     const interessesSalvos = [
@@ -30,7 +33,7 @@ export async function POST(request) {
       ...tiposLista.filter((item) => !interessesLista.includes(item)),
     ];
 
-    if (!titulo?.trim() || diasNumero === null || !perfil?.trim() || !conteudo?.trim()) {
+    if (!tituloLimpo || diasNumero === null || perfilLimpo.length < 2 || !conteudo?.trim()) {
       return NextResponse.json(
         {
           ...buildApiErrorBody("VALIDATION"),
@@ -44,9 +47,9 @@ export async function POST(request) {
       .from("roteiros")
       .insert({
         user_id: user.id,
-        titulo: titulo.trim(),
+        titulo: tituloLimpo,
         dias: diasNumero,
-        perfil: perfil.trim(),
+        perfil: perfilLimpo,
         interesses: interessesSalvos,
         conteudo: conteudo.trim(),
       })

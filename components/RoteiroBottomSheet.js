@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import BottomSheetShell from "@/components/BottomSheetShell";
 import Logo from "@/components/Logo";
 import RoteiroItineraryView from "@/components/atrativos/RoteiroItineraryView";
@@ -20,6 +20,13 @@ import {
   ROTEIRO_GASTRONOMIA_TIPOS,
   isGastronomiaInteresseAtivo,
 } from "@/lib/roteiroGastronomia";
+import { mergeRoteiroCatalogos } from "@/lib/roteiroCatalog";
+import {
+  ROTEIRO_PERFIL_MAX,
+  buildTituloRoteiro,
+  limitarPerfilRoteiro,
+  sanitizePerfilRoteiro,
+} from "@/lib/roteiroPerfil";
 import { buildReportContext } from "@/lib/reportContext";
 import {
   getNetworkErrorMessage,
@@ -120,6 +127,7 @@ function RoteiroLoadingView({ message }) {
  * @param {(usage: object|null) => void} [props.onUsageRefresh] - Called after generation with updated usage.
  * @param {(roteiro: object) => void} [props.onRoteiroSalvo] - Called after a successful save.
  * @param {boolean} [props.resumeDraft=false] - Restaura rascunho não salvo ao abrir.
+ * @param {Array<object>} [props.catalogoReferencia] - Lugares da listagem, para foto e mapa.
  * @returns {import('react').ReactElement|null}
  */
 export default function RoteiroBottomSheet({
@@ -132,11 +140,14 @@ export default function RoteiroBottomSheet({
   onUsageRefresh,
   onRoteiroSalvo,
   resumeDraft = false,
+  catalogoReferencia = [],
 }) {
   const [diasOpcao, setDiasOpcao] = useState("");
   const [diasExatos, setDiasExatos] = useState(null);
   const [dias, setDias] = useState("");
   const [perfil, setPerfil] = useState("");
+  const [perfilLivre, setPerfilLivre] = useState("");
+  const [perfilLivreAtivo, setPerfilLivreAtivo] = useState(false);
   const [interesses, setInteresses] = useState([]);
   const [tiposGastronomia, setTiposGastronomia] = useState([]);
   const [view, setView] = useState("form");
@@ -152,7 +163,14 @@ export default function RoteiroBottomSheet({
 
   const diasResolvido = resolveDiasParaRoteiro(diasOpcao, diasExatos);
   const gastronomiaAtiva = isGastronomiaInteresseAtivo(interesses);
-  const formularioCompleto = Boolean(diasResolvido && perfil && interesses.length > 0);
+  const perfilLimpo = sanitizePerfilRoteiro(perfil);
+  const formularioCompleto = Boolean(
+    diasResolvido && perfilLimpo.length >= 2 && interesses.length > 0
+  );
+  const catalogoVista = useMemo(
+    () => mergeRoteiroCatalogos(lugaresCatalog, catalogoReferencia),
+    [lugaresCatalog, catalogoReferencia]
+  );
 
   /**
    * Restaura rascunho não salvo (ex.: após voltar do detalhe de um lugar).
@@ -163,7 +181,11 @@ export default function RoteiroBottomSheet({
     setDiasOpcao(split.dias);
     setDiasExatos(split.diasExatos);
     setDias(draft.dias ?? "");
-    setPerfil(draft.perfil ?? "");
+    const perfilSalvo = draft.perfil ?? "";
+    const perfilPreset = PERFIS.some((item) => item.label === perfilSalvo);
+    setPerfilLivreAtivo(!perfilPreset && Boolean(perfilSalvo));
+    setPerfilLivre(perfilPreset ? "" : perfilSalvo);
+    setPerfil(perfilSalvo);
     setInteresses(Array.isArray(draft.interesses) ? draft.interesses : []);
     setTiposGastronomia(
       Array.isArray(draft.tiposGastronomia) ? draft.tiposGastronomia : []
@@ -186,7 +208,7 @@ export default function RoteiroBottomSheet({
       conteudo,
       dias,
       diasExatos,
-      perfil,
+      perfil: perfilLimpo,
       interesses,
       tiposGastronomia,
       lugaresCatalog,
@@ -230,6 +252,8 @@ export default function RoteiroBottomSheet({
     setDiasExatos(null);
     setDias("");
     setPerfil("");
+    setPerfilLivre("");
+    setPerfilLivreAtivo(false);
     setInteresses([]);
     setTiposGastronomia([]);
     setTitulo("");
@@ -344,7 +368,7 @@ export default function RoteiroBottomSheet({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           dias: diasEnvio,
-          perfil,
+          perfil: perfilLimpo,
           interesses,
           tiposGastronomia,
         }),
@@ -378,17 +402,18 @@ export default function RoteiroBottomSheet({
         return;
       }
 
-      setTitulo(data.titulo ?? `Roteiro ${diasEnvio} - ${perfil}`);
+      const tituloGerado = data.titulo ?? buildTituloRoteiro(diasEnvio, perfilLimpo);
+      setTitulo(tituloGerado);
       setConteudo(data.conteudo ?? "");
       setLugaresCatalog(Array.isArray(data.lugaresCatalog) ? data.lugaresCatalog : []);
       setDias(diasEnvio);
       setView("result");
       saveRoteiroDraft({
-        titulo: data.titulo ?? `Roteiro ${diasEnvio} - ${perfil}`,
+        titulo: tituloGerado,
         conteudo: data.conteudo ?? "",
         dias: diasEnvio,
         diasExatos: isDiasExtendedOpcao(diasOpcao) ? diasExatos : null,
-        perfil,
+        perfil: perfilLimpo,
         interesses,
         tiposGastronomia,
         lugaresCatalog: Array.isArray(data.lugaresCatalog) ? data.lugaresCatalog : [],
@@ -425,7 +450,7 @@ export default function RoteiroBottomSheet({
         body: JSON.stringify({
           titulo,
           dias,
-          perfil,
+          perfil: perfilLimpo,
           interesses,
           tiposGastronomia,
           conteudo,
@@ -450,7 +475,7 @@ export default function RoteiroBottomSheet({
       const salvo = data.roteiro ?? {
         titulo,
         dias,
-        perfil,
+        perfil: perfilLimpo,
         interesses,
         conteudo,
         created_at: new Date().toISOString(),
@@ -476,27 +501,31 @@ export default function RoteiroBottomSheet({
 
   const sheetFooter =
     view === "result" ? (
-      <div className="shrink-0 border-t border-[#e8eeee] bg-white px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
+      <div className="shrink-0 border-t border-[#e8eeee] bg-white px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-8px_24px_rgba(26,46,40,0.05)]">
+        {erro ? (
+          <UserErrorAlert className="mb-3" message={erro} reportContext={erroContext} />
+        ) : null}
         <button
           type="button"
           onClick={handleSalvar}
           disabled={salvando || !conteudo.trim()}
-          className="w-full rounded-xl bg-[#1a4a3a] py-3.5 text-sm font-semibold text-white transition-colors hover:bg-[#153d30] disabled:opacity-60"
+          aria-busy={salvando}
+          className="flex min-h-12 w-full items-center justify-center rounded-2xl bg-[#1a4a3a] text-[15px] font-semibold text-white transition-transform active:scale-[0.99] disabled:opacity-60"
         >
-          {salvando ? "Salvando…" : "Salvar roteiro"}
+          {salvando ? "Salvando…" : "Salvar meu roteiro"}
         </button>
-        <div className="mt-2 flex gap-4">
+        <div className="mt-1 flex gap-2">
           <button
             type="button"
             onClick={resetFormulario}
-            className="flex-1 py-2 text-sm font-semibold text-[#1a4a3a] transition-colors hover:text-[#153d30]"
+            className="min-h-11 flex-1 text-sm font-semibold text-[#1a4a3a]"
           >
             Novo roteiro
           </button>
           <button
             type="button"
             onClick={handleClose}
-            className="flex-1 py-2 text-sm font-medium text-[#5a6b66] transition-colors hover:text-[#1a2e28]"
+            className="min-h-11 flex-1 text-sm font-medium text-[#5a6b66]"
           >
             Fechar
           </button>
@@ -583,16 +612,23 @@ export default function RoteiroBottomSheet({
                 </section>
 
             <section className="mt-6">
-              <h3 className="text-sm font-bold text-gray-800">2. Qual o perfil?</h3>
+              <h3 className="text-sm font-bold text-gray-800">2. Qual o perfil da viagem?</h3>
+              <p className="mt-1 text-xs text-gray-500">
+                Escolha um perfil ou descreva com suas palavras.
+              </p>
               <div className="mt-3 grid grid-cols-2 gap-2">
                 {PERFIS.map((item) => {
-                  const selected = perfil === item.label;
+                  const selected = !perfilLivreAtivo && perfil === item.label;
                   return (
                     <button
                       key={item.id}
                       type="button"
-                      onClick={() => setPerfil(item.label)}
-                      className={`flex flex-col items-center justify-center gap-1 rounded-2xl border-2 px-3 py-4 text-center text-sm font-semibold transition-colors ${
+                      aria-pressed={selected}
+                      onClick={() => {
+                        setPerfilLivreAtivo(false);
+                        setPerfil(item.label);
+                      }}
+                      className={`flex min-h-[4.5rem] flex-col items-center justify-center gap-1 rounded-2xl border-2 px-3 py-3 text-center text-sm font-semibold transition-colors ${
                         selected
                           ? "border-[#1a4a3a] bg-[#d4ede8] text-[#1a4a3a]"
                           : "border-gray-100 bg-gray-50 text-gray-700 hover:border-gray-200"
@@ -606,6 +642,47 @@ export default function RoteiroBottomSheet({
                   );
                 })}
               </div>
+              <button
+                type="button"
+                aria-pressed={perfilLivreAtivo}
+                onClick={() => {
+                  setPerfilLivreAtivo(true);
+                  setPerfil(perfilLivre);
+                }}
+                className={`mt-2 flex min-h-14 w-full flex-col items-start justify-center rounded-2xl border-2 px-4 py-3 text-left transition-colors ${
+                  perfilLivreAtivo
+                    ? "border-[#1a4a3a] bg-[#d4ede8] text-[#1a4a3a]"
+                    : "border-gray-100 bg-gray-50 text-gray-700"
+                }`}
+              >
+                <span className="text-sm font-semibold">Escrever o que eu quero</span>
+                <span className="mt-0.5 text-xs font-medium text-[#5a6b66]">
+                  A IA usa esse texto para montar o roteiro
+                </span>
+              </button>
+              {perfilLivreAtivo ? (
+                <div className="mt-3">
+                  <label htmlFor="roteiro-perfil-livre" className="text-sm font-semibold text-[#1a2e28]">
+                    Como é essa viagem?
+                  </label>
+                  <textarea
+                    id="roteiro-perfil-livre"
+                    value={perfilLivre}
+                    maxLength={ROTEIRO_PERFIL_MAX}
+                    rows={3}
+                    placeholder="Ex.: lua de mel, viagem com cachorro, aniversário"
+                    className="mt-2 w-full resize-none rounded-2xl border border-[#d8dfdc] bg-white px-3.5 py-3 text-base leading-relaxed text-[#1a2e28] outline-none ring-[#1a4a3a] placeholder:text-[#8a9994] focus:border-[#1a4a3a] focus:ring-2"
+                    onChange={(event) => {
+                      const next = limitarPerfilRoteiro(event.target.value);
+                      setPerfilLivre(next);
+                      setPerfil(next);
+                    }}
+                  />
+                  <p className="mt-1 text-right text-xs text-[#5a6b66]">
+                    {perfilLivre.length}/{ROTEIRO_PERFIL_MAX}
+                  </p>
+                </div>
+              ) : null}
             </section>
 
             <section className="mt-6">
@@ -685,28 +762,20 @@ export default function RoteiroBottomSheet({
         )}
 
         {view === "result" && (
-          <>
-            <h2 id="roteiro-sheet-title" className="sr-only">
-              {titulo}
-            </h2>
-            <RoteiroItineraryView
-              conteudo={conteudo}
-              titulo={titulo}
-              diasLabel={dias}
-              perfil={perfil}
-              interesses={[...interesses, ...tiposGastronomia]}
-              lugaresCatalog={lugaresCatalog}
-              returnPath={ROTEIRO_RETURN_PATH}
-            />
-
-            {erro && (
-              <UserErrorAlert
-                className="mt-4"
-                message={erro}
-                reportContext={erroContext}
-              />
-            )}
-          </>
+          <RoteiroItineraryView
+            key={conteudo}
+            conteudo={conteudo}
+            titulo={titulo}
+            diasLabel={dias}
+            perfil={perfilLimpo}
+            interesses={[...interesses, ...tiposGastronomia]}
+            lugaresCatalog={catalogoVista}
+            returnPath={ROTEIRO_RETURN_PATH}
+            salvando={salvando}
+            onSalvar={handleSalvar}
+            titleId="roteiro-sheet-title"
+            className="pb-2"
+          />
         )}
       </div>
     </BottomSheetShell>

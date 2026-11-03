@@ -12,6 +12,7 @@ import { HOME_SURFACE_CLASS } from "@/components/home/homeTokens";
 import { canUseRoteiro, isDailyRoteiroLimitReached } from "@/lib/premium";
 import RoteiroItineraryView from "@/components/atrativos/RoteiroItineraryView";
 import { fetchLugaresFromApi } from "@/lib/fetchLugaresApi";
+import { toRoteiroCatalogItem } from "@/lib/roteiroCatalog";
 import { fetchApi } from "@/lib/fetchApi";
 import { formatDiasViagem } from "@/lib/roteiroDias";
 import { createClient } from "@/lib/supabase";
@@ -134,24 +135,18 @@ function RoteiroViewModal({ roteiro, onClose, onExcluir, lugaresCatalog = [] }) 
         </div>
       }
     >
-      <div className="border-b border-[#e8eeee] px-5 py-3">
-        <h2 id="roteiro-view-title" className="font-display text-lg font-extrabold text-[#1a2e28]">
-          {roteiro?.titulo}
-        </h2>
-        <p className="mt-1 text-xs text-[#5a6b66]">
-          {formatData(roteiro?.created_at)}
-          {diasLabel ? ` · ${diasLabel}` : ""}
-          {roteiro?.perfil ? ` · ${roteiro.perfil}` : ""}
-        </p>
-      </div>
-      <div className="px-5 py-4">
+      <div className="px-5 pb-8 pt-2">
         <RoteiroItineraryView
+          key={roteiro?.id || roteiro?.created_at || "roteiro"}
           conteudo={roteiro?.conteudo}
+          titulo={roteiro?.titulo}
           diasLabel={diasLabel}
           perfil={roteiro?.perfil}
           interesses={interesses}
           lugaresCatalog={lugaresCatalog}
-          compactHeader
+          roteiroId={roteiro?.id ? String(roteiro.id) : ""}
+          jaSalvo
+          titleId="roteiro-view-title"
         />
       </div>
     </BottomSheetShell>
@@ -287,13 +282,7 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
       .then((data) => {
         if (cancelled) return;
         setLugaresCatalog(
-          (data ?? []).map((lugar) => ({
-            id: String(lugar.id),
-            nome: lugar.nome,
-            imagem_url: lugar.imagem_url ?? null,
-            fotos: lugar.fotos ?? null,
-            ehParceiro: Boolean(lugar.eh_parceiro),
-          }))
+          (data ?? []).map((lugar) => toRoteiroCatalogItem(lugar)).filter(Boolean)
         );
       })
       .catch(() => {
@@ -318,8 +307,9 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
       ...atual.filter((item) => item.id !== novoRoteiro.id),
     ]);
     setSheetOpen(false);
-    setSavedToast("Roteiro salvo! Toque em Dias que eu montei para abrir.");
-    window.setTimeout(() => setSavedToast(""), 3500);
+    setRoteiroVisualizando(novoRoteiro);
+    setSavedToast("Roteiro salvo");
+    window.setTimeout(() => setSavedToast(""), 2200);
   }
 
   /**
@@ -442,7 +432,7 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
     <div id="montar-dia" className="box-border min-w-0 max-w-full">
       {savedToast ? (
         <div
-          className="fixed left-4 right-4 top-4 z-[60] mx-auto max-w-md rounded-xl bg-[#1a4a3a] px-4 py-3 text-center text-sm font-semibold text-white shadow-lg"
+          className="fixed left-4 right-4 top-[max(0.75rem,env(safe-area-inset-top))] z-[70] mx-auto max-w-md rounded-2xl bg-[#1a4a3a] px-4 py-3 text-center text-sm font-semibold text-white shadow-lg"
           role="status"
         >
           {savedToast}
@@ -525,24 +515,30 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
         <section className="mb-6 min-w-0 max-w-full overflow-hidden">
           <h2 className="mb-3 text-lg font-bold text-[#1a2e28]">Dias que eu montei</h2>
           <div className="grid min-w-0 gap-3">
-            {roteiros.map((roteiro) => (
-              <article
-                key={roteiro.id ?? roteiro.created_at}
-                className="box-border flex min-w-0 items-center justify-between gap-3 overflow-hidden rounded-2xl bg-white p-4 shadow-sm"
-              >
-                <div className="min-w-0 flex-1">
-                  <h3 className="truncate font-semibold text-gray-950">{roteiro.titulo}</h3>
-                  <p className="mt-0.5 text-xs text-gray-500">{formatData(roteiro.created_at)}</p>
-                </div>
+            {roteiros.map((roteiro) => {
+              const meta = [formatDiasViagem(roteiro.dias), roteiro.perfil].filter(Boolean);
+              return (
                 <button
+                  key={roteiro.id ?? roteiro.created_at}
                   type="button"
                   onClick={() => setRoteiroVisualizando(roteiro)}
-                  className="shrink-0 rounded-full bg-[#1a4a3a] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#153d30]"
+                  className="box-border w-full min-w-0 overflow-hidden rounded-[22px] bg-white p-4 text-left shadow-[0_8px_24px_rgba(26,46,40,0.05)] ring-1 ring-[#e8eeee] transition-transform active:scale-[0.99]"
                 >
-                  Ver
+                  <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#1a4a3a]">
+                    Salvo
+                  </p>
+                  <h3 className="mt-1 font-display text-[17px] font-bold leading-snug text-[#1a2e28]">
+                    {roteiro.titulo}
+                  </h3>
+                  {meta.length > 0 ? (
+                    <p className="mt-1 line-clamp-2 text-sm leading-snug text-[#5a6b66]">
+                      {meta.join(" · ")}
+                    </p>
+                  ) : null}
+                  <p className="mt-2 text-xs text-[#8a9994]">{formatData(roteiro.created_at)}</p>
                 </button>
-              </article>
-            ))}
+              );
+            })}
           </div>
         </section>
       )}
@@ -567,6 +563,7 @@ export default function RoteiroSection({ roteirosIniciais = [] }) {
           if (nextUsage) setPremiumUsage(nextUsage);
           else refreshUsage();
         }}
+        catalogoReferencia={lugaresCatalog}
       />
 
       <LoginModal

@@ -16,8 +16,8 @@ O projeto separa bem segredos de servidor (`ANTHROPIC_API_KEY`, `SUPABASE_SERVIC
 | Rota | Método | Sessão | Papel admin | Rate limit | Notas |
 |------|--------|--------|-------------|------------|-------|
 | `/api/buscar` | POST | Obrigatória (`checkBuscaAccess`) | — | Não | Claude; incrementa uso IA |
-| `/api/roteiro` | POST | Obrigatória (`checkRoteiroAccess`) | — | Não | Claude; `max_tokens: 2400` |
-| `/api/roteiro/salvar` | POST | Obrigatória | — | Não | Insert `roteiros` via RLS |
+| `/api/roteiro` | POST | Obrigatória (`checkRoteiroAccess`) | — | Não | Claude; perfil limitado a 80 caracteres |
+| `/api/roteiro/salvar` | POST | Obrigatória | — | Não | Insert `roteiros` via RLS; perfil limitado a 80 caracteres |
 | `/api/roteiro/[id]` | DELETE | Obrigatória | — | Não | `.eq("user_id", user.id)` |
 | `/api/avaliacoes/analisar` | POST | Obrigatória | — | Não | Só `avaliacao.user_id === user.id` |
 | `/api/uso-premium` | GET | Opcional | — | Não | Leitura de contadores |

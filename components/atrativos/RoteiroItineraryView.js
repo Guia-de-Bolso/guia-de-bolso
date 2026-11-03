@@ -1,332 +1,78 @@
 "use client";
 
-import PrefetchLink from "@/components/PrefetchLink";
-import RemotePhoto from "@/components/shared/RemotePhoto";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import RoteiroDiaBlock from "@/components/roteiro/RoteiroDiaBlock";
+import RoteiroGuideHeader from "@/components/roteiro/RoteiroGuideHeader";
+import { useOfflineMode } from "@/components/OfflineModeProvider";
 import { getCapaThumbFromLugar } from "@/lib/fotos";
 import { getLugarPublicPath } from "@/lib/lugarPublicPath";
+import { buildMapsUrlsForLugar } from "@/lib/mapsCoordinates";
+import { MAP_PREFERENCE_STORAGE_KEY } from "@/lib/perfil";
+import { descreverDeslocamento } from "@/lib/roteiroDeslocamento";
+import { textoRoteiroLimpo } from "@/lib/roteiroDisplay";
 import { ROTEIRO_RETURN_PATH } from "@/lib/roteiroDraft";
-import { getBadgeParceiroLabel } from "@/lib/lugarBadges";
 import {
   countRoteiroParadas,
-  getRoteiroResumo,
   parseRoteiroMarkdown,
 } from "@/lib/roteiroParse";
+import {
+  loadParadasConcluidas,
+  paradaProgressoKey,
+  roteiroProgressScope,
+  toggleParadaConcluida,
+} from "@/lib/roteiroProgresso";
 
-const MAX_ATIVIDADES = 2;
-const MAX_ATIVIDADE_CHARS = 88;
-const MAX_DICA_CHARS = 120;
+const FOCUS_RING =
+  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a4a3a]";
 
 /**
- * @param {string} text
- * @returns {string}
+ * @param {import("@/lib/roteiroParse").RoteiroDia[]} dias
+ * @returns {Set<number>}
  */
-function stripMarkdownBold(text) {
-  return String(text || "").replace(/\*\*/g, "").trim();
+function diasIniciaisAbertos(dias) {
+  if (dias.length <= 2) return new Set(dias.map((dia) => dia.numero));
+  return new Set(dias[0] ? [dias[0].numero] : []);
 }
 
 /**
- * @param {string} text
- * @param {number} [max]
- * @returns {string}
+ * @param {import("@/lib/roteiroParse").RoteiroDia} dia
+ * @returns {import("@/lib/roteiroParse").RoteiroParada[]}
  */
-function truncateText(text, max = MAX_ATIVIDADE_CHARS) {
-  const clean = stripMarkdownBold(text);
-  if (clean.length <= max) return clean;
-  const slice = clean.slice(0, max - 1);
-  const lastSpace = slice.lastIndexOf(" ");
-  const cut = lastSpace > max * 0.6 ? slice.slice(0, lastSpace) : slice;
-  return `${cut.trim()}…`;
+function paradasDoDia(dia) {
+  return [
+    ...dia.periodos.flatMap((periodo) => periodo.paradas),
+    ...dia.paradasSemPeriodo,
+  ];
 }
 
 /**
- * @param {string[]} atividades
- * @returns {string[]}
+ * @param {object|null|undefined} lugar
+ * @returns {{ latitude: number, longitude: number }|null}
  */
-function summarizeAtividades(atividades) {
-  return (atividades ?? [])
-    .filter(Boolean)
-    .slice(0, MAX_ATIVIDADES)
-    .map((item) => truncateText(item));
+function coordsDoLugar(lugar) {
+  const latitude = Number(lugar?.latitude);
+  const longitude = Number(lugar?.longitude);
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+  return { latitude, longitude };
 }
 
 /**
- * @param {import("@/lib/roteiroParse").RoteiroParada} parada
- * @param {Array<{ id: string, slug?: string|null }>} [lugaresCatalog]
- * @param {string} [returnPath]
- * @returns {string|null}
- */
-function getParadaHref(parada, lugaresCatalog = [], returnPath = ROTEIRO_RETURN_PATH) {
-  if (!parada.lugarId) return null;
-  const lugar = lugaresCatalog.find((item) => String(item.id) === String(parada.lugarId));
-  return getLugarPublicPath(lugar ?? { id: parada.lugarId }, { from: returnPath });
-}
-
-/**
- * Card de parada com foto, duração destacada e texto resumido.
+ * Guia visual do roteiro gerado ou salvo.
  * @param {object} props
- * @param {import("@/lib/roteiroParse").RoteiroParada} props.parada
- * @param {boolean} [props.ehParceiro]
- * @param {string} [props.capaUrl]
- * @param {string} [props.lugarHref]
- * @returns {import("react").JSX.Element}
- */
-function RoteiroParadaCard({ parada, ehParceiro = false, capaUrl = "", lugarHref = null }) {
-  const atividades = summarizeAtividades(parada.atividades);
-  const dica = parada.dica ? truncateText(parada.dica, MAX_DICA_CHARS) : "";
-  const duracao = parada.duracao ? stripMarkdownBold(parada.duracao) : "";
-  const nome = stripMarkdownBold(parada.nome);
-  const temFoto = Boolean(capaUrl && parada.lugarId);
-
-  const cardInner = (
-    <>
-      {temFoto ? (
-        <div className="relative h-[5.5rem] w-full shrink-0 overflow-hidden bg-[#e8eeee] sm:h-24">
-          <RemotePhoto
-            src={capaUrl}
-            alt={nome}
-            fill
-            sizes="(max-width: 640px) 100vw, 320px"
-            className="object-cover"
-          />
-          <div
-            className="absolute inset-0 bg-gradient-to-t from-[#1a2e28]/75 via-[#1a2e28]/20 to-transparent"
-            aria-hidden
-          />
-          <div className="absolute bottom-2 left-2 right-2 flex items-end justify-between gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/95 text-xs font-bold text-[#1a4a3a] shadow-sm">
-              {parada.ordem}
-            </span>
-            {duracao ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-[#1a4a3a]/90 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm backdrop-blur-sm">
-                <span aria-hidden>⏱</span>
-                {duracao}
-              </span>
-            ) : null}
-          </div>
-        </div>
-      ) : (
-        <div className="flex items-center justify-between gap-2 border-b border-[#eef2f0] px-3 py-2.5">
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#1a4a3a] text-xs font-bold text-white">
-            {parada.ordem}
-          </span>
-          {duracao ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-[#d4ede8] px-2.5 py-1 text-[11px] font-bold text-[#1a4a3a]">
-              <span aria-hidden>⏱</span>
-              {duracao}
-            </span>
-          ) : null}
-        </div>
-      )}
-
-      <div className="min-w-0 flex-1 p-3">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <h4 className="text-[15px] font-bold leading-snug text-[#1a2e28]">{nome}</h4>
-          {ehParceiro ? (
-            <span className="inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-900">
-              {getBadgeParceiroLabel()}
-            </span>
-          ) : null}
-        </div>
-
-        {atividades.length > 0 ? (
-          <ul className="mt-2 space-y-1">
-            {atividades.map((item) => (
-              <li
-                key={`${parada.ordem}-${item.slice(0, 40)}`}
-                className="flex gap-2 text-[13px] leading-snug text-[#3d4f4a]"
-              >
-                <span
-                  className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#1a4a3a]"
-                  aria-hidden
-                />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        ) : null}
-
-        {dica ? (
-          <div className="mt-2.5 flex gap-2 rounded-lg bg-[#f0f4f3] px-2.5 py-2 ring-1 ring-[#d4ede8]">
-            <span className="shrink-0 text-sm leading-none" aria-hidden>
-              💡
-            </span>
-            <p className="text-[12px] leading-snug text-[#3d4f4a]">{dica}</p>
-          </div>
-        ) : null}
-
-        {lugarHref && !temFoto ? (
-          <PrefetchLink
-            href={lugarHref}
-            className="mt-2.5 inline-flex text-[13px] font-semibold text-[#1a4a3a] underline-offset-2 hover:underline"
-          >
-            Ver no guia →
-          </PrefetchLink>
-        ) : null}
-      </div>
-    </>
-  );
-
-  if (lugarHref && temFoto) {
-    return (
-      <PrefetchLink
-        href={lugarHref}
-        className="group block overflow-hidden rounded-xl border border-[#e3e9e6] bg-white shadow-sm transition-shadow hover:shadow-md"
-      >
-        {cardInner}
-      </PrefetchLink>
-    );
-  }
-
-  return (
-    <article className="overflow-hidden rounded-xl border border-[#e3e9e6] bg-white shadow-sm">
-      {cardInner}
-    </article>
-  );
-}
-
-/**
- * Bloco de período (manhã/tarde/noite) com paradas em cards.
- * @param {object} props
- * @param {import("@/lib/roteiroParse").RoteiroPeriodo} props.periodo
- * @param {Map<string, boolean>} [props.parceiroPorLugarId]
- * @param {Map<string, string>} [props.capaPorLugarId]
- * @returns {import("react").JSX.Element|null}
- */
-function RoteiroPeriodoBlock({ periodo, parceiroPorLugarId, capaPorLugarId, lugaresCatalog, returnPath }) {
-  if (!periodo.paradas?.length) return null;
-
-  return (
-    <div className="mt-4 first:mt-2">
-      <div className="flex items-center gap-2 border-l-[3px] border-[#1a4a3a] pl-2.5">
-        <span className="text-base leading-none" aria-hidden>
-          {periodo.emoji}
-        </span>
-        <h3 className="text-xs font-bold uppercase tracking-wide text-[#1a4a3a]">
-          {periodo.label}
-        </h3>
-      </div>
-      <div className="mt-2.5 space-y-2.5">
-        {periodo.paradas.map((parada) => (
-          <RoteiroParadaCard
-            key={`${periodo.id}-${parada.ordem}-${parada.nome}`}
-            parada={parada}
-            ehParceiro={Boolean(
-              parada.lugarId && parceiroPorLugarId?.get(String(parada.lugarId))
-            )}
-            capaUrl={
-              parada.lugarId
-                ? capaPorLugarId?.get(String(parada.lugarId)) ?? ""
-                : ""
-            }
-            lugarHref={getParadaHref(parada, lugaresCatalog, returnPath)}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/**
- * Accordion de um dia do roteiro.
- * @param {object} props
- * @param {import("@/lib/roteiroParse").RoteiroDia} props.dia
- * @param {boolean} props.defaultOpen
- * @param {Map<string, boolean>} [props.parceiroPorLugarId]
- * @param {Map<string, string>} [props.capaPorLugarId]
- * @returns {import("react").JSX.Element}
- */
-function RoteiroDiaAccordion({
-  dia,
-  defaultOpen,
-  parceiroPorLugarId,
-  capaPorLugarId,
-  lugaresCatalog,
-  returnPath,
-}) {
-  const [open, setOpen] = useState(defaultOpen);
-
-  const paradasNoDia =
-    dia.periodos.reduce((acc, p) => acc + p.paradas.length, 0) +
-    dia.paradasSemPeriodo.length;
-
-  return (
-    <section className="overflow-hidden rounded-2xl border border-[#e3e9e6] bg-white shadow-sm">
-      <button
-        type="button"
-        onClick={() => setOpen((value) => !value)}
-        className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-colors hover:bg-[#f7fbf9]"
-        aria-expanded={open}
-      >
-        <div className="min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-[#1a4a3a]">
-            Dia {dia.numero}
-          </p>
-          <h3 className="font-display text-base font-extrabold leading-snug text-[#1a2e28]">
-            {stripMarkdownBold(dia.titulo.replace(/^dia\s*\d+\s*[—–-]?\s*/i, "")) ||
-              dia.titulo}
-          </h3>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <span className="rounded-full bg-[#d4ede8] px-2.5 py-1 text-[11px] font-bold text-[#1a4a3a]">
-            {paradasNoDia} {paradasNoDia === 1 ? "parada" : "paradas"}
-          </span>
-          <span
-            className={`text-[#1a4a3a] transition-transform ${open ? "rotate-180" : ""}`}
-            aria-hidden
-          >
-            ▾
-          </span>
-        </div>
-      </button>
-
-      {open && (
-        <div className="border-t border-[#e8eeee] px-3 pb-4 pt-1 sm:px-4">
-          {dia.periodos.map((periodo) => (
-            <RoteiroPeriodoBlock
-              key={periodo.id ?? periodo.label}
-              periodo={periodo}
-              parceiroPorLugarId={parceiroPorLugarId}
-              capaPorLugarId={capaPorLugarId}
-              lugaresCatalog={lugaresCatalog}
-              returnPath={returnPath}
-            />
-          ))}
-          {dia.paradasSemPeriodo.length > 0 ? (
-            <div className="mt-3 space-y-2.5">
-              {dia.paradasSemPeriodo.map((parada) => (
-                <RoteiroParadaCard
-                  key={`sem-periodo-${parada.ordem}-${parada.nome}`}
-                  parada={parada}
-                  ehParceiro={Boolean(
-                    parada.lugarId && parceiroPorLugarId?.get(String(parada.lugarId))
-                  )}
-                  capaUrl={
-                    parada.lugarId
-                      ? capaPorLugarId?.get(String(parada.lugarId)) ?? ""
-                      : ""
-                  }
-                  lugarHref={getParadaHref(parada, lugaresCatalog, returnPath)}
-                />
-              ))}
-            </div>
-          ) : null}
-        </div>
-      )}
-    </section>
-  );
-}
-
-/**
- * Timeline compacta do roteiro gerado ou salvo.
- * @param {object} props
- * @param {string} props.conteudo - Markdown do roteiro.
+ * @param {string} props.conteudo
  * @param {string} [props.titulo]
  * @param {string} [props.diasLabel]
  * @param {string} [props.perfil]
  * @param {string[]} [props.interesses]
- * @param {Array<{ id: string, nome: string, imagem_url?: string, fotos?: unknown }>} [props.lugaresCatalog]
- * @param {boolean} [props.compactHeader=false] - Omitir header interno (pai já exibe título).
+ * @param {Array<object>} [props.lugaresCatalog]
+ * @param {boolean} [props.compactHeader]
+ * @param {string} [props.className]
+ * @param {string} [props.returnPath]
+ * @param {string} [props.roteiroId]
+ * @param {boolean} [props.jaSalvo]
+ * @param {boolean} [props.salvando]
+ * @param {() => void} [props.onSalvar]
+ * @param {string} [props.titleId]
  * @returns {import("react").JSX.Element}
  */
 export default function RoteiroItineraryView({
@@ -339,136 +85,311 @@ export default function RoteiroItineraryView({
   compactHeader = false,
   className = "",
   returnPath = ROTEIRO_RETURN_PATH,
+  roteiroId = "",
+  jaSalvo = false,
+  salvando = false,
+  onSalvar,
+  titleId = "roteiro-guide-title",
 }) {
+  const { offlineLimited } = useOfflineMode();
   const parsed = useMemo(
     () => parseRoteiroMarkdown(conteudo, lugaresCatalog),
     [conteudo, lugaresCatalog]
   );
 
-  const parceiroPorLugarId = useMemo(() => {
+  const catalogoPorId = useMemo(() => {
     const map = new Map();
     for (const item of lugaresCatalog ?? []) {
-      if (item?.id) {
-        map.set(String(item.id), Boolean(item.ehParceiro));
-      }
+      if (item?.id) map.set(String(item.id), item);
     }
     return map;
   }, [lugaresCatalog]);
 
-  const capaPorLugarId = useMemo(() => {
+  const capaPorId = useMemo(() => {
     const map = new Map();
     for (const item of lugaresCatalog ?? []) {
-      if (item?.id) {
-        const capa = getCapaThumbFromLugar(item);
-        if (capa) map.set(String(item.id), capa);
-      }
+      if (!item?.id) continue;
+      const capa = getCapaThumbFromLugar(item);
+      if (capa) map.set(String(item.id), capa);
     }
     return map;
   }, [lugaresCatalog]);
 
-  const resumo = getRoteiroResumo(parsed);
+  const capaRoteiro = useMemo(() => {
+    for (const dia of parsed.dias) {
+      for (const parada of paradasDoDia(dia)) {
+        const url = parada.lugarId ? capaPorId.get(String(parada.lugarId)) : "";
+        if (url) return { url, alt: textoRoteiroLimpo(parada.nome) };
+      }
+    }
+    return { url: "", alt: "" };
+  }, [parsed.dias, capaPorId]);
+
   const totalParadas = countRoteiroParadas(parsed);
+  const scope = roteiroProgressScope(roteiroId, conteudo);
+  const [concluidas, setConcluidas] = useState(() => loadParadasConcluidas(scope));
+  const [diasAbertos, setDiasAbertos] = useState(() => diasIniciaisAbertos(parsed.dias));
+  const [diaAtivo, setDiaAtivo] = useState(parsed.dias[0]?.numero ?? null);
+
+  useEffect(() => {
+    const nodes = [...document.querySelectorAll("[data-dia]")];
+    if (nodes.length < 2) return undefined;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visivel = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        const numero = Number(visivel?.target?.getAttribute("data-dia"));
+        if (Number.isFinite(numero) && numero > 0) setDiaAtivo(numero);
+      },
+      { rootMargin: "-20% 0px -55% 0px", threshold: [0.2, 0.45] }
+    );
+
+    nodes.forEach((node) => observer.observe(node));
+    return () => observer.disconnect();
+  }, [conteudo, parsed.dias.length]);
+
+  const proximaKey = useMemo(() => {
+    for (const dia of parsed.dias) {
+      for (const parada of paradasDoDia(dia)) {
+        const key = paradaProgressoKey(dia.numero, parada.ordem);
+        if (!concluidas.has(key)) return key;
+      }
+    }
+    return null;
+  }, [parsed.dias, concluidas]);
+
+  const todasFeitas = totalParadas > 0 && proximaKey == null && concluidas.size > 0;
+
+  /**
+   * @param {string} key
+   */
+  function handleToggleConcluida(key) {
+    setConcluidas(new Set(toggleParadaConcluida(scope, key)));
+  }
+
+  /**
+   * @param {number} numero
+   */
+  function irParaDia(numero) {
+    setDiasAbertos((atual) => {
+      const proximo = new Set(atual);
+      proximo.add(numero);
+      return proximo;
+    });
+    setDiaAtivo(numero);
+    const reduzir = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    requestAnimationFrame(() => {
+      document.getElementById(`roteiro-dia-${numero}`)?.scrollIntoView({
+        behavior: reduzir ? "auto" : "smooth",
+        block: "start",
+      });
+    });
+  }
+
+  /**
+   * @param {import("@/lib/roteiroParse").RoteiroParada} parada
+   * @param {object|null|undefined} lugar
+   * @returns {string|null}
+   */
+  function getHref(parada, lugar) {
+    if (!parada.lugarId) return null;
+    return getLugarPublicPath(lugar ?? { id: parada.lugarId }, { from: returnPath });
+  }
+
+  /**
+   * @param {import("@/lib/roteiroParse").RoteiroParada} atual
+   * @param {import("@/lib/roteiroParse").RoteiroParada} proxima
+   * @returns {string|null}
+   */
+  function getDeslocamento(atual, proxima) {
+    const origem = coordsDoLugar(
+      atual.lugarId ? catalogoPorId.get(String(atual.lugarId)) : null
+    );
+    const destino = coordsDoLugar(
+      proxima.lugarId ? catalogoPorId.get(String(proxima.lugarId)) : null
+    );
+    return descreverDeslocamento(origem, destino);
+  }
+
+  /**
+   * @param {import("@/lib/roteiroParse").RoteiroParada} parada
+   * @param {object|null|undefined} lugar
+   */
+  function handleIrAgora(parada, lugar) {
+    const nome = lugar?.nome || textoRoteiroLimpo(parada.nome);
+    if (!nome) return;
+
+    const coords = coordsDoLugar(lugar);
+    const localizacao = coords
+      ? { ...coords, endereco_completo: lugar?.endereco || "" }
+      : lugar?.endereco
+        ? { endereco_completo: lugar.endereco }
+        : null;
+    const urls = buildMapsUrlsForLugar({ nome }, localizacao);
+    if (!urls) return;
+
+    let app = "google";
+    try {
+      const salvo = localStorage.getItem(MAP_PREFERENCE_STORAGE_KEY);
+      if (salvo && urls[salvo]) app = salvo;
+    } catch {
+      app = "google";
+    }
+
+    window.open(urls[app], "_blank", "noopener,noreferrer");
+  }
 
   if (!conteudo?.trim()) {
     return (
-      <div className="rounded-2xl border border-dashed border-[#d4ede8] bg-[#f7fbf9] px-4 py-8 text-center">
-        <p className="text-sm font-medium text-[#1a2e28]">
-          Não foi possível montar o roteiro desta vez.
-        </p>
-        <p className="mt-1 text-sm text-[#5a6b66]">Tente gerar novamente.</p>
-      </div>
+      <EstadoRoteiro
+        titulo="Não foi possível montar o roteiro"
+        texto="Tente gerar novamente."
+      />
     );
   }
 
-  if (parsed.fallbackTexto && parsed.intro.length > 0) {
-    return (
-      <div className="space-y-3">
-        {!compactHeader && titulo ? (
-          <header>
-            <h2 className="font-display text-lg font-extrabold text-[#1a2e28]">
-              {titulo}
-            </h2>
-          </header>
-        ) : null}
-        <div className="rounded-2xl bg-white p-4 text-sm leading-relaxed text-[#3d4f4a] shadow-sm ring-1 ring-[#e8eeee]">
-          {parsed.intro.map((line) => (
-            <p key={line.slice(0, 48)} className="mb-2 last:mb-0">
-              {stripMarkdownBold(line)}
-            </p>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (parsed.dias.length === 0) {
-    return (
-      <div className="rounded-2xl border border-dashed border-[#d4ede8] bg-[#f7fbf9] px-4 py-8 text-center">
-        <p className="text-sm font-medium text-[#1a2e28]">
-          Roteiro sem paradas estruturadas.
-        </p>
-        <p className="mt-1 text-sm text-[#5a6b66]">Gere novamente para reorganizar.</p>
-      </div>
-    );
-  }
-
-  const chips = [
-    diasLabel,
-    perfil,
-    ...(interesses?.length ? [interesses.slice(0, 3).join(" · ")] : []),
-  ].filter(Boolean);
+  const diasTexto =
+    diasLabel ||
+    (parsed.dias.length
+      ? `${parsed.dias.length} ${parsed.dias.length === 1 ? "dia" : "dias"}`
+      : "");
+  const paradasTexto = totalParadas
+    ? `${totalParadas} ${totalParadas === 1 ? "parada" : "paradas"}`
+    : "";
+  const interessesTexto = (interesses ?? []).map(textoRoteiroLimpo).filter(Boolean).join(" · ");
 
   return (
-    <div className={`space-y-4 ${className}`.trim()}>
+    <div className={`min-w-0 ${className}`.trim()}>
+      <style>{`
+        @keyframes roteiroDiaIn {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: none; }
+        }
+        .roteiro-dia-panel { animation: roteiroDiaIn 280ms ease; }
+        @media (prefers-reduced-motion: reduce) {
+          .roteiro-dia-panel { animation: none; }
+        }
+      `}</style>
+
       {!compactHeader ? (
-        <header className="space-y-2">
-          {titulo ? (
-            <h2 className="font-display text-lg font-extrabold leading-tight text-[#1a2e28]">
-              {titulo}
-            </h2>
-          ) : null}
-          {chips.length > 0 ? (
-            <div className="flex flex-wrap gap-1.5">
-              {chips.map((chip) => (
-                <span
-                  key={chip}
-                  className="rounded-full bg-[#d4ede8] px-2.5 py-1 text-[11px] font-semibold text-[#1a4a3a]"
-                >
-                  {chip}
-                </span>
-              ))}
-            </div>
-          ) : null}
-          {resumo ? (
-            <p className="text-xs text-[#5a6b66]">
-              {resumo}
-              {totalParadas > 0 ? " · Siga na ordem abaixo" : ""}
-            </p>
-          ) : null}
-        </header>
+        <RoteiroGuideHeader
+          titleId={titleId}
+          titulo={titulo}
+          perfil={perfil}
+          diasTexto={diasTexto}
+          paradasTexto={paradasTexto}
+          interessesTexto={interessesTexto}
+          capaUrl={capaRoteiro.url}
+          capaAlt={capaRoteiro.alt}
+          jaSalvo={jaSalvo}
+          salvando={salvando}
+          onSalvar={onSalvar}
+        />
       ) : null}
 
-      {parsed.intro.length > 0 ? (
-        <div className="rounded-xl border border-[#d4ede8] bg-[#f0f4f3] px-3 py-2.5 text-[13px] leading-snug text-[#3d4f4a]">
-          {parsed.intro.slice(0, 2).map((line) => (
-            <p key={line.slice(0, 48)}>{stripMarkdownBold(line)}</p>
+      {parsed.fallbackTexto && parsed.intro.length > 0 ? (
+        <div className={`${compactHeader ? "" : "mt-5"} space-y-3 text-[15px] leading-relaxed text-[#3d4f4a]`}>
+          {parsed.intro.map((line) => (
+            <p key={line.slice(0, 48)}>{textoRoteiroLimpo(line)}</p>
           ))}
         </div>
       ) : null}
 
-      <div className="space-y-3" role="list" aria-label="Dias do roteiro">
-        {parsed.dias.map((dia, index) => (
-          <RoteiroDiaAccordion
-            key={`dia-${dia.numero}-${dia.titulo}`}
-            dia={dia}
-            defaultOpen={index === 0 || parsed.dias.length === 1}
-            parceiroPorLugarId={parceiroPorLugarId}
-            capaPorLugarId={capaPorLugarId}
-            lugaresCatalog={lugaresCatalog}
-            returnPath={returnPath}
-          />
-        ))}
-      </div>
+      {!parsed.fallbackTexto && parsed.intro.length > 0 ? (
+        <p className="mt-5 text-[15px] leading-relaxed text-[#3d4f4a]">
+          {parsed.intro.slice(0, 2).map(textoRoteiroLimpo).filter(Boolean).join(" ")}
+        </p>
+      ) : null}
+
+      {!parsed.fallbackTexto && parsed.dias.length === 0 ? (
+        <EstadoRoteiro
+          className="mt-5"
+          titulo="Roteiro sem paradas estruturadas"
+          texto="Gere novamente para reorganizar."
+        />
+      ) : null}
+
+      {parsed.dias.length > 1 ? (
+        <div className="sticky top-0 z-10 mt-5 bg-white/95 py-2.5 backdrop-blur-md">
+          <div
+            className="flex gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            role="tablist"
+            aria-label="Dias do roteiro"
+          >
+            {parsed.dias.map((dia) => {
+              const ativo = diaAtivo === dia.numero;
+              return (
+                <button
+                  key={`nav-${dia.numero}`}
+                  type="button"
+                  role="tab"
+                  aria-selected={ativo}
+                  onClick={() => irParaDia(dia.numero)}
+                  className={`min-h-11 shrink-0 rounded-full px-4 text-sm font-semibold transition-colors ${FOCUS_RING} ${
+                    ativo ? "bg-[#1a4a3a] text-white" : "bg-[#f0f4f3] text-[#1a4a3a]"
+                  }`}
+                >
+                  Dia {dia.numero}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+
+      {parsed.dias.length > 0 ? (
+        <div className={`space-y-8 ${parsed.dias.length > 1 ? "mt-4" : "mt-6"}`} role="list">
+          {parsed.dias.map((dia) => (
+            <RoteiroDiaBlock
+              key={`dia-${dia.numero}-${dia.titulo}`}
+              dia={dia}
+              open={diasAbertos.has(dia.numero)}
+              onToggle={() =>
+                setDiasAbertos((atual) => {
+                  const proximo = new Set(atual);
+                  if (proximo.has(dia.numero)) proximo.delete(dia.numero);
+                  else proximo.add(dia.numero);
+                  return proximo;
+                })
+              }
+              catalogoPorId={catalogoPorId}
+              capaPorId={capaPorId}
+              getHref={getHref}
+              getDeslocamento={getDeslocamento}
+              onIrAgora={offlineLimited ? undefined : handleIrAgora}
+              proximaKey={proximaKey}
+              concluidas={concluidas}
+              onToggleConcluida={handleToggleConcluida}
+              paradaKey={paradaProgressoKey}
+            />
+          ))}
+        </div>
+      ) : null}
+
+      {todasFeitas ? (
+        <p className="mt-6 rounded-2xl bg-[#e7f3ee] px-4 py-3 text-sm leading-relaxed text-[#1a4a3a]">
+          Todas as paradas marcadas como feitas nesta consulta. A marcação fica neste aparelho
+          até você fechar a aba.
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * @param {object} props
+ * @param {string} props.titulo
+ * @param {string} props.texto
+ * @param {string} [props.className]
+ * @returns {import("react").JSX.Element}
+ */
+function EstadoRoteiro({ titulo, texto, className = "" }) {
+  return (
+    <div className={`rounded-[24px] bg-[#f4f8f6] px-5 py-10 text-center ${className}`.trim()}>
+      <p className="font-display text-lg font-bold text-[#1a2e28]">{titulo}</p>
+      <p className="mt-2 text-sm leading-relaxed text-[#5a6b66]">{texto}</p>
     </div>
   );
 }
