@@ -38,7 +38,6 @@ import { fetchClimaApisCached } from "@/lib/clima";
 import { fetchApi } from "@/lib/fetchApi";
 import { isCapacitorNative } from "@/lib/capacitorNavigation";
 import { IMBITUBA_COORDS, sortLugaresPorDistancia } from "@/lib/homeContext";
-import { enrichLugaresFlags } from "@/lib/lugarBadges";
 import { pickEmAltaCuradoria, pickParceirosCarrossel } from "@/lib/homeSelection";
 import { resolveAtrativoDoDia } from "@/lib/atrativoDoDia";
 import { fetchLugaresPopulares } from "@/lib/lugaresPopulares";

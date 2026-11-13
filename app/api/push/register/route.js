@@ -3,7 +3,7 @@ import { disablePushTokens, upsertPushToken } from "@/lib/pushTokens";
 import { validatePushPlatform, validatePushToken } from "@/lib/pushTokenValidation";
 import { createServiceClient } from "@/lib/supabase/service";
 import { createClient } from "@/lib/supabase/server";
-import { getSessionUser } from "@/lib/supabase/session";
+import { getVerifiedUser, serviceRoleUserId } from "@/lib/supabase/session";
 import { buildApiErrorBody, USER_MESSAGES } from "@/lib/userMessages";
 
 /**
@@ -14,9 +14,9 @@ import { buildApiErrorBody, USER_MESSAGES } from "@/lib/userMessages";
 export async function POST(request) {
   try {
     const supabase = await createClient();
-    const user = await getSessionUser(supabase);
+    const userId = serviceRoleUserId(await getVerifiedUser(supabase));
 
-    if (!user) {
+    if (!userId) {
       return NextResponse.json(
         buildApiErrorBody("UNAUTHORIZED", { error: USER_MESSAGES.UNAUTHORIZED }),
         { status: 401 }
@@ -49,16 +49,14 @@ export async function POST(request) {
       );
     }
 
-    const result = await upsertPushToken(admin, user.id, {
+    const result = await upsertPushToken(admin, userId, {
       token: tokenResult.token,
       platform: platformResult.platform,
     });
 
     if (!result.ok) {
-      return NextResponse.json(
-        buildApiErrorBody("SERVER", { error: result.message }),
-        { status: 500 }
-      );
+      console.error("POST /api/push/register:", result.message);
+      return NextResponse.json(buildApiErrorBody("SERVER"), { status: 500 });
     }
 
     return NextResponse.json({ ok: true });
@@ -80,9 +78,9 @@ export async function POST(request) {
 export async function DELETE(request) {
   try {
     const supabase = await createClient();
-    const user = await getSessionUser(supabase);
+    const userId = serviceRoleUserId(await getVerifiedUser(supabase));
 
-    if (!user) {
+    if (!userId) {
       return NextResponse.json(
         buildApiErrorBody("UNAUTHORIZED", { error: USER_MESSAGES.UNAUTHORIZED }),
         { status: 401 }
@@ -109,15 +107,13 @@ export async function DELETE(request) {
 
     const result = await disablePushTokens(
       admin,
-      user.id,
+      userId,
       tokenResult?.ok ? tokenResult.token : undefined
     );
 
     if (!result.ok) {
-      return NextResponse.json(
-        buildApiErrorBody("SERVER", { error: result.message }),
-        { status: 500 }
-      );
+      console.error("DELETE /api/push/register:", result.message);
+      return NextResponse.json(buildApiErrorBody("SERVER"), { status: 500 });
     }
 
     return NextResponse.json({ ok: true, disabled: result.disabled });

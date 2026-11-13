@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import PrefeituraSupportLine from "@/components/PrefeituraSupportLine";
-import { IconInstagram, IconMail, IconTikTok } from "@/components/landing/LandingIcons";
+import { IconInstagram, IconTikTok } from "@/components/landing/LandingIcons";
 import {
   LANDING_CONTACT_EMAIL,
   LANDING_CONTACT_PHONE,

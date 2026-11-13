@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { deleteUserAccount } from "@/lib/deleteUserAccount";
 import { createServiceClient } from "@/lib/supabase/service";
 import { createClient } from "@/lib/supabase/server";
-import { getSessionUser } from "@/lib/supabase/session";
+import { getVerifiedUser, serviceRoleUserId } from "@/lib/supabase/session";
 import { USER_MESSAGES } from "@/lib/userMessages";
 
 /**
@@ -12,9 +12,9 @@ import { USER_MESSAGES } from "@/lib/userMessages";
 export async function DELETE() {
   try {
     const supabase = await createClient();
-    const user = await getSessionUser(supabase);
+    const userId = serviceRoleUserId(await getVerifiedUser(supabase));
 
-    if (!user) {
+    if (!userId) {
       return NextResponse.json(
         { error: USER_MESSAGES.UNAUTHORIZED, code: "UNAUTHORIZED" },
         { status: 401 }
@@ -30,7 +30,7 @@ export async function DELETE() {
       );
     }
 
-    await deleteUserAccount(admin, user.id);
+    await deleteUserAccount(admin, userId);
 
     await supabase.auth.signOut();
 
@@ -39,7 +39,7 @@ export async function DELETE() {
     const message = err instanceof Error ? err.message : USER_MESSAGES.SERVER;
     console.error("DELETE /api/conta:", message);
     return NextResponse.json(
-      { error: message, code: "SERVER" },
+      { error: USER_MESSAGES.SERVER, code: "SERVER" },
       { status: 500 }
     );
   }

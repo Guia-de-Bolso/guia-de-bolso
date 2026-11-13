@@ -6,7 +6,7 @@ import {
 import { checkFeedbackRateLimit } from "@/lib/feedbackRateLimit";
 import { createServiceClient } from "@/lib/supabase/service";
 import { createClient } from "@/lib/supabase/server";
-import { getSessionUser } from "@/lib/supabase/session";
+import { getVerifiedUser, serviceRoleUserId } from "@/lib/supabase/session";
 import { USER_MESSAGES } from "@/lib/userMessages";
 
 const MAX_ASSUNTO = 120;
@@ -42,7 +42,7 @@ function getRateLimitKey(request, userId) {
 export async function POST(request) {
   try {
     const supabase = await createClient();
-    const user = await getSessionUser(supabase);
+    const userId = serviceRoleUserId(await getVerifiedUser(supabase));
 
     const body = await request.json();
     const tipo = sanitizeText(body.tipo, 32);
@@ -80,7 +80,7 @@ export async function POST(request) {
       );
     }
 
-    const rateKey = getRateLimitKey(request, user?.id);
+    const rateKey = getRateLimitKey(request, userId);
     if (!checkFeedbackRateLimit(rateKey)) {
       return NextResponse.json(
         { error: USER_MESSAGES.RATE_LIMIT, code: "RATE_LIMIT" },
@@ -89,7 +89,7 @@ export async function POST(request) {
     }
 
     const row = {
-      user_id: user?.id ?? null,
+      user_id: userId,
       tipo,
       status: "novo",
       assunto,
@@ -104,7 +104,7 @@ export async function POST(request) {
     const service = createServiceClient();
     const insertClient = service ?? supabase;
 
-    if (!user && !service) {
+    if (!userId && !service) {
       console.error("SUPABASE_SERVICE_ROLE_KEY ausente — feedback de visitante indisponível");
       return NextResponse.json(
         {

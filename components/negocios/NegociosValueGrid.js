@@ -1,10 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import LandingButton from "@/components/landing/LandingButton";
 import LandingSection, { LandingSectionHeader } from "@/components/landing/LandingSection";
 import { useLandingRevealMotion } from "@/components/landing/useLandingRichMotion";
-import { NEGOCIOS_CONTACT_MAILTO, NEGOCIOS_VALUE_PROPS } from "@/lib/negociosContent";
+import { NEGOCIOS_VALUE_PROPS } from "@/lib/negociosContent";
 
 /**
  * Grid de benefícios para anunciantes.

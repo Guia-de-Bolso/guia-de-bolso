@@ -6,7 +6,7 @@ import {
 } from "@/lib/avatarStorage";
 import { createServiceClient } from "@/lib/supabase/service";
 import { createClient } from "@/lib/supabase/server";
-import { getSessionUser } from "@/lib/supabase/session";
+import { getVerifiedUser } from "@/lib/supabase/session";
 import { USER_MESSAGES } from "@/lib/userMessages";
 
 /**
@@ -16,7 +16,7 @@ import { USER_MESSAGES } from "@/lib/userMessages";
 export async function POST(request) {
   try {
     const supabase = await createClient();
-    const user = await getSessionUser(supabase);
+    const user = await getVerifiedUser(supabase);
 
     if (!user) {
       return NextResponse.json(

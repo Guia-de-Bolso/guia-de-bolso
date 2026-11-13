@@ -14,7 +14,6 @@ import {
 import { useUserPosition } from "@/hooks/useUserPosition";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { useFavoritoLugar } from "@/hooks/useFavoritoLugar";
-import { AVALIACAO_STATUS_APROVADOS } from "@/lib/avaliacoes";
 import { getCapaFromLugar, getFotosFromLugar } from "@/lib/fotos";
 import {
   applyGalleryVisibility,

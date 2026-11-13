@@ -22,24 +22,24 @@ O projeto separa bem segredos de servidor (`ANTHROPIC_API_KEY`, `SUPABASE_SERVIC
 | `/api/avaliacoes/analisar` | POST | Obrigatória | — | Não | Só `avaliacao.user_id === user.id` |
 | `/api/uso-premium` | GET | Opcional | — | Não | Leitura de contadores |
 | `/api/lugares` | GET | Pública (anon server) | — | Não | Só lugares ativos / destaques |
-| `/api/feedback` | POST | Opcional | — | Sim (memória, 5/h) | Guest usa service role |
+| `/api/feedback` | POST | Opcional (`getVerifiedUser`) | — | Sim (memória, 5/h) | `user_id` só do Auth; guest segue com service role |
 | `/api/health` | GET | Pública | — | Não | Smoke deploy; sem dados sensíveis |
 | `/api/explorar` | GET | Pública | — | Não | Agregados de categorias para home |
 | `/api/atrativos` | GET | Pública | — | Não | Lista atrativos curados |
 | `/api/atrativos/catalogo` | GET | Pública | — | Não | Catálogo leve para clientes |
 | `/api/waitlist` | POST | Pública | — | Sim (`waitlistRateLimit`) | Insert waitlist + e-mail Resend |
 | `/api/planos-rapidos` | POST | Obrigatória (`getAuthUser`) | — | Não | Planos rápidos da home; catálogo via `queryAllLugaresAtivos` |
-| `/api/perfil/avatar` | POST | Obrigatória | — | Não | Upload via service role; MIME/tamanho validados |
-| `/api/conta` | DELETE | Obrigatória | — | Não | Exclusão de conta (App Store / Play) |
+| `/api/perfil/avatar` | POST | Obrigatória (`getVerifiedUser`) | — | Não | Upload via service role no id confirmado pelo Auth; MIME/tamanho validados |
+| `/api/conta` | DELETE | Obrigatória (`getVerifiedUser`) | — | Não | Exclusão só da conta confirmada pelo Auth; erro interno fica no log |
 | `/api/auth/logout` | POST | Opcional | — | Não | Encerra sessão Supabase |
-| `/api/premium/verify-apple` | POST | Obrigatória | — | Não | Valida receipt IAP Apple |
-| `/api/premium/verify-play` | POST | Obrigatória | — | Não | Valida purchase Play Billing |
-| `/api/push/register` | POST, DELETE | Obrigatória | — | Não | Registro/desativação de token FCM/APNs (service role upsert) |
+| `/api/premium/verify-apple` | POST | Obrigatória (`getAuthUser` → `getVerifiedUser`) | — | Não | Valida receipt IAP Apple |
+| `/api/premium/verify-play` | POST | Obrigatória (`getAuthUser` → `getVerifiedUser`) | — | Não | Valida purchase Play Billing no id confirmado pelo Auth |
+| `/api/push/register` | POST, DELETE | Obrigatória (`getVerifiedUser`) | — | Não | Token FCM/APNs no id confirmado pelo Auth |
 | `/api/admin/push/send` | POST | Obrigatória | `admin` ou `dev` (`requireAdminApi`) | Não | Envio push via Firebase Admin; destinatários explícitos |
 | `/api/admin/push/process` | POST | Obrigatória | `admin` ou `dev` (`requireAdminApi`) | Não | Processa eventos de conteúdo pendentes + `revalidatePath` home/landing |
 | `/api/cron/push-automations` | GET | `CRON_SECRET` | — | Não | Clima, destaque semanal, roteiro e fila de conteúdo |
 | `/api/cron/lugares-purge` | GET | `CRON_SECRET` | — | Não | Purge lugares desativados 30d+ |
-| `/api/admin/usuarios/[id]` | DELETE | Obrigatória | `admin` (`requireAdminOnlyApi`) | Não | Exclusão de usuário (service role) |
+| `/api/admin/usuarios/[id]` | DELETE | Obrigatória (`getVerifiedUser`) | `dev` (`requireAdminOnlyApi`) | Não | Exclusão de usuário (service role); papel conferido no perfil do Auth |
 | `/api/admin/contratos/[id]/documentos` | POST | Obrigatória | `dev` | Não | Upload documento contrato |
 | `/api/admin/contratos/documentos/[docId]` | GET, DELETE | Obrigatória | `dev` | Não | Download/remoção de documento |
 

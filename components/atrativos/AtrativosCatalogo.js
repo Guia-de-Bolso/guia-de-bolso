@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import PrefetchLink from "@/components/PrefetchLink";
 import RemotePhoto from "@/components/shared/RemotePhoto";
 import { useMemo, useState } from "react";
