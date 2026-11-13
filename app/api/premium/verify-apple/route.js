@@ -23,10 +23,18 @@ export async function POST(request) {
     const body = await request.json().catch(() => ({}));
     const transactionId =
       typeof body?.transactionId === "string" ? body.transactionId.trim() : "";
-    const productId =
-      typeof body?.productId === "string" && body.productId.trim()
-        ? body.productId.trim()
-        : APPLE_PREMIUM_PRODUCT_ID;
+    const requestedProductId =
+      typeof body?.productId === "string" ? body.productId.trim() : "";
+    const productId = APPLE_PREMIUM_PRODUCT_ID;
+
+    if (requestedProductId && requestedProductId !== productId) {
+      return NextResponse.json(
+        buildApiErrorBody("VALIDATION", {
+          error: "Produto da compra não corresponde à assinatura Premium.",
+        }),
+        { status: 400 }
+      );
+    }
 
     const jwsRepresentation =
       typeof body?.jwsRepresentation === "string" ? body.jwsRepresentation.trim() : null;

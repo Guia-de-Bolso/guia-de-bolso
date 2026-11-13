@@ -32,7 +32,7 @@ O projeto separa bem segredos de servidor (`ANTHROPIC_API_KEY`, `SUPABASE_SERVIC
 | `/api/perfil/avatar` | POST | Obrigatória (`getVerifiedUser`) | — | Não | Upload via service role no id confirmado pelo Auth; MIME/tamanho validados |
 | `/api/conta` | DELETE | Obrigatória (`getVerifiedUser`) | — | Não | Exclusão só da conta confirmada pelo Auth; erro interno fica no log |
 | `/api/auth/logout` | POST | Opcional | — | Não | Encerra sessão Supabase |
-| `/api/premium/verify-apple` | POST | Obrigatória (`getAuthUser` → `getVerifiedUser`) | — | Não | Valida receipt IAP Apple |
+| `/api/premium/verify-apple` | POST | Obrigatória (`getAuthUser` → `getVerifiedUser`) | — | Não | Só App Store Server API; JWS do cliente ignorado fora de development/preview |
 | `/api/premium/verify-play` | POST | Obrigatória (`getAuthUser` → `getVerifiedUser`) | — | Não | Valida purchase Play Billing no id confirmado pelo Auth |
 | `/api/push/register` | POST, DELETE | Obrigatória (`getVerifiedUser`) | — | Não | Token FCM/APNs no id confirmado pelo Auth |
 | `/api/admin/push/send` | POST | Obrigatória | `admin` ou `dev` (`requireAdminApi`) | Não | Envio push via Firebase Admin; destinatários explícitos |

@@ -82,6 +82,7 @@ Run in order for a **new environment**. Base tables (`lugares`, `perfis`, `favor
 | 2b | `premium_uso_diario.sql` | Optional: comment on `uso_ia_mes` (daily key) |
 | 2c | `premium_uso_dia_fix.sql` | Optional: one-time fix for legacy month keys |
 | 3 | `perfis_email_admin.sql` | `perfis.email` + admin read |
+| 3b | `migrations/20261103180000_activate_premium_subscription_atomic.sql` | Ativação Premium atômica, sem desligar o trigger e sem flag de sessão. Ambiente já existente: aplicar só este arquivo |
 
 ### B — Helpers and perfis RLS
 

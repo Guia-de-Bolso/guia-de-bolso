@@ -12,7 +12,8 @@ AS $$
 DECLARE
   v_ia_bypass boolean;
 BEGIN
-  v_ia_bypass := current_setting('app.perfis_ia_usage_write', true) = '1';
+  -- Ausente não é bypass. A comparação NULL = '1' faria o IF NOT ignorar o bloqueio.
+  v_ia_bypass := COALESCE(current_setting('app.perfis_ia_usage_write', true), '') = '1';
 
   IF TG_OP = 'INSERT' THEN
     IF auth.role() = 'service_role' OR public.is_dev() THEN
