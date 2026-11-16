@@ -14,7 +14,7 @@ test.describe("smoke", () => {
   test("home loads with search and bottom nav", async ({ page }) => {
     await skipOnboarding(page);
     await page.goto(baseURL);
-    await expect(page.getByPlaceholder("O que você quer descobrir hoje?")).toBeVisible();
+    await expect(page.getByRole("searchbox", { name: "Pergunte ao Guia" })).toBeVisible();
     await expect(page.getByRole("navigation", { name: "Navegação principal" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Explorar" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Montar meu dia" })).toBeVisible();

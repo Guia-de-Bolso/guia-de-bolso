@@ -2,7 +2,11 @@
 
 import { memo, useCallback, useState } from "react";
 import { HOME_CHIP_CLASS, HOME_SURFACE_CLASS } from "@/components/home/homeTokens";
+import { useTypingPlaceholder } from "@/hooks/useTypingPlaceholder";
 import { QUICK_SEARCH_CHIPS } from "@/lib/homeContext";
+
+const SEARCH_PLACEHOLDER = "O que você quer descobrir hoje?";
+const VOICE_PLACEHOLDER = "Fale o que você quer descobrir…";
 
 function IconSend({ className = "h-4 w-4" }) {
   return (
@@ -66,6 +70,9 @@ function SmartSearch({
   onVoiceToggle,
 }) {
   const [focused, setFocused] = useState(false);
+  const hasQuery = termoBusca.trim().length > 0;
+  const showTyping = !hasQuery && !voiceListening && !searchMode;
+  const typing = useTypingPlaceholder(showTyping);
 
   const handleChip = useCallback((chip) => onChipClick(chip), [onChipClick]);
 
@@ -85,7 +92,6 @@ function SmartSearch({
     [onBlur]
   );
 
-  const hasQuery = termoBusca.trim().length > 0;
   const active = focused || searchMode || voiceListening;
   const showChipRow = showChips && !searchMode && !voiceListening;
 
@@ -155,8 +161,10 @@ function SmartSearch({
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={
                   voiceListening
-                    ? "Fale o que você quer descobrir…"
-                    : "O que você quer descobrir hoje?"
+                    ? VOICE_PLACEHOLDER
+                    : typing.animating
+                      ? typing.text
+                      : SEARCH_PLACEHOLDER
                 }
                 className={`mt-0.5 w-full appearance-none border-0 bg-transparent text-base leading-snug text-[#1a2e28] shadow-none outline-none ring-0 placeholder:text-[#9aa8a3] focus:outline-none focus-visible:outline-none ${
                   searchMode ? "pr-8" : ""

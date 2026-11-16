@@ -62,7 +62,7 @@ test.describe("auth gates — UI", () => {
     await skipOnboarding(page);
     await page.goto(baseURL);
 
-    await page.getByPlaceholder("O que você quer descobrir hoje?").fill("restaurante à beira-mar");
+    await page.getByRole("searchbox", { name: "Pergunte ao Guia" }).fill("restaurante à beira-mar");
     await page.getByRole("button", { name: "Buscar", exact: true }).click();
 
     await expect(
